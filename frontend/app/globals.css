@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* MintKey Design System — Dark Navy + Indigo accent */
+:root {
+  /* Backgrounds */
+  --bg-base: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-elevated: #334155;
+
+  /* Borders */
+  --border-color: #475569;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-muted: #94a3b8;
+
+  /* Accents */
+  --accent-indigo: #6366f1;
+  --accent-violet: #8b5cf6;
+
+  /* Score colors */
+  --score-high: #22c55e;
+  --score-mid: #f59e0b;
+  --score-low: #ef4444;
+
+  /* Utility colors */
+  --color-teal: #14b8a6;
+  --color-sky: #38bdf8;
+
+  /* Background and foreground for body */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border: var(--border-color);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-accent-indigo: var(--accent-indigo);
+  --color-accent-violet: var(--accent-violet);
+  --color-score-high: var(--score-high);
+  --color-score-mid: var(--score-mid);
+  --color-score-low: var(--score-low);
+  --color-teal: var(--color-teal);
+  --color-sky: var(--color-sky);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Global styles */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, "Inter", system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-indigo);
+  color: var(--text-primary);
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 2px;
+}
