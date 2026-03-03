@@ -46,7 +46,8 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
 
     # Import and include routers
-    from app.routers import users, scores, analysis, roadmap, trends
+    from app.routers import users, scores, analysis, roadmap, trends, auth
+    app.include_router(auth.router)
     app.include_router(users.router)
     app.include_router(scores.router)
     app.include_router(analysis.router)

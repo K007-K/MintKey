@@ -6,29 +6,38 @@
 
 ## Phase 1: Foundation & Infrastructure ✅
 
-| Task                                                                                                                                                                                  | Status     | Date  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- |
-| FastAPI backend skeleton (5 routers, 3 middleware, main app)                                                                                                                          | ✅ Done    | Mar 3 |
-| SQLAlchemy ORM — 8 tables (`users`, `company_blueprints`, `platform_scores`, `company_match_scores`, `user_target_companies`, `user_skill_gaps`, `user_roadmaps`, `analysis_results`) | ✅ Done    | Mar 3 |
-| Alembic migration — all tables created & verified in Postgres                                                                                                                         | ✅ Done    | Mar 3 |
-| LiteLLM client (Groq primary + Ollama fallback)                                                                                                                                       | ✅ Done    | Mar 3 |
-| Pydantic v2 schemas (API response envelope, User, Auth, Analysis, Company)                                                                                                            | ✅ Done    | Mar 3 |
-| Repository pattern (users, scores)                                                                                                                                                    | ✅ Done    | Mar 3 |
-| Next.js 14 project (App Router, TypeScript, Tailwind v4)                                                                                                                              | ✅ Done    | Mar 3 |
-| Tailwind design system (dark navy + indigo accent)                                                                                                                                    | ✅ Done    | Mar 3 |
-| Zustand stores (sidebar, company, preferences)                                                                                                                                        | ✅ Done    | Mar 3 |
-| React Query + Axios client with JWT interceptor                                                                                                                                       | ✅ Done    | Mar 3 |
-| Docker Compose (API, Postgres, Redis, HelixDB)                                                                                                                                        | ✅ Done    | Mar 3 |
-| CI/CD workflows (lint + deploy)                                                                                                                                                       | ✅ Done    | Mar 3 |
-| `.env.example` + real keys configured                                                                                                                                                 | ✅ Done    | Mar 3 |
-| GitHub OAuth via NextAuth.js v5                                                                                                                                                       | ⏳ Pending | —     |
+| Task                                                                                                                                                                                  | Status  | Date  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- |
+| FastAPI backend skeleton (5 routers, 3 middleware, main app)                                                                                                                          | ✅ Done | Mar 3 |
+| SQLAlchemy ORM — 8 tables (`users`, `company_blueprints`, `platform_scores`, `company_match_scores`, `user_target_companies`, `user_skill_gaps`, `user_roadmaps`, `analysis_results`) | ✅ Done | Mar 3 |
+| Alembic migration — all tables created & verified in Postgres                                                                                                                         | ✅ Done | Mar 3 |
+| LiteLLM client (Groq primary + Ollama fallback)                                                                                                                                       | ✅ Done | Mar 3 |
+| Pydantic v2 schemas (API response envelope, User, Auth, Analysis, Company)                                                                                                            | ✅ Done | Mar 3 |
+| Repository pattern (users, scores)                                                                                                                                                    | ✅ Done | Mar 3 |
+| Next.js 14 project (App Router, TypeScript, Tailwind v4)                                                                                                                              | ✅ Done | Mar 3 |
+| Task                                                                                                                                                                                  | Status  | Date  |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------ | :---- |
+| FastAPI backend skeleton (5 routers, 3 middleware, main app)                                                                                                                          | ✅ Done | Mar 3 |
+| SQLAlchemy ORM — 8 tables (`users`, `company_blueprints`, `platform_scores`, `company_match_scores`, `user_target_companies`, `user_skill_gaps`, `user_roadmaps`, `analysis_results`) | ✅ Done | Mar 3 |
+| Alembic migration — all tables created & verified in Postgres                                                                                                                         | ✅ Done | Mar 3 |
+| LiteLLM client (Groq primary + Ollama fallback)                                                                                                                                       | ✅ Done | Mar 3 |
+| Pydantic v2 schemas (API response envelope, User, Auth, Analysis, Company)                                                                                                            | ✅ Done | Mar 3 |
+| Repository pattern (users, scores)                                                                                                                                                    | ✅ Done | Mar 3 |
+| Next.js 14 project (App Router, TypeScript, Tailwind v4)                                                                                                                              | ✅ Done | Mar 3 |
+| Tailwind design system (dark navy + indigo accent)                                                                                                                                    | ✅ Done | Mar 3 |
+| Zustand stores (sidebar, company, preferences)                                                                                                                                        | ✅ Done | Mar 3 |
+| React Query + Axios client with JWT interceptor                                                                                                                                       | ✅ Done | Mar 3 |
+| Docker Compose (API, Postgres, Redis, HelixDB)                                                                                                                                        | ✅ Done | Mar 3 |
+| CI/CD workflows (lint + deploy)                                                                                                                                                       | ✅ Done | Mar 3 |
+| `.env.example` + real keys configured                                                                                                                                                 | ✅ Done | Mar 3 |
+| GitHub OAuth via NextAuth.js v5                                                                                                                                                       | ✅ Done | Mar 3 |
 
 ---
 
 ## Phase 2: Data Integration & Platform Sync 🔲
 
 | Task                                          | Status         | Date |
-| --------------------------------------------- | -------------- | ---- |
+| :-------------------------------------------- | :------------- | :--- |
 | GitHub REST API scraper (httpx async)         | 🔲 Not started | —    |
 | LeetCode GraphQL scraper                      | 🔲 Not started | —    |
 | Resume PDF parser (PyMuPDF + spaCy)           | 🔲 Not started | —    |
@@ -41,7 +50,7 @@
 ## Phase 3: 8-Agent LLM Engine 🔲
 
 | Task                                     | Status         | Date |
-| ---------------------------------------- | -------------- | ---- |
+| :--------------------------------------- | :------------- | :--- |
 | Agentic loop core (tool calling pattern) | 🔲 Not started | —    |
 | Agent 1: GitHub Intelligence Analyst     | 🔲 Not started | —    |
 | Agent 2: DSA Performance Analyst         | 🔲 Not started | —    |
@@ -60,7 +69,7 @@
 ## Phase 4: Scoring Engine & Company Blueprints 🔲
 
 | Task                                      | Status         | Date |
-| ----------------------------------------- | -------------- | ---- |
+| :---------------------------------------- | :------------- | :--- |
 | Weighted scoring algorithm                | 🔲 Not started | —    |
 | Company blueprint seeding (15+ companies) | 🔲 Not started | —    |
 | HelixDB skill graph seeding (200+ nodes)  | 🔲 Not started | —    |
@@ -73,7 +82,7 @@
 ## Phase 5: Frontend — All 15 Pages 🔲
 
 | Task                               | Status         | Date |
-| ---------------------------------- | -------------- | ---- |
+| :--------------------------------- | :------------- | :--- |
 | Landing page (/)                   | 🔲 Not started | —    |
 | Auth page (/auth)                  | 🔲 Not started | —    |
 | Onboarding wizard (/onboarding)    | 🔲 Not started | —    |
