@@ -1,5 +1,5 @@
 # Pydantic v2 DTOs for all request/response shapes
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import Optional, Any
 from datetime import datetime
 from uuid import UUID

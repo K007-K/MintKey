@@ -1,6 +1,6 @@
 # Repository pattern — all score database operations
 from uuid import UUID
-from typing import Optional
+from typing import Optional  # noqa: F401 — used in type hints below
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.models.db import CompanyMatchScore, PlatformScore
