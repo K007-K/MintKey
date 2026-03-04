@@ -1,7 +1,8 @@
-// Roadmap page — week-by-week preparation plan
+// Roadmap page — clean light mode timeline
 "use client";
 
 import DashboardLayout from "@/components/ui/DashboardLayout";
+import { CheckCircle2, Circle, Clock, BookOpen, Code2, Target } from "lucide-react";
 
 const WEEKS = [
   { week: 1, theme: "Foundation & Basics", tasks: 6, dsa: 10, milestone: "Complete prerequisite skills", done: true },
@@ -10,51 +11,45 @@ const WEEKS = [
   { week: 4, theme: "Dynamic Programming", tasks: 6, dsa: 15, milestone: "Solve 15 medium DP problems", done: false },
   { week: 5, theme: "System Design Intro", tasks: 5, dsa: 8, milestone: "Design URL Shortener", done: false },
   { week: 6, theme: "Advanced DP & Graphs", tasks: 7, dsa: 12, milestone: "Hard DP problems", done: false },
-  { week: 7, theme: "Mock Interviews", tasks: 4, dsa: 10, milestone: "2 mock interviews", done: false },
-  { week: 8, theme: "Final Review", tasks: 5, dsa: 8, milestone: "Full revision cycle", done: false },
+  { week: 7, theme: "Mock Interviews", tasks: 4, dsa: 10, milestone: "2 peer mock interviews", done: false },
+  { week: 8, theme: "Final Review & Polish", tasks: 5, dsa: 8, milestone: "Full revision cycle", done: false },
 ];
 
 export default function RoadmapPage() {
   return (
-    <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Your Roadmap</h1>
-          <p className="mt-1 text-text-muted">Week-by-week preparation plan tailored to your target companies.</p>
-        </div>
-
-        <div className="space-y-4">
-          {WEEKS.map((w) => (
-            <div
-              key={w.week}
-              className={`rounded-2xl border p-5 transition-all ${
-                w.done
-                  ? "border-score-high/30 bg-score-high/5"
-                  : "border-border/30 bg-bg-surface/50 hover:border-accent-indigo/30"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${
-                    w.done ? "bg-score-high/20 text-score-high" : "bg-accent-indigo/10 text-accent-indigo"
-                  }`}>
-                    {w.done ? "✓" : w.week}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-text-primary">Week {w.week}: {w.theme}</h3>
-                    <p className="text-xs text-text-muted">{w.tasks} tasks • {w.dsa} DSA problems</p>
-                  </div>
-                </div>
-                <span className={`text-xs font-medium ${w.done ? "text-score-high" : "text-text-muted"}`}>
-                  {w.done ? "Completed" : "Pending"}
-                </span>
+    <DashboardLayout title="My Roadmap" subtitle="Week-by-week preparation plan tailored to your targets.">
+      <div className="max-w-3xl space-y-4">
+        {WEEKS.map((w) => (
+          <div key={w.week} className={`rounded-xl border bg-bg-card p-5 transition-all ${w.done ? "border-green/30" : "border-border-default hover:border-mint/30"}`}>
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5">
+                {w.done ? (
+                  <CheckCircle2 className="h-5 w-5 text-green" strokeWidth={2} />
+                ) : (
+                  <Circle className="h-5 w-5 text-text-placeholder" strokeWidth={1.5} />
+                )}
               </div>
-              <div className="ml-11 text-sm text-text-muted">
-                🎯 Milestone: {w.milestone}
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-text-primary">
+                    Week {w.week}: {w.theme}
+                  </h3>
+                  <span className={`text-xs font-medium ${w.done ? "text-green" : "text-text-muted"}`}>
+                    {w.done ? "Completed" : "Upcoming"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 mb-2 text-xs text-text-muted">
+                  <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> {w.tasks} tasks</span>
+                  <span className="flex items-center gap-1"><Code2 className="h-3 w-3" /> {w.dsa} problems</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <Target className="h-3 w-3 text-mint-dark" />
+                  {w.milestone}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </DashboardLayout>
   );

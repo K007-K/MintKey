@@ -1,75 +1,112 @@
 @import "tailwindcss";
 
-/* MintKey Design System — Dark Navy + Indigo accent */
+/* MintKey Design System — Clean Light Mode + Teal Accent */
 :root {
   /* Backgrounds */
-  --bg-base: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-elevated: #334155;
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-active: #f0fdfa;
 
   /* Borders */
-  --border-color: #475569;
+  --border-default: #e2e8f0;
+  --border-light: #f1f5f9;
 
   /* Text */
-  --text-primary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
   --text-muted: #94a3b8;
+  --text-placeholder: #cbd5e1;
 
-  /* Accents */
-  --accent-indigo: #6366f1;
-  --accent-violet: #8b5cf6;
+  /* Brand — Teal (from MintKey logo) */
+  --mint: #2dd4bf;
+  --mint-dark: #14b8a6;
+  --mint-darker: #0d9488;
+  --mint-light: #ccfbf1;
+  --mint-bg: #f0fdfa;
 
-  /* Score colors */
-  --score-high: #22c55e;
-  --score-mid: #f59e0b;
-  --score-low: #ef4444;
+  /* Status colors */
+  --green: #22c55e;
+  --green-light: #dcfce7;
+  --green-dark: #166534;
+  --orange: #f97316;
+  --orange-light: #ffedd5;
+  --orange-dark: #9a3412;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --red-dark: #991b1b;
+  --blue: #3b82f6;
+  --blue-light: #dbeafe;
+  --blue-dark: #1e40af;
 
-  /* Utility colors */
-  --color-teal: #14b8a6;
-  --color-sky: #38bdf8;
+  /* Chart */
+  --chart-line: #14b8a6;
+  --chart-fill: #ccfbf1;
 
-  /* Background and foreground for body */
-  --background: var(--bg-base);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+
+  --background: var(--bg-page);
   --foreground: var(--text-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-bg-base: var(--bg-base);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-elevated: var(--bg-elevated);
-  --color-border: var(--border-color);
+  --color-bg-page: var(--bg-page);
+  --color-bg-card: var(--bg-card);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-hover: var(--bg-hover);
+  --color-bg-active: var(--bg-active);
+  --color-border-default: var(--border-default);
+  --color-border-light: var(--border-light);
   --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
-  --color-accent-indigo: var(--accent-indigo);
-  --color-accent-violet: var(--accent-violet);
-  --color-score-high: var(--score-high);
-  --color-score-mid: var(--score-mid);
-  --color-score-low: var(--score-low);
-  --color-teal: var(--color-teal);
-  --color-sky: var(--color-sky);
+  --color-text-placeholder: var(--text-placeholder);
+  --color-mint: var(--mint);
+  --color-mint-dark: var(--mint-dark);
+  --color-mint-darker: var(--mint-darker);
+  --color-mint-light: var(--mint-light);
+  --color-mint-bg: var(--mint-bg);
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+  --color-green-dark: var(--green-dark);
+  --color-orange: var(--orange);
+  --color-orange-light: var(--orange-light);
+  --color-orange-dark: var(--orange-dark);
+  --color-red: var(--red);
+  --color-red-light: var(--red-light);
+  --color-red-dark: var(--red-dark);
+  --color-blue: var(--blue);
+  --color-blue-light: var(--blue-light);
+  --color-blue-dark: var(--blue-dark);
+  --color-chart-line: var(--chart-line);
+  --color-chart-fill: var(--chart-fill);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* Global styles */
+/* Base */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: var(--font-sans, "Inter", system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-base);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: var(--border-default);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -78,12 +115,12 @@ body {
 
 /* Selection */
 ::selection {
-  background: var(--accent-indigo);
+  background: var(--mint-light);
   color: var(--text-primary);
 }
 
-/* Focus ring */
+/* Focus */
 *:focus-visible {
-  outline: 2px solid var(--accent-indigo);
+  outline: 2px solid var(--mint);
   outline-offset: 2px;
 }
