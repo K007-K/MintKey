@@ -1,5 +1,5 @@
-// NextAuth.js v5 middleware for route protection
-export { auth as middleware } from "@/auth";
+// NextAuth.js v5 proxy for route protection (Next.js 16 convention)
+export { auth as proxy } from "@/auth";
 
 export const config = {
   // Protect dashboard and authenticated routes
