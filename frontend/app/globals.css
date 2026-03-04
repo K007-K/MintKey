@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
+/* Force Tailwind v4 to use class-based dark mode only (not OS preference) */
+@variant dark (&:where(.dark, .dark *));
+
 /* MintKey Design System — Clean Light Mode + Teal Accent */
 :root {
+  color-scheme: light;
+
   /* Backgrounds */
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
@@ -89,10 +94,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Base */
+/* Force light mode on everything */
+html, body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  color-scheme: light !important;
+}
+
 body {
-  background: var(--bg-page);
-  color: var(--text-primary);
   font-family: var(--font-sans, "Inter", system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -106,21 +115,21 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-default);
+  background: #e2e8f0;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #94a3b8;
 }
 
 /* Selection */
 ::selection {
-  background: var(--mint-light);
-  color: var(--text-primary);
+  background: #ccfbf1;
+  color: #0f172a;
 }
 
 /* Focus */
 *:focus-visible {
-  outline: 2px solid var(--mint);
+  outline: 2px solid #2dd4bf;
   outline-offset: 2px;
 }
