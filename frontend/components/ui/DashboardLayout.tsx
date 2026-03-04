@@ -3,7 +3,7 @@
 
 import Sidebar from "@/components/ui/Sidebar";
 import { useSidebarStore } from "@/lib/store";
-import { Bell, Maximize2, Menu } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -55,11 +55,6 @@ export default function DashboardLayout({
             <button className="flex items-center gap-2 rounded-lg border border-border-default px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors">
               <div className="h-6 w-6 rounded-full bg-mint-light flex items-center justify-center text-xs font-semibold text-mint-darker">K</div>
               <span className="hidden sm:inline">Public Profile</span>
-            </button>
-
-            {/* Expand */}
-            <button className="rounded-lg p-2 text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors">
-              <Maximize2 className="h-[18px] w-[18px]" strokeWidth={1.8} />
             </button>
           </div>
         </header>
