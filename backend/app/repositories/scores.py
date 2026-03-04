@@ -45,6 +45,23 @@ class ScoreRepository:
         await self.db.flush()
         return score
 
+    async def upsert_match_score(
+        self,
+        user_id: UUID,
+        company_slug: str,
+        overall_score: float,
+        component_scores: dict,
+        weights: dict,
+        grade: str,
+    ) -> CompanyMatchScore:
+        """Insert a new match score snapshot (always appends for time-series)."""
+        breakdown = {
+            "component_scores": component_scores,
+            "weights": weights,
+            "grade": grade,
+        }
+        return await self.save_match_score(user_id, company_slug, overall_score, breakdown)
+
     async def get_platform_scores(self, user_id: UUID) -> list[PlatformScore]:
         result = await self.db.execute(
             select(PlatformScore).where(PlatformScore.user_id == user_id)
