@@ -46,13 +46,14 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
 
     # Import and include routers
-    from app.routers import users, scores, analysis, roadmap, trends, auth
+    from app.routers import users, scores, analysis, roadmap, trends, auth, sync
     app.include_router(auth.router)
     app.include_router(users.router)
     app.include_router(scores.router)
     app.include_router(analysis.router)
     app.include_router(roadmap.router)
     app.include_router(trends.router)
+    app.include_router(sync.router)
 
     # Health check
     @app.get("/health", tags=["health"])
