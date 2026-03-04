@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
+import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
 import { Search, Bell, ChevronDown, X, Plus } from "lucide-react";
 
 /* ── Company Data ────────────────────────────────────────────────── */
@@ -12,33 +13,30 @@ interface Company {
   name: string;
   slug: string;
   category: string;
-  logo: string;
-  logoBg: string;
-  logoText: string;
   salary: string;
   difficulty: "Hard" | "Medium" | "Easy";
   score: number;
 }
 
 const ALL_COMPANIES: Company[] = [
-  { name: "Amazon", slug: "amazon", category: "E-commerce & Cloud", logo: "a", logoBg: "#232F3E", logoText: "#FF9900", salary: "$140k - $280k", difficulty: "Medium", score: 76 },
-  { name: "Microsoft", slug: "microsoft", category: "Software & Cloud", logo: "⊞", logoBg: "#00A4EF", logoText: "#ffffff", salary: "$150k - $290k", difficulty: "Medium", score: 81 },
-  { name: "Apple", slug: "apple", category: "Hardware & Software", logo: "", logoBg: "#333333", logoText: "#ffffff", salary: "$170k - $330k", difficulty: "Hard", score: 88 },
-  { name: "Netflix", slug: "netflix", category: "Streaming & Media", logo: "N", logoBg: "#E50914", logoText: "#ffffff", salary: "$200k - $400k", difficulty: "Hard", score: 72 },
-  { name: "Uber", slug: "uber", category: "Ridesharing & Delivery", logo: "U", logoBg: "#000000", logoText: "#ffffff", salary: "$140k - $260k", difficulty: "Medium", score: 69 },
-  { name: "Salesforce", slug: "salesforce", category: "CRM & Cloud", logo: "sf", logoBg: "#00A1E0", logoText: "#ffffff", salary: "$130k - $240k", difficulty: "Easy", score: 84 },
-  { name: "Twitter", slug: "twitter", category: "Social Media", logo: "𝕏", logoBg: "#1DA1F2", logoText: "#ffffff", salary: "$160k - $300k", difficulty: "Medium", score: 73 },
-  { name: "LinkedIn", slug: "linkedin", category: "Professional Network", logo: "in", logoBg: "#0A66C2", logoText: "#ffffff", salary: "$150k - $280k", difficulty: "Medium", score: 79 },
-  { name: "Shopify", slug: "shopify", category: "E-commerce Platform", logo: "S", logoBg: "#96BF48", logoText: "#ffffff", salary: "$120k - $220k", difficulty: "Easy", score: 91 },
-  { name: "Slack", slug: "slack", category: "Collaboration Tools", logo: "#", logoBg: "#611F69", logoText: "#ffffff", salary: "$140k - $250k", difficulty: "Easy", score: 86 },
-  { name: "Spotify", slug: "spotify", category: "Music Streaming", logo: "♫", logoBg: "#1DB954", logoText: "#ffffff", salary: "$130k - $240k", difficulty: "Medium", score: 75 },
+  { name: "Amazon", slug: "amazon", category: "E-commerce & Cloud", salary: "$140k - $280k", difficulty: "Medium", score: 76 },
+  { name: "Microsoft", slug: "microsoft", category: "Software & Cloud", salary: "$150k - $290k", difficulty: "Medium", score: 81 },
+  { name: "Apple", slug: "apple", category: "Hardware & Software", salary: "$170k - $330k", difficulty: "Hard", score: 88 },
+  { name: "Netflix", slug: "netflix", category: "Streaming & Media", salary: "$200k - $400k", difficulty: "Hard", score: 72 },
+  { name: "Uber", slug: "uber", category: "Ridesharing & Delivery", salary: "$140k - $260k", difficulty: "Medium", score: 69 },
+  { name: "Salesforce", slug: "salesforce", category: "CRM & Cloud", salary: "$130k - $240k", difficulty: "Easy", score: 84 },
+  { name: "Twitter", slug: "twitter", category: "Social Media", salary: "$160k - $300k", difficulty: "Medium", score: 73 },
+  { name: "LinkedIn", slug: "linkedin", category: "Professional Network", salary: "$150k - $280k", difficulty: "Medium", score: 79 },
+  { name: "Shopify", slug: "shopify", category: "E-commerce Platform", salary: "$120k - $220k", difficulty: "Easy", score: 91 },
+  { name: "Slack", slug: "slack", category: "Collaboration Tools", salary: "$140k - $250k", difficulty: "Easy", score: 86 },
+  { name: "Spotify", slug: "spotify", category: "Music Streaming", salary: "$130k - $240k", difficulty: "Medium", score: 75 },
 ];
 
 const INITIAL_TARGETS: Company[] = [
-  { name: "Google", slug: "google", category: "Search & Cloud", logo: "G", logoBg: "#4285F4", logoText: "#ffffff", salary: "$180k - $350k", difficulty: "Hard", score: 92 },
-  { name: "Meta", slug: "meta", category: "Social & VR", logo: "∞", logoBg: "#0668E1", logoText: "#ffffff", salary: "$170k - $320k", difficulty: "Hard", score: 85 },
-  { name: "Airbnb", slug: "airbnb", category: "Travel & Hospitality", logo: "A", logoBg: "#FF5A5F", logoText: "#ffffff", salary: "$150k - $280k", difficulty: "Medium", score: 78 },
-  { name: "Stripe", slug: "stripe", category: "Fintech & Payments", logo: "S", logoBg: "#635BFF", logoText: "#ffffff", salary: "$160k - $300k", difficulty: "Medium", score: 64 },
+  { name: "Google", slug: "google", category: "Search & Cloud", salary: "$180k - $350k", difficulty: "Hard", score: 92 },
+  { name: "Meta", slug: "meta", category: "Social & VR", salary: "$170k - $320k", difficulty: "Hard", score: 85 },
+  { name: "Airbnb", slug: "airbnb", category: "Travel & Hospitality", salary: "$150k - $280k", difficulty: "Medium", score: 78 },
+  { name: "Stripe", slug: "stripe", category: "Fintech & Payments", salary: "$160k - $300k", difficulty: "Medium", score: 64 },
 ];
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -47,12 +45,6 @@ function diffColor(d: string) {
   if (d === "Hard") return "#B91C1C";
   if (d === "Medium") return "#B45309";
   return "#047857";
-}
-
-function diffBg(d: string) {
-  if (d === "Hard") return "#FEE2E2";
-  if (d === "Medium") return "#FEF3C7";
-  return "#D1FAE5";
 }
 
 /* ── Page ─────────────────────────────────────────────────────────── */
@@ -140,11 +132,8 @@ export default function CompaniesPage() {
                 </button>
 
                 {/* Logo */}
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold mb-3"
-                  style={{ backgroundColor: t.logoBg, color: t.logoText }}
-                >
-                  {t.logo}
+                <div className="mb-3">
+                  <CompanyLogoIcon slug={t.slug} />
                 </div>
 
                 {/* Name */}
@@ -192,12 +181,7 @@ export default function CompaniesPage() {
               >
                 {/* Header: logo + name/category */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold shrink-0"
-                    style={{ backgroundColor: c.logoBg, color: c.logoText }}
-                  >
-                    {c.logo}
-                  </div>
+                  <CompanyLogoIcon slug={c.slug} />
                   <div>
                     <h3 className="text-sm font-semibold text-[#111827]">{c.name}</h3>
                     <p className="text-xs text-[#6B7280]">{c.category}</p>
