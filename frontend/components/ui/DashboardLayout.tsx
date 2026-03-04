@@ -21,7 +21,7 @@ export default function DashboardLayout({
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between border-b border-border-default bg-bg-card px-6 py-4">
+        <header className="flex items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-3.5">
           <div className="flex items-center gap-4">
             <button
               onClick={toggle}
@@ -30,7 +30,7 @@ export default function DashboardLayout({
               <Menu className="h-5 w-5" strokeWidth={1.8} />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-text-primary">
+              <h1 className="text-xl font-semibold text-gray-900">
                 {title || "Good morning, Karthik"}
               </h1>
               {subtitle && (

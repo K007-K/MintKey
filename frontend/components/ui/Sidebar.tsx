@@ -50,11 +50,11 @@ export default function Sidebar() {
         href={href}
         className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
           isActive
-            ? "bg-mint-bg text-mint-darker border-l-2 border-mint-dark -ml-px"
-            : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+            ? "bg-[#ecfdf5] text-[#10b981] border-l-2 border-[#10b981] -ml-px"
+            : "text-text-secondary hover:bg-[#f3f4f6] hover:text-text-primary"
         }`}
       >
-        <Icon className={`h-[18px] w-[18px] ${isActive ? "text-mint-dark" : "text-text-muted group-hover:text-text-secondary"}`} strokeWidth={1.8} />
+        <Icon className={`h-[18px] w-[18px] ${isActive ? "text-[#10b981]" : "text-text-muted group-hover:text-text-secondary"}`} strokeWidth={1.8} />
         <span className="flex-1">{label}</span>
         {badge && (
           <span className="rounded-full bg-mint-light px-2 py-0.5 text-[10px] font-semibold text-mint-darker">{badge}</span>
@@ -83,7 +83,7 @@ export default function Sidebar() {
         {/* Platform section */}
         <nav className="flex-1 overflow-y-auto px-3">
           <div className="mb-1">
-            <span className="px-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            <span className="px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400">
               Platform
             </span>
           </div>
@@ -94,7 +94,7 @@ export default function Sidebar() {
           </div>
 
           <div className="mb-1">
-            <span className="px-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            <span className="px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400">
               Intelligence
             </span>
           </div>

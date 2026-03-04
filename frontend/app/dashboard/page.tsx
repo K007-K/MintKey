@@ -50,10 +50,10 @@ export default function DashboardPage() {
       title="Good morning, Karthik"
       subtitle="Let's get you ready for that Senior Engineer role."
     >
-      <div className="space-y-6">
+      <div className="space-y-5">
 
         {/* ─── Row 1: Four Stat Cards ─── */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={<CodeBracketsIcon />}
             label="LeetCode Solved"
@@ -85,9 +85,9 @@ export default function DashboardPage() {
         </div>
 
         {/* ─── Row 2: Readiness Trend (2/3) + Company Match (1/3) ─── */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 320px' }}>
           {/* Readiness Trend Chart */}
-          <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6">
+          <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-semibold text-gray-900">Readiness Trend</h2>
@@ -121,8 +121,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Company Match */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-5 text-base font-bold text-gray-900">Company Match</h2>
+          <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
+            <h2 className="mb-4 text-base font-bold text-gray-900">Company Match</h2>
             <div className="space-y-4">
               {COMPANY_MATCHES.map((c) => (
                 <div key={c.name}>
@@ -133,25 +133,25 @@ export default function DashboardPage() {
                     </div>
                     <span className="text-sm font-bold text-gray-900">{c.score}%</span>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full transition-all duration-700 ease-out"
                       style={{ width: `${c.score}%`, backgroundColor: c.color }}
                     />
                   </div>
                 </div>
               ))}
             </div>
-            <button className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">
+            <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-400 hover:bg-[#f9fafb] hover:text-gray-600 transition-colors">
               <Plus className="h-4 w-4" /> Add Target Company
             </button>
           </div>
         </div>
 
         {/* ─── Row 3: Top Priority Actions (2/3) + Critical Gaps (1/3) ─── */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 320px' }}>
           {/* Top Priority Actions */}
-          <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6">
+          <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-bold text-gray-900">Top Priority Actions</h2>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-3">
               {PRIORITY_ACTIONS.map((action) => (
-                <div key={action.title} className="flex items-center gap-4 rounded-lg border border-gray-100 p-4 hover:bg-gray-50 transition-colors">
+                <div key={action.title} className="flex items-center gap-4 rounded-lg border border-gray-100 p-3.5 hover:bg-[#f9fafb] transition-colors cursor-pointer">
                   {/* Empty checkbox */}
                   <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-gray-300" />
                   <div className="flex-1 min-w-0">
@@ -177,16 +177,16 @@ export default function DashboardPage() {
           </div>
 
           {/* Critical Gaps */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <h2 className="mb-4 text-base font-bold text-gray-900">Critical Gaps</h2>
             <div className="space-y-3">
               {CRITICAL_GAPS.map((g) => (
                 <div
                   key={g.title}
-                  className={`rounded-lg p-4 ${
+                  className={`rounded-lg p-4 border ${
                     g.severity === "high"
-                      ? "bg-red-50"
-                      : "bg-orange-50"
+                      ? "bg-[#fef2f2] border-[#fecaca]"
+                      : "bg-[#fff7ed] border-[#fed7aa]"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ─── Row 4: Recent Activity (full width) ─── */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-bold text-gray-900">Recent Activity</h2>
             <button className="text-xs font-medium text-gray-400 hover:text-gray-700 transition-colors">View full history</button>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {RECENT_ACTIVITY.map((item) => (
-                <tr key={item.activity} className="border-b border-gray-50 last:border-0">
+                <tr key={item.activity} className="border-b border-gray-50 last:border-0 hover:bg-[#f9fafb] transition-colors">
                   <td className="py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
@@ -272,7 +272,7 @@ function StatCard({
   badgeColor: string;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+    <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
       <div className="flex items-center justify-between mb-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors">
           {icon}
@@ -281,8 +281,8 @@ function StatCard({
           {badge}
         </span>
       </div>
-      <div className="text-xs text-gray-400 mb-0.5">{label}</div>
-      <div className="text-2xl font-bold text-gray-900">{value}</div>
+      <div className="text-[11px] text-[#6b7280] mb-0.5">{label}</div>
+      <div className="text-[28px] font-bold leading-tight text-gray-900">{value}</div>
     </div>
   );
 }
