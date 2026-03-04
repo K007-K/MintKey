@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
@@ -42,14 +43,27 @@ const INITIAL_TARGETS: Company[] = [
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
 function diffColor(d: string) {
-  if (d === "Hard") return "#B91C1C";
-  if (d === "Medium") return "#B45309";
-  return "#047857";
+  if (d === "Hard") return "#DC2626";
+  if (d === "Medium") return "#D97706";
+  return "#10B981";
+}
+
+function diffBg(d: string) {
+  if (d === "Hard") return "#FEF2F2";
+  if (d === "Medium") return "#FFFBEB";
+  return "#ECFDF5";
+}
+
+function scoreBarColor(score: number) {
+  if (score >= 80) return "#10B981";
+  if (score >= 60) return "#F59E0B";
+  return "#EF4444";
 }
 
 /* ── Page ─────────────────────────────────────────────────────────── */
 
 export default function CompaniesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [targets, setTargets] = useState<Company[]>(INITIAL_TARGETS);
   const [visibleCount, setVisibleCount] = useState(9);
@@ -82,7 +96,7 @@ export default function CompaniesPage() {
   return (
     <DashboardLayout title="Company Explorer" subtitle="Browse companies and see how ready you are">
       {/* ── Search bar row ── */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div />
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -92,17 +106,17 @@ export default function CompaniesPage() {
               placeholder="Search companies..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-60 rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#047857] focus:ring-1 focus:ring-[#047857]"
+              className="h-9 w-56 rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-colors"
             />
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-all">
             <Bell className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* ── Filters ── */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3">
         <FilterDropdown value={companyTypeFilter} onChange={setCompanyTypeFilter} options={["All Company Types"]} />
         <FilterDropdown value={dsaFilter} onChange={setDsaFilter} options={["All DSA Levels", "Hard", "Medium", "Easy"]} />
         <FilterDropdown value={packageFilter} onChange={setPackageFilter} options={["All Package Ranges"]} />
@@ -110,51 +124,57 @@ export default function CompaniesPage() {
 
       {/* ── Your Target Companies ── */}
       {targets.length > 0 && (
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-lg font-bold text-[#111827]">Your Target Companies</h2>
-            <button className="text-sm text-[#6B7280] hover:text-[#047857] transition-colors">Edit targets</button>
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-0.5">
+            <h2 className="text-base font-bold text-[#111827]">Your Target Companies</h2>
+            <button className="text-xs text-[#6B7280] hover:text-[#10B981] transition-colors">Edit targets</button>
           </div>
-          <p className="text-sm text-[#6B7280] mb-4">Companies you&apos;re actively preparing for</p>
+          <p className="text-xs text-[#9CA3AF] mb-3">Companies you&apos;re actively preparing for</p>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {targets.map((t) => (
               <div
                 key={t.slug}
-                className="relative rounded-xl border border-[#E5E7EB] bg-white p-5 transition-all hover:shadow-md"
+                onClick={() => router.push(`/company/${t.slug}`)}
+                className="relative rounded-xl border border-[#E5E7EB] bg-white p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-[#D1D5DB] group"
               >
                 {/* Remove button */}
                 <button
-                  onClick={() => removeTarget(t.slug)}
-                  className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6] transition-colors"
+                  onClick={(e) => { e.stopPropagation(); removeTarget(t.slug); }}
+                  className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[#D1D5DB] opacity-0 group-hover:opacity-100 hover:text-[#6B7280] hover:bg-[#F3F4F6] transition-all"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3 w-3" />
                 </button>
 
                 {/* Logo */}
-                <div className="mb-3">
-                  <CompanyLogoIcon slug={t.slug} />
+                <div className="mb-2.5">
+                  <CompanyLogoIcon slug={t.slug} size={36} />
                 </div>
 
                 {/* Name */}
-                <h3 className="text-sm font-semibold text-[#111827] mb-1">{t.name}</h3>
+                <h3 className="text-sm font-semibold text-[#111827] mb-0.5">{t.name}</h3>
 
                 {/* Salary + difficulty */}
-                <div className="flex items-center gap-1.5 text-xs mb-3">
+                <div className="flex items-center gap-1.5 text-xs mb-2.5">
                   <span className="text-[#6B7280]">{t.salary}</span>
-                  <span className="text-[#D1D5DB]">·</span>
-                  <span className="font-semibold" style={{ color: diffColor(t.difficulty) }}>{t.difficulty}</span>
+                  <span className="text-[#E5E7EB]">·</span>
+                  <span
+                    className="font-semibold text-[10px] px-1.5 py-0.5 rounded"
+                    style={{ color: diffColor(t.difficulty), backgroundColor: diffBg(t.difficulty) }}
+                  >
+                    {t.difficulty}
+                  </span>
                 </div>
 
                 {/* Match score */}
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-[#6B7280]">Match Score</span>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-[#9CA3AF]">Match Score</span>
                   <span className="font-semibold text-[#111827]">{t.score}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#E5E7EB]">
+                <div className="h-1.5 rounded-full bg-[#F3F4F6]">
                   <div
-                    className="h-1.5 rounded-full transition-all bg-[#1F2937]"
-                    style={{ width: `${t.score}%` }}
+                    className="h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${t.score}%`, backgroundColor: scoreBarColor(t.score) }}
                   />
                 </div>
               </div>
@@ -165,66 +185,73 @@ export default function CompaniesPage() {
 
       {/* ── All Companies ── */}
       <section>
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-bold text-[#111827]">All Companies</h2>
-          <span className="text-sm text-[#6B7280]">Showing <span className="font-bold text-[#111827]">{filteredCompanies.length}</span> companies</span>
+        <div className="flex items-center justify-between mb-0.5">
+          <h2 className="text-base font-bold text-[#111827]">All Companies</h2>
+          <span className="text-xs text-[#9CA3AF]">Showing <span className="font-bold text-[#374151]">{filteredCompanies.length}</span> companies</span>
         </div>
-        <p className="text-sm text-[#6B7280] mb-5">Explore and add companies to your targets</p>
+        <p className="text-xs text-[#9CA3AF] mb-4">Explore and add companies to your targets</p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {visibleCompanies.map((c) => {
             const isTargeted = targets.some((t) => t.slug === c.slug);
             return (
               <div
                 key={c.slug}
-                className="rounded-xl border border-[#E5E7EB] bg-white p-5 transition-all hover:shadow-md"
+                onClick={() => router.push(`/company/${c.slug}`)}
+                className="rounded-xl border border-[#E5E7EB] bg-white p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-[#D1D5DB] group"
               >
                 {/* Header: logo + name/category */}
-                <div className="flex items-center gap-3 mb-4">
-                  <CompanyLogoIcon slug={c.slug} />
+                <div className="flex items-center gap-3 mb-3">
+                  <CompanyLogoIcon slug={c.slug} size={36} />
                   <div>
-                    <h3 className="text-sm font-semibold text-[#111827]">{c.name}</h3>
-                    <p className="text-xs text-[#6B7280]">{c.category}</p>
+                    <h3 className="text-sm font-semibold text-[#111827] group-hover:text-[#10B981] transition-colors">{c.name}</h3>
+                    <p className="text-[11px] text-[#9CA3AF]">{c.category}</p>
                   </div>
                 </div>
 
                 {/* Salary + difficulty */}
-                <div className="flex items-center gap-1.5 text-xs mb-3">
+                <div className="flex items-center gap-1.5 text-xs mb-2.5">
                   <span className="text-[#6B7280]">{c.salary}</span>
-                  <span className="text-[#D1D5DB]">·</span>
-                  <span className="font-semibold" style={{ color: diffColor(c.difficulty) }}>{c.difficulty}</span>
+                  <span className="text-[#E5E7EB]">·</span>
+                  <span
+                    className="font-semibold text-[10px] px-1.5 py-0.5 rounded"
+                    style={{ color: diffColor(c.difficulty), backgroundColor: diffBg(c.difficulty) }}
+                  >
+                    {c.difficulty}
+                  </span>
                 </div>
 
                 {/* Match score */}
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-[#6B7280]">Match Score</span>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-[#9CA3AF]">Match Score</span>
                   <span className="font-semibold text-[#111827]">{c.score}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#E5E7EB] mb-4">
+                <div className="h-1.5 rounded-full bg-[#F3F4F6] mb-3">
                   <div
-                    className="h-1.5 rounded-full transition-all bg-[#1F2937]"
-                    style={{ width: `${c.score}%` }}
+                    className="h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${c.score}%`, backgroundColor: scoreBarColor(c.score) }}
                   />
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-2 border-t border-[#E5E7EB] pt-3">
+                <div className="flex gap-2 border-t border-[#F3F4F6] pt-2.5">
                   <Link
                     href={`/company/${c.slug}`}
-                    className="flex-1 flex items-center justify-center rounded-lg border border-[#E5E7EB] px-3 py-2 text-xs font-medium text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 flex items-center justify-center rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1F2937] active:scale-[0.98] transition-all"
                   >
                     View Details
                   </Link>
                   <button
-                    onClick={() => addTarget(c)}
+                    onClick={(e) => { e.stopPropagation(); addTarget(c); }}
                     disabled={isTargeted}
-                    className={`flex-1 flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                       isTargeted
-                        ? "bg-[#F3F4F6] text-[#9CA3AF] cursor-default border border-[#E5E7EB]"
-                        : "bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] hover:bg-[#D1FAE5] active:scale-[0.98]"
+                        ? "bg-[#F9FAFB] text-[#D1D5DB] cursor-default border border-[#F3F4F6]"
+                        : "bg-white text-[#374151] border border-[#E5E7EB] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] active:scale-[0.98]"
                     }`}
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-3 w-3" />
                     Target
                   </button>
                 </div>
@@ -235,10 +262,10 @@ export default function CompaniesPage() {
 
         {/* Load More */}
         {hasMore && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-6">
             <button
               onClick={() => setVisibleCount((v) => v + 6)}
-              className="rounded-lg border border-[#E5E7EB] px-6 py-2.5 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
+              className="rounded-lg border border-[#E5E7EB] px-5 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] active:scale-[0.98] transition-all"
             >
               Load More Companies
             </button>
@@ -247,12 +274,12 @@ export default function CompaniesPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="mt-12 pt-6 border-t border-[#E5E7EB] flex items-center justify-between text-xs text-[#9CA3AF]">
+      <footer className="mt-10 pt-5 border-t border-[#F3F4F6] flex items-center justify-between text-[11px] text-[#D1D5DB]">
         <span>© 2024 Mintkey Inc. All rights reserved.</span>
         <div className="flex items-center gap-4">
-          <a href="#" className="hover:text-[#6B7280] transition-colors">Privacy</a>
-          <a href="#" className="hover:text-[#6B7280] transition-colors">Terms</a>
-          <a href="#" className="hover:text-[#6B7280] transition-colors">Help</a>
+          <a href="#" className="hover:text-[#9CA3AF] transition-colors">Privacy</a>
+          <a href="#" className="hover:text-[#9CA3AF] transition-colors">Terms</a>
+          <a href="#" className="hover:text-[#9CA3AF] transition-colors">Help</a>
         </div>
       </footer>
     </DashboardLayout>
@@ -275,7 +302,7 @@ function FilterDropdown({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none rounded-lg border border-[#E5E7EB] bg-white pl-3 pr-8 py-2 text-sm text-[#374151] outline-none focus:border-[#047857] focus:ring-1 focus:ring-[#047857] cursor-pointer hover:bg-[#F9FAFB] transition-colors"
+        className="appearance-none rounded-lg border border-[#E5E7EB] bg-white pl-3 pr-8 py-1.5 text-xs text-[#374151] outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] cursor-pointer hover:border-[#D1D5DB] transition-all"
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>
@@ -283,7 +310,7 @@ function FilterDropdown({
           </option>
         ))}
       </select>
-      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9CA3AF] pointer-events-none" />
+      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#9CA3AF] pointer-events-none" />
     </div>
   );
 }
