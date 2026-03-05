@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
@@ -220,9 +221,9 @@ export default function CompanyDetailPage() {
               </div>
               {/* CTA buttons (matching reference: outlined + filled) */}
               <div className="flex gap-3">
-                <button className="flex-1 rounded-lg border border-[#E5E7EB] px-5 py-3 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] active:scale-[0.98] transition-all">
+                <Link href={`/match/${slug}`} className="flex-1 rounded-lg border border-[#E5E7EB] px-5 py-3 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] active:scale-[0.98] transition-all text-center">
                   Full Report
-                </button>
+                </Link>
                 <button className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#10B981] px-5 py-3 text-sm font-semibold text-white hover:bg-[#059669] active:scale-[0.98] transition-all">
                   <Sparkles className="h-4 w-4" /> Roadmap
                 </button>
