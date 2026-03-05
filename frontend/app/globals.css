@@ -3,6 +3,15 @@
 /* Force Tailwind v4 to use class-based dark mode only (not OS preference) */
 @variant dark (&:where(.dark, .dark *));
 
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* MintKey Design System — Clean Light Mode + Teal Accent */
 :root {
   color-scheme: light;

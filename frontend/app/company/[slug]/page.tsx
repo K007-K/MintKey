@@ -232,8 +232,8 @@ export default function CompanyDetailPage() {
         </div>
 
         {/* ─── TAB NAVIGATION (matching reference: underline style, "High" badge) ─── */}
-        <div className="border-b border-[#E5E7EB]">
-          <nav className="flex gap-6 -mb-px overflow-x-auto">
+        <div className="border-b border-[#E5E7EB] overflow-x-auto scrollbar-hide">
+          <nav className="flex gap-6 -mb-px min-w-max">
             {TABS.map((tab) => (
               <button
                 key={tab}
@@ -1206,12 +1206,13 @@ function SkillGapTab() {
    TAB 9 — PREPARATION STRATEGY
    ════════════════════════════════════════════════════════ */
 function PreparationStrategyTab() {
+  const [activeStep, setActiveStep] = useState(1);
   const steps = [
-    { num: 1, title: "Master Dynamic Programming", desc: "Focus on 12 remaining DP problems. Target patterns: Knapsack, LCS, Matrix Chain.", est: "2-3 weeks", cta: "Start →", active: true },
-    { num: 2, title: "Improve Graph Algorithms", desc: "Practice BFS/DFS variations, Dijkstra, Union-Find.", est: "1-2 weeks", cta: "Start →", active: false },
-    { num: 3, title: "Build a Distributed Backend Project", desc: "Choose: Key-Value Store or Real-time Collaboration Tool.", est: "3-4 weeks", cta: "View Templates →", active: false },
-    { num: 4, title: "Start System Design Preparation", desc: "Begin with Load Balancing, then Caching fundamentals.", est: "2 weeks", cta: "Resources →", active: false },
-    { num: 5, title: "Practice Mock Interviews", desc: "2-3 mock interviews/week in final stretch.", est: "2 weeks", cta: "Schedule →", active: false },
+    { num: 1, title: "Master Dynamic Programming", desc: "Focus on 12 remaining DP problems. Target patterns: Knapsack, LCS, Matrix Chain.", est: "2-3 weeks", cta: "Start →" },
+    { num: 2, title: "Improve Graph Algorithms", desc: "Practice BFS/DFS variations, Dijkstra, Union-Find.", est: "1-2 weeks", cta: "Start →" },
+    { num: 3, title: "Build a Distributed Backend Project", desc: "Choose: Key-Value Store or Real-time Collaboration Tool.", est: "3-4 weeks", cta: "View Templates →" },
+    { num: 4, title: "Start System Design Preparation", desc: "Begin with Load Balancing, then Caching fundamentals.", est: "2 weeks", cta: "Resources →" },
+    { num: 5, title: "Practice Mock Interviews", desc: "2-3 mock interviews/week in final stretch.", est: "2 weeks", cta: "Schedule →" },
   ];
 
   const weeklyPlan = [
@@ -1236,15 +1237,15 @@ function PreparationStrategyTab() {
         <h3 className="text-base font-semibold text-[#111827] mb-5">Your Personalized Preparation Roadmap</h3>
         <div className="space-y-0">
           {steps.map((s, i) => (
-            <div key={s.num} className="flex gap-4">
+            <div key={s.num} className="flex gap-4" onClick={() => setActiveStep(s.num)}>
               <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${s.active ? "bg-[#10B981] text-white" : "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 cursor-pointer ${s.num === activeStep ? "bg-[#10B981] text-white" : s.num < activeStep ? "bg-[#A7F3D0] text-[#065F46]" : "bg-[#F3F4F6] text-[#6B7280]"}`}>
                   {s.num}
                 </div>
                 {i < steps.length - 1 && <div className="w-px flex-1 min-h-[20px] border-l-2 border-dashed border-[#E5E7EB] ml-0" />}
               </div>
               <div className="flex-1 pb-4">
-                <div className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors">
+                <div className={`rounded-xl border bg-white p-5 transition-colors cursor-pointer ${s.num === activeStep ? "border-[#10B981] shadow-sm" : "border-[#E5E7EB] hover:border-[#A7F3D0]"}`}>
                   <h4 className="text-sm font-bold text-[#111827] mb-1">{s.title}</h4>
                   <p className="text-xs text-[#9CA3AF] mb-2 leading-relaxed">{s.desc}</p>
                   <div className="flex items-center justify-between">
