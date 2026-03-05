@@ -7,10 +7,11 @@ import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
 import {
-  Home, ChevronRight, Clock, Download, Sparkles,
+  Home, ChevronRight, Clock, Download, Sparkles, Info,
   Code2, Layers, Settings, GraduationCap, Briefcase, TrendingUp,
   Brain, GitBranch, BarChart3, BookOpen, Users, Trophy,
-  XCircle, CheckCircle2, AlertCircle
+  XCircle, CheckCircle2, AlertCircle, Zap, ShieldAlert, Flame,
+  SlidersHorizontal
 } from "lucide-react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -24,7 +25,7 @@ const MATCH_DATA: Record<string, {
   status: "Strong" | "Good" | "Needs Work" | "Critical";
   weeksToReadiness: number; targetScore: number; gapToClose: number;
   problemsToSolve: number; lastUpdated: string;
-  breakdown: { component: string; icon: string; yourScore: number; target: number; gap: number }[];
+  breakdown: { component: string; icon: string; yourScore: number; target: number; gap: number; tooltip: string }[];
   radarData: { axis: string; user: number; target: number }[];
   dsaAnalysis: {
     total: { solved: number; required: number };
@@ -33,21 +34,23 @@ const MATCH_DATA: Record<string, {
     hard: { solved: number; required: number };
     topics: { name: string; solved: number; required: number; gap: number }[];
   };
-  topActions: { title: string; desc: string; impact: number; weeks: string; iconColor: string }[];
+  topActions: { title: string; desc: string; impact: number; weeks: string; iconColor: string; effort: "Low" | "Medium" | "High"; roi: "Low" | "Medium" | "High" | "Very High" }[];
   scoreHistory: { month: string; score: number | null; projected: number | null }[];
   targetScoreLine: number;
+  whyScore: { strong: string[]; weak: string[] };
+  simulator: { scenarios: { label: string; action: string; currentScore: number; newScore: number }[] };
 }> = {
   google: {
     name: "Google", role: "Software Development Engineer I (L3)",
     matchScore: 67, status: "Needs Work", weeksToReadiness: 10,
     targetScore: 85, gapToClose: 18, problemsToSolve: 87, lastUpdated: "2 hours ago",
     breakdown: [
-      { component: "DSA", icon: "code", yourScore: 75, target: 90, gap: -15 },
-      { component: "Projects", icon: "layers", yourScore: 45, target: 85, gap: -40 },
-      { component: "Tech Stack", icon: "settings", yourScore: 70, target: 85, gap: -15 },
-      { component: "Academics", icon: "graduation", yourScore: 80, target: 80, gap: 0 },
-      { component: "Internships", icon: "briefcase", yourScore: 65, target: 85, gap: -20 },
-      { component: "Consistency", icon: "trending-up", yourScore: 85, target: 90, gap: -5 },
+      { component: "DSA", icon: "code", yourScore: 75, target: 90, gap: -15, tooltip: "Data structures & algorithms problem-solving proficiency" },
+      { component: "Projects", icon: "layers", yourScore: 45, target: 85, gap: -40, tooltip: "Quality and depth of portfolio projects" },
+      { component: "Tech Stack", icon: "settings", yourScore: 70, target: 85, gap: -15, tooltip: "Alignment of your tech stack with company requirements" },
+      { component: "Academics", icon: "graduation", yourScore: 80, target: 80, gap: 0, tooltip: "Academic background and GPA alignment" },
+      { component: "Internships", icon: "briefcase", yourScore: 65, target: 85, gap: -20, tooltip: "Relevant work experience and internship quality" },
+      { component: "Consistency", icon: "trending-up", yourScore: 85, target: 90, gap: -5, tooltip: "How regularly you solve problems and commit code" },
     ],
     radarData: [
       { axis: "Projects", user: 45, target: 85 },
@@ -72,12 +75,12 @@ const MATCH_DATA: Record<string, {
       ],
     },
     topActions: [
-      { title: "Master Dynamic Programming", desc: "Complete 32 DP problems focusing on patterns like Knapsack, LIS, and LCS.", impact: 12, weeks: "3-4 weeks", iconColor: "red" },
-      { title: "Build System Design Project", desc: "Create a distributed system project (e.g., URL shortener or chat app).", impact: 10, weeks: "2-3 weeks", iconColor: "amber" },
-      { title: "Strengthen Graph Algorithms", desc: "Focus on advanced graph problems: Dijkstra, Bellman-Ford, Floyd-Warshall.", impact: 8, weeks: "2 weeks", iconColor: "blue" },
-      { title: "Complete Hard Problems", desc: "Solve 56 more Hard-level problems across all topics to meet target.", impact: 6, weeks: "4-5 weeks", iconColor: "purple" },
-      { title: "Mock Interview Practice", desc: "Complete 8 mock interviews focusing on communication and problem-solving.", impact: 5, weeks: "4 weeks", iconColor: "green" },
-      { title: "Participate in Contests", desc: "Join 6 weekly contests to improve speed and accuracy under pressure.", impact: 4, weeks: "6 weeks", iconColor: "orange" },
+      { title: "Master Dynamic Programming", desc: "Complete 32 DP problems focusing on patterns like Knapsack, LIS, and LCS.", impact: 12, weeks: "3-4 weeks", iconColor: "red", effort: "High", roi: "Very High" },
+      { title: "Build System Design Project", desc: "Create a distributed system project (e.g., URL shortener or chat app).", impact: 10, weeks: "2-3 weeks", iconColor: "amber", effort: "Medium", roi: "High" },
+      { title: "Strengthen Graph Algorithms", desc: "Focus on advanced graph problems: Dijkstra, Bellman-Ford, Floyd-Warshall.", impact: 8, weeks: "2 weeks", iconColor: "blue", effort: "Medium", roi: "High" },
+      { title: "Complete Hard Problems", desc: "Solve 56 more Hard-level problems across all topics to meet target.", impact: 6, weeks: "4-5 weeks", iconColor: "purple", effort: "High", roi: "Medium" },
+      { title: "Mock Interview Practice", desc: "Complete 8 mock interviews focusing on communication and problem-solving.", impact: 5, weeks: "4 weeks", iconColor: "green", effort: "Low", roi: "High" },
+      { title: "Participate in Contests", desc: "Join 6 weekly contests to improve speed and accuracy under pressure.", impact: 4, weeks: "6 weeks", iconColor: "orange", effort: "Low", roi: "Medium" },
     ],
     scoreHistory: [
       { month: "Jan", score: 42, projected: null },
@@ -94,6 +97,27 @@ const MATCH_DATA: Record<string, {
       { month: "Dec", score: null, projected: 78 },
     ],
     targetScoreLine: 85,
+    whyScore: {
+      strong: [
+        "Academics meet the expected benchmark for Google L3",
+        "Coding consistency is strong — regular commits and problem-solving",
+        "DSA fundamentals are above average for Easy & Medium problems",
+      ],
+      weak: [
+        "Project depth significantly below industry expectation (45% vs 85%)",
+        "Hard problem count critically lower than target (44/100)",
+        "Limited system design exposure — needs immediate attention",
+        "Internship experience gap — fewer relevant tech internships",
+      ],
+    },
+    simulator: {
+      scenarios: [
+        { label: "Solve 50 more DSA problems", action: "50 more problems", currentScore: 67, newScore: 74 },
+        { label: "Build 1 backend project", action: "1 backend project", currentScore: 67, newScore: 78 },
+        { label: "Complete 20 Hard problems", action: "20 Hard problems", currentScore: 67, newScore: 72 },
+        { label: "Do all 3 actions above", action: "all 3 combined", currentScore: 67, newScore: 85 },
+      ],
+    },
   },
 };
 
@@ -149,6 +173,39 @@ function topicGapColor(gap: number) {
   return "text-[#EF4444]";
 }
 
+function effortBadge(effort: string) {
+  if (effort === "Low") return "bg-green-50 text-green-700";
+  if (effort === "Medium") return "bg-amber-50 text-amber-700";
+  return "bg-red-50 text-red-700";
+}
+
+function roiBadge(roi: string) {
+  if (roi === "Very High") return "bg-emerald-50 text-emerald-700";
+  if (roi === "High") return "bg-green-50 text-green-700";
+  if (roi === "Medium") return "bg-amber-50 text-amber-700";
+  return "bg-gray-50 text-gray-600";
+}
+
+/* ─── Tooltip component ─── */
+function InfoTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <Info
+        className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help hover:text-[#6B7280] transition-colors"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      />
+      {show && (
+        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#111827] text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+          {text}
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#111827]" />
+        </span>
+      )}
+    </span>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════
    MAIN PAGE COMPONENT
    ═══════════════════════════════════════════════════════ */
@@ -157,11 +214,12 @@ export default function MatchReportPage() {
   const router = useRouter();
   const data = MATCH_DATA[slug || "google"] || MATCH_DATA.google;
   const [timeFilter, setTimeFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");
+  const [activeScenario, setActiveScenario] = useState<number | null>(null);
 
   /* Time filter slicing */
   const filterMap = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12 };
   const months = filterMap[timeFilter];
-  const currentMonthIdx = 8; // Sep = index 8 (last real data point)
+  const currentMonthIdx = 8;
   const startIdx = Math.max(0, currentMonthIdx - months + 1);
   const filteredHistory = data.scoreHistory.slice(startIdx, startIdx + months + 3).slice(0, 12);
 
@@ -208,19 +266,38 @@ export default function MatchReportPage() {
               <span className={`rounded-full px-3 py-1 text-sm font-medium ${statusColors[data.status]}`}>{data.status}</span>
             </div>
 
-            <div className="w-full h-3 rounded-full bg-[#F3F4F6] mb-4">
+            <div className="w-full h-3 rounded-full bg-[#F3F4F6] mb-5">
               <div className="h-full rounded-full bg-[#10B981] transition-all duration-1000" style={{ width: `${data.matchScore}%` }} />
+            </div>
+
+            {/* ── FIX 1: Score Components Mini-Bars ── */}
+            <div className="mb-5 p-4 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6]">
+              <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-3">Score Components</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                {data.breakdown.map((b) => (
+                  <div key={b.component} className="flex items-center gap-2">
+                    <span className="text-xs text-[#6B7280] w-20 shrink-0">{b.component}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-[#E5E7EB]">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${b.yourScore}%`,
+                          backgroundColor: b.gap === 0 ? "#10B981" : b.gap >= -10 ? "#F59E0B" : "#EF4444",
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs font-semibold text-[#374151] w-8 text-right">{b.yourScore}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <p className="text-sm text-[#6B7280] flex items-center gap-1.5 mb-2">
               <Clock className="h-4 w-4 text-[#9CA3AF]" />
               You are about <span className="font-bold text-[#111827]">{data.weeksToReadiness} weeks</span> away from readiness.
             </p>
-            <p className="text-sm text-[#9CA3AF] max-w-xl mb-6">
-              Based on your current skills, DSA progress, and project portfolio. Focus on Dynamic Programming and System Design to improve your score.
-            </p>
 
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap mt-5">
               <button className="flex items-center gap-2 rounded-lg bg-[#10B981] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
                 <Sparkles className="h-4 w-4" /> Generate Preparation Roadmap
               </button>
@@ -230,21 +307,48 @@ export default function MatchReportPage() {
             </div>
           </div>
 
-          {/* Right — Quick Stats */}
-          <div className="rounded-xl border border-[#E5E7EB] border-l-4 border-l-[#10B981] bg-[#ECFDF5] p-5">
-            <h3 className="text-sm font-semibold text-[#111827] mb-4">Quick Stats</h3>
-            <div className="space-y-0">
-              {[
-                { label: "Target Score", value: `${data.targetScore}%`, color: "text-[#111827]" },
-                { label: "Gap to Close", value: `${data.gapToClose}%`, color: "text-[#EF4444] font-bold" },
-                { label: "Problems to Solve", value: `${data.problemsToSolve}`, color: "text-[#111827]" },
-                { label: "Last Updated", value: data.lastUpdated, color: "text-[#9CA3AF] text-sm" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-center justify-between py-3 border-b border-[#A7F3D0] last:border-0">
-                  <span className="text-sm text-[#6B7280]">{s.label}</span>
-                  <span className={`font-semibold ${s.color}`}>{s.value}</span>
+          {/* Right — Quick Stats + Why This Score */}
+          <div className="space-y-4">
+            <div className="rounded-xl border border-[#E5E7EB] border-l-4 border-l-[#10B981] bg-[#ECFDF5] p-5">
+              <h3 className="text-sm font-semibold text-[#111827] mb-4">Quick Stats</h3>
+              <div className="space-y-0">
+                {[
+                  { label: "Target Score", value: `${data.targetScore}%`, color: "text-[#111827]" },
+                  { label: "Gap to Close", value: `${data.gapToClose}%`, color: "text-[#EF4444] font-bold" },
+                  { label: "Problems to Solve", value: `${data.problemsToSolve}`, color: "text-[#111827]" },
+                  { label: "Last Updated", value: data.lastUpdated, color: "text-[#9CA3AF] text-sm" },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center justify-between py-3 border-b border-[#A7F3D0] last:border-0">
+                    <span className="text-sm text-[#6B7280]">{s.label}</span>
+                    <span className={`font-semibold ${s.color}`}>{s.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── FIX 2: Why This Score? ── */}
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+              <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#10B981]" /> Why your score is {data.matchScore}%
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] font-bold text-[#10B981] uppercase tracking-wider mb-1.5">Strong Areas</p>
+                  {data.whyScore.strong.map((s, i) => (
+                    <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5 mb-1">
+                      <CheckCircle2 className="h-3 w-3 text-[#10B981] mt-0.5 shrink-0" /> {s}
+                    </p>
+                  ))}
                 </div>
-              ))}
+                <div className="border-t border-[#F3F4F6] pt-2.5">
+                  <p className="text-[10px] font-bold text-[#EF4444] uppercase tracking-wider mb-1.5">Weak Areas</p>
+                  {data.whyScore.weak.map((w, i) => (
+                    <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5 mb-1">
+                      <AlertCircle className="h-3 w-3 text-[#EF4444] mt-0.5 shrink-0" /> {w}
+                    </p>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -266,7 +370,7 @@ export default function MatchReportPage() {
             </ResponsiveContainer>
           </div>
 
-          {/* Detailed Score Table */}
+          {/* Detailed Score Table with Tooltips */}
           <div className="rounded-xl border border-[#E5E7EB] bg-white overflow-hidden">
             <div className="p-6 pb-0">
               <h3 className="text-base font-semibold text-[#111827] mb-4">Detailed Score Breakdown</h3>
@@ -287,6 +391,7 @@ export default function MatchReportPage() {
                       <div className="flex items-center gap-3">
                         <div className="rounded-md bg-[#F3F4F6] p-1.5"><ComponentIcon type={b.icon} /></div>
                         <span className="text-sm font-semibold text-[#111827]">{b.component}</span>
+                        <InfoTooltip text={b.tooltip} />
                       </div>
                     </td>
                     <td className="text-center text-sm font-semibold text-[#111827] px-4">{b.yourScore}%</td>
@@ -361,18 +466,27 @@ export default function MatchReportPage() {
             </div>
           </div>
 
-          {/* Hard — Full-width critical card */}
-          <div className="rounded-xl bg-red-50 border border-red-200 p-6 mb-6 relative">
-            <XCircle className="h-5 w-5 text-[#EF4444] absolute top-5 right-5" />
-            <span className="text-sm font-medium text-[#374151] block mb-3">Hard</span>
-            <div className="flex items-baseline gap-2 mb-2">
+          {/* Hard — Full-width critical card with STRONGER red indicator */}
+          <div className="rounded-xl bg-red-50 border-2 border-red-300 p-6 mb-6 relative overflow-hidden">
+            {/* Pulsing critical badge */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <span className="flex items-center gap-1.5 bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                <ShieldAlert className="h-3.5 w-3.5" /> CRITICAL GAP
+              </span>
+            </div>
+            {/* Red left stripe */}
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#EF4444] rounded-l-xl" />
+            <span className="text-sm font-bold text-[#991B1B] block mb-3 pl-2">Hard Problems</span>
+            <div className="flex items-baseline gap-2 mb-2 pl-2">
               <span className="text-3xl font-bold text-[#111827]">{data.dsaAnalysis.hard.solved}</span>
               <span className="text-xl text-[#9CA3AF]">/ {data.dsaAnalysis.hard.required}</span>
             </div>
-            <div className="h-3 rounded-full bg-red-100 mb-2">
+            <div className="h-3 rounded-full bg-red-100 mb-2 ml-2">
               <div className="h-full rounded-full bg-[#EF4444]" style={{ width: `${(data.dsaAnalysis.hard.solved / data.dsaAnalysis.hard.required) * 100}%` }} />
             </div>
-            <p className="text-sm text-[#EF4444] font-medium">Critical gap: {data.dsaAnalysis.hard.required - data.dsaAnalysis.hard.solved} more needed</p>
+            <p className="text-sm text-[#EF4444] font-semibold pl-2 flex items-center gap-1.5">
+              <Flame className="h-4 w-4" /> Critical gap: {data.dsaAnalysis.hard.required - data.dsaAnalysis.hard.solved} more needed to hit target
+            </p>
           </div>
 
           {/* Topic Gaps */}
@@ -393,7 +507,7 @@ export default function MatchReportPage() {
           </div>
         </div>
 
-        {/* ═══ SECTION 5 — TOP ACTIONS ═══ */}
+        {/* ═══ SECTION 5 — TOP ACTIONS (with ROI) ═══ */}
         <div>
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-base font-semibold text-[#111827]">Top Actions to Improve Score</h3>
@@ -406,14 +520,78 @@ export default function MatchReportPage() {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg[a.iconColor]}`}>
                   <ActionIcon color={a.iconColor} />
                 </div>
-                <h4 className="text-base font-semibold text-[#111827] mt-3">{a.title}</h4>
-                <p className="text-sm text-[#6B7280] mt-1 leading-relaxed">{a.desc}</p>
-                <div className="flex items-center justify-between mt-4">
+                <h4 className="text-sm font-semibold text-[#111827] mt-3">{a.title}</h4>
+                <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{a.desc}</p>
+
+                {/* ── FIX 3: ROI Details ── */}
+                <div className="mt-3 grid grid-cols-2 gap-1.5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-[#9CA3AF]">Effort:</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${effortBadge(a.effort)}`}>{a.effort}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-[#9CA3AF]">ROI:</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${roiBadge(a.roi)}`}>{a.roi}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F3F4F6]">
                   <span className="text-xs text-[#9CA3AF] flex items-center gap-1"><Clock className="h-3 w-3" /> {a.weeks}</span>
                   <button className="text-sm font-medium text-[#10B981] hover:underline">Start →</button>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ═══ SECTION 5.5 — SCORE SIMULATOR ═══ */}
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center">
+              <SlidersHorizontal className="h-4 w-4 text-[#10B981]" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-[#111827]">Score Simulator</h3>
+              <p className="text-xs text-[#9CA3AF]">See how specific actions would improve your match score</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+            {data.simulator.scenarios.map((sc, i) => {
+              const isActive = activeScenario === i;
+              const delta = sc.newScore - sc.currentScore;
+              return (
+                <button
+                  key={sc.label}
+                  onClick={() => setActiveScenario(isActive ? null : i)}
+                  className={`text-left rounded-xl border p-4 transition-all ${
+                    isActive
+                      ? "border-[#10B981] bg-[#ECFDF5] shadow-sm"
+                      : "border-[#E5E7EB] bg-white hover:border-[#A7F3D0]"
+                  }`}
+                >
+                  <p className="text-sm font-medium text-[#111827] mb-3">{sc.label}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-center">
+                      <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider">Current</p>
+                      <p className="text-xl font-bold text-[#6B7280]">{sc.currentScore}%</p>
+                    </div>
+                    <div className="flex-1 flex items-center gap-2">
+                      <div className="flex-1 h-1 bg-[#E5E7EB] rounded-full relative">
+                        <div className="absolute left-0 top-0 h-full rounded-full bg-[#9CA3AF]" style={{ width: `${sc.currentScore}%` }} />
+                        <div className="absolute left-0 top-0 h-full rounded-full bg-[#10B981] transition-all duration-500" style={{ width: isActive ? `${sc.newScore}%` : `${sc.currentScore}%` }} />
+                      </div>
+                      <span className="text-sm font-bold text-[#10B981]">→</span>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider">After</p>
+                      <p className={`text-xl font-bold ${isActive ? "text-[#10B981]" : "text-[#374151]"}`}>{sc.newScore}%</p>
+                    </div>
+                    <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">+{delta}%</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -443,17 +621,14 @@ export default function MatchReportPage() {
               <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
-              {/* Target line */}
               <Line
                 type="monotone" dataKey={() => data.targetScoreLine} name={`Target (${data.targetScoreLine}%)`}
                 stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls
               />
-              {/* Your Score */}
               <Line
                 type="monotone" dataKey="score" name="Your Score"
                 stroke="#10B981" strokeWidth={2} dot={{ r: 4, fill: "#10B981" }} connectNulls
               />
-              {/* Projected */}
               <Line
                 type="monotone" dataKey="projected" name="Projected"
                 stroke="#9CA3AF" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 3, fill: "#9CA3AF" }} connectNulls
