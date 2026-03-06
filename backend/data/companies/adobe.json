@@ -1,0 +1,83 @@
+{
+  "slug": "adobe",
+  "name": "Adobe",
+  "type": "Global Product Company",
+  "hiring_data": {
+    "package_range_lpa": { "min": 20, "max": 42, "median": 30, "currency": "INR", "level": "MTS / SMTS", "source": "6figr.com, AmbitionBox, Glassdoor", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Campus: 7.0+; lateral: no hard cutoff", "confidence": "MEDIUM" },
+    "college_preference": "IITs, NITs, BITS, Top IIITs for campus. Open to all for off-campus.",
+    "hiring_difficulty": "Hard",
+    "hiring_months": ["Aug", "Sep", "Oct", "Jan"],
+    "locations": ["Noida", "Bangalore"],
+    "roles": ["MTS-1 (Member of Technical Staff)", "MTS-2", "SWE Intern"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 3, "max": 6 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 200, "easy": 50, "medium": 110, "hard": 40 },
+    "recommended_problems": { "total": 350, "easy": 70, "medium": 180, "hard": 100 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 30, "recommended": 45, "frequency_pct": 65 },
+      "dynamic_programming": { "minimum": 25, "recommended": 45, "frequency_pct": 55 },
+      "trees": { "minimum": 20, "recommended": 35, "frequency_pct": 50 },
+      "graphs": { "minimum": 20, "recommended": 30, "frequency_pct": 45 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 42 },
+      "linked_lists": { "minimum": 12, "recommended": 20, "frequency_pct": 40 },
+      "sorting_searching": { "minimum": 12, "recommended": 20, "frequency_pct": 38 },
+      "backtracking": { "minimum": 8, "recommended": 15, "frequency_pct": 30 },
+      "bit_manipulation": { "minimum": 5, "recommended": 12, "frequency_pct": 22 }
+    },
+    "source": "LeetCode Adobe tag, GeeksForGeeks, Glassdoor"
+  },
+  "tech_stack": {
+    "languages_accepted": ["C++", "Java", "Python", "JavaScript"],
+    "preferred_languages": ["C++", "Java"],
+    "frameworks_evaluated": false,
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Very High",
+    "additional_valued": ["C++ STL", "System Programming", "Computer Graphics", "ML/AI", "OS internals"]
+  },
+  "system_design": {
+    "required_at_sde1": true,
+    "depth": "LLD (MTS-1), HLD (MTS-2+)",
+    "must_know_designs": ["Photo Editor (LLD)", "File Storage System", "PDF Renderer", "Pub-Sub System", "URL Shortener"],
+    "core_concepts": ["OOP Design Patterns", "SOLID", "Database Normalization", "Caching", "API Design"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "3 coding problems on HackerRank. Medium-hard difficulty. + MCQs on CS fundamentals (OS, DBMS, OOP)." },
+      { "round": 2, "type": "Technical Round 1 (DSA)", "duration_min": 60, "description": "2 DSA problems. DP, trees, arrays common. Dry-run + complexity analysis." },
+      { "round": 3, "type": "Technical Round 2 (DSA + CS)", "duration_min": 60, "description": "Advanced DSA + deep OS/DBMS/OOP questions. C++ specific questions common." },
+      { "round": 4, "type": "Design Round", "duration_min": 60, "description": "LLD for MTS-1 (design classes, interfaces). Focus on design patterns and SOLID." },
+      { "round": 5, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral, project deep-dive, career aspirations, Adobe values." }
+    ],
+    "oa_platform": "HackerRank",
+    "total_rounds": 5,
+    "source": "GeeksForGeeks, LeetCode Discuss, Glassdoor"
+  },
+  "behavioral": {
+    "type": "Adobe Values / Culture Fit",
+    "framework": "STAR",
+    "key_attributes": ["Creativity", "User Experience Focus", "Innovation", "Collaboration"],
+    "common_questions": ["Why Adobe?", "Tell me about your most creative project", "How do you approach designing for users?", "Describe a difficult technical challenge"]
+  },
+  "projects": {
+    "must_have": ["Clean OOP code (preferably C++ or Java)", "Database design", "Git version control"],
+    "strong_positive_signals": ["Graphics/image processing project", "Open source contributions", "C++ systems project", "Design patterns usage"],
+    "impressive_projects": ["Image/video processing tool", "Compiler or interpreter", "Custom rendering engine", "Real-time collaborative app"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Adobe Tag", "url": "https://leetcode.com/company/adobe/", "priority": "MUST" },
+      { "name": "Coding Ninjas Adobe Problems", "url": "https://www.naukri.com/code360/library/adobe-interview-questions", "priority": "HIGH" },
+      { "name": "Striver's SDE Sheet", "url": "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems", "priority": "HIGH" }
+    ]
+  },
+  "scoring_weights": { "dsa_score": 0.35, "project_score": 0.20, "academic_score": 0.15, "stack_alignment": 0.10, "system_design_score": 0.10, "internship_score": 0.05, "consistency_index": 0.05 },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/adobe/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/adobe-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Adobe-Interview-Questions-E1090.htm", "accessed": "2025-03", "type": "glassdoor" }
+  ]
+}

@@ -15,15 +15,6 @@ class Base(DeclarativeBase):
     pass
 
 
-class CompanyTier(str, enum.Enum):
-    """Company tier classification."""
-    FAANG = "faang"
-    PRODUCT = "product"
-    FINTECH = "fintech"
-    STARTUP = "startup"
-    IT_SERVICES = "it_services"
-
-
 class GapPriority(str, enum.Enum):
     """Skill gap priority levels."""
     BLOCKING = "blocking"
@@ -93,29 +84,26 @@ class PlatformScore(Base):
 
 
 class CompanyBlueprint(Base):
-    """Company hiring blueprint and requirements."""
+    """Company hiring blueprint — all complex data stored as JSONB for flexibility."""
     __tablename__ = "company_blueprints"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     slug = Column(String(100), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
+    type = Column(String(100), nullable=True)       # "FAANG", "Fintech Unicorn", "IT Services"
     logo_url = Column(Text, nullable=True)
-    tier = Column(SAEnum(CompanyTier), nullable=False)
-    package_range = Column(String(50), nullable=True)
 
-    # Requirements
-    dsa_intensity = Column(String(20), nullable=True)  # extreme, high, medium, low
-    min_cgpa = Column(Float, nullable=True)
-    required_skills = Column(JSONB, nullable=True)
-    dsa_thresholds = Column(JSONB, nullable=True)
-    interview_format = Column(JSONB, nullable=True)
-    system_design_required = Column(Boolean, default=False)
-
-    # Scoring weights
-    scoring_weights = Column(JSONB, nullable=True)
-
-    # Description
-    hiring_description = Column(Text, nullable=True)
+    # All complex data as JSONB — flexible, queryable, extensible
+    hiring_data = Column(JSONB, nullable=True)       # package, cgpa, rounds, difficulty, timeline
+    dsa_requirements = Column(JSONB, nullable=True)  # topic targets, difficulty breakdown, problem counts
+    tech_stack = Column(JSONB, nullable=True)         # languages, frameworks, tools evaluated
+    system_design = Column(JSONB, nullable=True)      # required topics, depth, must-know designs
+    interview_format = Column(JSONB, nullable=True)   # rounds breakdown, OA platform, behavioral
+    behavioral = Column(JSONB, nullable=True)         # framework, key attributes, common questions
+    projects = Column(JSONB, nullable=True)           # must-have, strong signals, impressive projects
+    resources = Column(JSONB, nullable=True)          # curated DSA, system design, mock interview links
+    scoring_weights = Column(JSONB, nullable=True)    # match score weight distribution (decimals)
+    raw_sources = Column(JSONB, nullable=True)        # URLs + access dates of data sources
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

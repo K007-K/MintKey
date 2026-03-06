@@ -15,12 +15,6 @@ class APIResponse(BaseModel):
 
 
 # --- Enums ---
-class CompanyTierEnum(str, Enum):
-    FAANG = "faang"
-    PRODUCT = "product"
-    FINTECH = "fintech"
-    STARTUP = "startup"
-    IT_SERVICES = "it_services"
 
 
 class GapPriorityEnum(str, Enum):
@@ -106,13 +100,20 @@ class AnalysisStatusResponse(BaseModel):
 class CompanyBlueprintResponse(BaseModel):
     slug: str
     name: str
+    type: Optional[str] = None
     logo_url: Optional[str] = None
-    tier: CompanyTierEnum
-    package_range: Optional[str] = None
-    dsa_intensity: Optional[str] = None
-    min_cgpa: Optional[float] = None
-    required_skills: Optional[dict] = None
+    hiring_data: Optional[dict] = None
+    dsa_requirements: Optional[dict] = None
+    tech_stack: Optional[dict] = None
+    system_design: Optional[dict] = None
+    interview_format: Optional[dict] = None
+    behavioral: Optional[dict] = None
+    projects: Optional[dict] = None
+    resources: Optional[dict] = None
     scoring_weights: Optional[dict] = None
+    raw_sources: Optional[list] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 

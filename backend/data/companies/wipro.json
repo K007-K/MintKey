@@ -1,0 +1,56 @@
+{
+  "slug": "wipro",
+  "name": "Wipro",
+  "type": "IT Services",
+  "hiring_data": {
+    "package_range_lpa": { "min": 3.5, "max": 6.5, "median": 4, "currency": "INR", "level": "Project Engineer / Turbo", "source": "Wipro careers, AmbitionBox, Glassdoor", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 6.0, "note": "60% or 6.0 CGPA. No active backlogs.", "source": "Wipro campus eligibility", "confidence": "VERY HIGH" },
+    "college_preference": "Mass recruiter. All AICTE-approved colleges.",
+    "hiring_difficulty": "Easy",
+    "hiring_months": ["Year-round via WILP/Elite", "Sep", "Oct"],
+    "locations": ["Pan-India (Bangalore, Hyderabad, Pune, Chennai)"],
+    "roles": ["Project Engineer (3.5 LPA)", "Turbo Engineer (6.5 LPA)"],
+    "interview_rounds": 3,
+    "typical_timeline_weeks": { "min": 2, "max": 8 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 60, "easy": 40, "medium": 18, "hard": 2 },
+    "recommended_problems": { "total": 120, "easy": 70, "medium": 40, "hard": 10 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 18, "recommended": 30, "frequency_pct": 65 },
+      "sorting_searching": { "minimum": 12, "recommended": 20, "frequency_pct": 50 },
+      "basic_math": { "minimum": 10, "recommended": 18, "frequency_pct": 45 },
+      "hash_maps": { "minimum": 5, "recommended": 12, "frequency_pct": 25 },
+      "linked_lists": { "minimum": 5, "recommended": 10, "frequency_pct": 20 }
+    },
+    "source": "PrepInsta Wipro analysis, GeeksForGeeks"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "C", "Python", "C++"],
+    "preferred_languages": ["Java", "C"],
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Medium",
+    "additional_valued": ["SQL", "Networking", "Linux basics"]
+  },
+  "system_design": { "required_at_sde1": false, "depth": "Not required" },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Wipro NLTH (National Level Talent Hunt)", "duration_min": 120, "description": "Aptitude (quantitative, verbal, logical) + coding (1-2 easy problems)." },
+      { "round": 2, "type": "Technical Interview", "duration_min": 25, "description": "Basic CS questions, OOP, DBMS, project discussion." },
+      { "round": 3, "type": "HR Interview", "duration_min": 15, "description": "Standard behavioral, relocation readiness." }
+    ],
+    "total_rounds": 3,
+    "source": "Wipro careers, GeeksForGeeks"
+  },
+  "behavioral": {
+    "type": "Standard HR",
+    "key_attributes": ["Communication", "Flexibility", "Learning attitude"],
+    "common_questions": ["Tell me about yourself", "Why Wipro?", "Willing to relocate?"]
+  },
+  "scoring_weights": { "dsa_score": 0.15, "project_score": 0.15, "academic_score": 0.35, "stack_alignment": 0.05, "system_design_score": 0.05, "internship_score": 0.15, "consistency_index": 0.10 },
+  "raw_sources": [
+    { "url": "https://careers.wipro.com/", "accessed": "2025-03", "type": "official" },
+    { "url": "https://www.ambitionbox.com/reviews/wipro-reviews", "accessed": "2025-03", "type": "ambitionbox" }
+  ]
+}

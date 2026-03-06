@@ -1,0 +1,91 @@
+{
+  "slug": "razorpay",
+  "name": "Razorpay",
+  "type": "Fintech Unicorn",
+  "hiring_data": {
+    "package_range_lpa": { "min": 18, "max": 38, "median": 25, "currency": "INR", "level": "SDE-1", "source": "6figr.com, Glassdoor, LeetCode salary threads", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 0, "note": "No hard CGPA requirement; skills-focused hiring", "confidence": "HIGH" },
+    "college_preference": "Open to all colleges. Strong machine coding skills and system design matter more.",
+    "hiring_difficulty": "Medium-Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Bangalore"],
+    "roles": ["SDE-1", "SDE-2", "SDE Intern"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 2, "max": 4 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 40, "medium": 80, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 60, "medium": 140, "hard": 50 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "frequency_pct": 55 },
+      "dynamic_programming": { "minimum": 20, "recommended": 35, "frequency_pct": 48 },
+      "graphs": { "minimum": 15, "recommended": 25, "frequency_pct": 40 },
+      "trees": { "minimum": 15, "recommended": 25, "frequency_pct": 42 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 45 },
+      "binary_search": { "minimum": 10, "recommended": 18, "frequency_pct": 35 },
+      "bit_manipulation": { "minimum": 5, "recommended": 12, "frequency_pct": 20 }
+    },
+    "machine_coding_emphasis": "HIGH — Razorpay is famous for its machine coding rounds. OOP design is tested heavily.",
+    "source": "GeeksForGeeks, Naukri.com, YouTube, JoinTaro"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Go", "Python", "Ruby"],
+    "preferred_languages": ["Java", "Go"],
+    "frameworks_evaluated": ["Spring Boot", "Ruby on Rails"],
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Very High",
+    "additional_valued": ["Payment Systems", "Fintech domain", "Microservices", "Event-driven architecture"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Machine Coding / LLD (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Payment Gateway", "Rating Service (LLD)", "In-Memory SQL DB (LLD)", "LRU Cache", "Version Control System (LLD)", "Search Engine (LLD)"],
+    "core_concepts": ["OOP Design Patterns", "SOLID Principles", "Clean Architecture", "Database Design"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "MCQs on OS, DBMS, OOP + 2 coding problems. Medium-hard." },
+      { "round": 2, "type": "DSA Round", "duration_min": 60, "description": "1-2 DSA problems. Medium-hard. Live coding with discussion." },
+      { "round": 3, "type": "Machine Coding", "duration_min": 150, "description": "CRITICAL: 2-2.5 hrs. Build a clean, modular, OOP solution. Rating service, LRU cache, etc." },
+      { "round": 4, "type": "System Design", "duration_min": 60, "description": "HLD for SDE-2+. LLD discussion for SDE-1 (extending the machine coding solution)." },
+      { "round": 5, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral, cultural fit, past projects, career goals." }
+    ],
+    "total_rounds": 5,
+    "source": "GeeksForGeeks, Naukri.com machine coding guides, YouTube, LeetCode Discuss"
+  },
+  "behavioral": {
+    "type": "Culture Fit",
+    "framework": "STAR",
+    "key_attributes": ["Ownership", "Speed of Execution", "Customer Focus", "Fintech Passion"],
+    "common_questions": ["Tell me about a time you built something under pressure", "Why fintech/Razorpay?", "How do you ensure code quality?"]
+  },
+  "projects": {
+    "must_have": ["Backend project with clean OOP architecture", "Database design", "API design"],
+    "strong_positive_signals": ["Payment/fintech related project", "Machine coding practice projects on GitHub", "Microservices architecture"],
+    "impressive_projects": ["Payment processing system", "Event-driven architecture implementation", "Real-time transaction monitoring"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "Striver's SDE Sheet", "url": "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems", "priority": "MUST" },
+      { "name": "NeetCode 150", "url": "https://neetcode.io/practice", "priority": "MUST" }
+    ],
+    "machine_coding": [
+      { "name": "Workat.tech Machine Coding", "url": "https://workat.tech/machine-coding/practice", "priority": "MUST", "note": "Practice LLD problems: parking lot, splitwise, snake game" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.25,
+    "project_score": 0.25,
+    "academic_score": 0.10,
+    "stack_alignment": 0.15,
+    "system_design_score": 0.15,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://www.geeksforgeeks.org/razorpay-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.naukri.com/code360/library/razorpay-interview-experience", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Razorpay-Interview-Questions-E1700610.htm", "accessed": "2025-03", "type": "glassdoor" }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "swiggy",
+  "name": "Swiggy",
+  "type": "Quick Commerce / Food Delivery",
+  "hiring_data": {
+    "package_range_lpa": { "min": 18, "max": 40, "median": 25, "currency": "INR", "level": "SDE-1", "source": "6figr.com, Glassdoor, AmbitionBox", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Campus: 7.0+; lateral: no hard cutoff", "confidence": "MEDIUM" },
+    "hiring_difficulty": "Medium-Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Bangalore"],
+    "roles": ["SDE-1", "SDE-2"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 2, "max": 4 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 45, "medium": 75, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 70, "medium": 130, "hard": 50 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "frequency_pct": 58 },
+      "dynamic_programming": { "minimum": 20, "recommended": 35, "frequency_pct": 45 },
+      "graphs": { "minimum": 15, "recommended": 25, "subtopics": ["BFS", "DFS", "Shortest path"], "frequency_pct": 42 },
+      "trees": { "minimum": 15, "recommended": 25, "frequency_pct": 38 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 42 },
+      "heaps": { "minimum": 8, "recommended": 15, "frequency_pct": 25 }
+    },
+    "source": "GeeksForGeeks, Glassdoor, LeetCode Discuss"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Python", "Go", "Kotlin"],
+    "preferred_languages": ["Java", "Go"],
+    "frameworks_evaluated": ["Spring Boot", "Microservices"],
+    "databases_tested": true,
+    "oops_required": "High",
+    "additional_valued": ["Food delivery/logistics domain", "Real-time systems", "Microservices", "Kubernetes"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "LLD (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Food Delivery System", "Real-time Order Tracking", "Delivery Assignment Algorithm", "Surge Pricing Engine"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "2-3 coding problems on HackerRank." },
+      { "round": 2, "type": "Technical Round (DSA)", "duration_min": 60, "description": "DSA problems + complexity analysis." },
+      { "round": 3, "type": "Machine Coding / LLD", "duration_min": 120, "description": "Design and implement OOP solution. 1.5-2 hrs." },
+      { "round": 4, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral, past projects, cultural fit." }
+    ],
+    "total_rounds": 4,
+    "source": "GeeksForGeeks, Glassdoor, AmbitionBox"
+  },
+  "behavioral": { "type": "Culture Fit", "key_attributes": ["Customer First", "Ownership", "Speed", "Adaptability"] },
+  "scoring_weights": { "dsa_score": 0.30, "project_score": 0.25, "academic_score": 0.10, "stack_alignment": 0.10, "system_design_score": 0.15, "internship_score": 0.05, "consistency_index": 0.05 },
+  "raw_sources": [{ "url": "https://www.geeksforgeeks.org/swiggy-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" }]
+}

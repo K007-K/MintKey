@@ -1,0 +1,59 @@
+{
+  "slug": "groww",
+  "name": "Groww",
+  "type": "Fintech Unicorn",
+  "hiring_data": {
+    "package_range_lpa": { "min": 15, "max": 35, "median": 22, "currency": "INR", "level": "SDE-1", "source": "Glassdoor, AmbitionBox, Reddit", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 0, "note": "No hard CGPA requirement", "confidence": "HIGH" },
+    "college_preference": "Open to all colleges. Portfolio and problem-solving matter.",
+    "hiring_difficulty": "Medium",
+    "hiring_months": ["Year-round"],
+    "locations": ["Bangalore"],
+    "roles": ["SDE-1", "SDE-2"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 1, "max": 3 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 50, "medium": 70, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 70, "medium": 130, "hard": 50 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "frequency_pct": 60 },
+      "dynamic_programming": { "minimum": 15, "recommended": 30, "frequency_pct": 42 },
+      "trees": { "minimum": 15, "recommended": 25, "frequency_pct": 38 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 45 },
+      "graphs": { "minimum": 10, "recommended": 20, "frequency_pct": 30 },
+      "sorting_searching": { "minimum": 10, "recommended": 18, "frequency_pct": 35 }
+    },
+    "source": "GeeksForGeeks, Glassdoor, LeetCode Discuss"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Python", "Go", "JavaScript"],
+    "preferred_languages": ["Java", "Go"],
+    "frameworks_evaluated": ["Spring Boot", "React"],
+    "databases_tested": true,
+    "oops_required": "High",
+    "additional_valued": ["Fintech domain", "REST APIs", "Microservices"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "LLD (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Stock Trading Platform", "Portfolio Management System", "Notification Service"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "2-3 coding problems. Medium difficulty." },
+      { "round": 2, "type": "Technical Round (DSA)", "duration_min": 60, "description": "1-2 DSA problems + project discussion." },
+      { "round": 3, "type": "Machine Coding / LLD", "duration_min": 90, "description": "LLD round or machine coding. Build modular OOP solution." },
+      { "round": 4, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral, cultural fit, career goals." }
+    ],
+    "total_rounds": 4,
+    "source": "GeeksForGeeks, Glassdoor"
+  },
+  "behavioral": {
+    "type": "Startup Culture Fit",
+    "key_attributes": ["Ownership", "User Empathy", "Speed", "Financial Literacy"],
+    "common_questions": ["Why Groww?", "How do you handle fast-changing requirements?"]
+  },
+  "scoring_weights": { "dsa_score": 0.30, "project_score": 0.25, "academic_score": 0.10, "stack_alignment": 0.10, "system_design_score": 0.15, "internship_score": 0.05, "consistency_index": 0.05 },
+  "raw_sources": [{ "url": "https://www.glassdoor.co.in/Interview/Groww-Interview-Questions-E2879972.htm", "accessed": "2025-03", "type": "glassdoor" }]
+}

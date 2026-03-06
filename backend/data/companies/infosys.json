@@ -1,0 +1,58 @@
+{
+  "slug": "infosys",
+  "name": "Infosys",
+  "type": "IT Services",
+  "hiring_data": {
+    "package_range_lpa": { "min": 3.6, "max": 9.5, "median": 6.5, "currency": "INR", "level": "SE / DSE / PP / SP", "source": "Infosys careers, AmbitionBox, Glassdoor", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 6.0, "note": "60% aggregate or 6.0 CGPA. No active backlogs.", "source": "Infosys campus drive eligibility", "confidence": "VERY HIGH" },
+    "college_preference": "Mass recruiter. All AICTE-approved engineering colleges eligible.",
+    "hiring_difficulty": "Easy",
+    "hiring_months": ["Year-round via InfyTQ", "Sep", "Oct", "Jan"],
+    "locations": ["Pan-India (Mysore for training, then Bangalore, Pune, Hyderabad, Chennai)"],
+    "roles": ["Systems Engineer (3.6 LPA)", "Digital SE (5 LPA)", "Power Programmer (6.5 LPA)", "Specialist Programmer (9.5 LPA)"],
+    "interview_rounds": 3,
+    "typical_timeline_weeks": { "min": 2, "max": 8 },
+    "note": "Infosys hires in 4 tiers: SE (3.6L), DSE (5L), PP (6.5L), SP (9.5L). InfyTQ/HackWithInfy score determines tier."
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 80, "easy": 50, "medium": 25, "hard": 5 },
+    "recommended_problems": { "total": 150, "easy": 80, "medium": 50, "hard": 20 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 20, "recommended": 35, "frequency_pct": 65 },
+      "sorting_searching": { "minimum": 15, "recommended": 25, "frequency_pct": 55 },
+      "basic_math": { "minimum": 10, "recommended": 20, "frequency_pct": 45 },
+      "hash_maps": { "minimum": 8, "recommended": 15, "frequency_pct": 30 },
+      "linked_lists": { "minimum": 8, "recommended": 12, "frequency_pct": 25 },
+      "dynamic_programming": { "minimum": 5, "recommended": 15, "frequency_pct": 15, "note": "Only for PP/SP tier" }
+    },
+    "source": "PrepInsta Infosys analysis, GeeksForGeeks"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Python", "C", "C++"],
+    "preferred_languages": ["Java", "Python"],
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Medium",
+    "additional_valued": ["SQL", "DBMS", "Networking", "Cloud basics"]
+  },
+  "system_design": { "required_at_sde1": false, "depth": "Not required for freshers" },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "InfyTQ / HackWithInfy / Online Test", "duration_min": 180, "description": "Aptitude + coding test. 2-3 coding problems. Score determines role tier." },
+      { "round": 2, "type": "Technical Interview", "duration_min": 30, "description": "CS fundamentals, OOP, DBMS, project discussion." },
+      { "round": 3, "type": "HR Interview", "duration_min": 20, "description": "Behavioral, relocation readiness, career goals." }
+    ],
+    "total_rounds": 3,
+    "source": "Infosys careers, GeeksForGeeks, PrepInsta"
+  },
+  "behavioral": {
+    "type": "Standard HR",
+    "key_attributes": ["Communication", "Willingness to learn", "Relocation flexibility", "Teamwork"],
+    "common_questions": ["Tell me about yourself", "Why Infosys?", "Willing to relocate?", "Strengths/Weaknesses?"]
+  },
+  "scoring_weights": { "dsa_score": 0.20, "project_score": 0.15, "academic_score": 0.30, "stack_alignment": 0.05, "system_design_score": 0.05, "internship_score": 0.15, "consistency_index": 0.10 },
+  "raw_sources": [
+    { "url": "https://www.infosys.com/careers/", "accessed": "2025-03", "type": "official" },
+    { "url": "https://www.ambitionbox.com/reviews/infosys-reviews", "accessed": "2025-03", "type": "ambitionbox" }
+  ]
+}

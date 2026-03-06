@@ -1,0 +1,202 @@
+{
+  "slug": "google",
+  "name": "Google",
+  "type": "FAANG",
+  "hiring_data": {
+    "package_range_lpa": { "min": 27, "max": 55, "median": 46, "currency": "INR", "level": "L3 (SDE-1)", "source": "levels.fyi, AmbitionBox, YouTube breakdowns", "confidence": "HIGH" },
+    "package_range_usd": { "min": 180000, "max": 350000, "currency": "USD", "level": "L3 (SDE-1)", "source": "levels.fyi US data" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Soft preference for campus hiring; no hard cutoff for experienced", "source": "GeeksForGeeks campus drive reports, Reddit r/developersIndia", "confidence": "MEDIUM" },
+    "college_preference": "Tier 1 preferred (IITs, NITs, BITS, IIITs), exceptional candidates from any tier considered",
+    "hiring_difficulty": "Very Hard",
+    "acceptance_rate_pct": 0.2,
+    "hiring_months": ["Aug", "Sep", "Oct", "Jan", "Feb"],
+    "locations": ["Bangalore", "Hyderabad", "Gurgaon"],
+    "roles": ["Software Engineer L3", "Software Engineer L4", "SWE Intern"],
+    "interview_rounds": 6,
+    "typical_timeline_weeks": { "min": 4, "max": 8 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 250, "easy": 60, "medium": 130, "hard": 60 },
+    "recommended_problems": { "total": 400, "easy": 80, "medium": 200, "hard": 120 },
+    "contest_rating": { "minimum": 1700, "recommended": 1900, "platform": "LeetCode" },
+    "topic_targets": {
+      "dynamic_programming": {
+        "minimum": 40, "recommended": 60,
+        "subtopics": ["1D DP", "2D DP", "Knapsack variants", "LCS/LPS", "Tree DP", "Bitmask DP", "Digit DP"],
+        "frequency_in_interviews": "Very High",
+        "frequency_pct": 78,
+        "source": "LeetCode Discuss Google tag analysis, GeeksForGeeks interview experiences"
+      },
+      "graphs": {
+        "minimum": 30, "recommended": 45,
+        "subtopics": ["BFS", "DFS", "Dijkstra", "Bellman-Ford", "Topological Sort", "SCC", "Bridges", "DSU/Union-Find"],
+        "frequency_in_interviews": "Very High",
+        "frequency_pct": 72,
+        "source": "LeetCode Discuss, Reddit interview reports"
+      },
+      "trees": {
+        "minimum": 25, "recommended": 40,
+        "subtopics": ["Binary Tree traversals", "BST operations", "LCA", "Diameter", "Segment Trees", "Fenwick/BIT"],
+        "frequency_in_interviews": "High",
+        "frequency_pct": 65,
+        "source": "GeeksForGeeks Google interview experiences"
+      },
+      "arrays_strings": {
+        "minimum": 30, "recommended": 50,
+        "subtopics": ["Two Pointers", "Prefix Sum", "Kadane's", "String manipulation", "Hashing"],
+        "frequency_in_interviews": "High",
+        "frequency_pct": 60,
+        "source": "LeetCode Google tagged problems"
+      },
+      "sliding_window": {
+        "minimum": 15, "recommended": 25,
+        "subtopics": ["Fixed window", "Variable window", "Two pointer sliding"],
+        "frequency_pct": 55
+      },
+      "backtracking": {
+        "minimum": 12, "recommended": 20,
+        "subtopics": ["Permutations", "Combinations", "N-Queens", "Sudoku solver"],
+        "frequency_pct": 42
+      },
+      "heaps_priority_queues": {
+        "minimum": 10, "recommended": 20,
+        "subtopics": ["Top-K problems", "Median from stream", "Merge K sorted"],
+        "frequency_pct": 38
+      },
+      "greedy": {
+        "minimum": 10, "recommended": 18,
+        "subtopics": ["Interval scheduling", "Activity selection", "Huffman coding"],
+        "frequency_pct": 35
+      },
+      "bit_manipulation": {
+        "minimum": 8, "recommended": 15,
+        "subtopics": ["XOR tricks", "Bitmask subsets", "Single number variants"],
+        "frequency_pct": 25
+      },
+      "tries": {
+        "minimum": 5, "recommended": 10,
+        "subtopics": ["Autocomplete", "Word search", "Longest prefix"],
+        "frequency_pct": 20
+      }
+    },
+    "hard_problem_required": true,
+    "easy_reliance_warning_threshold_pct": 40,
+    "source": "LeetCode Google company tag (200+ problems), candidate reports on LeetCode Discuss 2024-2025"
+  },
+  "tech_stack": {
+    "languages_accepted": ["C++", "Java", "Python", "Go", "JavaScript"],
+    "preferred_languages": ["C++", "Java", "Python"],
+    "frameworks_evaluated": false,
+    "databases_tested": false,
+    "os_questions": false,
+    "oops_required": "Medium",
+    "additional_valued": ["Distributed Systems", "Machine Learning", "Cloud (GCP)"]
+  },
+  "system_design": {
+    "required_at_sde1": true,
+    "depth": "Intermediate (L3), Deep (L4+)",
+    "must_know_designs": [
+      "URL Shortener (TinyURL)",
+      "Google Search Autocomplete / Typeahead",
+      "YouTube / Video Streaming Platform",
+      "Google Drive / Distributed File Storage",
+      "Rate Limiter",
+      "Distributed Cache (Memcached/Redis)",
+      "Web Crawler",
+      "Chat System (WhatsApp-like)"
+    ],
+    "core_concepts": ["CAP Theorem", "Consistent Hashing", "SQL vs NoSQL tradeoffs", "Load Balancing (L4/L7)", "Database Sharding", "Message Queues (Pub/Sub)", "CDN", "Replication strategies"],
+    "resources": [
+      { "name": "Designing Data-Intensive Applications (Martin Kleppmann)", "type": "book", "priority": "MUST" },
+      { "name": "System Design Primer (GitHub - donnemartin)", "type": "repository", "url": "https://github.com/donnemartin/system-design-primer", "priority": "MUST" },
+      { "name": "ByteByteGo YouTube", "type": "youtube", "url": "https://youtube.com/@ByteByteGo", "priority": "HIGH" },
+      { "name": "Gaurav Sen YouTube", "type": "youtube", "url": "https://youtube.com/@gaboronYT", "priority": "HIGH" },
+      { "name": "Alex Xu - System Design Interview Vol 1 & 2", "type": "book", "priority": "HIGH" }
+    ],
+    "source": "tryexponent.com, igotanoffer.com, GeeksForGeeks interviews 2024-2025"
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "2-3 algorithmic problems, medium-hard difficulty. No IDE. Google Forms or custom platform." },
+      { "round": 2, "type": "Technical Phone Screen", "duration_min": 45, "description": "1-2 DSA problems on Google Docs shared editor. Live coding with interviewer." },
+      { "round": 3, "type": "Onsite - Coding 1", "duration_min": 45, "description": "DSA problem-solving. Trees, graphs, or DP typically. Code on whiteboard or shared doc." },
+      { "round": 4, "type": "Onsite - Coding 2", "duration_min": 45, "description": "Another DSA round, different topic. Arrays/strings, sliding window, or backtracking." },
+      { "round": 5, "type": "Onsite - System Design", "duration_min": 45, "description": "Design a scalable system. URL shortener, chat system, or search autocomplete." },
+      { "round": 6, "type": "Googliness & Leadership", "duration_min": 45, "description": "Behavioral round: culture fit, teamwork, ambiguity comfort. STAR method responses." }
+    ],
+    "oa_platform": "Google internal platform / Google Forms-based",
+    "total_rounds": 6,
+    "process_duration_weeks": { "min": 4, "max": 8 },
+    "source": "tryexponent.com, GeeksForGeeks, Reddit r/cscareerquestions, Glassdoor"
+  },
+  "behavioral": {
+    "type": "Googliness & Leadership",
+    "framework": "STAR (Situation, Task, Action, Result)",
+    "key_attributes": ["Intellectual curiosity", "Comfort with ambiguity", "Collaborative mindset", "Bias for action", "Humility and learning from mistakes", "High standards"],
+    "common_questions": [
+      "Tell me about a time you disagreed with your team and how you resolved it",
+      "Describe a project you are most proud of and your specific contribution",
+      "How do you handle failure? Give a specific example",
+      "Tell me about a time you had to deal with ambiguous requirements",
+      "Why Google? What excites you about working here?"
+    ],
+    "source": "igotanoffer.com, interviewsidekick.com, Glassdoor Google behavioral questions"
+  },
+  "projects": {
+    "must_have": [
+      "At least one scalable backend project with proper REST API design",
+      "Database schema with relationships and proper indexing",
+      "Clean code with version control (meaningful Git history)"
+    ],
+    "strong_positive_signals": [
+      "Deployed on GCP/AWS with production traffic",
+      "Open source contributions (even small PRs to popular repos)",
+      "CI/CD pipeline configured (GitHub Actions, Jenkins)",
+      "Unit tests with good coverage"
+    ],
+    "impressive_projects": [
+      "Distributed system (key-value store, message queue, or consensus protocol)",
+      "Search engine with inverted index",
+      "Compiler, interpreter, or programming language",
+      "Real-time system (collaborative editor, multiplayer game)"
+    ],
+    "source": "Google engineering blog, Reddit r/cscareerquestions, Glassdoor"
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Google Tag", "url": "https://leetcode.com/company/google/", "priority": "MUST", "note": "200+ company-tagged problems" },
+      { "name": "NeetCode 150", "url": "https://neetcode.io/practice", "priority": "MUST", "note": "Curated 150 must-do problems" },
+      { "name": "Striver's A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2", "priority": "HIGH" },
+      { "name": "Aditya Verma DP Playlist", "url": "https://youtube.com/playlist?list=PL_z_8CaSLPWekqhdCPmFohncHwz8TY2Go", "priority": "HIGH", "note": "Best DP playlist for Indian audience" },
+      { "name": "William Fiset Graph Theory", "url": "https://youtube.com/playlist?list=PLDV1Zeh2NRsDGO4--qE8yH72HFL1Km93P", "priority": "HIGH" },
+      { "name": "CSES Problem Set", "url": "https://cses.fi/problemset/", "priority": "MEDIUM" }
+    ],
+    "system_design": [
+      { "name": "DDIA (Designing Data-Intensive Applications)", "url": "https://dataintensive.net", "priority": "MUST" },
+      { "name": "ByteByteGo YouTube", "url": "https://youtube.com/@ByteByteGo", "priority": "MUST" },
+      { "name": "System Design Primer GitHub", "url": "https://github.com/donnemartin/system-design-primer", "priority": "MUST" }
+    ],
+    "mock_interviews": [
+      { "name": "Pramp", "url": "https://pramp.com", "type": "free" },
+      { "name": "Interviewing.io", "url": "https://interviewing.io", "type": "paid" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.40,
+    "project_score": 0.15,
+    "academic_score": 0.10,
+    "stack_alignment": 0.10,
+    "system_design_score": 0.15,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/google/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/google-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Google-Software-Engineer-Interview-Questions-EI_IE9079.0,6_KO7,24.htm", "accessed": "2025-03", "type": "glassdoor" },
+    { "url": "https://www.levels.fyi/companies/google/salaries/software-engineer", "accessed": "2025-03", "type": "compensation" },
+    { "url": "https://www.ambitionbox.com/reviews/google-reviews", "accessed": "2025-03", "type": "ambitionbox" },
+    { "url": "https://www.tryexponent.com/blog/google-sde-interview", "accessed": "2025-03", "type": "interview_guide" },
+    { "url": "https://www.igotanoffer.com/blogs/tech/google-software-engineer-interview", "accessed": "2025-03", "type": "interview_guide" }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "slug": "amazon",
+  "name": "Amazon",
+  "type": "FAANG",
+  "hiring_data": {
+    "package_range_lpa": { "min": 25, "max": 55, "median": 32, "currency": "INR", "level": "SDE-1 (L4)", "source": "levels.fyi, AmbitionBox, LeetCode salary threads", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 6.5, "note": "Soft cutoff for campus; no hard requirement for experienced", "source": "GeeksForGeeks campus reports", "confidence": "MEDIUM" },
+    "college_preference": "Tier 1-2 preferred, open to exceptional candidates from any college",
+    "hiring_difficulty": "Hard",
+    "hiring_months": ["Jul", "Aug", "Sep", "Oct", "Jan"],
+    "locations": ["Bangalore", "Hyderabad", "Chennai"],
+    "roles": ["SDE-1", "SDE-2", "SDE Intern"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 3, "max": 6 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 200, "easy": 50, "medium": 110, "hard": 40 },
+    "recommended_problems": { "total": 350, "easy": 70, "medium": 180, "hard": 100 },
+    "contest_rating": { "minimum": 1600, "recommended": 1800, "platform": "LeetCode" },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 30, "recommended": 50, "subtopics": ["Two Pointers", "Sliding Window", "Prefix Sum", "Kadane's"], "frequency_pct": 70 },
+      "graphs": { "minimum": 25, "recommended": 40, "subtopics": ["BFS", "DFS", "DSU", "Topological Sort"], "frequency_pct": 65 },
+      "dynamic_programming": { "minimum": 30, "recommended": 50, "subtopics": ["1D DP", "2D DP", "Knapsack", "LCS/LIS"], "frequency_pct": 62 },
+      "trees": { "minimum": 25, "recommended": 35, "subtopics": ["BST", "BT traversals", "LCA", "Diameter"], "frequency_pct": 58 },
+      "sliding_window": { "minimum": 15, "recommended": 25, "frequency_pct": 55 },
+      "heaps_priority_queues": { "minimum": 12, "recommended": 20, "subtopics": ["Top-K", "Merge K sorted", "LRU Cache"], "frequency_pct": 45 },
+      "hash_maps": { "minimum": 20, "recommended": 30, "frequency_pct": 50 },
+      "linked_lists": { "minimum": 10, "recommended": 15, "subtopics": ["Reverse", "Cycle detection", "LRU Cache"], "frequency_pct": 35 },
+      "greedy": { "minimum": 10, "recommended": 18, "frequency_pct": 30 },
+      "binary_search": { "minimum": 10, "recommended": 20, "frequency_pct": 40 }
+    },
+    "hard_problem_required": true,
+    "easy_reliance_warning_threshold_pct": 45,
+    "source": "LeetCode Amazon tag, Medium interview experiences, GeeksForGeeks"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Python", "C++", "JavaScript"],
+    "preferred_languages": ["Java", "Python"],
+    "frameworks_evaluated": false,
+    "databases_tested": false,
+    "os_questions": true,
+    "oops_required": "High",
+    "additional_valued": ["AWS", "Distributed Systems", "Microservices", "System Design"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Basic (SDE-1), Deep (SDE-2+)",
+    "must_know_designs": ["Amazon E-Commerce scalable system", "URL Shortener", "Parking Lot (LLD)", "LRU Cache", "Rate Limiter", "Notification System"],
+    "core_concepts": ["Scalability", "Load Balancing", "Database Sharding", "Microservices", "Message Queues (SQS/SNS)", "Caching"],
+    "resources": [
+      { "name": "Amazon System Design Prep", "type": "guide", "priority": "MUST" },
+      { "name": "DDIA Book", "type": "book", "priority": "HIGH" },
+      { "name": "ByteByteGo YouTube", "type": "youtube", "priority": "HIGH" }
+    ]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 70, "description": "2 coding problems (medium-hard) on HackerRank. Plus Work Simulation (~60 min) and Workstyles Assessment (~15 min)." },
+      { "round": 2, "type": "Technical Round 1 (DSA)", "duration_min": 60, "description": "1-2 DSA problems + LP behavioral questions woven in." },
+      { "round": 3, "type": "Technical Round 2 (DSA)", "duration_min": 60, "description": "DSA coding + discuss past projects. Trees/Graphs/DP focus." },
+      { "round": 4, "type": "Technical Round 3 (DSA/Design)", "duration_min": 60, "description": "DSA or system design for SDE-2+. LP questions throughout." },
+      { "round": 5, "type": "Bar Raiser", "duration_min": 60, "description": "CRITICAL round. Senior engineer from different team. Heavy LP focus + 1 DSA problem. Veto power." }
+    ],
+    "oa_platform": "HackerRank",
+    "total_rounds": 5,
+    "process_duration_weeks": { "min": 3, "max": 6 },
+    "source": "Amazon.jobs, Medium, GeeksForGeeks, LeetCode Discuss 2024-2025"
+  },
+  "behavioral": {
+    "type": "Leadership Principles (16 LPs)",
+    "framework": "STAR (Situation, Task, Action, Result)",
+    "critical_note": "Amazon LP questions are asked in EVERY round, not just the behavioral round. This is UNIQUE to Amazon.",
+    "key_attributes": ["Customer Obsession", "Ownership", "Invent and Simplify", "Dive Deep", "Bias for Action", "Earn Trust", "Deliver Results", "Have Backbone; Disagree and Commit"],
+    "common_questions": [
+      "Tell me about a time you took ownership of a project",
+      "Describe a time you simplified a complex process",
+      "Tell me about a time you had to deliver results under tight deadlines",
+      "Give an example of when you disagreed with your manager and what you did",
+      "Tell me about a time you went above and beyond for a customer"
+    ],
+    "source": "Amazon.jobs LP page, Glassdoor, Medium, Naukri.com"
+  },
+  "projects": {
+    "must_have": ["Backend project with REST API", "Database design with proper schema", "Version control with meaningful commits"],
+    "strong_positive_signals": ["Deployed on AWS (EC2, S3, Lambda)", "Microservices architecture", "Scalable system handling concurrent users", "CI/CD pipeline"],
+    "impressive_projects": ["Distributed system with queue processing", "Real-time data pipeline", "E-commerce platform with payment integration"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Amazon Tag", "url": "https://leetcode.com/company/amazon/", "priority": "MUST" },
+      { "name": "NeetCode 150", "url": "https://neetcode.io/practice", "priority": "MUST" },
+      { "name": "Striver's SDE Sheet", "url": "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems", "priority": "HIGH" }
+    ],
+    "behavioral": [
+      { "name": "Amazon Leadership Principles Guide", "url": "https://amazon.jobs/content/en/our-workplace/leadership-principles", "priority": "MUST" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.35,
+    "project_score": 0.15,
+    "academic_score": 0.10,
+    "stack_alignment": 0.10,
+    "system_design_score": 0.10,
+    "behavioral_score": 0.15,
+    "internship_score": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/amazon/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/amazon-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://amazon.jobs/content/en/our-workplace/leadership-principles", "accessed": "2025-03", "type": "official" },
+    { "url": "https://www.glassdoor.co.in/Interview/Amazon-SDE-Interview-Questions-EI_IE6036.0,6_KO7,10.htm", "accessed": "2025-03", "type": "glassdoor" },
+    { "url": "https://www.levels.fyi/companies/amazon/salaries/software-engineer", "accessed": "2025-03", "type": "compensation" }
+  ]
+}

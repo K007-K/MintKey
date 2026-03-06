@@ -1,0 +1,75 @@
+{
+  "slug": "cred",
+  "name": "CRED",
+  "type": "Fintech Unicorn",
+  "hiring_data": {
+    "package_range_lpa": { "min": 25, "max": 50, "median": 35, "currency": "INR", "level": "SDE-1/SDE-2", "source": "Glassdoor, LeetCode salary threads, Medium", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 0, "note": "No CGPA requirement. Skills-only hiring.", "confidence": "HIGH" },
+    "college_preference": "No college preference. Strong engineering skills and design sense matter.",
+    "hiring_difficulty": "Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Bangalore"],
+    "roles": ["SDE-1", "SDE-2"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 2, "max": 4 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 40, "medium": 80, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 60, "medium": 130, "hard": 60 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "frequency_pct": 55 },
+      "dynamic_programming": { "minimum": 15, "recommended": 30, "frequency_pct": 40 },
+      "trees_graphs": { "minimum": 20, "recommended": 30, "frequency_pct": 45 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 40 },
+      "puzzles_math": { "minimum": 10, "recommended": 20, "note": "CRED uniquely includes puzzle questions alongside DSA", "frequency_pct": 35 }
+    },
+    "machine_coding_emphasis": "VERY HIGH — CRED machine coding is 2.5 hrs. Code quality > speed.",
+    "source": "Guvi.in, GeeksForGeeks, Medium, LeetCode Discuss"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Kotlin", "Python", "Go"],
+    "preferred_languages": ["Java", "Kotlin"],
+    "frameworks_evaluated": ["Spring Boot", "Android (Kotlin)"],
+    "databases_tested": true,
+    "oops_required": "Very High",
+    "additional_valued": ["Clean Architecture", "Design Patterns", "Mobile Development", "Fintech"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Machine Coding / LLD (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Payment Processing Package (LLD)", "Metrics Computation System (LLD)", "Credit Score Calculator", "Notification System"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Take-Home Assignment", "duration_min": 180, "description": "Often a coding assignment to submit. Quality over speed." },
+      { "round": 2, "type": "DSA & Puzzles", "duration_min": 90, "description": "DSA problems + logic puzzles. Medium difficulty. Google Docs coding." },
+      { "round": 3, "type": "Machine Coding", "duration_min": 150, "description": "2.5 hrs. Extend a boilerplate or build from scratch. Design patterns, error handling, extensibility." },
+      { "round": 4, "type": "HR Discussion", "duration_min": 30, "description": "Culture fit, career goals, compensation discussion." }
+    ],
+    "total_rounds": 4,
+    "source": "Guvi.in, GeeksForGeeks, Medium, LeetCode Discuss"
+  },
+  "behavioral": {
+    "type": "Culture Fit",
+    "key_attributes": ["Design Thinking", "Quality Obsession", "Product Sense", "Craftsmanship"],
+    "common_questions": ["What does good code mean to you?", "Why CRED?", "Describe your approach to building maintainable software"]
+  },
+  "projects": {
+    "must_have": ["Clean, well-designed backend project", "Evidence of design patterns usage", "Code quality focus"],
+    "strong_positive_signals": ["Beautiful UI/UX in projects", "Mobile app (Android/iOS)", "Fintech or payments domain"],
+    "impressive_projects": ["Full-stack fintech app", "Design system implementation", "High-quality open source contribution"]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.20,
+    "project_score": 0.30,
+    "academic_score": 0.05,
+    "stack_alignment": 0.15,
+    "system_design_score": 0.20,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://www.geeksforgeeks.org/cred-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/CRED-Interview-Questions-E3003020.htm", "accessed": "2025-03", "type": "glassdoor" }
+  ]
+}

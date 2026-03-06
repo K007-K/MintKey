@@ -173,6 +173,48 @@ DEFAULT_WEIGHTS = {
 class ScoringEngine:
     """Compute weighted match scores for users against companies."""
 
+    # Mapping from DB scoring_weights keys (decimal) to component keys (integer)
+    _DB_WEIGHT_MAP = {
+        "dsa_score": "dsa",
+        "project_score": "projects",
+        "academic_score": "academic",
+        "stack_alignment": "stack",
+        "system_design_score": "stack",  # maps to stack if no dedicated scorer
+        "internship_score": "internship",
+        "behavioral_score": "aptitude",
+        "consistency_index": "consistency",
+    }
+
+    def _resolve_weights(
+        self, company_slug: str, blueprint: Optional[CompanyBlueprintModel] = None
+    ) -> dict[str, int]:
+        """
+        Resolve scoring weights for a company. Priority:
+        1. Blueprint scoring_weights from DB (decimal format, e.g. 0.35)
+        2. Hardcoded COMPANY_WEIGHTS dict (integer format, e.g. 35)
+        3. DEFAULT_WEIGHTS fallback
+        """
+        # Try DB weights first (decimal format from JSONB)
+        if blueprint and hasattr(blueprint, "scoring_weights") and blueprint.scoring_weights:
+            db_weights = blueprint.scoring_weights
+            resolved = {}
+            for db_key, component_key in self._DB_WEIGHT_MAP.items():
+                if db_key in db_weights:
+                    val = float(db_weights[db_key])
+                    # Convert decimal (0.35) → integer (35) if < 1.0
+                    weight_int = int(val * 100) if val < 1.0 else int(val)
+                    # Merge if component already exists (e.g., system_design → stack)
+                    resolved[component_key] = resolved.get(component_key, 0) + weight_int
+            # Fill missing components with 0
+            for key in DEFAULT_WEIGHTS:
+                if key not in resolved:
+                    resolved[key] = 0
+            logger.info(f"Using DB scoring weights for {company_slug}: {resolved}")
+            return resolved
+
+        # Fall back to hardcoded weights
+        return COMPANY_WEIGHTS.get(company_slug.lower(), DEFAULT_WEIGHTS)
+
     def compute_match_score(
         self,
         company_slug: str,
@@ -185,7 +227,7 @@ class ScoringEngine:
         Compute a weighted match score (0-100) for a user against a company.
         Returns score breakdown by component.
         """
-        weights = COMPANY_WEIGHTS.get(company_slug.lower(), DEFAULT_WEIGHTS)
+        weights = self._resolve_weights(company_slug, blueprint)
 
         # Component scores (0-100 each)
         scores = {

@@ -1,0 +1,88 @@
+{
+  "slug": "flipkart",
+  "name": "Flipkart",
+  "type": "Product (Walmart-owned)",
+  "hiring_data": {
+    "package_range_lpa": { "min": 21, "max": 40, "median": 28, "currency": "INR", "level": "SDE-1", "source": "6figr.com, PrepInsta, LeetCode salary threads", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Campus drives: 7.0+; lateral: no hard cutoff", "confidence": "MEDIUM" },
+    "college_preference": "IITs, NITs, BITS, IIITs for campus. Open to all for off-campus with strong profile.",
+    "hiring_difficulty": "Hard",
+    "hiring_months": ["Jul", "Aug", "Sep", "Jan", "Feb"],
+    "locations": ["Bangalore"],
+    "roles": ["SDE-1", "SDE-2", "SDE Intern"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 2, "max": 4 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 200, "easy": 50, "medium": 110, "hard": 40 },
+    "recommended_problems": { "total": 350, "easy": 70, "medium": 180, "hard": 100 },
+    "topic_targets": {
+      "graphs": { "minimum": 25, "recommended": 40, "frequency_pct": 60 },
+      "trees": { "minimum": 25, "recommended": 40, "frequency_pct": 58 },
+      "dynamic_programming": { "minimum": 30, "recommended": 50, "frequency_pct": 55 },
+      "arrays_strings": { "minimum": 30, "recommended": 45, "frequency_pct": 65 },
+      "linked_lists": { "minimum": 10, "recommended": 20, "frequency_pct": 40 },
+      "heaps": { "minimum": 10, "recommended": 18, "frequency_pct": 30 },
+      "sorting_searching": { "minimum": 15, "recommended": 25, "frequency_pct": 35 }
+    },
+    "source": "LeetCode Flipkart tag, GeeksForGeeks, Medium"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Python", "C++", "Go"],
+    "preferred_languages": ["Java"],
+    "frameworks_evaluated": ["Spring Boot", "Microservices"],
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "High",
+    "additional_valued": ["Java ecosystem", "Microservices", "Distributed Systems", "Machine Coding"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Basic (SDE-1), Deep (SDE-2+)",
+    "must_know_designs": ["E-Commerce System", "Inventory Management", "Bowling Alley (LLD)", "Job Scheduler (LLD)", "URL Shortener"],
+    "core_concepts": ["OOP Design Patterns", "SOLID Principles", "System Scalability", "Database Design"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "2-3 coding problems on HackerRank/SHL. Medium-hard. Some MCQs on CS fundamentals." },
+      { "round": 2, "type": "Problem Solving & Data Structures (PSDS)", "duration_min": 60, "description": "DSA coding on Google Docs. Discuss approach, complexity. 1-2 problems." },
+      { "round": 3, "type": "Machine Coding / Advanced DSA", "duration_min": 120, "description": "Build a modular console app in 1.5-2 hrs (bowling alley, job scheduler). OR advanced DSA round." },
+      { "round": 4, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral, resume discussion, cultural fit, career goals." }
+    ],
+    "oa_platform": "HackerRank / SHL",
+    "total_rounds": 4,
+    "process_duration_weeks": { "min": 2, "max": 4 },
+    "source": "GeeksForGeeks, LeetCode Discuss, Medium, YouTube"
+  },
+  "behavioral": {
+    "type": "Culture Fit",
+    "framework": "STAR",
+    "key_attributes": ["Problem Solving Mindset", "Customer Focus", "Ownership", "Teamwork"],
+    "common_questions": ["Tell me about your most challenging project", "How do you handle tight deadlines?", "Why Flipkart?"]
+  },
+  "projects": {
+    "must_have": ["Backend project with REST API (preferably Java)", "Database design", "Git version control"],
+    "strong_positive_signals": ["Microservices architecture", "E-commerce related project", "Machine coding practice evident"],
+    "impressive_projects": ["Full-stack e-commerce platform", "Real-time notification system", "Distributed caching layer"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Flipkart Tag", "url": "https://leetcode.com/company/flipkart/", "priority": "MUST" },
+      { "name": "Striver's SDE Sheet", "url": "https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems", "priority": "HIGH" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.30,
+    "project_score": 0.20,
+    "academic_score": 0.15,
+    "stack_alignment": 0.10,
+    "system_design_score": 0.10,
+    "internship_score": 0.10,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/flipkart/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/flipkart-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://6figr.com/in/salary/flipkart", "accessed": "2025-03", "type": "compensation" }
+  ]
+}

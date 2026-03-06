@@ -1,0 +1,77 @@
+{
+  "slug": "phonepe",
+  "name": "PhonePe",
+  "type": "Fintech Unicorn",
+  "hiring_data": {
+    "package_range_lpa": { "min": 18, "max": 60, "median": 30, "currency": "INR", "level": "SDE-1/SDE-2", "source": "YouTube, Reddit, Glassdoor", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Campus: 7.0+; lateral: no hard cutoff", "confidence": "MEDIUM" },
+    "college_preference": "IITs, NITs, BITS for campus. Open to strong profiles from all colleges.",
+    "hiring_difficulty": "Medium-Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Bangalore", "Pune"],
+    "roles": ["SDE-1", "SDE-2"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 2, "max": 4 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 40, "medium": 80, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 60, "medium": 140, "hard": 50 },
+    "topic_targets": {
+      "trees": { "minimum": 20, "recommended": 35, "subtopics": ["Binary Tree", "BST", "LCA", "Diameter"], "frequency_pct": 55 },
+      "dynamic_programming": { "minimum": 20, "recommended": 35, "frequency_pct": 50 },
+      "arrays_strings": { "minimum": 25, "recommended": 40, "subtopics": ["Prefix Sum", "Two Pointers"], "frequency_pct": 55 },
+      "graphs": { "minimum": 15, "recommended": 25, "frequency_pct": 42 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 40 },
+      "linked_lists": { "minimum": 10, "recommended": 18, "frequency_pct": 30 }
+    },
+    "machine_coding_emphasis": "HIGH — PhonePe has dedicated machine coding / take-home assignments.",
+    "source": "GeeksForGeeks, Medium, Reddit r/developersIndia, JoinTaro"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Kotlin", "Python", "Go"],
+    "preferred_languages": ["Java"],
+    "frameworks_evaluated": ["Spring Boot"],
+    "databases_tested": true,
+    "oops_required": "High",
+    "additional_valued": ["Payment Systems", "UPI domain", "Microservices", "Distributed Systems"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Machine Coding (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Multilevel Cache (LLD)", "E-Commerce App (LLD)", "PhonePe Resolution Service (LLD)", "App Version Manager (LLD)", "Payment Processing"],
+    "core_concepts": ["OOP Design Patterns", "SOLID Principles", "Clean Architecture", "Extensibility"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Coding Test / Machine Coding Assignment", "duration_min": 120, "description": "Online assessment OR take-home machine coding challenge. Design + implement a functional system." },
+      { "round": 2, "type": "Technical Round 1 (DSA)", "duration_min": 60, "description": "2 DSA problems. Medium-hard. Trees, DP, arrays common." },
+      { "round": 3, "type": "Technical Round 2 (DSA + System Design)", "duration_min": 60, "description": "Advanced DSA + system design basics. Project discussion." },
+      { "round": 4, "type": "HR Round", "duration_min": 30, "description": "Cultural fit, compensation, career goals." }
+    ],
+    "total_rounds": 4,
+    "source": "Unstop, Naukri, GeeksForGeeks, Medium, Reddit, YouTube"
+  },
+  "behavioral": {
+    "type": "Culture Fit",
+    "key_attributes": ["Customer First", "Ownership", "Speed", "Collaboration"],
+    "common_questions": ["Why PhonePe?", "Tell me about a challenging technical problem", "How do you handle conflicting priorities?"]
+  },
+  "projects": {
+    "must_have": ["Backend project with Java/Spring Boot", "Database design", "Clean OOP code"],
+    "strong_positive_signals": ["Payment/fintech project", "Machine coding projects", "Microservices"],
+    "impressive_projects": ["UPI-like payment system", "Real-time transaction processing", "Multi-tenant SaaS platform"]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.25,
+    "project_score": 0.25,
+    "academic_score": 0.10,
+    "stack_alignment": 0.15,
+    "system_design_score": 0.15,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://www.geeksforgeeks.org/phonepe-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/PhonePe-Interview-Questions-E2062476.htm", "accessed": "2025-03", "type": "glassdoor" }
+  ]
+}

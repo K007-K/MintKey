@@ -1,0 +1,77 @@
+{
+  "slug": "zepto",
+  "name": "Zepto",
+  "type": "Quick Commerce Unicorn",
+  "hiring_data": {
+    "package_range_lpa": { "min": 18, "max": 50, "median": 30, "currency": "INR", "level": "SDE-1/SDE-2", "source": "YouTube, Reddit r/developersIndia, Glassdoor", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 0, "note": "No CGPA requirement", "confidence": "HIGH" },
+    "college_preference": "Open hiring. Strong problem-solving skills matter most.",
+    "hiring_difficulty": "Medium-Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Mumbai", "Bangalore"],
+    "roles": ["SDE-1", "SDE-2", "Frontend SDE"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 1, "max": 3 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 150, "easy": 50, "medium": 70, "hard": 30 },
+    "recommended_problems": { "total": 250, "easy": 70, "medium": 130, "hard": 50 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "subtopics": ["Sliding Window", "Two Pointers", "Prefix Sum"], "frequency_pct": 60 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 50 },
+      "dynamic_programming": { "minimum": 15, "recommended": 30, "frequency_pct": 40 },
+      "graphs": { "minimum": 15, "recommended": 25, "subtopics": ["BFS", "DFS", "Graph traversal"], "frequency_pct": 38 },
+      "binary_search": { "minimum": 10, "recommended": 18, "frequency_pct": 35 },
+      "trees": { "minimum": 10, "recommended": 20, "frequency_pct": 30 }
+    },
+    "source": "codekerdos.in, GeeksForGeeks, LeetCode Discuss, Medium"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Java", "Go", "Python", "JavaScript/TypeScript"],
+    "preferred_languages": ["Go", "Java"],
+    "frameworks_evaluated": ["React.js (frontend)", "Node.js"],
+    "databases_tested": true,
+    "oops_required": "High",
+    "additional_valued": ["Real-time systems", "Quick commerce domain", "LLD", "React.js"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "LLD (SDE-1), HLD (SDE-2+)",
+    "must_know_designs": ["Real-time Order Tracking", "Delivery Assignment System", "Inventory Management", "Notification System"],
+    "core_concepts": ["Low-Level Design", "System Thinking", "Scalability", "Real-time processing"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Coding Assessment", "duration_min": 90, "description": "2-3 coding problems. Easy-medium difficulty." },
+      { "round": 2, "type": "DSA + Problem Solving", "duration_min": 60, "description": "Arrays, sliding window, hashmaps, graphs. Live coding." },
+      { "round": 3, "type": "LLD + System Thinking", "duration_min": 60, "description": "Low-level design + machine coding. Build a modular solution." },
+      { "round": 4, "type": "Hiring Manager / Bar Raiser", "duration_min": 45, "description": "Problem-solving approach, past projects, leadership." },
+      { "round": 5, "type": "Culture Fit / Vision Alignment", "duration_min": 30, "description": "Alignment with Zepto's mission and values." }
+    ],
+    "total_rounds": 5,
+    "source": "codekerdos.in, GeeksForGeeks, Medium, stackademic.com"
+  },
+  "behavioral": {
+    "type": "Culture Fit / Startup Mindset",
+    "key_attributes": ["Speed", "Ownership", "Entrepreneurial Mindset", "Adaptability"],
+    "common_questions": ["Why a startup over a big company?", "How do you handle ambiguity?", "Tell me about a time you shipped fast"]
+  },
+  "projects": {
+    "must_have": ["Backend or full-stack project", "API design", "Version control"],
+    "strong_positive_signals": ["React.js frontend project", "Real-time features", "High concurrency handling"],
+    "impressive_projects": ["Real-time delivery tracking", "Live location system", "Order management platform"]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.25,
+    "project_score": 0.25,
+    "academic_score": 0.10,
+    "stack_alignment": 0.15,
+    "system_design_score": 0.15,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://www.geeksforgeeks.org/zepto-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Zepto-Interview-Questions-E6462236.htm", "accessed": "2025-03", "type": "glassdoor" }
+  ]
+}

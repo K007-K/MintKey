@@ -1,0 +1,53 @@
+{
+  "slug": "blinkit",
+  "name": "Blinkit",
+  "type": "Quick Commerce (Zomato-owned)",
+  "hiring_data": {
+    "package_range_lpa": { "min": 15, "max": 35, "median": 22, "currency": "INR", "level": "SDE-1", "source": "Glassdoor, AmbitionBox", "confidence": "MEDIUM" },
+    "cgpa_cutoff": { "value": 0, "note": "No hard CGPA requirement", "confidence": "HIGH" },
+    "hiring_difficulty": "Medium",
+    "hiring_months": ["Year-round"],
+    "locations": ["Gurgaon"],
+    "roles": ["SDE-1", "SDE-2"],
+    "interview_rounds": 4,
+    "typical_timeline_weeks": { "min": 1, "max": 3 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 120, "easy": 40, "medium": 60, "hard": 20 },
+    "recommended_problems": { "total": 200, "easy": 60, "medium": 100, "hard": 40 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 25, "recommended": 40, "frequency_pct": 60 },
+      "hash_maps": { "minimum": 15, "recommended": 25, "frequency_pct": 45 },
+      "trees": { "minimum": 12, "recommended": 20, "frequency_pct": 35 },
+      "dynamic_programming": { "minimum": 12, "recommended": 25, "frequency_pct": 35 },
+      "graphs": { "minimum": 10, "recommended": 18, "frequency_pct": 28 },
+      "sorting_searching": { "minimum": 10, "recommended": 18, "frequency_pct": 30 }
+    },
+    "source": "Glassdoor, AmbitionBox, GeeksForGeeks"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Python", "Java", "Go", "JavaScript"],
+    "preferred_languages": ["Python", "Go"],
+    "frameworks_evaluated": ["Django", "FastAPI", "React"],
+    "databases_tested": true,
+    "oops_required": "Medium",
+    "additional_valued": ["Quick Commerce domain", "Real-time systems", "Logistics optimization"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "must_know_designs": ["Inventory Management", "Real-time Delivery Tracking", "Warehouse Management System"]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 75, "description": "2 coding problems + aptitude." },
+      { "round": 2, "type": "Technical Round (DSA)", "duration_min": 60, "description": "DSA problem-solving. Medium difficulty." },
+      { "round": 3, "type": "LLD / Machine Coding", "duration_min": 90, "description": "LLD or small machine coding task." },
+      { "round": 4, "type": "Hiring Manager", "duration_min": 45, "description": "Behavioral + past projects." }
+    ],
+    "total_rounds": 4,
+    "source": "Glassdoor, AmbitionBox"
+  },
+  "behavioral": { "type": "Startup Culture", "key_attributes": ["Speed", "Ownership", "Customer Focus", "Hustle"] },
+  "scoring_weights": { "dsa_score": 0.30, "project_score": 0.25, "academic_score": 0.10, "stack_alignment": 0.10, "system_design_score": 0.15, "internship_score": 0.05, "consistency_index": 0.05 },
+  "raw_sources": [{ "url": "https://www.glassdoor.co.in/Interview/Blinkit-Interview-Questions-E3577883.htm", "accessed": "2025-03", "type": "glassdoor" }]
+}

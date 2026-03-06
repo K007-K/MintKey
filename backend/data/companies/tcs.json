@@ -1,0 +1,68 @@
+{
+  "slug": "tcs",
+  "name": "TCS (Tata Consultancy Services)",
+  "type": "IT Services",
+  "hiring_data": {
+    "package_range_lpa": { "min": 3.36, "max": 11.5, "median": 7, "currency": "INR", "level": "ASE / Digital SDE", "source": "TCS NQT official, AmbitionBox, Glassdoor", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 6.0, "note": "60% or 6.0 CGPA minimum. No backlogs allowed at time of joining.", "source": "TCS NQT eligibility criteria", "confidence": "VERY HIGH" },
+    "college_preference": "Mass recruiter. Hires from ALL AICTE-approved colleges. No tier preference.",
+    "hiring_difficulty": "Easy-Medium",
+    "hiring_months": ["Year-round via TCS NQT", "Sep", "Oct"],
+    "locations": ["Pan-India (Chennai, Mumbai, Pune, Hyderabad, Bangalore, Kolkata, NCR)"],
+    "roles": ["System Engineer (3.36 LPA)", "Digital SDE (7 LPA)", "Ninja (3.36 LPA)", "Digital (7 LPA)", "Prime (9.5 LPA)"],
+    "interview_rounds": 3,
+    "typical_timeline_weeks": { "min": 2, "max": 8 },
+    "note": "TCS hires in 3 tiers: Ninja (3.36L), Digital (7L), Prime (9.5L). NQT score determines tier."
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 80, "easy": 50, "medium": 25, "hard": 5 },
+    "recommended_problems": { "total": 150, "easy": 80, "medium": 50, "hard": 20 },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 20, "recommended": 35, "frequency_pct": 70 },
+      "sorting_searching": { "minimum": 15, "recommended": 25, "frequency_pct": 55 },
+      "basic_math": { "minimum": 10, "recommended": 20, "subtopics": ["Number theory", "Pattern printing", "Prime numbers"], "frequency_pct": 50 },
+      "hash_maps": { "minimum": 8, "recommended": 15, "frequency_pct": 35 },
+      "linked_lists": { "minimum": 8, "recommended": 15, "frequency_pct": 30 },
+      "trees": { "minimum": 5, "recommended": 12, "frequency_pct": 20 },
+      "dynamic_programming": { "minimum": 5, "recommended": 15, "frequency_pct": 15, "note": "Only for Digital/Prime tier" }
+    },
+    "source": "PrepInsta TCS NQT analysis, GeeksForGeeks, YouTube TCS NQT guides"
+  },
+  "tech_stack": {
+    "languages_accepted": ["C", "C++", "Java", "Python"],
+    "preferred_languages": ["Java", "C"],
+    "frameworks_evaluated": false,
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Medium",
+    "additional_valued": ["SQL", "DBMS", "Networking", "Agile methodology"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Not required for freshers"
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "TCS NQT (National Qualifier Test)", "duration_min": 180, "description": "Aptitude (verbal, quantitative, logical reasoning) + Coding (2-3 problems, easy-medium). Score determines tier." },
+      { "round": 2, "type": "Technical Interview", "duration_min": 30, "description": "Basic CS fundamentals: OOP, DBMS, OS, data structures. Project discussion." },
+      { "round": 3, "type": "HR Interview", "duration_min": 20, "description": "Standard behavioral: strengths, weaknesses, why TCS, relocation readiness." }
+    ],
+    "oa_platform": "TCS iON (proprietary)",
+    "total_rounds": 3,
+    "source": "TCS NQT official, PrepInsta, GeeksForGeeks"
+  },
+  "behavioral": {
+    "type": "Standard HR",
+    "key_attributes": ["Communication skills", "Willingness to relocate", "Team player", "Learning attitude"],
+    "common_questions": ["Tell me about yourself", "Why TCS?", "Are you willing to relocate?", "What are your strengths and weaknesses?"]
+  },
+  "projects": {
+    "must_have": ["Any academic project with proper documentation", "Basic programming skills"],
+    "strong_positive_signals": ["Web development project", "Mobile app", "Any deployed project"]
+  },
+  "scoring_weights": { "dsa_score": 0.20, "project_score": 0.15, "academic_score": 0.30, "stack_alignment": 0.05, "system_design_score": 0.05, "internship_score": 0.15, "consistency_index": 0.10 },
+  "raw_sources": [
+    { "url": "https://www.tcs.com/careers/tcs-nqt", "accessed": "2025-03", "type": "official" },
+    { "url": "https://www.ambitionbox.com/reviews/tcs-reviews", "accessed": "2025-03", "type": "ambitionbox" }
+  ]
+}

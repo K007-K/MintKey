@@ -1,0 +1,110 @@
+{
+  "slug": "meta",
+  "name": "Meta",
+  "type": "FAANG",
+  "hiring_data": {
+    "package_range_lpa": { "min": 40, "max": 58, "median": 54, "currency": "INR", "level": "E3 (SDE-1)", "source": "6figr.com, levels.fyi", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 0, "note": "No CGPA requirement; skills-based hiring only", "confidence": "HIGH" },
+    "college_preference": "No college preference — purely skills-based. Strong portfolio and problem-solving matter most.",
+    "hiring_difficulty": "Very Hard",
+    "hiring_months": ["Year-round"],
+    "locations": ["Gurgaon", "Hyderabad"],
+    "roles": ["Software Engineer E3", "Software Engineer E4", "SWE Intern"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 4, "max": 8 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 300, "easy": 60, "medium": 150, "hard": 90 },
+    "recommended_problems": { "total": 450, "easy": 80, "medium": 220, "hard": 150 },
+    "contest_rating": { "minimum": 1800, "recommended": 2000, "platform": "LeetCode" },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 35, "recommended": 55, "subtopics": ["Two Pointers", "Sliding Window", "Prefix Sum", "Subarray problems"], "frequency_pct": 75 },
+      "trees_graphs": { "minimum": 35, "recommended": 50, "subtopics": ["BFS/DFS", "Trie", "Cycle detection", "Serialize/Deserialize BT", "Number of Islands"], "frequency_pct": 70 },
+      "dynamic_programming": { "minimum": 35, "recommended": 55, "subtopics": ["1D DP", "2D DP", "State machine DP", "Interval DP"], "frequency_pct": 68 },
+      "hash_maps_sets": { "minimum": 20, "recommended": 35, "frequency_pct": 55 },
+      "recursion_backtracking": { "minimum": 15, "recommended": 25, "subtopics": ["Combinations", "Permutations", "Word Search"], "frequency_pct": 45 },
+      "sliding_window": { "minimum": 15, "recommended": 25, "frequency_pct": 50 },
+      "linked_lists": { "minimum": 10, "recommended": 20, "subtopics": ["Reverse", "Merge", "Loop detection"], "frequency_pct": 35 },
+      "heaps": { "minimum": 10, "recommended": 18, "frequency_pct": 30 },
+      "greedy": { "minimum": 10, "recommended": 18, "frequency_pct": 28 }
+    },
+    "hard_problem_required": true,
+    "speed_emphasis": "Meta uniquely values SPEED. You must solve medium problems in 15-20 min and hard problems in 25-30 min.",
+    "easy_reliance_warning_threshold_pct": 35,
+    "source": "LeetCode Meta tag, Medium, getsdeready.com"
+  },
+  "tech_stack": {
+    "languages_accepted": ["Python", "C++", "Java", "JavaScript"],
+    "preferred_languages": ["Python", "C++"],
+    "frameworks_evaluated": ["React (for frontend roles)"],
+    "databases_tested": false,
+    "os_questions": false,
+    "oops_required": "Medium",
+    "additional_valued": ["React", "GraphQL", "Distributed Systems", "Machine Learning"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Not required at E3, Deep at E4+",
+    "must_know_designs": ["Instagram feed/timeline", "Messenger/Chat system", "News Feed ranking", "Dropbox/File sharing", "Web Crawler", "Rate Limiter"],
+    "core_concepts": ["Scalability", "Caching strategies (LRU)", "SQL vs NoSQL", "Distributed systems", "CAP theorem", "Load balancing", "Event-driven architecture"],
+    "resources": [
+      { "name": "DDIA Book", "type": "book", "priority": "MUST" },
+      { "name": "ByteByteGo", "type": "youtube", "priority": "HIGH" },
+      { "name": "Meta candidate portal prep videos", "type": "official", "priority": "HIGH" }
+    ]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Recruiter Screen", "duration_min": 30, "description": "Background, experience, role fit discussion." },
+      { "round": 2, "type": "Technical Screen (Coding)", "duration_min": 45, "description": "1-2 DSA problems in online editor. Medium-hard. Speed matters." },
+      { "round": 3, "type": "Onsite - Coding 1", "duration_min": 45, "description": "2 medium-hard problems. Must solve both cleanly in 40 min." },
+      { "round": 4, "type": "Onsite - Coding 2", "duration_min": 45, "description": "2 more problems. Different topics. Speed and correctness." },
+      { "round": 5, "type": "Behavioral / System Design", "duration_min": 45, "description": "E3: behavioral only. E4+: system design. Meta values and culture fit." }
+    ],
+    "oa_platform": "CoderPad or Meta internal platform",
+    "total_rounds": 5,
+    "process_duration_weeks": { "min": 4, "max": 8 },
+    "unique_note": "Meta coding rounds are SPEED-focused. 2 problems per round, 40-45 min. Fastest coding interviews in FAANG.",
+    "source": "igotanoffer.com, Medium, LeetCode Discuss, techprep.app"
+  },
+  "behavioral": {
+    "type": "Meta Values",
+    "framework": "STAR",
+    "key_attributes": ["Move Fast", "Focus on Long-Term Impact", "Build Awesome Things", "Live in the Future", "Be Direct and Respect Your Colleagues"],
+    "common_questions": [
+      "Tell me about a time you received negative feedback and what you did about it",
+      "Describe a situation where you had to make a quick decision with incomplete information",
+      "Why Meta? What product of ours excites you most?",
+      "Tell me about a challenging technical problem you solved"
+    ],
+    "source": "igotanoffer.com, Glassdoor Meta behavioral"
+  },
+  "projects": {
+    "must_have": ["Full-stack or backend project with API", "Clean code with tests", "Git version control"],
+    "strong_positive_signals": ["React/React Native project", "Open source contributions", "High-traffic system", "ML/data project"],
+    "impressive_projects": ["Social platform with feed algorithm", "Real-time chat application", "Recommendation engine"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Meta (Facebook) Tag", "url": "https://leetcode.com/company/facebook/", "priority": "MUST" },
+      { "name": "NeetCode 150", "url": "https://neetcode.io/practice", "priority": "MUST" },
+      { "name": "Meta Candidate Portal", "url": "https://www.metacareers.com/prepare", "priority": "HIGH" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.50,
+    "project_score": 0.15,
+    "academic_score": 0.05,
+    "stack_alignment": 0.10,
+    "system_design_score": 0.10,
+    "internship_score": 0.05,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/facebook/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/meta-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Meta-Software-Engineer-Interview-Questions-EI_IE40772.0,4_KO5,22.htm", "accessed": "2025-03", "type": "glassdoor" },
+    { "url": "https://www.levels.fyi/companies/meta/salaries", "accessed": "2025-03", "type": "compensation" },
+    { "url": "https://www.metacareers.com/prepare", "accessed": "2025-03", "type": "official" }
+  ]
+}

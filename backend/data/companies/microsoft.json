@@ -1,0 +1,110 @@
+{
+  "slug": "microsoft",
+  "name": "Microsoft",
+  "type": "FAANG",
+  "hiring_data": {
+    "package_range_lpa": { "min": 30, "max": 58, "median": 45, "currency": "INR", "level": "SDE (L59-L60)", "source": "levels.fyi, 6figr.com, YouTube breakdowns", "confidence": "HIGH" },
+    "cgpa_cutoff": { "value": 7.0, "note": "Tier 1 campus drives typically 7.0+; lateral hiring has no hard cutoff", "source": "GeeksForGeeks campus reports", "confidence": "MEDIUM" },
+    "college_preference": "Top colleges preferred (IITs, NITs, BITS), but strong profiles from any college considered",
+    "hiring_difficulty": "Hard",
+    "hiring_months": ["Aug", "Sep", "Oct", "Feb", "Mar"],
+    "locations": ["Hyderabad", "Bangalore", "Noida"],
+    "roles": ["SDE", "SDE-2", "SWE Intern"],
+    "interview_rounds": 5,
+    "typical_timeline_weeks": { "min": 2, "max": 5 }
+  },
+  "dsa_requirements": {
+    "minimum_problems": { "total": 200, "easy": 50, "medium": 110, "hard": 40 },
+    "recommended_problems": { "total": 350, "easy": 70, "medium": 180, "hard": 100 },
+    "contest_rating": { "minimum": 1600, "recommended": 1800, "platform": "LeetCode" },
+    "topic_targets": {
+      "arrays_strings": { "minimum": 30, "recommended": 45, "subtopics": ["Two Pointers", "Hashing", "Sorting"], "frequency_pct": 68 },
+      "trees": { "minimum": 25, "recommended": 40, "subtopics": ["BST operations", "BT traversals", "LCA", "Serialize/Deserialize"], "frequency_pct": 62 },
+      "dynamic_programming": { "minimum": 25, "recommended": 45, "subtopics": ["1D DP", "2D DP", "String DP", "Knapsack"], "frequency_pct": 58 },
+      "linked_lists": { "minimum": 15, "recommended": 25, "subtopics": ["Reverse", "Merge", "Cycle detection", "LRU"], "frequency_pct": 50 },
+      "graphs": { "minimum": 20, "recommended": 35, "subtopics": ["BFS", "DFS", "Shortest path", "Union-Find"], "frequency_pct": 48 },
+      "sorting_searching": { "minimum": 15, "recommended": 25, "subtopics": ["Binary Search", "Quick Sort", "Merge Sort"], "frequency_pct": 45 },
+      "stacks_queues": { "minimum": 10, "recommended": 20, "subtopics": ["Monotonic stack", "Min stack", "Queue using stacks"], "frequency_pct": 35 },
+      "backtracking": { "minimum": 8, "recommended": 15, "frequency_pct": 30 },
+      "heaps": { "minimum": 8, "recommended": 15, "frequency_pct": 28 }
+    },
+    "hard_problem_required": true,
+    "easy_reliance_warning_threshold_pct": 45,
+    "source": "LeetCode Microsoft tag, Medium interview experiences, InterviewBit"
+  },
+  "tech_stack": {
+    "languages_accepted": ["C#", "Java", "Python", "C++", "JavaScript/TypeScript"],
+    "preferred_languages": ["C#", "Java", "C++"],
+    "frameworks_evaluated": [".NET", "Azure"],
+    "databases_tested": true,
+    "os_questions": true,
+    "oops_required": "Very High",
+    "additional_valued": ["Azure Cloud", "System Design", ".NET ecosystem", "Operating Systems"]
+  },
+  "system_design": {
+    "required_at_sde1": false,
+    "depth": "Low-Level Design (SDE-1), HLD+LLD (SDE-2+)",
+    "must_know_designs": ["Parking Lot (LLD)", "URL Shortener", "Chat Application (WhatsApp)", "File System (LLD)", "Garbage Collector", "CloudWatch Logs"],
+    "core_concepts": ["OOP Design Patterns", "SOLID Principles", "Class diagrams", "Concurrency", "Scalability", "Load Balancing"],
+    "lld_focus": true,
+    "resources": [
+      { "name": "Head First Design Patterns", "type": "book", "priority": "MUST" },
+      { "name": "Sudocode YouTube (LLD)", "type": "youtube", "priority": "HIGH" }
+    ]
+  },
+  "interview_format": {
+    "rounds": [
+      { "round": 1, "type": "Online Assessment", "duration_min": 90, "description": "Codility test: 2-3 coding problems. Need ~80% test cases to pass. Medium-Hard difficulty." },
+      { "round": 2, "type": "Technical Round 1 (DSA)", "duration_min": 45, "description": "1-2 DSA problems. Arrays, Trees, or DP typically. Discussion of approach and optimization." },
+      { "round": 3, "type": "Technical Round 2 (DSA)", "duration_min": 45, "description": "Different DSA topic. May include CS fundamentals (OS, DBMS, OOP)." },
+      { "round": 4, "type": "Design Round (LLD/HLD)", "duration_min": 60, "description": "Low-Level Design for SDE-1 (class design, interfaces). HLD for SDE-2+." },
+      { "round": 5, "type": "Hiring Manager / AA Round", "duration_min": 45, "description": "Behavioral + project discussion. Cultural fit, career goals, team alignment." }
+    ],
+    "oa_platform": "Codility",
+    "total_rounds": 5,
+    "process_duration_weeks": { "min": 2, "max": 5 },
+    "source": "Medium interview experiences, LeetCode Discuss, GeeksForGeeks, YouTube"
+  },
+  "behavioral": {
+    "type": "Growth Mindset / Cultural Fit",
+    "framework": "STAR",
+    "key_attributes": ["Growth Mindset", "Customer Obsession", "One Microsoft", "Diversity and Inclusion", "Making a difference"],
+    "common_questions": [
+      "Tell me about a challenging project and how you overcame obstacles",
+      "How do you handle feedback?",
+      "Describe a time you worked in a team with conflicting opinions",
+      "Why Microsoft? What do you know about our mission?"
+    ],
+    "source": "igotanoffer.com, Glassdoor Microsoft interviews"
+  },
+  "projects": {
+    "must_have": ["Backend project with proper API design", "Database with relationships", "Clean OOP code"],
+    "strong_positive_signals": ["Azure deployment", ".NET/C# project", "Design patterns demonstrated", "Unit tests"],
+    "impressive_projects": ["Full-stack app with auth and RBAC", "System with real-time features", "CLI tool or dev tooling"]
+  },
+  "resources": {
+    "dsa": [
+      { "name": "LeetCode Microsoft Tag", "url": "https://leetcode.com/company/microsoft/", "priority": "MUST" },
+      { "name": "NeetCode 150", "url": "https://neetcode.io/practice", "priority": "MUST" },
+      { "name": "InterviewBit Microsoft Problems", "url": "https://www.interviewbit.com/microsoft-interview-questions/", "priority": "HIGH" }
+    ],
+    "design": [
+      { "name": "Sudocode YouTube LLD Series", "url": "https://youtube.com/@sudocode", "priority": "HIGH" }
+    ]
+  },
+  "scoring_weights": {
+    "dsa_score": 0.35,
+    "project_score": 0.20,
+    "academic_score": 0.10,
+    "stack_alignment": 0.10,
+    "system_design_score": 0.10,
+    "internship_score": 0.10,
+    "consistency_index": 0.05
+  },
+  "raw_sources": [
+    { "url": "https://leetcode.com/company/microsoft/", "accessed": "2025-03", "type": "leetcode_company_tag" },
+    { "url": "https://www.geeksforgeeks.org/microsoft-interview-experience/", "accessed": "2025-03", "type": "interview_experiences" },
+    { "url": "https://www.glassdoor.co.in/Interview/Microsoft-Interview-Questions-E1651.htm", "accessed": "2025-03", "type": "glassdoor" },
+    { "url": "https://www.levels.fyi/companies/microsoft/salaries/software-engineer", "accessed": "2025-03", "type": "compensation" }
+  ]
+}
