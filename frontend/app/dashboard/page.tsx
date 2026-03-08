@@ -1,36 +1,26 @@
-// Main dashboard — matches MintKey UXPilot reference design exactly
+// Main dashboard — wired to real API data with skeleton loaders
 "use client";
 
+import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
+import { useCurrentUser, useMatchScores } from "@/lib/api";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 
-/* ─── Sample data (will be replaced with API calls later) ─── */
-
-const TREND_DATA = [
-  { week: "Week 1", score: 58 },
-  { week: "Week 2", score: 62 },
-  { week: "Week 3", score: 65 },
-  { week: "Week 4", score: 68 },
-  { week: "Week 5", score: 72 },
-  { week: "Week 6", score: 75 },
-  { week: "Week 7", score: 82 },
-  { week: "Week 8", score: 87 },
-];
-
-const COMPANY_MATCHES = [
-  { name: "Google", score: 92, color: "#16a34a" },
-  { name: "Meta", score: 85, color: "#2563eb" },
-  { name: "Airbnb", score: 78, color: "#1e293b" },
-  { name: "Stripe", score: 64, color: "#1e293b" },
-];
+/* ─── Smart static fallbacks (will be wired to agent output later) ─── */
 
 const PRIORITY_ACTIONS = [
-  { title: 'Complete "System Design: Scalability" module', desc: "High impact on your Google readiness score", time: "~45m" },
-  { title: "Solve 2 Dynamic Programming problems", desc: "Maintain your 48-day streak", time: "~60m" },
+  { title: 'Complete "System Design: Scalability" module', desc: "High impact on your readiness score", time: "~45m" },
+  { title: "Solve 2 Dynamic Programming problems", desc: "Maintain your coding streak", time: "~60m" },
   { title: "Review PR comments on GitHub project", desc: "Improve code quality metrics", time: "~15m" },
+];
+
+const CRITICAL_GAPS = [
+  { title: "System Design Depth", desc: "Design docs should discuss trade-offs. Critical for L5+ roles.", severity: "high" as const },
+  { title: "Graph Algorithms", desc: "Success rate on Hard graph problems is below target.", severity: "medium" as const },
 ];
 
 const RECENT_ACTIVITY = [
@@ -39,16 +29,38 @@ const RECENT_ACTIVITY = [
   { activity: "Commit to 'mintkey-core'", platform: "GitHub", result: "Merged", resultStyle: "text-gray-700 bg-gray-100", date: "2 days ago", iconType: "git" as const },
 ];
 
-const CRITICAL_GAPS = [
-  { title: "System Design Depth", desc: "Your design docs lack discussion on trade-offs. This is critical for L5+ roles.", severity: "high" },
-  { title: "Graph Algorithms", desc: "Success rate on Hard graph problems is 30% below target.", severity: "medium" },
-];
+/* ─── Main Dashboard Page ─── */
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const { data: user, isLoading: userLoading } = useCurrentUser();
+  const { data: matchScores, isLoading: scoresLoading } = useMatchScores();
+
+  const userName = session?.user?.name?.split(" ")[0] || "there";
+  const greeting = getGreeting();
+
+  // Derive stats from user data
+  const leetcodeSolved = (user as Record<string, unknown>)?.leetcode_username ? "—" : "—";
+  const githubGrade = (user as Record<string, unknown>)?.github_username ? "—" : "—";
+
+  // Parse match scores
+  const scores = Array.isArray(matchScores) ? matchScores : [];
+  const topScore = scores.length > 0
+    ? Math.round(scores.reduce((max: number, s: Record<string, unknown>) => Math.max(max, (s.overall_score as number) || 0), 0))
+    : null;
+
+  // Generate trend data from scores or use placeholder
+  const trendData = scores.length > 0
+    ? scores.slice(-8).map((s: Record<string, unknown>, i: number) => ({
+        week: `Week ${i + 1}`,
+        score: Math.round((s.overall_score as number) || 0),
+      }))
+    : Array.from({ length: 8 }, (_, i) => ({ week: `Week ${i + 1}`, score: 50 + i * 5 }));
+
   return (
     <DashboardLayout
-      title="Good morning, Karthik"
-      subtitle="Let's get you ready for that Senior Engineer role."
+      title={`${greeting}, ${userName}`}
+      subtitle="Let's get you ready for that dream role."
     >
       <div className="space-y-5">
 
@@ -57,35 +69,65 @@ export default function DashboardPage() {
           <StatCard
             icon={<CodeBracketsIcon />}
             label="LeetCode Solved"
-            value="342"
-            badge="+12 this week"
-            badgeColor="bg-green-50 text-green-600"
+            value={userLoading ? null : ((user as Record<string, unknown>)?.leetcode_username ? "Synced" : "Not connected")}
+            badge={
+              (user as Record<string, unknown>)?.leetcode_username
+                ? "Connected"
+                : "Add in Settings"
+            }
+            badgeColor={
+              (user as Record<string, unknown>)?.leetcode_username
+                ? "bg-green-50 text-green-600"
+                : "bg-gray-100 text-gray-500"
+            }
+            loading={userLoading}
           />
           <StatCard
             icon={<GitHubLogoIcon />}
             label="GitHub Depth"
-            value="A+"
-            badge="Top 5%"
+            value={userLoading ? null : ((user as Record<string, unknown>)?.github_username ? "Connected" : "Not connected")}
+            badge={
+              (user as Record<string, unknown>)?.github_username
+                ? `@${(user as Record<string, unknown>)?.github_username}`
+                : "Link account"
+            }
             badgeColor="bg-teal-50 text-teal-600"
+            loading={userLoading}
           />
           <StatCard
             icon={<FlameIcon />}
             label="Coding Streak"
-            value="48 Days"
-            badge="Personal Best"
+            value={userLoading ? null : "—"}
+            badge="Sync to track"
             badgeColor="bg-gray-100 text-gray-600"
+            loading={userLoading}
           />
           <StatCard
             icon={<MoonIcon />}
             label="Readiness Grade"
-            value="87%"
-            badge="+4%"
-            badgeColor="bg-green-50 text-green-600"
+            value={
+              userLoading
+                ? null
+                : topScore !== null
+                ? `${topScore}%`
+                : "—"
+            }
+            badge={
+              topScore !== null
+                ? topScore >= 80 ? "Strong" : topScore >= 60 ? "Growing" : "Building"
+                : "Run analysis"
+            }
+            badgeColor={
+              topScore !== null && topScore >= 80
+                ? "bg-green-50 text-green-600"
+                : "bg-gray-100 text-gray-500"
+            }
+            loading={userLoading}
           />
         </div>
 
         {/* ─── Row 2: Readiness Trend (2/3) + Company Match (1/3) ─── */}
-        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 320px' }}>
+        <div className="grid gap-5 lg:grid-cols-[1fr_320px] grid-cols-1">
           {/* Readiness Trend Chart */}
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
@@ -100,7 +142,7 @@ export default function DashboardPage() {
             </div>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={TREND_DATA}>
+                <AreaChart data={trendData}>
                   <defs>
                     <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.08} />
@@ -109,7 +151,7 @@ export default function DashboardPage() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[50, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}
                     labelStyle={{ fontWeight: 600 }}
@@ -123,40 +165,80 @@ export default function DashboardPage() {
           {/* Company Match */}
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <h2 className="mb-4 text-base font-bold text-gray-900">Company Match</h2>
-            <div className="space-y-4">
-              {COMPANY_MATCHES.map((c) => (
-                <div key={c.name}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2.5">
-                      <CompanyLogo name={c.name} />
-                      <span className="text-sm font-medium text-gray-900">{c.name}</span>
+            {scoresLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-24 animate-pulse rounded bg-gray-100" />
+                      <div className="h-4 w-10 animate-pulse rounded bg-gray-100" />
                     </div>
-                    <span className="text-sm font-bold text-gray-900">{c.score}%</span>
+                    <div className="h-2.5 w-full animate-pulse rounded-full bg-gray-100" />
                   </div>
-                  <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${c.score}%`, backgroundColor: c.color }}
-                    />
-                  </div>
+                ))}
+              </div>
+            ) : scores.length > 0 ? (
+              <div className="space-y-4">
+                {scores.slice(0, 5).map((s: Record<string, unknown>) => {
+                  const slug = s.company_slug as string;
+                  const score = Math.round((s.overall_score as number) || 0);
+                  const color = score >= 80 ? "#16a34a" : score >= 60 ? "#2563eb" : "#1e293b";
+                  return (
+                    <Link key={slug} href={`/company/${slug}`} className="block group">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2.5">
+                          <CompanyLogo name={slug} />
+                          <span className="text-sm font-medium text-gray-900 capitalize group-hover:text-teal-600 transition-colors">
+                            {slug.replace(/-/g, " ")}
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900">{score}%</span>
+                      </div>
+                      <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{ width: `${score}%`, backgroundColor: color }}
+                        />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
+                  <ArrowUpRight className="h-6 w-6 text-gray-300" />
                 </div>
-              ))}
-            </div>
-            <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-400 hover:bg-[#f9fafb] hover:text-gray-600 transition-colors">
-              <Plus className="h-4 w-4" /> Add Target Company
-            </button>
+                <p className="text-sm font-medium text-gray-500 mb-1">No target companies yet</p>
+                <p className="text-xs text-gray-400 mb-4">Add companies to see your match scores</p>
+                <Link
+                  href="/companies"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-teal-50 px-3.5 py-2 text-sm font-medium text-teal-700 hover:bg-teal-100 transition-colors"
+                >
+                  <Plus className="h-4 w-4" /> Browse Companies
+                </Link>
+              </div>
+            )}
+            {scores.length > 0 && (
+              <Link
+                href="/companies"
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-400 hover:bg-[#f9fafb] hover:text-gray-600 transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Add Target Company
+              </Link>
+            )}
           </div>
         </div>
 
         {/* ─── Row 3: Top Priority Actions (2/3) + Critical Gaps (1/3) ─── */}
-        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 320px' }}>
+        <div className="grid gap-5 lg:grid-cols-[1fr_320px] grid-cols-1">
           {/* Top Priority Actions */}
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-bold text-gray-900">Top Priority Actions</h2>
                 <span className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
-                  AI Generated
+                  <Sparkles className="h-3 w-3" /> AI Generated
                 </span>
               </div>
               <button className="text-xs font-medium text-gray-400 hover:text-gray-700 transition-colors">View all</button>
@@ -164,7 +246,6 @@ export default function DashboardPage() {
             <div className="space-y-3">
               {PRIORITY_ACTIONS.map((action) => (
                 <div key={action.title} className="flex items-center gap-4 rounded-lg border border-gray-100 p-3.5 hover:bg-[#f9fafb] transition-colors cursor-pointer">
-                  {/* Empty checkbox */}
                   <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 border-gray-300" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900">{action.title}</div>
@@ -256,7 +337,16 @@ export default function DashboardPage() {
   );
 }
 
-/* ─── Stat Card Component ─── */
+/* ─── Helpers ─── */
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+/* ─── Stat Card Component with Skeleton ─── */
 
 function StatCard({
   icon,
@@ -264,12 +354,14 @@ function StatCard({
   value,
   badge,
   badgeColor,
+  loading = false,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: string | null;
   badge: string;
   badgeColor: string;
+  loading?: boolean;
 }) {
   return (
     <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
@@ -277,12 +369,20 @@ function StatCard({
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors">
           {icon}
         </div>
-        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeColor}`}>
-          {badge}
-        </span>
+        {loading ? (
+          <div className="h-5 w-16 animate-pulse rounded-full bg-gray-100" />
+        ) : (
+          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeColor}`}>
+            {badge}
+          </span>
+        )}
       </div>
       <div className="text-[11px] text-[#6b7280] mb-0.5">{label}</div>
-      <div className="text-[28px] font-bold leading-tight text-gray-900">{value}</div>
+      {loading ? (
+        <div className="h-8 w-20 animate-pulse rounded bg-gray-100 mt-1" />
+      ) : (
+        <div className="text-[28px] font-bold leading-tight text-gray-900">{value || "—"}</div>
+      )}
     </div>
   );
 }
@@ -325,43 +425,37 @@ function MoonIcon() {
 
 function CompanyLogo({ name }: { name: string }) {
   const base = "flex h-7 w-7 items-center justify-center rounded-full";
-  switch (name) {
-    case "Google":
-      return (
-        <div className={`${base} bg-gray-50`}>
-          <svg width="16" height="16" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-        </div>
-      );
-    case "Meta":
-      return (
-        <div className={`${base} bg-blue-50`}>
-          <svg width="16" height="11" viewBox="0 0 32 22" fill="#1877F2">
-            <path d="M16 11c0-3.3 1.6-6.5 4-8.5C22.4.5 25.6 0 28 0c2.4 0 4 2.3 4 5.5 0 6.35-5.37 16.5-12 16.5-2.4 0-4-1.15-4-5.5V11zm-8 5.5C8 20.85 5.6 22 3.2 22-2.63 22-4 11.85-4 5.5-4 2.3-2.4 0 0 0c2.4 0 5.6.5 8 2.5 2.4 2 4 5.2 4 8.5v5.5z" transform="translate(4, 0)"/>
-          </svg>
-        </div>
-      );
-    case "Airbnb":
-      return (
-        <div className={`${base} bg-red-50`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF5A5F">
-            <path d="M12 0C8 4.5 5 8 5 11.5 5 15.09 8.13 18 12 18s7-2.91 7-6.5C19 8 16 4.5 12 0zm0 16c-2.21 0-4-2.02-4-4.5S9.79 5 12 5s4 4.02 4 6.5S14.21 16 12 16z"/>
-          </svg>
-        </div>
-      );
-    case "Stripe":
-      return (
-        <div className={`${base} bg-indigo-50`}>
-          <span className="text-[8px] font-extrabold text-indigo-600 tracking-tight leading-none">stripe</span>
-        </div>
-      );
-    default:
-      return <div className={`${base} bg-gray-100 text-xs font-bold text-gray-500`}>{name[0]}</div>;
+  const n = name.toLowerCase();
+  if (n.includes("google")) {
+    return (
+      <div className={`${base} bg-gray-50`}>
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+      </div>
+    );
   }
+  if (n.includes("meta")) {
+    return <div className={`${base} bg-blue-50 text-[10px] font-extrabold text-blue-600`}>M</div>;
+  }
+  if (n.includes("amazon")) {
+    return <div className={`${base} bg-orange-50 text-[10px] font-extrabold text-orange-600`}>A</div>;
+  }
+  if (n.includes("apple")) {
+    return <div className={`${base} bg-gray-100 text-[10px] font-extrabold text-gray-700`}>🍎</div>;
+  }
+  if (n.includes("microsoft")) {
+    return <div className={`${base} bg-blue-50 text-[10px] font-extrabold text-blue-500`}>MS</div>;
+  }
+  if (n.includes("stripe")) {
+    return <div className={`${base} bg-indigo-50`}><span className="text-[8px] font-extrabold text-indigo-600 tracking-tight leading-none">stripe</span></div>;
+  }
+  // Generic fallback
+  const initial = name.replace(/-/g, " ").split(" ").map(w => w[0]?.toUpperCase()).join("").slice(0, 2);
+  return <div className={`${base} bg-gray-100 text-xs font-bold text-gray-500`}>{initial}</div>;
 }
 
 function ActivityIcon({ type }: { type: "code" | "video" | "git" }) {
