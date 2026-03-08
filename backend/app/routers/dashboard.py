@@ -208,13 +208,13 @@ async def get_dashboard_summary(
     analysis_result = await db.execute(
         select(AnalysisResult)
         .where(AnalysisResult.user_id == current_user.id)
-        .order_by(desc(AnalysisResult.created_at))
+        .order_by(desc(AnalysisResult.started_at))
         .limit(1)
     )
     latest_analysis = analysis_result.scalar_one_or_none()
 
-    if latest_analysis and latest_analysis.result_data:
-        data = latest_analysis.result_data
+    if latest_analysis and latest_analysis.merged_analysis:
+        data = latest_analysis.merged_analysis
 
         # Extract gaps from gap analysis
         gap_analysis = data.get("gap_analysis", {})
