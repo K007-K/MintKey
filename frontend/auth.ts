@@ -44,6 +44,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.error("Backend auth sync failed:", err);
         }
       }
+
+      // Retry: if backendToken is missing (backend was down during login), re-fetch
+      if (!token.backendToken && token.githubId) {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/github`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                github_oauth_id: token.githubId,
+                email: token.email,
+                name: token.name,
+                avatar_url: token.avatar,
+                github_username: token.githubUsername,
+              }),
+            }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            token.backendToken = data.data?.access_token;
+            token.userId = data.data?.user_id;
+            token.isOnboarded = data.data?.is_onboarded;
+          }
+        } catch {
+          // Backend still down — will retry on next request
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
