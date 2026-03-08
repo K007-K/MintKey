@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.middleware.auth import create_access_token
-from app.models.db import User
 from app.models.schemas import APIResponse
 from app.repositories.users import UserRepository
 

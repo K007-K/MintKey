@@ -39,15 +39,21 @@ export default function DashboardPage() {
   const userName = session?.user?.name?.split(" ")[0] || "there";
   const greeting = getGreeting();
 
-  // Derive stats from user data
-  const leetcodeSolved = (user as Record<string, unknown>)?.leetcode_username ? "—" : "—";
-  const githubGrade = (user as Record<string, unknown>)?.github_username ? "—" : "—";
+  // Platform connection status — session is primary (always has GitHub from OAuth)
+  const githubUsername = session?.user?.githubUsername || (user as Record<string, unknown>)?.github_username as string || null;
+  const leetcodeUsername = (user as Record<string, unknown>)?.leetcode_username as string || null;
+  const hackerrankUsername = (user as Record<string, unknown>)?.hackerrank_username as string || null;
+  const codechefUsername = (user as Record<string, unknown>)?.codechef_username as string || null;
+  const isLoading = userLoading && !session;
 
   // Parse match scores
   const scores = Array.isArray(matchScores) ? matchScores : [];
   const topScore = scores.length > 0
     ? Math.round(scores.reduce((max: number, s: Record<string, unknown>) => Math.max(max, (s.overall_score as number) || 0), 0))
     : null;
+
+  // Count connected platforms
+  const connectedPlatforms = [githubUsername, leetcodeUsername, hackerrankUsername, codechefUsername].filter(Boolean).length;
 
   // Generate trend data from scores or use placeholder
   const trendData = scores.length > 0
@@ -68,45 +74,33 @@ export default function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={<CodeBracketsIcon />}
-            label="LeetCode Solved"
-            value={userLoading ? null : ((user as Record<string, unknown>)?.leetcode_username ? "Synced" : "Not connected")}
-            badge={
-              (user as Record<string, unknown>)?.leetcode_username
-                ? "Connected"
-                : "Add in Settings"
-            }
-            badgeColor={
-              (user as Record<string, unknown>)?.leetcode_username
-                ? "bg-green-50 text-green-600"
-                : "bg-gray-100 text-gray-500"
-            }
-            loading={userLoading}
+            label="LeetCode"
+            value={isLoading ? null : (leetcodeUsername ? `@${leetcodeUsername}` : "Not connected")}
+            badge={leetcodeUsername ? "Connected" : "Add in Settings"}
+            badgeColor={leetcodeUsername ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"}
+            loading={isLoading}
           />
           <StatCard
             icon={<GitHubLogoIcon />}
-            label="GitHub Depth"
-            value={userLoading ? null : ((user as Record<string, unknown>)?.github_username ? "Connected" : "Not connected")}
-            badge={
-              (user as Record<string, unknown>)?.github_username
-                ? `@${(user as Record<string, unknown>)?.github_username}`
-                : "Link account"
-            }
-            badgeColor="bg-teal-50 text-teal-600"
-            loading={userLoading}
+            label="GitHub"
+            value={isLoading ? null : (githubUsername ? `@${githubUsername}` : "Not connected")}
+            badge={githubUsername ? "Connected ✓" : "Link account"}
+            badgeColor={githubUsername ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"}
+            loading={isLoading}
           />
           <StatCard
             icon={<FlameIcon />}
-            label="Coding Streak"
-            value={userLoading ? null : "—"}
-            badge="Sync to track"
-            badgeColor="bg-gray-100 text-gray-600"
-            loading={userLoading}
+            label="Platforms Connected"
+            value={isLoading ? null : `${connectedPlatforms}/4`}
+            badge={connectedPlatforms >= 3 ? "Great coverage" : "Add more"}
+            badgeColor={connectedPlatforms >= 3 ? "bg-teal-50 text-teal-600" : "bg-gray-100 text-gray-600"}
+            loading={isLoading}
           />
           <StatCard
             icon={<MoonIcon />}
             label="Readiness Grade"
             value={
-              userLoading
+              isLoading
                 ? null
                 : topScore !== null
                 ? `${topScore}%`
@@ -122,7 +116,7 @@ export default function DashboardPage() {
                 ? "bg-green-50 text-green-600"
                 : "bg-gray-100 text-gray-500"
             }
-            loading={userLoading}
+            loading={isLoading}
           />
         </div>
 
