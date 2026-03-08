@@ -138,6 +138,19 @@ export function useCompanyScoringWeights(slug: string) {
   });
 }
 
+// Dashboard summary — real scraped platform data
+export function useDashboardSummary() {
+  return useQuery({
+    queryKey: ["dashboard", "summary"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/dashboard/summary");
+      return data.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 min cache
+    retry: 1,
+  });
+}
+
 // Health check
 export function useHealthCheck() {
   return useQuery({
