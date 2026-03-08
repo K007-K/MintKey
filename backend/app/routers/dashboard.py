@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User, AnalysisResult, MatchScore
+from app.models.db import User, AnalysisResult, CompanyMatchScore
 from app.models.schemas import APIResponse
 
 logger = logging.getLogger(__name__)
@@ -145,9 +145,9 @@ async def get_dashboard_summary(
 
     # Readiness Grade — from latest match scores
     score_result = await db.execute(
-        select(MatchScore)
-        .where(MatchScore.user_id == current_user.id)
-        .order_by(desc(MatchScore.computed_at))
+        select(CompanyMatchScore)
+        .where(CompanyMatchScore.user_id == current_user.id)
+        .order_by(desc(CompanyMatchScore.computed_at))
         .limit(5)
     )
     match_scores = score_result.scalars().all()
