@@ -93,7 +93,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 flex h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out ${
+      className={`fixed left-0 top-0 z-40 flex h-full flex-col overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-300 ease-in-out ${
         isOpen ? "w-[240px]" : "w-[76px]"
       }`}
     >

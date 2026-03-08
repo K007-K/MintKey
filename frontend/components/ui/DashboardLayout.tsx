@@ -28,7 +28,7 @@ export default function DashboardLayout({
 
       {/* Main content — shifts based on sidebar width */}
       <div
-        className="flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out"
+        className="flex flex-1 flex-col overflow-hidden transition-[margin-left] duration-300 ease-in-out"
         style={{ marginLeft: isOpen ? 240 : 76 }}
       >
         {/* Top bar */}
