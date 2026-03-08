@@ -1,14 +1,15 @@
 // Company explorer — browse companies, manage targets, filter and search
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
-import { Search, Bell, ChevronDown, X, Plus } from "lucide-react";
+import { Search, Bell, ChevronDown, X, Plus, Loader2 } from "lucide-react";
+import { useCompanies } from "@/lib/api";
 
-/* ── Company Data ────────────────────────────────────────────────── */
+/* ── Company UI type ────────────────────────────────────────────── */
 
 interface Company {
   name: string;
@@ -19,26 +20,34 @@ interface Company {
   score: number;
 }
 
-const ALL_COMPANIES: Company[] = [
-  { name: "Amazon", slug: "amazon", category: "E-commerce & Cloud", salary: "$140k - $280k", difficulty: "Medium", score: 76 },
-  { name: "Microsoft", slug: "microsoft", category: "Software & Cloud", salary: "$150k - $290k", difficulty: "Medium", score: 81 },
-  { name: "Apple", slug: "apple", category: "Hardware & Software", salary: "$170k - $330k", difficulty: "Hard", score: 88 },
-  { name: "Netflix", slug: "netflix", category: "Streaming & Media", salary: "$200k - $400k", difficulty: "Hard", score: 72 },
-  { name: "Uber", slug: "uber", category: "Ridesharing & Delivery", salary: "$140k - $260k", difficulty: "Medium", score: 69 },
-  { name: "Salesforce", slug: "salesforce", category: "CRM & Cloud", salary: "$130k - $240k", difficulty: "Easy", score: 84 },
-  { name: "Twitter", slug: "twitter", category: "Social Media", salary: "$160k - $300k", difficulty: "Medium", score: 73 },
-  { name: "LinkedIn", slug: "linkedin", category: "Professional Network", salary: "$150k - $280k", difficulty: "Medium", score: 79 },
-  { name: "Shopify", slug: "shopify", category: "E-commerce Platform", salary: "$120k - $220k", difficulty: "Easy", score: 91 },
-  { name: "Slack", slug: "slack", category: "Collaboration Tools", salary: "$140k - $250k", difficulty: "Easy", score: 86 },
-  { name: "Spotify", slug: "spotify", category: "Music Streaming", salary: "$130k - $240k", difficulty: "Medium", score: 75 },
-];
+/* ── Transform DB data → UI Company shape ─────────────────────── */
 
-const INITIAL_TARGETS: Company[] = [
-  { name: "Google", slug: "google", category: "Search & Cloud", salary: "$180k - $350k", difficulty: "Hard", score: 92 },
-  { name: "Meta", slug: "meta", category: "Social & VR", salary: "$170k - $320k", difficulty: "Hard", score: 85 },
-  { name: "Airbnb", slug: "airbnb", category: "Travel & Hospitality", salary: "$150k - $280k", difficulty: "Medium", score: 78 },
-  { name: "Stripe", slug: "stripe", category: "Fintech & Payments", salary: "$160k - $300k", difficulty: "Medium", score: 64 },
-];
+function mapDifficulty(raw: string | undefined): "Hard" | "Medium" | "Easy" {
+  if (!raw) return "Medium";
+  const d = raw.toLowerCase();
+  if (d.includes("very hard") || d.includes("hard")) return "Hard";
+  if (d.includes("easy")) return "Easy";
+  return "Medium";
+}
+
+function formatSalary(hiring: Record<string, unknown> | null): string {
+  if (!hiring) return "—";
+  const pkg = hiring.package_range_lpa as { min?: number; max?: number } | undefined;
+  if (!pkg) return "—";
+  return `₹${pkg.min ?? 0} - ${pkg.max ?? 0} LPA`;
+}
+
+function transformCompany(raw: Record<string, unknown>): Company {
+  const hiring = raw.hiring_data as Record<string, unknown> | null;
+  return {
+    name: raw.name as string,
+    slug: raw.slug as string,
+    category: (raw.type as string) || "Company",
+    salary: formatSalary(hiring),
+    difficulty: mapDifficulty(hiring?.hiring_difficulty as string | undefined),
+    score: 0, // Placeholder until user has real match scores
+  };
+}
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
@@ -64,34 +73,86 @@ function scoreBarColor(score: number) {
 
 export default function CompaniesPage() {
   const router = useRouter();
+  const { data: rawCompanies, isLoading, isError } = useCompanies();
   const [search, setSearch] = useState("");
-  const [targets, setTargets] = useState<Company[]>(INITIAL_TARGETS);
+  const [targetSlugs, setTargetSlugs] = useState<string[]>([
+    "google", "meta", "amazon", "microsoft",
+  ]);
   const [visibleCount, setVisibleCount] = useState(9);
   const [companyTypeFilter, setCompanyTypeFilter] = useState("All Company Types");
   const [dsaFilter, setDsaFilter] = useState("All DSA Levels");
   const [packageFilter, setPackageFilter] = useState("All Package Ranges");
 
+  /* Transform API data */
+  const allCompanies: Company[] = useMemo(() => {
+    if (!rawCompanies || !Array.isArray(rawCompanies)) return [];
+    return (rawCompanies as Record<string, unknown>[]).map(transformCompany);
+  }, [rawCompanies]);
+
+  /* Derive targets from slugs */
+  const targets = useMemo(
+    () => allCompanies.filter((c) => targetSlugs.includes(c.slug)),
+    [allCompanies, targetSlugs]
+  );
+
+  /* Non-targeted companies for the "All" grid */
+  const nonTargeted = useMemo(
+    () => allCompanies.filter((c) => !targetSlugs.includes(c.slug)),
+    [allCompanies, targetSlugs]
+  );
+
+  /* Unique company types for the filter */
+  const companyTypes = useMemo(
+    () => ["All Company Types", ...new Set(allCompanies.map((c) => c.category))],
+    [allCompanies]
+  );
+
   const removeTarget = (slug: string) => {
-    setTargets((prev) => prev.filter((t) => t.slug !== slug));
+    setTargetSlugs((prev) => prev.filter((s) => s !== slug));
   };
 
   const addTarget = (company: Company) => {
-    if (!targets.find((t) => t.slug === company.slug)) {
-      setTargets((prev) => [...prev, company]);
+    if (!targetSlugs.includes(company.slug) && targetSlugs.length < 5) {
+      setTargetSlugs((prev) => [...prev, company.slug]);
     }
   };
 
   /* Filter + search */
-  const filteredCompanies = ALL_COMPANIES.filter((c) => {
+  const filteredCompanies = nonTargeted.filter((c: Company) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (dsaFilter === "Hard" && c.difficulty !== "Hard") return false;
     if (dsaFilter === "Medium" && c.difficulty !== "Medium") return false;
     if (dsaFilter === "Easy" && c.difficulty !== "Easy") return false;
+    if (companyTypeFilter !== "All Company Types" && c.category !== companyTypeFilter) return false;
     return true;
   });
 
   const visibleCompanies = filteredCompanies.slice(0, visibleCount);
   const hasMore = visibleCount < filteredCompanies.length;
+
+  /* Loading state */
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Company Explorer" subtitle="Browse companies and see how ready you are">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-[#10B981]" />
+          <span className="ml-3 text-sm text-[#6B7280]">Loading companies...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  /* Error state */
+  if (isError) {
+    return (
+      <DashboardLayout title="Company Explorer" subtitle="Browse companies and see how ready you are">
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-sm text-[#EF4444] font-medium mb-2">Failed to load companies</p>
+          <p className="text-xs text-[#9CA3AF]">Make sure the backend is running and try again.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Company Explorer" subtitle="Browse companies and see how ready you are">
@@ -117,7 +178,7 @@ export default function CompaniesPage() {
 
       {/* ── Filters ── */}
       <div className="flex items-center gap-3 mb-6 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3">
-        <FilterDropdown value={companyTypeFilter} onChange={setCompanyTypeFilter} options={["All Company Types"]} />
+        <FilterDropdown value={companyTypeFilter} onChange={setCompanyTypeFilter} options={companyTypes} />
         <FilterDropdown value={dsaFilter} onChange={setDsaFilter} options={["All DSA Levels", "Hard", "Medium", "Easy"]} />
         <FilterDropdown value={packageFilter} onChange={setPackageFilter} options={["All Package Ranges"]} />
       </div>

@@ -98,6 +98,46 @@ export function useTriggerAnalysis() {
   });
 }
 
+// --- Company Hooks ---
+
+// List all companies
+export function useCompanies() {
+  return useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/companies");
+      return data.data;
+    },
+    staleTime: 30 * 60 * 1000, // 30 min — company data rarely changes
+  });
+}
+
+// Single company by slug
+export function useCompany(slug: string) {
+  return useQuery({
+    queryKey: ["companies", slug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(`/api/companies/${slug}`);
+      return data.data;
+    },
+    enabled: !!slug,
+    staleTime: 30 * 60 * 1000,
+  });
+}
+
+// Scoring weights only
+export function useCompanyScoringWeights(slug: string) {
+  return useQuery({
+    queryKey: ["companies", slug, "weights"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(`/api/companies/${slug}/scoring-weights`);
+      return data.data;
+    },
+    enabled: !!slug,
+    staleTime: 30 * 60 * 1000,
+  });
+}
+
 // Health check
 export function useHealthCheck() {
   return useQuery({

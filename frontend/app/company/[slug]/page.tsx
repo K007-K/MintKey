@@ -1,12 +1,13 @@
 // Company detail / blueprint page — pixel-perfect match to UXPilot reference
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
+import { useCompany } from "@/lib/api";
 import {
   ChevronRight, Briefcase, MapPin, Clock, DollarSign,
   Code2, Blocks, Star, AlertCircle, BookOpen, ExternalLink, ArrowRight,
@@ -22,8 +23,8 @@ interface InterviewStage { label: string; duration: string; desc: string; color:
 interface QuestionItem { title: string; difficulty: "Hard" | "Med" | "Easy" }
 interface ProjectCard { category: string; title: string; desc: string; tags: string[]; hours: number; image: string }
 
-/* ─── Static data ─── */
-const COMPANY_DATA: Record<string, {
+/* ─── Build page data from API response ─── */
+type CompanyPageData = {
   name: string; role: string; salary: string; location: string; experience: string;
   tags: { label: string; color: string; bg: string }[];
   matchScore: number;
@@ -33,52 +34,126 @@ const COMPANY_DATA: Record<string, {
   timeline: InterviewStage[];
   questions: QuestionItem[];
   projects: ProjectCard[];
-}> = {
-  google: {
-    name: "Google", role: "Software Development Engineer I (L3)",
-    salary: "$180k - $240k / yr", location: "Mountain View, CA + Remote", experience: "0-2 Years Exp.",
-    tags: [
-      { label: "Hard", color: "#DC2626", bg: "#FEF2F2" },
-      { label: "Tech Giant", color: "#7C3AED", bg: "#F5F3FF" },
-    ],
-    matchScore: 78,
-    statCards: [
-      { label: "Hiring Difficulty", value: "Very Hard", desc: "Top 1% of applicants selected. Strong emphasis on DSA.", icon: "difficulty", borderColor: "#FCA5A5" },
-      { label: "DSA Importance", value: "Critical", desc: "3-4 rounds focused purely on algos & data structures.", icon: "code", borderColor: "#C4B5FD" },
-      { label: "System Design", value: "Low/Med", desc: "For L3, focus is on clean code and basic OO design.", icon: "blocks", borderColor: "#93C5FD" },
-      { label: "Googliness", value: "Required", desc: "Behavioral fit is a strict pass/fail criteria.", icon: "star", borderColor: "#FCD34D" },
-    ],
-    dsaTopicFreq: [
-      { topic: "Graphs", count: 85 },
-      { topic: "DP", count: 78 },
-      { topic: "Trees", count: 72 },
-      { topic: "Arrays", count: 65 },
-      { topic: "Strings", count: 55 },
-      { topic: "Heaps", count: 45 },
-    ],
-    readiness: [
-      { name: "Graph Algorithms", pct: 80, status: "Good" },
-      { name: "Dynamic Programming", pct: 35, status: "Needs Work" },
-      { name: "System Design", pct: 0, status: "Not Started" },
-    ],
-    timeline: [
-      { label: "Recruiter Screen", duration: "30 min", desc: "Resume review and basic fit.", color: "#10B981" },
-      { label: "Phone Screen / OA", duration: "45-60 min", desc: "1-2 Medium Leetcode problems.", color: "#3B82F6" },
-      { label: "Onsite Loop (Virtual)", duration: "4-5 rounds", desc: "3 Coding, 1 System Design/OOD, 1 Behavioral.", color: "#D1D5DB" },
-      { label: "Hiring Committee", duration: "Review", desc: "Review of packet • Offer decision.", color: "#D1D5DB" },
-    ],
-    questions: [
-      { title: "Find the median of two sorted arrays of different sizes.", difficulty: "Hard" },
-      { title: "Design a URL shortener service like bit.ly.", difficulty: "Med" },
-      { title: "Given a binary tree, find the maximum path sum.", difficulty: "Med" },
-    ],
-    projects: [
-      { category: "Full Stack", title: "Real-time Collaboration Tool", desc: "Build a Google Docs clone using WebSockets and OT/CRDT algorithms.", tags: ["React", "Node.js", "Socket.io"], hours: 20, image: "/projects/fullstack.png" },
-      { category: "Systems", title: "Distributed Key-Value Store", desc: "Implement a distributed KV store with sharding and replication logic.", tags: ["Go", "gRPC", "Docker"], hours: 35, image: "/projects/systems.png" },
-      { category: "Frontend", title: "E-commerce Analytics Dashboard", desc: "Create a high-performance dashboard handling large datasets.", tags: ["Next.js", "D3.js", "GraphQL"], hours: 25, image: "/projects/frontend.png" },
-    ],
-  },
 };
+
+function diffTag(difficulty: string): { label: string; color: string; bg: string } {
+  const d = difficulty?.toLowerCase() || "medium";
+  if (d.includes("very hard") || d.includes("hard")) return { label: "Hard", color: "#DC2626", bg: "#FEF2F2" };
+  if (d.includes("easy")) return { label: "Easy", color: "#10B981", bg: "#ECFDF5" };
+  return { label: "Medium", color: "#D97706", bg: "#FFFBEB" };
+}
+
+function buildCompanyPageData(raw: Record<string, unknown>): CompanyPageData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hiring = (raw.hiring_data || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (raw.dsa_requirements || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const interviewFmt = (raw.interview_format || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const techStack = (raw.tech_stack || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const behavioral = (raw.behavioral || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (raw.system_design || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const projects = (raw.projects || {}) as any;
+
+  const pkg = hiring.package_range_lpa || {};
+  const salary = pkg.min && pkg.max ? `₹${pkg.min} - ${pkg.max} LPA` : "—";
+  const roles = hiring.roles || [];
+  const role = roles[0] || "Software Development Engineer";
+  const locations = (hiring.locations || []).join(", ") || "India";
+  const difficulty = hiring.hiring_difficulty || "Medium";
+  const companyType = (raw.type as string) || "Company";
+
+  // Tags
+  const tags = [
+    diffTag(difficulty),
+    { label: companyType, color: "#7C3AED", bg: "#F5F3FF" },
+  ];
+
+  // DSA importance level
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const weights = (raw.scoring_weights || {}) as any;
+  const dsaWeight = parseFloat(weights.dsa_score || "0.25");
+  const dsaImportance = dsaWeight >= 0.4 ? "Critical" : dsaWeight >= 0.3 ? "High" : dsaWeight >= 0.2 ? "Medium" : "Low";
+
+  // System design level
+  const sdRequired = sysDesign.required_at_sde1 ? "Required" : "Low/Med";
+  const sdDepth = sysDesign.depth || "Not required at entry level";
+
+  // Stat cards
+  const statCards = [
+    { label: "Hiring Difficulty", value: difficulty, desc: `${hiring.interview_rounds || "?"} rounds. ${hiring.college_preference || ""}`.trim(), icon: "difficulty", borderColor: "#FCA5A5" },
+    { label: "DSA Importance", value: dsaImportance, desc: `Weight: ${Math.round(dsaWeight * 100)}%. ${dsa.minimum_problems?.total || "?"} min problems.`, icon: "code", borderColor: "#C4B5FD" },
+    { label: "System Design", value: sdRequired, desc: sdDepth, icon: "blocks", borderColor: "#93C5FD" },
+    { label: "Behavioral", value: behavioral.type || "Culture Fit", desc: (behavioral.key_attributes || []).slice(0, 3).join(", "), icon: "star", borderColor: "#FCD34D" },
+  ];
+
+  // DSA topic frequency from dsa_requirements.topic_targets
+  const topicTargets = dsa.topic_targets || {};
+  const dsaTopicFreq = Object.entries(topicTargets)
+    .map(([key, val]: [string, unknown]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = val as any;
+      const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      return { topic: label, count: t.frequency_pct || t.recommended || 50 };
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
+  // Readiness — placeholder (real data comes from user analysis)
+  const readiness: ReadinessItem[] = dsaTopicFreq.slice(0, 3).map((t) => ({
+    name: t.topic,
+    pct: 0,
+    status: "Not Started" as const,
+  }));
+
+  // Interview timeline from interview_format.rounds
+  const roundColors = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#D1D5DB"];
+  const timeline: InterviewStage[] = (interviewFmt.rounds || []).map((r: Record<string, unknown>, i: number) => ({
+    label: r.type as string || `Round ${i + 1}`,
+    duration: r.duration_min ? `${r.duration_min} min` : "—",
+    desc: (r.description as string) || "",
+    color: roundColors[i % roundColors.length],
+  }));
+
+  // Questions — placeholder (generated from must_know_designs)
+  const mustKnow = sysDesign.must_know_designs || [];
+  const questions: QuestionItem[] = mustKnow.slice(0, 4).map((q: string, i: number) => ({
+    title: `Design: ${q}`,
+    difficulty: (i === 0 ? "Hard" : "Med") as "Hard" | "Med" | "Easy",
+  }));
+
+  // Projects — from DB or placeholder
+  const projectList: ProjectCard[] = (projects.impressive_projects || projects.must_have || [])
+    .slice(0, 3)
+    .map((p: string, i: number) => ({
+      category: ["Full Stack", "Systems", "Frontend"][i % 3],
+      title: p,
+      desc: `Build a production-quality ${p.toLowerCase()} to demonstrate your skills.`,
+      tags: (techStack.preferred_languages || []).slice(0, 3),
+      hours: 20 + i * 10,
+      image: `/projects/${["fullstack", "systems", "frontend"][i % 3]}.png`,
+    }));
+
+  return {
+    name: raw.name as string,
+    role,
+    salary,
+    location: locations,
+    experience: "0-2 Years Exp.",
+    tags,
+    matchScore: 0, // Populated when user has scored
+    statCards,
+    dsaTopicFreq,
+    readiness,
+    timeline,
+    questions,
+    projects: projectList,
+  };
+}
 
 /* Tab set — all 9 tabs */
 const TABS = ["Overview", "DSA Requirements", "System Design", "Projects", "Interview Format", "Resources", "Reviews", "Skill Gap Analysis", "Preparation Strategy"] as const;
@@ -153,10 +228,38 @@ export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
-  const data = COMPANY_DATA[slug] || COMPANY_DATA.google;
+  const { data: rawCompany, isLoading, isError } = useCompany(slug);
+
+  const data = useMemo(() => {
+    if (!rawCompany) return null;
+    return buildCompanyPageData(rawCompany as Record<string, unknown>);
+  }, [rawCompany]);
+
   const name = data?.name || slug.charAt(0).toUpperCase() + slug.slice(1);
 
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Loading..." subtitle="">
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E5E7EB] border-t-[#10B981]" />
+          <span className="ml-3 text-sm text-[#6B7280]">Loading company data...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <DashboardLayout title="Company Not Found" subtitle="">
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-sm text-[#EF4444] font-medium mb-2">Company &ldquo;{slug}&rdquo; not found</p>
+          <button onClick={() => router.push('/companies')} className="text-xs text-[#10B981] hover:underline">← Back to companies</button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title={`${name} Blueprint`} subtitle="Company-specific preparation roadmap">
@@ -272,7 +375,7 @@ export default function CompanyDetailPage() {
 /* ════════════════════════════════════════════════════════
    OVERVIEW TAB — Exact match to reference 2-column layout
    ════════════════════════════════════════════════════════ */
-function OverviewContent({ data, slug, setTab }: { data: typeof COMPANY_DATA["google"]; slug: string; setTab: (t: Tab) => void }) {
+function OverviewContent({ data, slug, setTab }: { data: CompanyPageData; slug: string; setTab: (t: Tab) => void }) {
   return (
     <div className="space-y-6">
       {/* ─── 4 Stat Cards Row (matching reference: colored border, icon top-right) ─── */}
@@ -457,7 +560,7 @@ function OverviewContent({ data, slug, setTab }: { data: typeof COMPANY_DATA["go
 /* ════════════════════════════════════════════════════════
    TAB 2 — DSA REQUIREMENTS
    ════════════════════════════════════════════════════════ */
-function DSARequirementsTab({ data }: { data: typeof COMPANY_DATA["google"] }) {
+function DSARequirementsTab({ data }: { data: CompanyPageData }) {
   const difficulty = [
     { label: "Easy", required: 100, user: 72, color: "#10B981", borderColor: "#A7F3D0" },
     { label: "Medium", required: 200, user: 145, color: "#F59E0B", borderColor: "#FDE68A" },
