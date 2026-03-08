@@ -89,33 +89,57 @@ export default function OnboardingPage() {
   const { data: session, update: updateSession } = useSession();
   const router = useRouter();
 
-  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Platform usernames
+  // ─── Persisted state (survives page refresh) ───────────────────────────────
+  const STORAGE_KEY = "mintkey_onboarding";
+
+  const getStored = () => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  };
+
+  const stored = getStored();
+
+  const [step, setStep] = useState<number>(stored?.step || 1);
+
   const [platforms, setPlatforms] = useState({
-    github: "",
-    leetcode: "",
-    hackerrank: "",
-    codechef: "",
+    github: stored?.platforms?.github || "",
+    leetcode: stored?.platforms?.leetcode || "",
+    hackerrank: stored?.platforms?.hackerrank || "",
+    codechef: stored?.platforms?.codechef || "",
   });
 
-  // Pre-fill GitHub from OAuth session
+  const [academic, setAcademic] = useState({
+    cgpa: stored?.academic?.cgpa || "",
+    branch: stored?.academic?.branch || "",
+    college_tier: stored?.academic?.college_tier || "",
+    graduation_year: stored?.academic?.graduation_year || "",
+    internship_count: stored?.academic?.internship_count || "0",
+  });
+
+  // Pre-fill GitHub from OAuth session (only if not already stored)
   useEffect(() => {
-    if (session?.user?.githubUsername) {
+    if (session?.user?.githubUsername && !platforms.github) {
       setPlatforms((prev) => ({ ...prev, github: session.user.githubUsername || "" }));
     }
   }, [session?.user?.githubUsername]);
 
-  // Academic info
-  const [academic, setAcademic] = useState({
-    cgpa: "",
-    branch: "",
-    college_tier: "",
-    graduation_year: "",
-    internship_count: "0",
-  });
+  // Persist to localStorage on every change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ step, platforms, academic }));
+    }
+  }, [step, platforms, academic]);
+
+  // Clear persisted data (called on submit/skip)
+  const clearStored = () => {
+    if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+  };
 
   const handlePlatformChange = (id: string, value: string) => {
     setPlatforms((prev) => ({ ...prev, [id]: value }));
@@ -141,6 +165,7 @@ export default function OnboardingPage() {
       // Silently fail — user can update later
     }
     // Hard redirect to force session refresh
+    clearStored();
     window.location.href = "/dashboard";
   };
 
@@ -192,6 +217,7 @@ export default function OnboardingPage() {
 
       // Hard redirect — forces NextAuth session refresh so authorized callback
       // sees the updated is_onboarded=true instead of stale JWT value
+      clearStored();
       window.location.href = "/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
