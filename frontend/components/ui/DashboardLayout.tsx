@@ -1,6 +1,7 @@
-// Dashboard layout — sidebar + topbar (matches reference design)
+// Dashboard layout — sidebar + topbar with dynamic sidebar width
 "use client";
 
+import { useSession } from "next-auth/react";
 import Sidebar from "@/components/ui/Sidebar";
 import { useSidebarStore } from "@/lib/store";
 import { Bell, Menu } from "lucide-react";
@@ -14,15 +15,26 @@ export default function DashboardLayout({
   title?: string;
   subtitle?: string;
 }) {
-  const { toggle } = useSidebarStore();
+  const { isOpen, toggle } = useSidebarStore();
+  const { data: session } = useSession();
+
+  const userName = session?.user?.name?.split(" ")[0] || "there";
+  const userInitial = (session?.user?.name || "U").charAt(0).toUpperCase();
+  const userAvatar = session?.user?.image;
 
   return (
     <div className="flex h-screen bg-bg-page">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+
+      {/* Main content — shifts based on sidebar width */}
+      <div
+        className="flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ marginLeft: isOpen ? 240 : 76 }}
+      >
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-3.5">
           <div className="flex items-center gap-4">
+            {/* Mobile hamburger */}
             <button
               onClick={toggle}
               className="rounded-lg p-1.5 text-text-muted hover:bg-bg-hover hover:text-text-primary md:hidden"
@@ -31,7 +43,7 @@ export default function DashboardLayout({
             </button>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
-                {title || "Good morning, Karthik"}
+                {title || `Good morning, ${userName}`}
               </h1>
               {subtitle && (
                 <p className="text-sm text-text-muted">{subtitle}</p>
@@ -53,16 +65,24 @@ export default function DashboardLayout({
 
             {/* Profile */}
             <button className="flex items-center gap-2 rounded-lg border border-border-default px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors">
-              <div className="h-6 w-6 rounded-full bg-mint-light flex items-center justify-center text-xs font-semibold text-mint-darker">K</div>
+              {userAvatar ? (
+                <img
+                  src={userAvatar}
+                  alt={userName}
+                  className="h-6 w-6 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-mint-light flex items-center justify-center text-xs font-semibold text-mint-darker">
+                  {userInitial}
+                </div>
+              )}
               <span className="hidden sm:inline">Public Profile</span>
             </button>
           </div>
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );
