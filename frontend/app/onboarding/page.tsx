@@ -149,10 +149,10 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      const token = session?.backendToken;
+      const token = session?.backendToken || (typeof window !== 'undefined' ? localStorage.getItem("mintkey_token") : null);
       if (!token) {
-        setError("Session expired. Please log in again.");
-        setIsSubmitting(false);
+        // Try a hard redirect to dashboard — maybe session will work on next load
+        window.location.href = "/dashboard";
         return;
       }
 
