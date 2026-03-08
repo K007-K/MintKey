@@ -123,6 +123,27 @@ export default function OnboardingPage() {
 
   const filledPlatforms = Object.values(platforms).filter((v) => v.trim() !== "").length;
 
+  const handleSkip = async () => {
+    // Mark as onboarded even when skipping so user isn't stuck
+    try {
+      const token = session?.backendToken;
+      if (token) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ is_onboarded: true }),
+        });
+      }
+    } catch (_) {
+      // Silently fail — user can update later
+    }
+    // Hard redirect to force session refresh
+    window.location.href = "/dashboard";
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError("");
@@ -169,10 +190,9 @@ export default function OnboardingPage() {
         throw new Error(data.detail || "Failed to save profile");
       }
 
-      // Update NextAuth session
-      await updateSession({ isOnboarded: true });
-
-      router.push("/dashboard");
+      // Hard redirect — forces NextAuth session refresh so authorized callback
+      // sees the updated is_onboarded=true instead of stale JWT value
+      window.location.href = "/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -306,10 +326,12 @@ export default function OnboardingPage() {
 
               {/* Footer */}
               <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-text-muted">
-                  <span className="font-semibold text-text-primary">{filledPlatforms}</span>{" "}
-                  of 4 connected
-                </p>
+                <button
+                  onClick={handleSkip}
+                  className="text-xs font-medium text-text-muted hover:text-text-primary transition-colors underline underline-offset-2"
+                >
+                  Skip for now →
+                </button>
                 <button
                   onClick={() => setStep(2)}
                   className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-5 py-2 text-sm font-semibold text-white hover:bg-mint-darker transition-colors"
@@ -465,26 +487,34 @@ export default function OnboardingPage() {
                 >
                   <ArrowLeft className="h-3.5 w-3.5" /> Back
                 </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-6 py-2 text-sm font-semibold text-white hover:bg-mint-darker disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      Start Analyzing
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleSkip}
+                    className="text-xs font-medium text-text-muted hover:text-text-primary transition-colors underline underline-offset-2"
+                  >
+                    Skip
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-6 py-2 text-sm font-semibold text-white hover:bg-mint-darker disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Start Analyzing
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <p className="text-center text-[10px] text-text-placeholder">
+              <p className="text-center text-[10px] text-text-placeholder mt-3">
                 You can update everything from Settings later.
               </p>
             </div>

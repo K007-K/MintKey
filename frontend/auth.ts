@@ -56,10 +56,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnboarded = auth?.user?.isOnboarded;
-      const isOnboardingPage = nextUrl.pathname.startsWith("/onboarding");
       const isAuthPage = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/auth");
-      const isPublic = nextUrl.pathname === "/" || isAuthPage;
+      const isPublic = nextUrl.pathname === "/" || isAuthPage || nextUrl.pathname.startsWith("/api");
 
       // Public pages — always accessible
       if (isPublic) return true;
@@ -67,16 +65,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Not logged in — redirect to login
       if (!isLoggedIn) return false;
 
-      // Logged in but not onboarded — redirect to onboarding
-      if (!isOnboarded && !isOnboardingPage) {
-        return Response.redirect(new URL("/onboarding", nextUrl));
-      }
-
-      // Already onboarded but visiting onboarding — redirect to dashboard
-      if (isOnboarded && isOnboardingPage) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
-      }
-
+      // All authenticated users can access all protected pages
+      // Onboarding redirect is handled client-side (avoids stale JWT issues)
       return true;
     },
   },
