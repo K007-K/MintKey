@@ -37,12 +37,15 @@ class UserUpdate(BaseModel):
     github_username: Optional[str] = None
     leetcode_username: Optional[str] = None
     kaggle_username: Optional[str] = None
+    hackerrank_username: Optional[str] = None
+    codechef_username: Optional[str] = None
     cgpa: Optional[float] = Field(None, ge=0, le=10)
     branch: Optional[str] = None
     college_tier: Optional[int] = Field(None, ge=1, le=4)
     graduation_year: Optional[int] = None
     internship_count: Optional[int] = Field(None, ge=0)
     available_months: Optional[int] = Field(None, ge=1, le=12)
+    is_onboarded: Optional[bool] = None
 
 
 class UserResponse(BaseModel):
@@ -52,6 +55,8 @@ class UserResponse(BaseModel):
     avatar_url: Optional[str] = None
     github_username: Optional[str] = None
     leetcode_username: Optional[str] = None
+    hackerrank_username: Optional[str] = None
+    codechef_username: Optional[str] = None
     cgpa: Optional[float] = None
     branch: Optional[str] = None
     college_tier: Optional[int] = None

@@ -249,7 +249,7 @@ export default function MatchReportPage() {
         </nav>
 
         {/* ═══ SECTION 2 — HERO ═══ */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_320px] items-start">
           {/* Left — Main card */}
           <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8">
             <div className="flex items-center gap-4 mb-6">
@@ -308,42 +308,42 @@ export default function MatchReportPage() {
           </div>
 
           {/* Right — Quick Stats + Why This Score */}
-          <div className="space-y-4">
-            <div className="rounded-xl border border-[#E5E7EB] border-l-4 border-l-[#10B981] bg-[#ECFDF5] p-5">
-              <h3 className="text-sm font-semibold text-[#111827] mb-4">Quick Stats</h3>
+          <div className="space-y-3">
+            <div className="rounded-xl border border-[#E5E7EB] border-l-4 border-l-[#10B981] bg-[#ECFDF5] p-4">
+              <h3 className="text-xs font-semibold text-[#111827] mb-2">Quick Stats</h3>
               <div className="space-y-0">
                 {[
                   { label: "Target Score", value: `${data.targetScore}%`, color: "text-[#111827]" },
                   { label: "Gap to Close", value: `${data.gapToClose}%`, color: "text-[#EF4444] font-bold" },
                   { label: "Problems to Solve", value: `${data.problemsToSolve}`, color: "text-[#111827]" },
-                  { label: "Last Updated", value: data.lastUpdated, color: "text-[#9CA3AF] text-sm" },
+                  { label: "Last Updated", value: data.lastUpdated, color: "text-[#9CA3AF] text-xs" },
                 ].map((s) => (
-                  <div key={s.label} className="flex items-center justify-between py-3 border-b border-[#A7F3D0] last:border-0">
-                    <span className="text-sm text-[#6B7280]">{s.label}</span>
-                    <span className={`font-semibold ${s.color}`}>{s.value}</span>
+                  <div key={s.label} className="flex items-center justify-between py-2 border-b border-[#A7F3D0] last:border-0">
+                    <span className="text-xs text-[#6B7280]">{s.label}</span>
+                    <span className={`text-sm font-semibold ${s.color}`}>{s.value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* ── FIX 2: Why This Score? ── */}
-            <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-              <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#10B981]" /> Why your score is {data.matchScore}%
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
+              <h3 className="text-xs font-semibold text-[#111827] mb-2 flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3 text-[#10B981]" /> Why your score is {data.matchScore}%
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <p className="text-[10px] font-bold text-[#10B981] uppercase tracking-wider mb-1.5">Strong Areas</p>
+                  <p className="text-[10px] font-bold text-[#10B981] uppercase tracking-wider mb-1">Strong Areas</p>
                   {data.whyScore.strong.map((s, i) => (
-                    <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5 mb-1">
+                    <p key={i} className="text-[11px] text-[#6B7280] flex items-start gap-1.5 mb-0.5 leading-tight">
                       <CheckCircle2 className="h-3 w-3 text-[#10B981] mt-0.5 shrink-0" /> {s}
                     </p>
                   ))}
                 </div>
-                <div className="border-t border-[#F3F4F6] pt-2.5">
-                  <p className="text-[10px] font-bold text-[#EF4444] uppercase tracking-wider mb-1.5">Weak Areas</p>
+                <div className="border-t border-[#F3F4F6] pt-2">
+                  <p className="text-[10px] font-bold text-[#EF4444] uppercase tracking-wider mb-1">Weak Areas</p>
                   {data.whyScore.weak.map((w, i) => (
-                    <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5 mb-1">
+                    <p key={i} className="text-[11px] text-[#6B7280] flex items-start gap-1.5 mb-0.5 leading-tight">
                       <AlertCircle className="h-3 w-3 text-[#EF4444] mt-0.5 shrink-0" /> {w}
                     </p>
                   ))}

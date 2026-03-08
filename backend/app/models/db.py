@@ -35,6 +35,8 @@ class User(Base):
     github_username = Column(String(100), nullable=True, index=True)
     leetcode_username = Column(String(100), nullable=True)
     kaggle_username = Column(String(100), nullable=True)
+    hackerrank_username = Column(String(100), nullable=True)
+    codechef_username = Column(String(100), nullable=True)
 
     # Academic background
     cgpa = Column(Float, nullable=True)

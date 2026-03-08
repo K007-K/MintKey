@@ -1,181 +1,494 @@
-// Onboarding wizard — 4-step flow, clean light mode
+// Onboarding wizard — collect platform usernames + academic info, save to backend
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MintKeyLogoMark } from "@/components/ui/MintKeyLogo";
-import { Github, Code2, FileText, Building2, ArrowRight, Check, Upload } from "lucide-react";
+import {
+  Github,
+  Code2,
+  Trophy,
+  Flame,
+  GraduationCap,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 
-const COMPANIES = [
-  "Google", "Amazon", "Microsoft", "Flipkart", "Razorpay",
-  "Zepto", "CRED", "PhonePe", "Groww", "Swiggy",
-  "Blinkit", "Meesho", "TCS", "Infosys", "Wipro",
+// ─── Platform Configuration ─────────────────────────────────────────────────────
+const PLATFORMS = [
+  {
+    id: "github",
+    name: "GitHub",
+    icon: Github,
+    color: "bg-gray-900 text-white",
+    activeColor: "border-gray-900 bg-gray-50",
+    description: "Projects, repos, languages, and code quality",
+    syncMode: "auto" as const,
+    placeholder: "e.g. K007-K",
+    profileUrl: (u: string) => `https://github.com/${u}`,
+  },
+  {
+    id: "leetcode",
+    name: "LeetCode",
+    icon: Code2,
+    color: "bg-amber-500 text-white",
+    activeColor: "border-amber-500 bg-amber-50",
+    description: "DSA problems, topic mastery, and contest rating",
+    syncMode: "auto" as const,
+    placeholder: "e.g. karthik_lc",
+    profileUrl: (u: string) => `https://leetcode.com/u/${u}`,
+  },
+  {
+    id: "hackerrank",
+    name: "HackerRank",
+    icon: Trophy,
+    color: "bg-emerald-600 text-white",
+    activeColor: "border-emerald-600 bg-emerald-50",
+    description: "Certifications and skill badges",
+    syncMode: "manual" as const,
+    placeholder: "e.g. karthik_hr",
+    profileUrl: (u: string) => `https://www.hackerrank.com/profile/${u}`,
+  },
+  {
+    id: "codechef",
+    name: "CodeChef",
+    icon: Flame,
+    color: "bg-orange-600 text-white",
+    activeColor: "border-orange-600 bg-orange-50",
+    description: "Rating, stars, and contest history",
+    syncMode: "manual" as const,
+    placeholder: "e.g. karthik_cc",
+    profileUrl: (u: string) => `https://www.codechef.com/users/${u}`,
+  },
 ];
 
-const STEPS = [
-  { label: "GitHub", Icon: Github },
-  { label: "LeetCode", Icon: Code2 },
-  { label: "Resume", Icon: FileText },
-  { label: "Companies", Icon: Building2 },
+const BRANCHES = [
+  "Computer Science",
+  "Information Technology",
+  "Electronics & Communication",
+  "Electrical Engineering",
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Data Science",
+  "Artificial Intelligence",
+  "Other",
 ];
 
+const COLLEGE_TIERS = [
+  { value: 1, label: "Tier 1", desc: "IIT, NIT, BITS, IIIT" },
+  { value: 2, label: "Tier 2", desc: "Good private universities" },
+  { value: 3, label: "Tier 3", desc: "State universities, other" },
+];
+
+// ─── Component ──────────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
+  const { data: session, update: updateSession } = useSession();
   const router = useRouter();
+
   const [step, setStep] = useState(1);
-  const [data, setData] = useState({
-    githubUsername: "",
-    leetcodeUsername: "",
-    resumeFile: null as File | null,
-    targetCompanies: [] as string[],
-    monthsAvailable: 6,
-    hoursPerDay: 4,
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  // Platform usernames
+  const [platforms, setPlatforms] = useState({
+    github: "",
+    leetcode: "",
+    hackerrank: "",
+    codechef: "",
   });
 
-  const toggleCompany = (c: string) => {
-    setData((prev) => ({
-      ...prev,
-      targetCompanies: prev.targetCompanies.includes(c)
-        ? prev.targetCompanies.filter((x) => x !== c)
-        : [...prev.targetCompanies, c].slice(0, 5),
-    }));
+  // Pre-fill GitHub from OAuth session
+  useEffect(() => {
+    if (session?.user?.githubUsername) {
+      setPlatforms((prev) => ({ ...prev, github: session.user.githubUsername || "" }));
+    }
+  }, [session?.user?.githubUsername]);
+
+  // Academic info
+  const [academic, setAcademic] = useState({
+    cgpa: "",
+    branch: "",
+    college_tier: "",
+    graduation_year: "",
+    internship_count: "0",
+  });
+
+  const handlePlatformChange = (id: string, value: string) => {
+    setPlatforms((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const filledPlatforms = Object.values(platforms).filter((v) => v.trim() !== "").length;
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const token = session?.backendToken;
+      if (!token) {
+        setError("Session expired. Please log in again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const body: Record<string, unknown> = {
+        is_onboarded: true,
+      };
+
+      // Platform usernames
+      if (platforms.github) body.github_username = platforms.github;
+      if (platforms.leetcode) body.leetcode_username = platforms.leetcode;
+      if (platforms.hackerrank) body.hackerrank_username = platforms.hackerrank;
+      if (platforms.codechef) body.codechef_username = platforms.codechef;
+
+      // Academic info
+      if (academic.cgpa) body.cgpa = parseFloat(academic.cgpa);
+      if (academic.branch) body.branch = academic.branch;
+      if (academic.college_tier) body.college_tier = parseInt(academic.college_tier);
+      if (academic.graduation_year) body.graduation_year = parseInt(academic.graduation_year);
+      if (academic.internship_count) body.internship_count = parseInt(academic.internship_count);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "Failed to save profile");
+      }
+
+      // Update NextAuth session
+      await updateSession({ isOnboarded: true });
+
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-page px-6 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
+        {/* Logo */}
         <div className="mb-8 text-center">
           <MintKeyLogoMark className="justify-center mb-4" />
         </div>
 
         {/* Step indicators */}
-        <div className="mb-8 flex items-center justify-center gap-2">
-          {STEPS.map((s, i) => (
-            <div key={s.label} className="flex items-center gap-2">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all ${
-                i + 1 === step ? "bg-mint-dark text-white shadow-md" : i + 1 < step ? "bg-green-light text-green-dark" : "bg-bg-hover text-text-muted"
-              }`}>
-                {i + 1 < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
+        <div className="mb-8 flex items-center justify-center gap-3">
+          {[
+            { label: "Platforms", num: 1 },
+            { label: "Academic", num: 2 },
+          ].map((s, i) => (
+            <div key={s.label} className="flex items-center gap-3">
+              <div
+                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-all ${
+                  s.num === step
+                    ? "bg-mint-dark text-white shadow-md"
+                    : s.num < step
+                    ? "bg-green-light text-green-dark"
+                    : "bg-bg-hover text-text-muted"
+                }`}
+              >
+                {s.num < step ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <span className="w-4 text-center">{s.num}</span>
+                )}
+                <span>{s.label}</span>
               </div>
-              {i < 3 && <div className={`h-px w-8 ${i + 1 < step ? "bg-green" : "bg-border-default"}`} />}
+              {i < 1 && (
+                <div
+                  className={`h-px w-10 ${
+                    s.num < step ? "bg-green" : "bg-border-default"
+                  }`}
+                />
+              )}
             </div>
           ))}
         </div>
 
-        <div className="rounded-xl border border-border-default bg-bg-card p-8">
+        <div className="rounded-xl border border-border-default bg-bg-card p-6">
+          {/* ─── Step 1: Connect Platforms ─────────────────────────────────── */}
           {step === 1 && (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-bold text-text-primary">Connect GitHub</h2>
-                <p className="mt-1 text-sm text-text-muted">We analyze your repos, code quality, and tech stack.</p>
+                <h2 className="text-xl font-bold text-text-primary">
+                  Connect your coding platforms
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Link your accounts for skill analysis. GitHub or LeetCode recommended.
+                </p>
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-text-muted">GitHub Username</label>
-                <input
-                  value={data.githubUsername}
-                  onChange={(e) => setData({ ...data, githubUsername: e.target.value })}
-                  placeholder="e.g. K007-K"
-                  className="w-full rounded-lg border border-border-default px-4 py-2.5 text-sm text-text-primary placeholder:text-text-placeholder focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
-                />
+
+              {PLATFORMS.map((platform) => {
+                const Icon = platform.icon;
+                const value = platforms[platform.id as keyof typeof platforms];
+                const hasValue = value.trim() !== "";
+
+                return (
+                  <div
+                    key={platform.id}
+                    className={`rounded-xl border-2 p-4 transition-all duration-200 ${
+                      hasValue ? platform.activeColor : "border-border-default bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${platform.color}`}
+                      >
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3 className="font-semibold text-text-primary text-sm">
+                            {platform.name}
+                          </h3>
+                          {platform.syncMode === "auto" ? (
+                            <span className="rounded-full bg-green-light px-2 py-0.5 text-[10px] font-semibold text-green-dark">
+                              Auto-Sync
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-bg-hover px-2 py-0.5 text-[10px] font-semibold text-text-muted">
+                              Profile Link
+                            </span>
+                          )}
+                          {hasValue && (
+                            <Check className="ml-auto h-4 w-4 text-green" />
+                          )}
+                        </div>
+                        <p className="text-xs text-text-muted mb-2">
+                          {platform.description}
+                        </p>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={value}
+                            onChange={(e) =>
+                              handlePlatformChange(platform.id, e.target.value)
+                            }
+                            placeholder={platform.placeholder}
+                            className="flex-1 rounded-lg border border-border-default px-3 py-2 text-sm text-text-primary placeholder:text-text-placeholder focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
+                          />
+                          {hasValue && (
+                            <a
+                              href={platform.profileUrl(value)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border-default text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
+                              title={`View ${platform.name} profile`}
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Footer */}
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-xs text-text-muted">
+                  <span className="font-semibold text-text-primary">{filledPlatforms}</span>{" "}
+                  of 4 connected
+                </p>
+                <button
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-5 py-2 text-sm font-semibold text-white hover:bg-mint-darker transition-colors"
+                >
+                  Continue <ArrowRight className="h-3.5 w-3.5" />
+                </button>
               </div>
-              <p className="text-xs text-text-muted">🔒 We only read public data. No write access.</p>
             </div>
           )}
 
+          {/* ─── Step 2: Academic Info ─────────────────────────────────────── */}
           {step === 2 && (
             <div className="space-y-5">
               <div>
-                <h2 className="text-xl font-bold text-text-primary">Connect LeetCode</h2>
-                <p className="mt-1 text-sm text-text-muted">We analyze your DSA patterns and readiness.</p>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-text-muted">LeetCode Username</label>
-                <input
-                  value={data.leetcodeUsername}
-                  onChange={(e) => setData({ ...data, leetcodeUsername: e.target.value })}
-                  placeholder="e.g. karthik_codes"
-                  className="w-full rounded-lg border border-border-default px-4 py-2.5 text-sm text-text-primary placeholder:text-text-placeholder focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
-                />
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-xl font-bold text-text-primary">Upload Resume</h2>
-                <p className="mt-1 text-sm text-text-muted">AI extracts skills, CGPA, and experience.</p>
-              </div>
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border-default bg-bg-page p-8">
-                <Upload className="h-8 w-8 text-text-placeholder mb-3" strokeWidth={1.5} />
-                <p className="text-sm font-medium text-text-primary">
-                  {data.resumeFile ? data.resumeFile.name : "Drop your resume here"}
+                <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-mint-dark" />
+                  Academic background
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Helps calculate eligibility for companies with academic cutoffs.
                 </p>
-                <p className="mt-1 text-xs text-text-muted">PDF only, max 5MB</p>
+              </div>
+
+              {/* CGPA */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">
+                  Current CGPA{" "}
+                  <span className="text-text-placeholder">(out of 10)</span>
+                </label>
                 <input
-                  type="file" accept=".pdf"
-                  className="mt-3 text-xs text-text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-mint-bg file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-mint-darker"
-                  onChange={(e) => setData({ ...data, resumeFile: e.target.files?.[0] || null })}
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  value={academic.cgpa}
+                  onChange={(e) =>
+                    setAcademic({ ...academic, cgpa: e.target.value })
+                  }
+                  placeholder="8.5"
+                  className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-text-primary placeholder:text-text-placeholder focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
                 />
               </div>
-            </div>
-          )}
 
-          {step === 4 && (
-            <div className="space-y-5">
+              {/* Branch */}
               <div>
-                <h2 className="text-xl font-bold text-text-primary">Target Companies</h2>
-                <p className="mt-1 text-sm text-text-muted">Select up to 5 companies to prepare for.</p>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">
+                  Branch / Department
+                </label>
+                <select
+                  value={academic.branch}
+                  onChange={(e) =>
+                    setAcademic({ ...academic, branch: e.target.value })
+                  }
+                  className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-text-primary focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
+                >
+                  <option value="">Select branch</option>
+                  {BRANCHES.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {COMPANIES.map((c) => {
-                  const sel = data.targetCompanies.includes(c);
-                  return (
-                    <button key={c} onClick={() => toggleCompany(c)}
-                      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                        sel ? "bg-mint-bg text-mint-darker border border-mint/40" : "bg-bg-page text-text-secondary border border-border-default hover:border-mint/30"
+
+              {/* College Tier */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-text-muted">
+                  College Tier
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {COLLEGE_TIERS.map((tier) => (
+                    <button
+                      key={tier.value}
+                      onClick={() =>
+                        setAcademic({
+                          ...academic,
+                          college_tier: String(tier.value),
+                        })
+                      }
+                      className={`rounded-lg border-2 p-2.5 text-center transition-all duration-200 ${
+                        academic.college_tier === String(tier.value)
+                          ? "border-mint bg-mint-bg"
+                          : "border-border-default hover:border-border-hover"
                       }`}
-                    >{c}</button>
-                  );
-                })}
+                    >
+                      <div className="text-sm font-semibold text-text-primary">
+                        {tier.label}
+                      </div>
+                      <div className="text-[10px] text-text-muted mt-0.5">
+                        {tier.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Graduation Year + Internships */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-text-muted">Months</label>
-                  <select value={data.monthsAvailable} onChange={(e) => setData({ ...data, monthsAvailable: +e.target.value })}
-                    className="w-full rounded-lg border border-border-default px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-mint">
-                    {[1, 2, 3, 4, 5, 6, 9, 12].map((m) => <option key={m} value={m}>{m} months</option>)}
+                  <label className="mb-1.5 block text-xs font-medium text-text-muted">
+                    Graduation Year
+                  </label>
+                  <select
+                    value={academic.graduation_year}
+                    onChange={(e) =>
+                      setAcademic({
+                        ...academic,
+                        graduation_year: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-text-primary focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
+                  >
+                    <option value="">Select year</option>
+                    {[2025, 2026, 2027, 2028, 2029].map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-text-muted">Hours/Day</label>
-                  <select value={data.hoursPerDay} onChange={(e) => setData({ ...data, hoursPerDay: +e.target.value })}
-                    className="w-full rounded-lg border border-border-default px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-mint">
-                    {[1, 2, 3, 4, 5, 6, 8].map((h) => <option key={h} value={h}>{h} hours</option>)}
-                  </select>
+                  <label className="mb-1.5 block text-xs font-medium text-text-muted">
+                    Internships Done
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={academic.internship_count}
+                    onChange={(e) =>
+                      setAcademic({
+                        ...academic,
+                        internship_count: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-text-primary focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint"
+                  />
                 </div>
               </div>
+
+              {/* Error */}
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-6 py-2 text-sm font-semibold text-white hover:bg-mint-darker disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      Start Analyzing
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-center text-[10px] text-text-placeholder">
+                You can update everything from Settings later.
+              </p>
             </div>
           )}
-
-          {/* Navigation */}
-          <div className="mt-6 flex items-center justify-between">
-            <button onClick={() => setStep(Math.max(1, step - 1))}
-              className={`text-sm font-medium text-text-muted hover:text-text-primary transition-colors ${step === 1 ? "invisible" : ""}`}>
-              ← Back
-            </button>
-            {step < 4 ? (
-              <button onClick={() => setStep(step + 1)}
-                className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-5 py-2 text-sm font-semibold text-white hover:bg-mint-darker transition-colors">
-                Continue <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            ) : (
-              <button onClick={() => router.push("/dashboard")}
-                disabled={data.targetCompanies.length === 0}
-                className="flex items-center gap-1.5 rounded-lg bg-mint-dark px-5 py-2 text-sm font-semibold text-white hover:bg-mint-darker disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                Start Analysis <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
         </div>
       </div>
     </div>

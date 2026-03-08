@@ -148,3 +148,63 @@ export function useHealthCheck() {
     },
   });
 }
+
+// --- Auth Token Management ---
+
+/**
+ * Store the backend JWT token (received from NextAuth callback).
+ * The Axios interceptor will pick it up for all subsequent requests.
+ */
+export function setAuthToken(token: string) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("mintkey_token", token);
+  }
+}
+
+export function clearAuthToken() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("mintkey_token");
+  }
+}
+
+// --- User Profile Mutations ---
+
+// Update user profile (used by onboarding and settings)
+export function useUpdateProfile() {
+  return useMutation({
+    mutationFn: async (updates: Record<string, unknown>) => {
+      const { data } = await api.patch<APIResponse>("/api/v1/users/me", updates);
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+    },
+  });
+}
+
+// --- Platform Sync Mutations ---
+
+// Trigger GitHub sync (direct mode — no Celery needed)
+export function useSyncGithub() {
+  return useMutation({
+    mutationFn: async (github_username: string) => {
+      const { data } = await api.post<APIResponse>("/api/v1/sync/github/direct", {
+        github_username,
+      });
+      return data.data;
+    },
+  });
+}
+
+// Trigger LeetCode sync (direct mode)
+export function useSyncLeetCode() {
+  return useMutation({
+    mutationFn: async (leetcode_username: string) => {
+      const { data } = await api.post<APIResponse>("/api/v1/sync/leetcode/direct", {
+        leetcode_username,
+      });
+      return data.data;
+    },
+  });
+}
+

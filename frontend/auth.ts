@@ -54,9 +54,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.backendToken = token.backendToken as string;
       return session;
     },
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnboarded = auth?.user?.isOnboarded;
+      const isOnboardingPage = nextUrl.pathname.startsWith("/onboarding");
+      const isAuthPage = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/auth");
+      const isPublic = nextUrl.pathname === "/" || isAuthPage;
+
+      // Public pages — always accessible
+      if (isPublic) return true;
+
+      // Not logged in — redirect to login
+      if (!isLoggedIn) return false;
+
+      // Logged in but not onboarded — redirect to onboarding
+      if (!isOnboarded && !isOnboardingPage) {
+        return Response.redirect(new URL("/onboarding", nextUrl));
+      }
+
+      // Already onboarded but visiting onboarding — redirect to dashboard
+      if (isOnboarded && isOnboardingPage) {
+        return Response.redirect(new URL("/dashboard", nextUrl));
+      }
+
+      return true;
+    },
   },
   pages: {
-    signIn: "/auth/login",
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",

@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { useSidebarStore } from "@/lib/store";
 import { MintKeyLogoMark } from "@/components/ui/MintKeyLogo";
 import {
@@ -16,6 +17,7 @@ import {
   Target,
   User,
   Settings,
+  LogOut,
 } from "lucide-react";
 
 const PLATFORM_NAV = [
@@ -40,6 +42,13 @@ const BOTTOM_NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isOpen, toggle } = useSidebarStore();
+  const { data: session } = useSession();
+
+  // User data from NextAuth session
+  const userName = session?.user?.name || "User";
+  const userEmail = session?.user?.email || "";
+  const userInitial = userName.charAt(0).toUpperCase();
+  const userAvatar = session?.user?.image;
 
   const NavItem = ({ href, label, Icon, badge }: {
     href: string; label: string; Icon: React.ElementType; badge?: string;
@@ -48,16 +57,18 @@ export default function Sidebar() {
     return (
       <Link
         href={href}
-        className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+        className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150 ${
           isActive
-            ? "bg-[#ecfdf5] text-[#10b981] border-l-2 border-[#10b981] -ml-px"
-            : "text-text-secondary hover:bg-[#f3f4f6] hover:text-text-primary"
+            ? "bg-mint-bg text-mint-darker font-semibold"
+            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
         }`}
       >
-        <Icon className={`h-[18px] w-[18px] ${isActive ? "text-[#10b981]" : "text-text-muted group-hover:text-text-secondary"}`} strokeWidth={1.8} />
-        <span className="flex-1">{label}</span>
+        <Icon className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-mint-dark" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={isActive ? 2.2 : 1.8} />
+        <span className="truncate">{label}</span>
         {badge && (
-          <span className="rounded-full bg-mint-light px-2 py-0.5 text-[10px] font-semibold text-mint-darker">{badge}</span>
+          <span className="ml-auto rounded-md bg-mint-light px-1.5 py-0.5 text-[9px] font-bold text-mint-darker tracking-wide">
+            {badge}
+          </span>
         )}
       </Link>
     );
@@ -65,18 +76,9 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden" onClick={toggle} />
-      )}
-
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-60 flex-col border-r border-border-default bg-bg-sidebar transition-transform duration-300 md:relative md:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      <aside className="fixed left-0 top-0 z-40 flex h-full w-[240px] flex-col border-r border-gray-200 bg-white">
         {/* Logo */}
-        <div className="px-5 py-5">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
           <MintKeyLogoMark />
         </div>
 
@@ -119,15 +121,30 @@ export default function Sidebar() {
             Sync Now
           </button>
 
-          {/* User profile */}
-          <div className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-light text-sm font-semibold text-mint-darker">
-              K
-            </div>
+          {/* User profile — real data from session */}
+          <div className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2 group">
+            {userAvatar ? (
+              <img
+                src={userAvatar}
+                alt={userName}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-light text-sm font-semibold text-mint-darker">
+                {userInitial}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-text-primary truncate">Karthik</div>
-              <div className="text-xs text-text-muted truncate">karthik@mintkey.io</div>
+              <div className="text-sm font-medium text-text-primary truncate">{userName}</div>
+              <div className="text-xs text-text-muted truncate">{userEmail}</div>
             </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+              title="Sign out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </aside>
