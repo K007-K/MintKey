@@ -137,6 +137,8 @@ class UserTargetCompany(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    user = relationship("User", back_populates="target_companies")
+
 
 class UserSkillGap(Base):
     """Identified skill gaps for a user."""
