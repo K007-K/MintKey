@@ -39,6 +39,7 @@ class User(Base):
     codechef_username = Column(String(100), nullable=True)
 
     # Academic background
+    institution_name = Column(String(255), nullable=True)
     cgpa = Column(Float, nullable=True)
     branch = Column(String(50), nullable=True)
     college_tier = Column(Integer, nullable=True)
@@ -53,6 +54,7 @@ class User(Base):
     # Auth
     github_oauth_id = Column(String(100), nullable=True, unique=True)
     is_onboarded = Column(Boolean, default=False)
+    settings = Column(JSONB, nullable=True, default=dict)
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

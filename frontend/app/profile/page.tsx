@@ -7,7 +7,7 @@ import { useCurrentUser, useUpdateProfile } from "@/lib/api";
 import { useSession } from "next-auth/react";
 import {
   Github, Code2, Upload, ChevronDown, ChevronUp,
-  CheckCircle2, AlertTriangle, FileText, Camera, Loader2,
+  CheckCircle2, FileText, Camera, Loader2,
 } from "lucide-react";
 
 /* ─── Types ─── */
@@ -56,6 +56,7 @@ export default function ProfilePage() {
   // Academic state
   const [academicOpen, setAcademicOpen] = useState(false);
   const [academic, setAcademic] = useState({
+    institution_name: "",
     college_tier: "",
     branch: "",
     cgpa: "",
@@ -73,6 +74,7 @@ export default function ProfilePage() {
     if (user) {
       setName((user.name as string) || "");
       setAcademic({
+        institution_name: (user.institution_name as string) || "",
         college_tier: user.college_tier != null ? String(user.college_tier) : "",
         branch: (user.branch as string) || "",
         cgpa: user.cgpa != null ? String(user.cgpa) : "",
@@ -120,6 +122,7 @@ export default function ProfilePage() {
     setAcademicSaving(true);
     try {
       await updateProfile.mutateAsync({
+        institution_name: academic.institution_name || null,
         college_tier: academic.college_tier ? parseInt(academic.college_tier) : null,
         branch: academic.branch || null,
         cgpa: academic.cgpa ? parseFloat(academic.cgpa) : null,
@@ -147,7 +150,7 @@ export default function ProfilePage() {
       title="Profile & Integrations"
       subtitle="Manage your profile, connected platforms, and resume."
     >
-      <div className="max-w-3xl space-y-5">
+      <div className="mx-auto max-w-3xl space-y-5">
 
         {/* ─── Section 1: Profile Card ─── */}
         <div className="rounded-xl border border-[#e5e7eb] bg-white p-6">
@@ -322,6 +325,16 @@ export default function ProfilePage() {
           {academicOpen && (
             <div className="border-t border-gray-100 px-6 pb-5 pt-4">
               <div className="grid gap-3.5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-[13px] font-medium text-gray-600">Institution Name</label>
+                  <input
+                    type="text"
+                    value={academic.institution_name}
+                    onChange={(e) => setAcademic({ ...academic, institution_name: e.target.value })}
+                    placeholder="e.g. VIT University"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400/30"
+                  />
+                </div>
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-gray-600">College Tier</label>
                   <select
@@ -449,23 +462,6 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* ─── Section 5: Danger Zone ─── */}
-        <div className="rounded-xl border border-red-200 bg-red-50/50 p-5">
-          <div className="flex items-start gap-3.5">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white border border-red-100">
-              <AlertTriangle className="h-4 w-4 text-red-500" strokeWidth={1.8} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-red-700">Danger Zone</h2>
-              <p className="mt-1 text-sm text-gray-500 leading-relaxed">
-                Once you delete your account, there is no going back. All your data, progress, and integrations will be permanently removed.
-              </p>
-              <button className="mt-3 rounded-lg border border-red-300 bg-white px-3.5 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
-                Delete Account
-              </button>
-            </div>
-          </div>
-        </div>
 
       </div>
     </DashboardLayout>

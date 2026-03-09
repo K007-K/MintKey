@@ -39,6 +39,7 @@ class UserUpdate(BaseModel):
     kaggle_username: Optional[str] = None
     hackerrank_username: Optional[str] = None
     codechef_username: Optional[str] = None
+    institution_name: Optional[str] = None
     cgpa: Optional[float] = Field(None, ge=0, le=10)
     branch: Optional[str] = None
     college_tier: Optional[int] = Field(None, ge=1, le=4)
@@ -46,6 +47,7 @@ class UserUpdate(BaseModel):
     internship_count: Optional[int] = Field(None, ge=0)
     available_months: Optional[int] = Field(None, ge=1, le=12)
     is_onboarded: Optional[bool] = None
+    settings: Optional[dict] = None
 
 
 class UserResponse(BaseModel):
@@ -57,12 +59,14 @@ class UserResponse(BaseModel):
     leetcode_username: Optional[str] = None
     hackerrank_username: Optional[str] = None
     codechef_username: Optional[str] = None
+    institution_name: Optional[str] = None
     cgpa: Optional[float] = None
     branch: Optional[str] = None
     college_tier: Optional[int] = None
     graduation_year: Optional[int] = None
     internship_count: int = 0
     is_onboarded: bool = False
+    settings: Optional[dict] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
