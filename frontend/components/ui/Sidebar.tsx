@@ -37,7 +37,7 @@ const INTELLIGENCE_NAV = [
 ];
 
 const BOTTOM_NAV = [
-  { href: "/profile", label: "Profile", Icon: User },
+  { href: "/profile", label: "Profile & Integrations", Icon: User },
   { href: "/settings", label: "Settings", Icon: Settings },
 ];
 
