@@ -2,9 +2,26 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/ui/Sidebar";
-import { useSidebarStore } from "@/lib/store";
+import { useSidebarStore, usePreferencesStore } from "@/lib/store";
 import { Bell, Menu } from "lucide-react";
+
+/** Format a relative time string like "3 mins ago" */
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "Never";
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  if (diffMs < 0) return "Just now";
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hr${hrs === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
 
 export default function DashboardLayout({
   children,
@@ -16,7 +33,9 @@ export default function DashboardLayout({
   subtitle?: string;
 }) {
   const { isOpen, toggle } = useSidebarStore();
+  const { lastSyncedAt, syncInProgress } = usePreferencesStore();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const userName = session?.user?.name?.split(" ")[0] || "there";
   const userInitial = (session?.user?.name || "U").charAt(0).toUpperCase();
@@ -52,10 +71,19 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Last synced */}
+            {/* Last synced — real timestamp */}
             <div className="hidden items-center gap-1.5 text-xs text-text-muted sm:flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-green" />
-              Last synced: 14 mins ago
+              {syncInProgress ? (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  Syncing...
+                </>
+              ) : (
+                <>
+                  <span className={`h-1.5 w-1.5 rounded-full ${lastSyncedAt ? "bg-green" : "bg-gray-300"}`} />
+                  {lastSyncedAt ? `Last synced: ${timeAgo(lastSyncedAt)}` : "Not synced yet"}
+                </>
+              )}
             </div>
 
             {/* Notification bell */}
@@ -63,8 +91,11 @@ export default function DashboardLayout({
               <Bell className="h-[18px] w-[18px]" strokeWidth={1.8} />
             </button>
 
-            {/* Profile */}
-            <button className="flex items-center gap-2 rounded-lg border border-border-default px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors">
+            {/* Profile — navigates to /profile */}
+            <button
+              onClick={() => router.push("/profile")}
+              className="flex items-center gap-2 rounded-lg border border-border-default px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors"
+            >
               {userAvatar ? (
                 <img
                   src={userAvatar}
@@ -76,7 +107,7 @@ export default function DashboardLayout({
                   {userInitial}
                 </div>
               )}
-              <span className="hidden sm:inline">Public Profile</span>
+              <span className="hidden sm:inline">My Profile</span>
             </button>
           </div>
         </header>

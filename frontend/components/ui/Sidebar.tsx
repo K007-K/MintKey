@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useSidebarStore } from "@/lib/store";
+import { useSidebarStore, usePreferencesStore } from "@/lib/store";
+import { useCurrentUser, useSyncGithub, useSyncLeetCode, queryClient } from "@/lib/api";
 import { MintKeyLogoMark, MintKeyLogo } from "@/components/ui/MintKeyLogo";
 import {
   LayoutDashboard,
@@ -20,6 +21,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Loader2,
 } from "lucide-react";
 
 const PLATFORM_NAV = [
@@ -44,12 +46,54 @@ const BOTTOM_NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isOpen, toggle } = useSidebarStore();
+  const { syncInProgress, setSyncInProgress, setLastSyncedAt } = usePreferencesStore();
   const { data: session } = useSession();
+  const { data: userData } = useCurrentUser();
+  const syncGithub = useSyncGithub();
+  const syncLeetCode = useSyncLeetCode();
 
+  const user = userData as Record<string, unknown> | undefined;
   const userName = session?.user?.name || "User";
   const userEmail = session?.user?.email || "";
   const userInitial = userName.charAt(0).toUpperCase();
   const userAvatar = session?.user?.image;
+
+  // Run sync for all connected platforms
+  const handleSyncNow = async () => {
+    if (syncInProgress) return;
+    setSyncInProgress(true);
+
+    const githubUsername = (user?.github_username as string) || "";
+    const leetcodeUsername = (user?.leetcode_username as string) || "";
+
+    try {
+      const promises: Promise<unknown>[] = [];
+      if (githubUsername) {
+        promises.push(syncGithub.mutateAsync(githubUsername));
+      }
+      if (leetcodeUsername) {
+        promises.push(syncLeetCode.mutateAsync(leetcodeUsername));
+      }
+
+      if (promises.length === 0) {
+        // No platforms connected — nothing to sync
+        setSyncInProgress(false);
+        return;
+      }
+
+      await Promise.allSettled(promises);
+
+      // Invalidate all data queries so dashboard refreshes
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["scores"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+
+      setLastSyncedAt(new Date().toISOString());
+    } catch {
+      // Sync failed — still update timestamp
+    }
+    setSyncInProgress(false);
+  };
 
   const NavItem = ({
     href,
@@ -168,27 +212,35 @@ export default function Sidebar() {
           <NavItem key={item.href} {...item} />
         ))}
 
-        {/* Sync Now button */}
+        {/* Sync Now button — wired to real APIs */}
         <button
-          className={`mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-mint-dark py-2.5 text-sm font-semibold text-white transition-all hover:bg-mint-darker active:scale-[0.98] ${
-            isOpen ? "px-4" : "px-0"
-          }`}
-          title={!isOpen ? "Sync Now" : undefined}
+          onClick={handleSyncNow}
+          disabled={syncInProgress}
+          className={`mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] ${
+            syncInProgress
+              ? "bg-gray-400 cursor-wait"
+              : "bg-mint-dark hover:bg-mint-darker"
+          } ${isOpen ? "px-4" : "px-0"}`}
+          title={!isOpen ? (syncInProgress ? "Syncing..." : "Sync Now") : undefined}
         >
-          <svg
-            className="h-4 w-4 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          {isOpen && "Sync Now"}
+          {syncInProgress ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+          ) : (
+            <svg
+              className="h-4 w-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+          )}
+          {isOpen && (syncInProgress ? "Syncing..." : "Sync Now")}
         </button>
 
         {/* User profile */}

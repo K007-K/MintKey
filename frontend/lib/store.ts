@@ -51,10 +51,21 @@ interface PreferencesState {
   setLastSyncedAt: (date: string) => void;
 }
 
+const getStoredSyncTime = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("mintkey_last_synced");
+};
+
 export const usePreferencesStore = create<PreferencesState>((set) => ({
   theme: "dark",
   syncInProgress: false,
-  lastSyncedAt: null,
+  lastSyncedAt: getStoredSyncTime(),
   setSyncInProgress: (val) => set({ syncInProgress: val }),
-  setLastSyncedAt: (date) => set({ lastSyncedAt: date }),
+  setLastSyncedAt: (date) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("mintkey_last_synced", date);
+    }
+    set({ lastSyncedAt: date });
+  },
 }));
+
