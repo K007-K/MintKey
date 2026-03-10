@@ -1,6 +1,7 @@
 // Dashboard layout — sidebar + topbar with dynamic sidebar width
 "use client";
 
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/ui/Sidebar";
@@ -37,6 +38,10 @@ export default function DashboardLayout({
   const { data: session } = useSession();
   const router = useRouter();
 
+  // Prevent hydration mismatch — defer localStorage-dependent UI until client mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const userName = session?.user?.name?.split(" ")[0] || "there";
   const userInitial = (session?.user?.name || "U").charAt(0).toUpperCase();
   const userAvatar = session?.user?.image;
@@ -71,16 +76,21 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Last synced — real timestamp */}
+            {/* Last synced — real timestamp (deferred to avoid SSR mismatch) */}
             <div className="hidden items-center gap-1.5 text-xs text-text-muted sm:flex">
-              {syncInProgress ? (
+              {!mounted ? (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                  Not synced yet
+                </>
+              ) : syncInProgress ? (
                 <>
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
                   Syncing...
                 </>
               ) : (
                 <>
-                  <span className={`h-1.5 w-1.5 rounded-full ${lastSyncedAt ? "bg-green" : "bg-gray-300"}`} />
+                  <span className={`h-1.5 w-1.5 rounded-full ${lastSyncedAt ? "bg-green-500" : "bg-gray-300"}`} />
                   {lastSyncedAt ? `Last synced: ${timeAgo(lastSyncedAt)}` : "Not synced yet"}
                 </>
               )}
