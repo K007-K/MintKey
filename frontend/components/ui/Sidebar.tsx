@@ -229,8 +229,8 @@ export default function Sidebar() {
           </span>
         </button>
 
-        {/* User profile */}
-        <div className={`mt-3 flex items-center rounded-lg py-2 group overflow-hidden transition-all duration-300 ${
+        {/* User profile + Logout */}
+        <div className={`mt-3 flex items-center rounded-lg py-2 overflow-hidden transition-all duration-300 ${
           isOpen ? "gap-3 px-3" : "justify-center px-0"
         }`}>
           {userAvatar ? (
@@ -257,13 +257,23 @@ export default function Sidebar() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all shrink-0"
+              className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all shrink-0"
               title="Sign out"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
+        {/* Collapsed logout button */}
+        {!isOpen && (
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="mt-1 flex w-full items-center justify-center rounded-lg py-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </aside>
   );
