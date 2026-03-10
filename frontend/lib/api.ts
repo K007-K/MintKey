@@ -25,6 +25,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// On 401 — clear stale token + trigger NextAuth session refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("mintkey_token");
+      // Trigger NextAuth to refresh the session (which re-runs JWT callback)
+      try { await fetch("/api/auth/session"); } catch {}
+    }
+    return Promise.reject(error);
+  }
+);
+
 // --- Query Client ---
 export const queryClient = new QueryClient({
   defaultOptions: {

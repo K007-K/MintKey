@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Auth
     JWT_SECRET: str = "dev-secret-change-in-production"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days — match NextAuth session duration
 
     # HelixDB
     HELIX_URL: str = "http://localhost:6969"

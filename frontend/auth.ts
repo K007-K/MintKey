@@ -45,8 +45,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
 
-      // Retry: if backendToken is missing (backend was down during login), re-fetch
-      if (!token.backendToken && token.githubId) {
+      // Check if backend token is missing OR expired — refresh it
+      let needsRefresh = !token.backendToken;
+      if (token.backendToken && !needsRefresh) {
+        try {
+          // Decode JWT payload to check expiry (JWT = header.payload.sig)
+          const payload = JSON.parse(
+            Buffer.from((token.backendToken as string).split(".")[1], "base64").toString()
+          );
+          const expiresAt = payload.exp * 1000; // convert to ms
+          const fiveMinBuffer = 5 * 60 * 1000;
+          if (Date.now() > expiresAt - fiveMinBuffer) {
+            needsRefresh = true;
+          }
+        } catch {
+          needsRefresh = true;
+        }
+      }
+
+      if (needsRefresh && token.githubId) {
         try {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/github`,
