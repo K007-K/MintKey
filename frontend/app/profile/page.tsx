@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
-import { useCurrentUser, useUpdateProfile } from "@/lib/api";
+import { useCurrentUser, useUpdateProfile, useUploadResume } from "@/lib/api";
 import { useSession } from "next-auth/react";
 import {
   Github, Code2, Upload, ChevronDown, ChevronUp,
@@ -41,6 +41,7 @@ export default function ProfilePage() {
   const { data: session } = useSession();
   const { data: userData, isLoading } = useCurrentUser();
   const updateProfile = useUpdateProfile();
+  const uploadResume = useUploadResume();
 
   const user = userData as Record<string, unknown> | undefined;
 
@@ -68,6 +69,25 @@ export default function ProfilePage() {
   // Resume state
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Resume upload handler
+  const handleResumeUpload = useCallback(async (file: File) => {
+    setUploadError(null);
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      setUploadError("Only PDF files are accepted");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File size must be under 5MB");
+      return;
+    }
+    try {
+      await uploadResume.mutateAsync(file);
+    } catch {
+      setUploadError("Upload failed. Please try again.");
+    }
+  }, [uploadResume]);
 
   // Hydrate from API data
   useEffect(() => {
@@ -409,19 +429,31 @@ export default function ProfilePage() {
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => { e.preventDefault(); setDragOver(false); }}
-            onClick={() => fileInputRef.current?.click()}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleResumeUpload(f); }}
+            onClick={() => !uploadResume.isPending && fileInputRef.current?.click()}
             className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 px-4 transition-colors ${
-              dragOver
-                ? "border-teal-400 bg-teal-50/30"
-                : "border-gray-200 bg-[#f9fafb] hover:border-teal-300 hover:bg-teal-50/10"
+              uploadResume.isPending
+                ? "border-teal-400 bg-teal-50/20 cursor-wait"
+                : dragOver
+                  ? "border-teal-400 bg-teal-50/30"
+                  : "border-gray-200 bg-[#f9fafb] hover:border-teal-300 hover:bg-teal-50/10"
             }`}
           >
-            <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-100 shadow-sm">
-              <Upload className="h-4 w-4 text-gray-400" />
-            </div>
-            <p className="text-sm font-medium text-gray-600">Drag & drop your resume or click to browse</p>
-            <p className="mt-0.5 text-xs text-gray-400">PDF only, max 5MB</p>
+            {uploadResume.isPending ? (
+              <>
+                <Loader2 className="h-6 w-6 text-teal-500 animate-spin mb-2" />
+                <p className="text-sm font-medium text-teal-600">Uploading & parsing...</p>
+                <p className="mt-0.5 text-xs text-gray-400">This may take a few seconds</p>
+              </>
+            ) : (
+              <>
+                <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-100 shadow-sm">
+                  <Upload className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-600">Drag & drop your resume or click to browse</p>
+                <p className="mt-0.5 text-xs text-gray-400">PDF only, max 5MB</p>
+              </>
+            )}
             <input
               ref={fileInputRef}
               type="file"
@@ -429,10 +461,14 @@ export default function ProfilePage() {
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) console.log("Selected file:", file.name);
+                if (file) handleResumeUpload(file);
+                e.target.value = ""; // reset so same file can be re-uploaded
               }}
             />
           </div>
+          {uploadError && (
+            <p className="mt-2 text-xs text-red-500 font-medium">{uploadError}</p>
+          )}
 
           {resumeUrl && (
             <div className="mt-3 flex items-center justify-between rounded-xl border border-gray-100 bg-white p-3.5">

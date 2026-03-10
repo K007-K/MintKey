@@ -113,10 +113,11 @@ async def sync_leetcode_direct(
 async def upload_resume(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Upload and parse a resume PDF.
-    Returns extracted sections, skills, education, and contact info.
+    Saves parsed data to user record and returns extracted info.
     """
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(
@@ -146,19 +147,28 @@ async def upload_resume(
         # Extract skills from resume text
         skills = extractor.extract_from_text(parsed.get("raw_text", ""))
 
-        return APIResponse(
-            success=True,
-            data={
-                "sections": list(parsed.get("sections", {}).keys()),
-                "education": parsed.get("education", []),
-                "experience": parsed.get("experience", []),
-                "projects": parsed.get("projects", []),
-                "certifications": parsed.get("certifications", []),
-                "contact": parsed.get("contact", {}),
-                "skills_extracted": skills[:30],
-                "total_skills": len(skills),
-            },
+        result_data = {
+            "filename": file.filename,
+            "sections": list(parsed.get("sections", {}).keys()),
+            "education": parsed.get("education", []),
+            "experience": parsed.get("experience", []),
+            "projects": parsed.get("projects", []),
+            "certifications": parsed.get("certifications", []),
+            "contact": parsed.get("contact", {}),
+            "skills_extracted": skills[:30],
+            "total_skills": len(skills),
+        }
+
+        # Persist to user record
+        from app.repositories.users import UserRepository
+        repo = UserRepository(db)
+        await repo.update(
+            current_user.id,
+            resume_url=file.filename,
+            resume_parsed_data=result_data,
         )
+
+        return APIResponse(success=True, data=result_data)
     except Exception as e:
         logger.error(f"Resume upload error: {e}")
         return APIResponse(success=False, data=None, error=str(e))

@@ -234,3 +234,20 @@ export function useSyncLeetCode() {
   });
 }
 
+// Upload resume PDF (multipart/form-data)
+export function useUploadResume() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const { data } = await api.post<APIResponse>("/api/v1/sync/resume/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 60000, // 60s for large files
+      });
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+    },
+  });
+}
