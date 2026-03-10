@@ -48,7 +48,7 @@ export default function DashboardLayout({
       {/* Main content — shifts based on sidebar width */}
       <div
         className="flex flex-1 flex-col overflow-hidden transition-[margin-left] duration-300 ease-in-out"
-        style={{ marginLeft: isOpen ? 240 : 76 }}
+        style={{ marginLeft: isOpen ? 240 : 60 }}
       >
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-3.5">
