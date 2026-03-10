@@ -98,6 +98,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.githubUsername = token.githubUsername as string;
       session.user.isOnboarded = token.isOnboarded as boolean;
       session.backendToken = token.backendToken as string;
+      session.githubId = token.githubId as string;
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {

@@ -12,6 +12,7 @@ declare module "next-auth" {
       isOnboarded?: boolean;
     };
     backendToken?: string;
+    githubId?: string;
   }
 }
 
