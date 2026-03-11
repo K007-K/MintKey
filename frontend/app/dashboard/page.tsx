@@ -92,9 +92,9 @@ export default function DashboardPage() {
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-semibold text-gray-900">Readiness Trend</h2>
+                <h2 className="text-base font-semibold text-gray-900">{(d?.trend_label as string) || "Readiness Trend"}</h2>
                 <p className="text-xs text-gray-400">
-                  {trendData ? "Your improvement over time" : "Run analysis to see real trends"}
+                  {trendData ? "Your profile score across platforms" : "Connect platforms to see your scores"}
                 </p>
               </div>
             </div>

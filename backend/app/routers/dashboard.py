@@ -50,6 +50,104 @@ def _compute_github_grade(profile_data: dict) -> tuple[str, str]:
         return "C", "Getting Started"
 
 
+def _compute_profile_readiness(
+    lc_data: dict, gh_data: dict, resume_data: dict | None
+) -> tuple[int, str]:
+    """
+    Compute overall profile readiness (0-100) from all available data.
+    Weights: LeetCode 40%, GitHub 35%, Resume 25%.
+    Returns (score, badge).
+    """
+    lc_score = 0.0
+    gh_score = 0.0
+    res_score = 0.0
+    components = 0
+
+    # ── LeetCode component (40%) ──
+    if lc_data and "error" not in lc_data:
+        summary = lc_data.get("summary", {})
+        total = summary.get("total_solved", 0)
+        hard = summary.get("hard", 0)
+        medium = summary.get("medium", 0)
+        # Volume: up to 40pts for 150+ problems
+        vol = min(total / 150, 1.0) * 40
+        # Difficulty: up to 35pts for hard ratio
+        diff = min(hard / max(total, 1) / 0.2, 1.0) * 35 if total > 0 else 0
+        # Breadth: up to 25pts for medium + hard
+        breadth = min((medium + hard) / max(total, 1), 1.0) * 25 if total > 0 else 0
+        lc_score = vol + diff + breadth
+        components += 40
+
+    # ── GitHub component (35%) ──
+    if gh_data and "error" not in gh_data:
+        repos = gh_data.get("original_repos", 0)
+        langs = len(gh_data.get("language_distribution", {}))
+        top_repos = gh_data.get("top_repos", [])
+        # Repos: up to 30pts for 10+ repos
+        r = min(repos / 10, 1.0) * 30
+        # Languages: up to 25pts for 5+ languages
+        l = min(langs / 5, 1.0) * 25
+        # Quality: up to 25pts for stars + descriptions
+        stars = sum(rr.get("stars", 0) for rr in top_repos)
+        q = min(stars / 10, 1.0) * 15 + min(
+            sum(1 for rr in top_repos if rr.get("description")) / 5, 1.0
+        ) * 10
+        # Recency: up to 20pts
+        from datetime import datetime, timezone
+        recent = 0
+        for rr in top_repos[:10]:
+            updated = rr.get("updated_at", "")
+            if updated:
+                try:
+                    dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+                    if (datetime.now(timezone.utc) - dt).days <= 30:
+                        recent += 1
+                except Exception:
+                    pass
+        rec = min(recent / 3, 1.0) * 20
+        gh_score = r + l + q + rec
+        components += 35
+
+    # ── Resume component (25%) ──
+    if resume_data and resume_data.get("total_skills"):
+        skills = resume_data.get("total_skills", 0)
+        projects = len(resume_data.get("projects", []))
+        education = len(resume_data.get("education", []))
+        experience = len(resume_data.get("experience", []))
+        # Skills: up to 30pts for 15+ skills
+        s = min(skills / 15, 1.0) * 30
+        # Projects: up to 30pts for 4+ projects
+        p = min(projects / 4, 1.0) * 30
+        # Education: 15pts if present
+        e = 15 if education > 0 else 0
+        # Experience: 25pts based on count
+        ex = min(experience / 2, 1.0) * 25
+        res_score = s + p + e + ex
+        components += 25
+
+    if components == 0:
+        return 0, "Connect platforms"
+
+    # Normalize to 100
+    weighted = (
+        (lc_score * 40 + gh_score * 35 + res_score * 25) / components
+    )
+    score = round(min(weighted, 100))
+
+    if score >= 85:
+        badge = "Excellent"
+    elif score >= 70:
+        badge = "Strong"
+    elif score >= 55:
+        badge = "Good"
+    elif score >= 40:
+        badge = "Building"
+    else:
+        badge = "Getting started"
+
+    return score, badge
+
+
 def _compute_coding_streak(lc_data: dict, gh_data: dict) -> tuple[str, str]:
     """Estimate coding streak from platform activity."""
     # Use LeetCode submission streak if available
@@ -143,7 +241,15 @@ async def get_dashboard_summary(
     # Coding Streak
     streak_val, streak_badge = _compute_coding_streak(leetcode_data, github_data)
 
-    # Readiness Grade — from latest match scores
+    # Readiness Grade — computed from all available data
+    resume_data = current_user.resume_parsed_data or {}
+    readiness, readiness_badge = _compute_profile_readiness(
+        leetcode_data, github_data, resume_data
+    )
+    if readiness == 0:
+        readiness = None
+
+    # Also fetch match scores for company bars + potential trend
     score_result = await db.execute(
         select(CompanyMatchScore)
         .where(CompanyMatchScore.user_id == current_user.id)
@@ -151,17 +257,6 @@ async def get_dashboard_summary(
         .limit(5)
     )
     match_scores = score_result.scalars().all()
-    readiness = None
-    readiness_badge = "Run analysis"
-    if match_scores:
-        readiness = round(
-            sum(s.overall_score for s in match_scores) / len(match_scores)
-        )
-        readiness_badge = (
-            "+4%" if readiness >= 80 else
-            "Growing" if readiness >= 60 else
-            "Building"
-        )
 
     # --- Recent Activity ---
     recent_activity = []
@@ -187,6 +282,18 @@ async def get_dashboard_summary(
             "result": f"{lc_total} Total",
             "resultStyle": "text-green-700 bg-green-100",
             "date": "Lifetime",
+            "iconType": "code",
+        })
+
+    # Resume upload event
+    if resume_data and resume_data.get("total_skills"):
+        uploaded_at = resume_data.get("uploaded_at", "")[:10] if resume_data.get("uploaded_at") else "Recently"
+        recent_activity.append({
+            "activity": f"Resume parsed — {resume_data.get('total_skills', 0)} skills extracted",
+            "platform": "Resume AI",
+            "result": "Parsed ✓",
+            "resultStyle": "text-teal-700 bg-teal-100",
+            "date": uploaded_at,
             "iconType": "code",
         })
 
@@ -274,23 +381,47 @@ async def get_dashboard_summary(
                 "desc": "Add more READMEs, topics, and multi-language projects to improve your engineering profile.",
                 "severity": "medium",
             })
+        if not resume_data or not resume_data.get("total_skills"):
+            critical_gaps.append({
+                "title": "No Resume Uploaded",
+                "desc": "Upload your resume for AI-powered skill extraction and gap analysis.",
+                "severity": "medium",
+            })
+        elif resume_data:
+            projects = len(resume_data.get("projects", []))
+            experience = len(resume_data.get("experience", []))
+            if projects < 3:
+                critical_gaps.append({
+                    "title": "Low Project Count",
+                    "desc": f"Only {projects} project{'s' if projects != 1 else ''} on resume. Top candidates showcase 4-6 projects.",
+                    "severity": "medium",
+                })
+            if experience == 0:
+                critical_gaps.append({
+                    "title": "No Work Experience",
+                    "desc": "Consider internships, freelance work, or open-source contributions to strengthen your resume.",
+                    "severity": "medium",
+                })
         if not critical_gaps:
             critical_gaps = [
-                {"title": "Run Full Analysis", "desc": "Trigger the 8-agent analysis to identify your real gaps.", "severity": "medium"}
+                {"title": "Add Target Companies", "desc": "Select companies you're targeting to get personalized gap analysis.", "severity": "medium"}
             ]
 
     if not priority_actions:
         actions = []
+        if not resume_data or not resume_data.get("total_skills"):
+            actions.append({"title": "Upload your resume", "desc": "Get AI-powered skill extraction and personalized insights", "time": "~2m", "link": "/profile"})
         if lc_total == 0 and current_user.leetcode_username:
             actions.append({"title": "Solve your first LeetCode problem", "desc": "Start with an Easy — Two Sum is a great beginner problem", "time": "~20m", "link": "/dsa"})
         if lc_total > 0 and lc_hard < 10:
             actions.append({"title": "Attempt a Hard DP or Graph problem", "desc": f"You have {lc_hard} Hard solved — companies test Hard in interviews", "time": "~60m", "link": "/dsa"})
         if github_data and "error" not in github_data and github_data.get("original_repos", 0) < 5:
             actions.append({"title": "Build a new project on GitHub", "desc": "Original projects matter more than forks for hiring", "time": "~2h", "link": None})
+        if not match_scores:
+            actions.append({"title": "Add target companies", "desc": "Select companies to get match scores and personalized roadmaps", "time": "~3m", "link": "/companies"})
         if not actions:
             actions = [
                 {"title": "Connect your coding platforms", "desc": "Link GitHub and LeetCode to unlock your dashboard", "time": "~5m", "link": "/settings"},
-                {"title": "Run full analysis", "desc": "Trigger the 8-agent AI analysis of your profile", "time": "~2m", "link": "/companies"},
             ]
         priority_actions = actions[:3]
 
@@ -302,6 +433,47 @@ async def get_dashboard_summary(
                 "week": f"Week {i + 1}",
                 "score": round(s.overall_score),
             })
+
+    # Fallback: profile score breakdown as bar chart data
+    trend_label = "Readiness Trend"
+    if not trend_data and readiness:
+        trend_label = "Profile Score Breakdown"
+        # Compute individual component scores for the chart
+        lc_pct = 0
+        gh_pct = 0
+        res_pct = 0
+        if lc_total > 0:
+            vol = min(lc_total / 150, 1.0) * 40
+            diff = min(lc_hard / max(lc_total, 1) / 0.2, 1.0) * 35
+            breadth = min((lc_medium + lc_hard) / max(lc_total, 1), 1.0) * 25
+            lc_pct = round(vol + diff + breadth)
+        if github_data and "error" not in github_data:
+            gh_pct = round(min(github_data.get("original_repos", 0) / 10, 1.0) * 30 +
+                          min(len(github_data.get("language_distribution", {})) / 5, 1.0) * 25 +
+                          25 + 20)  # Simplified
+            gh_pct = min(gh_pct, 100)
+        if resume_data and resume_data.get("total_skills"):
+            skills = resume_data.get("total_skills", 0)
+            projects = len(resume_data.get("projects", []))
+            res_pct = round(min(skills / 15, 1.0) * 30 + min(projects / 4, 1.0) * 30 + 15 + 25)
+            res_pct = min(res_pct, 100)
+        trend_data = [
+            {"week": "LeetCode", "score": lc_pct},
+            {"week": "GitHub", "score": gh_pct},
+            {"week": "Resume", "score": res_pct},
+            {"week": "Overall", "score": readiness},
+        ]
+
+    # --- Resume Summary ---
+    resume_summary = None
+    if resume_data and resume_data.get("total_skills"):
+        resume_summary = {
+            "skills": resume_data.get("total_skills", 0),
+            "projects": len(resume_data.get("projects", [])),
+            "education": len(resume_data.get("education", [])),
+            "experience": len(resume_data.get("experience", [])),
+            "uploaded": True,
+        }
 
     return APIResponse(
         success=True,
@@ -329,10 +501,12 @@ async def get_dashboard_summary(
                     "badge": readiness_badge,
                 },
             },
-            "recent_activity": recent_activity[:5],
+            "recent_activity": recent_activity[:6],
             "critical_gaps": critical_gaps[:3],
             "priority_actions": priority_actions[:3],
             "trend_data": trend_data if trend_data else None,
+            "trend_label": trend_label,
+            "resume_summary": resume_summary,
             "company_scores": [
                 {
                     "company_slug": s.company_slug,
