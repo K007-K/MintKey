@@ -493,19 +493,20 @@ export default function ProfilePage() {
                   <p className="mt-1 text-xs" style={{ color: '#9ca3af' }}>PDF only, max 5MB</p>
                 </>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleResumeUpload(file);
-                  e.target.value = '';
-                }}
-              />
             </div>
           )}
+          {/* Always-mounted hidden file input for Replace/Upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleResumeUpload(file);
+              e.target.value = '';
+            }}
+          />
           {uploadError && (
             <p className="mt-2 text-xs font-medium" style={{ color: '#ef4444' }}>{uploadError}</p>
           )}
