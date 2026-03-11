@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 class GitHubAuthRequest(BaseModel):
     """Payload sent by NextAuth JWT callback on GitHub sign-in."""
-    github_oauth_id: str
+    github_oauth_id: Optional[str] = None
     email: Optional[str] = None
     name: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -37,8 +37,10 @@ async def github_auth(
     repo = UserRepository(db)
 
     try:
-        # Check if user already exists by GitHub OAuth ID
-        user = await repo.get_by_github_oauth_id(payload.github_oauth_id)
+        # Check if user already exists by GitHub OAuth ID (if provided)
+        user = None
+        if payload.github_oauth_id:
+            user = await repo.get_by_github_oauth_id(payload.github_oauth_id)
 
         if user:
             # Existing user — update profile data from GitHub

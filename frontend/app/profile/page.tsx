@@ -84,8 +84,23 @@ export default function ProfilePage() {
     }
     try {
       await uploadResume.mutateAsync(file);
-    } catch {
-      setUploadError("Upload failed. Please try again.");
+    } catch (err: unknown) {
+      // Extract real error from Axios response
+      const axiosErr = err as { response?: { status?: number; data?: { detail?: string; error?: string } }; message?: string };
+      const status = axiosErr?.response?.status;
+      const detail = axiosErr?.response?.data?.detail || axiosErr?.response?.data?.error;
+
+      if (status === 401) {
+        setUploadError("Session expired. Please refresh the page.");
+      } else if (status === 413) {
+        setUploadError("File too large. Max 5MB allowed.");
+      } else if (detail) {
+        setUploadError(detail);
+      } else if (axiosErr?.message) {
+        setUploadError(axiosErr.message);
+      } else {
+        setUploadError("Upload failed. Please try again.");
+      }
     }
   }, [uploadResume]);
 

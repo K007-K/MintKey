@@ -240,10 +240,13 @@ export function useUploadResume() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
+      // DO NOT set Content-Type manually — browser must auto-set it with boundary
       const { data } = await api.post<APIResponse>("/api/v1/sync/resume/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        timeout: 60000, // 60s for large files
+        timeout: 60000,
       });
+      if (!data.success) {
+        throw new Error(data.error || "Upload failed");
+      }
       return data.data;
     },
     onSuccess: () => {
