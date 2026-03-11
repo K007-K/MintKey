@@ -532,8 +532,27 @@ export default function ProfilePage() {
                       <span className="text-[13px]" style={{ color: '#6b7280' }}>{resumeParsedData.total_skills} skills found</span>
                     </>
                   )}
+                  {resumeParsedData?.file_size_kb != null && (
+                    <>
+                      <span className="mx-2 text-xs" style={{ color: '#9ca3af' }}>·</span>
+                      <span className="text-[13px]" style={{ color: '#9ca3af' }}>{resumeParsedData.file_size_kb} KB</span>
+                    </>
+                  )}
                   <span className="mx-2 text-xs" style={{ color: '#9ca3af' }}>·</span>
-                  <span className="text-[13px]" style={{ color: '#9ca3af' }}>Uploaded</span>
+                  <span className="text-[13px]" style={{ color: '#9ca3af' }}>
+                    {resumeParsedData?.uploaded_at
+                      ? `Uploaded ${(() => {
+                          const diff = Date.now() - new Date(resumeParsedData.uploaded_at).getTime();
+                          const mins = Math.floor(diff / 60000);
+                          if (mins < 1) return 'just now';
+                          if (mins < 60) return `${mins}m ago`;
+                          const hrs = Math.floor(mins / 60);
+                          if (hrs < 24) return `${hrs}h ago`;
+                          const days = Math.floor(hrs / 24);
+                          return `${days} day${days > 1 ? 's' : ''} ago`;
+                        })()}`
+                      : 'Uploaded'}
+                  </span>
                 </div>
               </div>
               {/* Actions */}
@@ -572,20 +591,36 @@ export default function ProfilePage() {
             // Group skills by category
             type Skill = { name: string; category: string; frequency: number };
             const allSkills = (resumeParsedData.skills_extracted || []) as Skill[];
-            const categoryMap: Record<string, { label: string; styles: { bg: string; border: string; text: string; count: string } }> = {
-              languages: { label: 'DSA & CS', styles: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', count: '#16a34a' } },
-              database: { label: 'DSA & CS', styles: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', count: '#16a34a' } },
-              backend: { label: 'Backend', styles: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', count: '#3b82f6' } },
-              frontend: { label: 'Frontend', styles: { bg: '#faf5ff', border: '#e9d5ff', text: '#6b21a8', count: '#9333ea' } },
-            };
+            const dsaStyles = { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', count: '#16a34a' };
+            const backendStyles = { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', count: '#3b82f6' };
+            const frontendStyles = { bg: '#faf5ff', border: '#e9d5ff', text: '#6b21a8', count: '#9333ea' };
             const defaultStyles = { bg: '#f9fafb', border: '#e5e7eb', text: '#374151', count: '#6b7280' };
+
+            // Skills that should always go to Backend regardless of taxonomy category
+            const backendSkillNames = new Set(['javascript', 'typescript', 'sql', 'postgresql', 'mongodb', 'supabase', 'redis', 'node.js', 'express.js', 'rest api', 'graphql', 'fastapi', 'django', 'flask']);
+            // Category-level mapping for remaining skills
+            const categoryMap: Record<string, { label: string; styles: typeof defaultStyles }> = {
+              backend: { label: 'Backend', styles: backendStyles },
+              database: { label: 'Backend', styles: backendStyles },
+              frontend: { label: 'Frontend', styles: frontendStyles },
+              languages: { label: 'DSA & CS', styles: dsaStyles },
+            };
 
             const groups: Record<string, { label: string; styles: typeof defaultStyles; skills: Skill[] }> = {};
             allSkills.forEach((s) => {
-              const mapped = categoryMap[s.category];
-              const groupLabel = mapped ? mapped.label : 'Tools & Other';
+              // Check skill-name override first
+              let groupLabel: string;
+              let styles: typeof defaultStyles;
+              if (backendSkillNames.has(s.name.toLowerCase())) {
+                groupLabel = 'Backend';
+                styles = backendStyles;
+              } else {
+                const mapped = categoryMap[s.category];
+                groupLabel = mapped ? mapped.label : 'Tools & Other';
+                styles = mapped ? mapped.styles : defaultStyles;
+              }
               if (!groups[groupLabel]) {
-                groups[groupLabel] = { label: groupLabel, styles: mapped ? mapped.styles : defaultStyles, skills: [] };
+                groups[groupLabel] = { label: groupLabel, styles, skills: [] };
               }
               groups[groupLabel].skills.push(s);
             });

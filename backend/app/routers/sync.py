@@ -157,6 +157,8 @@ async def upload_resume(
             "contact": parsed.get("contact", {}),
             "skills_extracted": skills[:30],
             "total_skills": len(skills),
+            "file_size_kb": round(len(pdf_bytes) / 1024),
+            "uploaded_at": __import__("datetime").datetime.utcnow().isoformat() + "Z",
         }
 
         # Persist to user record
