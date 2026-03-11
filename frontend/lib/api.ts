@@ -240,8 +240,10 @@ export function useUploadResume() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
-      // DO NOT set Content-Type manually — browser must auto-set it with boundary
       const { data } = await api.post<APIResponse>("/api/v1/sync/resume/upload", formData, {
+        // Override the default "application/json" from axios.create —
+        // browser must auto-set Content-Type with multipart boundary
+        headers: { "Content-Type": undefined },
         timeout: 60000,
       });
       if (!data.success) {
