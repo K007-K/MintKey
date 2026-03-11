@@ -149,6 +149,9 @@ class ResumeParser:
         """Extract project entries — group bullet descriptions under titles."""
         if not text:
             return []
+        # Short standalone labels to skip (link text from resumes)
+        skip_labels = {"github", "live demo", "view project", "demo", "link",
+                       "source code", "view certificate", "certificate", "linkedin"}
         projects: list[dict] = []
         current: dict | None = None
         for line in text.split("\n"):
@@ -159,6 +162,9 @@ class ResumeParser:
             if stripped[0] in "•●-*" or stripped.startswith("–"):
                 if current is not None:
                     current["description"].append(stripped.lstrip("•●-* –"))
+                continue
+            # Skip standalone link labels
+            if stripped.lower() in skip_labels:
                 continue
             # Non-bullet line → new project title
             if current is not None:
