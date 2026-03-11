@@ -86,16 +86,29 @@ export default function ProfilePage() {
       await uploadResume.mutateAsync(file);
     } catch (err: unknown) {
       // Extract real error from Axios response
-      const axiosErr = err as { response?: { status?: number; data?: { detail?: string; error?: string } }; message?: string };
+      const axiosErr = err as { response?: { status?: number; data?: { detail?: unknown; error?: string } }; message?: string };
       const status = axiosErr?.response?.status;
-      const detail = axiosErr?.response?.data?.detail || axiosErr?.response?.data?.error;
+      const rawDetail = axiosErr?.response?.data?.detail;
+
+      // Safely extract a string message from detail (which can be string, array, or object)
+      let detail: string | null = null;
+      if (typeof rawDetail === "string") {
+        detail = rawDetail;
+      } else if (Array.isArray(rawDetail) && rawDetail.length > 0) {
+        // Pydantic 422 errors: [{type, loc, msg, input}]
+        detail = rawDetail.map((e: { msg?: string }) => e.msg || "Validation error").join(", ");
+      } else if (rawDetail && typeof rawDetail === "object") {
+        detail = JSON.stringify(rawDetail);
+      }
 
       if (status === 401) {
         setUploadError("Session expired. Please refresh the page.");
       } else if (status === 413) {
         setUploadError("File too large. Max 5MB allowed.");
-      } else if (detail) {
-        setUploadError(detail);
+      } else if (status === 422) {
+        setUploadError(detail || "Invalid request format.");
+      } else if (detail || axiosErr?.response?.data?.error) {
+        setUploadError(detail || axiosErr?.response?.data?.error || "Upload failed.");
       } else if (axiosErr?.message) {
         setUploadError(axiosErr.message);
       } else {
