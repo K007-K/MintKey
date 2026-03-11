@@ -146,15 +146,27 @@ class ResumeParser:
         return entries
 
     def _extract_projects(self, text: str) -> list[dict]:
-        """Extract project entries."""
+        """Extract project entries — group bullet descriptions under titles."""
         if not text:
             return []
-        entries = []
-        blocks = re.split(r'\n(?=[A-Z•●\-\*])', text)
-        for block in blocks[:10]:
-            if len(block.strip()) > 15:
-                entries.append({"raw": block.strip()[:500]})
-        return entries
+        projects: list[dict] = []
+        current: dict | None = None
+        for line in text.split("\n"):
+            stripped = line.strip()
+            if not stripped or len(stripped) < 5:
+                continue
+            # Bullet point → append to current project
+            if stripped[0] in "•●-*" or stripped.startswith("–"):
+                if current is not None:
+                    current["description"].append(stripped.lstrip("•●-* –"))
+                continue
+            # Non-bullet line → new project title
+            if current is not None:
+                projects.append(current)
+            current = {"name": stripped[:200], "description": []}
+        if current is not None:
+            projects.append(current)
+        return projects[:20]
 
     def _extract_certifications(self, text: str) -> list[str]:
         """Extract certification names."""
