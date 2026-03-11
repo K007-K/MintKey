@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import {
   Github, Code2, Upload, ChevronDown, ChevronUp,
   CheckCircle2, FileText, Camera, Loader2,
+  Trash2, Briefcase, GraduationCap, FolderGit2, Award, Mail, Phone,
 } from "lucide-react";
 
 /* ─── Types ─── */
@@ -192,6 +193,8 @@ export default function ProfilePage() {
   const githubUsername = (user?.github_username as string) || session?.user?.githubUsername || "";
   const resumeUrl = (user?.resume_url as string) || null;
   const resumeParsed = user?.resume_parsed_data != null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resumeParsedData = (user?.resume_parsed_data as Record<string, any>) || null;
 
   return (
     <DashboardLayout
@@ -454,74 +457,197 @@ export default function ProfilePage() {
           <h2 className="text-base font-bold text-gray-900">Resume Upload</h2>
           <p className="mb-4 text-sm text-gray-400">Upload your resume for AI-powered analysis</p>
 
-          <div
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleResumeUpload(f); }}
-            onClick={() => !uploadResume.isPending && fileInputRef.current?.click()}
-            className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 px-4 transition-colors ${
-              uploadResume.isPending
-                ? "border-teal-400 bg-teal-50/20 cursor-wait"
-                : dragOver
-                  ? "border-teal-400 bg-teal-50/30"
-                  : "border-gray-200 bg-[#f9fafb] hover:border-teal-300 hover:bg-teal-50/10"
-            }`}
-          >
-            {uploadResume.isPending ? (
-              <>
-                <Loader2 className="h-6 w-6 text-teal-500 animate-spin mb-2" />
-                <p className="text-sm font-medium text-teal-600">Uploading & parsing...</p>
-                <p className="mt-0.5 text-xs text-gray-400">This may take a few seconds</p>
-              </>
-            ) : (
-              <>
-                <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-100 shadow-sm">
-                  <Upload className="h-4 w-4 text-gray-400" />
-                </div>
-                <p className="text-sm font-medium text-gray-600">Drag & drop your resume or click to browse</p>
-                <p className="mt-0.5 text-xs text-gray-400">PDF only, max 5MB</p>
-              </>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleResumeUpload(file);
-                e.target.value = ""; // reset so same file can be re-uploaded
-              }}
-            />
-          </div>
+          {/* Upload area — show when no resume OR while uploading */}
+          {(!resumeUrl || uploadResume.isPending) && (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleResumeUpload(f); }}
+              onClick={() => !uploadResume.isPending && fileInputRef.current?.click()}
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 px-4 transition-colors ${
+                uploadResume.isPending
+                  ? "border-teal-400 bg-teal-50/20 cursor-wait"
+                  : dragOver
+                    ? "border-teal-400 bg-teal-50/30"
+                    : "border-gray-200 bg-[#f9fafb] hover:border-teal-300 hover:bg-teal-50/10"
+              }`}
+            >
+              {uploadResume.isPending ? (
+                <>
+                  <Loader2 className="h-6 w-6 text-teal-500 animate-spin mb-2" />
+                  <p className="text-sm font-medium text-teal-600">Uploading & parsing your resume...</p>
+                  <p className="mt-0.5 text-xs text-gray-400">Extracting skills, education, experience</p>
+                </>
+              ) : (
+                <>
+                  <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-100 shadow-sm">
+                    <Upload className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-600">Drag & drop your resume or click to browse</p>
+                  <p className="mt-0.5 text-xs text-gray-400">PDF only, max 5MB</p>
+                </>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleResumeUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          )}
           {uploadError && (
             <p className="mt-2 text-xs text-red-500 font-medium">{uploadError}</p>
           )}
 
-          {resumeUrl && (
-            <div className="mt-3 flex items-center justify-between rounded-xl border border-gray-100 bg-white p-3.5">
+          {/* Uploaded file card + actions */}
+          {resumeUrl && !uploadResume.isPending && (
+            <div className="mt-3 flex items-center justify-between rounded-xl border border-green-100 bg-green-50/30 p-3.5">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-red-50">
                   <FileText className="h-4 w-4 text-red-500" strokeWidth={1.8} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">Resume.pdf</div>
-                  <div className="text-xs text-gray-400">Uploaded</div>
+                  <div className="text-sm font-medium text-gray-900 truncate">{resumeUrl}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {resumeParsed && (
+                      <span className="flex items-center gap-1 text-[11px] font-semibold text-green-600">
+                        <CheckCircle2 className="h-3 w-3" /> AI Parsed
+                      </span>
+                    )}
+                    {resumeParsedData?.total_skills != null && (
+                      <span className="text-[11px] text-gray-400">
+                        • {resumeParsedData.total_skills} skills found
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                {resumeParsed && (
-                  <span className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600">
-                    <CheckCircle2 className="h-2.5 w-2.5" /> AI Parsed
-                  </span>
-                )}
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                  className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-teal-600 hover:bg-teal-50 transition-colors"
                 >
                   Replace
                 </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await updateProfile.mutateAsync({ resume_url: null, resume_parsed_data: null } as Record<string, unknown>);
+                    } catch { /* ignore */ }
+                  }}
+                  className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  title="Delete resume"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
+            </div>
+          )}
+
+          {/* ─── Resume Analysis Results ─── */}
+          {resumeParsed && resumeParsedData && !uploadResume.isPending && (
+            <div className="mt-4 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                Resume Analysis
+              </h3>
+
+              {/* Skills extracted */}
+              {resumeParsedData.skills_extracted?.length > 0 && (
+                <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-3">
+                  <p className="text-xs font-semibold text-gray-600 mb-2">Skills Extracted ({resumeParsedData.skills_extracted.length})</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(resumeParsedData.skills_extracted as Array<{name: string; category: string; frequency: number}>).map((skill, i) => {
+                      const colors: Record<string, string> = {
+                        languages: "bg-blue-50 text-blue-700 border-blue-200",
+                        frontend: "bg-purple-50 text-purple-700 border-purple-200",
+                        backend: "bg-amber-50 text-amber-700 border-amber-200",
+                        database: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                        devops: "bg-orange-50 text-orange-700 border-orange-200",
+                        testing: "bg-pink-50 text-pink-700 border-pink-200",
+                        tools: "bg-gray-50 text-gray-700 border-gray-200",
+                      };
+                      const colorClass = colors[skill.category] || "bg-gray-50 text-gray-700 border-gray-200";
+                      return (
+                        <span
+                          key={i}
+                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${colorClass}`}
+                        >
+                          {skill.name}
+                          {skill.frequency > 1 && (
+                            <span className="ml-1 text-[9px] opacity-60">×{skill.frequency}</span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Contact info */}
+              {resumeParsedData.contact && Object.values(resumeParsedData.contact).some(Boolean) && (
+                <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-3">
+                  <p className="text-xs font-semibold text-gray-600 mb-1.5">Contact Info</p>
+                  <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                    {resumeParsedData.contact.email && (
+                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{resumeParsedData.contact.email}</span>
+                    )}
+                    {resumeParsedData.contact.phone && (
+                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{resumeParsedData.contact.phone}</span>
+                    )}
+                    {resumeParsedData.contact.github && (
+                      <span className="flex items-center gap-1"><Github className="h-3 w-3" />github.com/{resumeParsedData.contact.github}</span>
+                    )}
+                    {resumeParsedData.contact.linkedin && (
+                      <span className="flex items-center gap-1">linkedin.com/in/{resumeParsedData.contact.linkedin}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Sections summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {resumeParsedData.education?.length > 0 && (
+                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
+                    <GraduationCap className="h-4 w-4 mx-auto text-blue-500 mb-1" />
+                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.education.length} Education</p>
+                    {resumeParsedData.education[0]?.degree && (
+                      <p className="text-[10px] text-gray-400 mt-0.5">{resumeParsedData.education[0].degree}</p>
+                    )}
+                  </div>
+                )}
+                {resumeParsedData.experience?.length > 0 && (
+                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
+                    <Briefcase className="h-4 w-4 mx-auto text-amber-500 mb-1" />
+                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.experience.length} Experience</p>
+                  </div>
+                )}
+                {resumeParsedData.projects?.length > 0 && (
+                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
+                    <FolderGit2 className="h-4 w-4 mx-auto text-purple-500 mb-1" />
+                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.projects.length} Projects</p>
+                  </div>
+                )}
+                {resumeParsedData.certifications?.length > 0 && (
+                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
+                    <Award className="h-4 w-4 mx-auto text-green-500 mb-1" />
+                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.certifications.length} Certs</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Sections found */}
+              {resumeParsedData.sections?.length > 0 && (
+                <p className="text-[11px] text-gray-400">
+                  Sections detected: {resumeParsedData.sections.join(", ")}
+                </p>
+              )}
             </div>
           )}
         </div>

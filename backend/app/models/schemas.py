@@ -48,6 +48,8 @@ class UserUpdate(BaseModel):
     available_months: Optional[int] = Field(None, ge=1, le=12)
     is_onboarded: Optional[bool] = None
     settings: Optional[dict] = None
+    resume_url: Optional[str] = None
+    resume_parsed_data: Optional[dict] = None
 
 
 class UserResponse(BaseModel):
