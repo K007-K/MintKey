@@ -6,7 +6,7 @@ import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useCurrentUser, useUpdateProfile, useUploadResume } from "@/lib/api";
 import { useSession } from "next-auth/react";
 import {
-  Github, Code2, Upload, ChevronDown, ChevronUp,
+  Github, Code2, Upload, UploadCloud, ChevronDown, ChevronUp,
   CheckCircle2, FileText, Camera, Loader2,
   Trash2, Briefcase, GraduationCap, FolderGit2, Award, Mail, Phone,
 } from "lucide-react";
@@ -453,9 +453,13 @@ export default function ProfilePage() {
         </div>
 
         {/* ─── Section 4: Resume Upload ─── */}
-        <div className="rounded-xl border border-[#e5e7eb] bg-white p-6">
-          <h2 className="text-base font-bold text-gray-900">Resume Upload</h2>
-          <p className="mb-4 text-sm text-gray-400">Upload your resume for AI-powered analysis</p>
+        <div className="rounded-[14px] border border-[#e5e7eb] bg-white p-6">
+          {/* Section header */}
+          <div className="flex items-center gap-2.5 mb-1">
+            <CheckCircle2 className="h-5 w-5" style={{ color: '#16a34a' }} />
+            <h2 className="text-lg font-bold" style={{ color: '#111827' }}>Resume Upload</h2>
+          </div>
+          <p className="text-sm mb-5" style={{ color: '#6b7280' }}>Upload your resume for AI-powered analysis</p>
 
           {/* Upload area — show when no resume OR while uploading */}
           {(!resumeUrl || uploadResume.isPending) && (
@@ -466,25 +470,27 @@ export default function ProfilePage() {
               onClick={() => !uploadResume.isPending && fileInputRef.current?.click()}
               className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 px-4 transition-colors ${
                 uploadResume.isPending
-                  ? "border-teal-400 bg-teal-50/20 cursor-wait"
-                  : dragOver
-                    ? "border-teal-400 bg-teal-50/30"
-                    : "border-gray-200 bg-[#f9fafb] hover:border-teal-300 hover:bg-teal-50/10"
+                  ? 'cursor-wait'
+                  : 'hover:bg-[rgba(20,184,166,0.04)]'
               }`}
+              style={{
+                borderColor: uploadResume.isPending || dragOver ? 'rgba(20,184,166,0.5)' : '#e5e7eb',
+                background: uploadResume.isPending ? 'rgba(20,184,166,0.04)' : dragOver ? 'rgba(20,184,166,0.06)' : '#f9fafb',
+              }}
             >
               {uploadResume.isPending ? (
                 <>
-                  <Loader2 className="h-6 w-6 text-teal-500 animate-spin mb-2" />
-                  <p className="text-sm font-medium text-teal-600">Uploading & parsing your resume...</p>
-                  <p className="mt-0.5 text-xs text-gray-400">Extracting skills, education, experience</p>
+                  <Loader2 className="h-6 w-6 animate-spin mb-2" style={{ color: '#14b8a6' }} />
+                  <p className="text-sm font-medium" style={{ color: '#14b8a6' }}>Uploading & parsing your resume...</p>
+                  <p className="mt-1 text-xs" style={{ color: '#6b7280' }}>Extracting skills, education, experience</p>
                 </>
               ) : (
                 <>
-                  <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-100 shadow-sm">
-                    <Upload className="h-4 w-4 text-gray-400" />
+                  <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.2)' }}>
+                    <Upload className="h-4 w-4" style={{ color: '#14b8a6' }} />
                   </div>
-                  <p className="text-sm font-medium text-gray-600">Drag & drop your resume or click to browse</p>
-                  <p className="mt-0.5 text-xs text-gray-400">PDF only, max 5MB</p>
+                  <p className="text-sm font-medium" style={{ color: '#374151' }}>Drag & drop your resume or click to browse</p>
+                  <p className="mt-1 text-xs" style={{ color: '#9ca3af' }}>PDF only, max 5MB</p>
                 </>
               )}
               <input
@@ -495,43 +501,51 @@ export default function ProfilePage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) handleResumeUpload(file);
-                  e.target.value = "";
+                  e.target.value = '';
                 }}
               />
             </div>
           )}
           {uploadError && (
-            <p className="mt-2 text-xs text-red-500 font-medium">{uploadError}</p>
+            <p className="mt-2 text-xs font-medium" style={{ color: '#ef4444' }}>{uploadError}</p>
           )}
 
-          {/* Uploaded file card + actions */}
+          {/* ── PART 1: Uploaded file row ── */}
           {resumeUrl && !uploadResume.isPending && (
-            <div className="mt-3 flex items-center justify-between rounded-xl border border-green-100 bg-green-50/30 p-3.5">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-red-50">
-                  <FileText className="h-4 w-4 text-red-500" strokeWidth={1.8} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">{resumeUrl}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {resumeParsed && (
-                      <span className="flex items-center gap-1 text-[11px] font-semibold text-green-600">
-                        <CheckCircle2 className="h-3 w-3" /> AI Parsed
-                      </span>
-                    )}
-                    {resumeParsedData?.total_skills != null && (
-                      <span className="text-[11px] text-gray-400">
-                        • {resumeParsedData.total_skills} skills found
-                      </span>
-                    )}
-                  </div>
+            <div className="flex items-center gap-3.5 rounded-[10px] p-3.5" style={{ background: '#f9fafb', border: '1px solid #e5e7eb' }}>
+              {/* PDF icon — teal */}
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(20,184,166,0.10)', border: '1px solid rgba(20,184,166,0.20)' }}>
+                <FileText className="h-5 w-5" style={{ color: '#14b8a6' }} strokeWidth={1.8} />
+              </div>
+              {/* File info */}
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold truncate" style={{ color: '#111827' }}>{resumeUrl}</div>
+                <div className="flex items-center gap-0 mt-1 flex-wrap">
+                  {resumeParsed && (
+                    <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.25)', color: '#16a34a' }}>
+                      <CheckCircle2 className="h-3 w-3" /> AI Parsed
+                    </span>
+                  )}
+                  {resumeParsedData?.total_skills != null && (
+                    <>
+                      <span className="mx-2 text-xs" style={{ color: '#9ca3af' }}>·</span>
+                      <span className="text-[13px]" style={{ color: '#6b7280' }}>{resumeParsedData.total_skills} skills found</span>
+                    </>
+                  )}
+                  <span className="mx-2 text-xs" style={{ color: '#9ca3af' }}>·</span>
+                  <span className="text-[13px]" style={{ color: '#9ca3af' }}>Uploaded</span>
                 </div>
               </div>
+              {/* Actions */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                  className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-teal-600 hover:bg-teal-50 transition-colors"
+                  className="flex items-center gap-1 text-[13px] font-medium bg-transparent border-none hover:underline transition-colors"
+                  style={{ color: '#14b8a6' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0d9488')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#14b8a6')}
                 >
+                  <UploadCloud className="h-3.5 w-3.5" />
                   Replace
                 </button>
                 <button
@@ -541,115 +555,170 @@ export default function ProfilePage() {
                       await updateProfile.mutateAsync({ resume_url: null, resume_parsed_data: null } as Record<string, unknown>);
                     } catch { /* ignore */ }
                   }}
-                  className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="bg-transparent border-none transition-colors p-1"
+                  style={{ color: '#9ca3af' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
                   title="Delete resume"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* ─── Resume Analysis Results ─── */}
-          {resumeParsed && resumeParsedData && !uploadResume.isPending && (
-            <div className="mt-4 space-y-3">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                Resume Analysis
-              </h3>
+          {/* ── Resume Analysis ── */}
+          {resumeParsed && resumeParsedData && !uploadResume.isPending && (() => {
+            // Group skills by category
+            type Skill = { name: string; category: string; frequency: number };
+            const allSkills = (resumeParsedData.skills_extracted || []) as Skill[];
+            const categoryMap: Record<string, { label: string; styles: { bg: string; border: string; text: string; count: string } }> = {
+              languages: { label: 'DSA & CS', styles: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', count: '#16a34a' } },
+              database: { label: 'DSA & CS', styles: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', count: '#16a34a' } },
+              backend: { label: 'Backend', styles: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', count: '#3b82f6' } },
+              frontend: { label: 'Frontend', styles: { bg: '#faf5ff', border: '#e9d5ff', text: '#6b21a8', count: '#9333ea' } },
+            };
+            const defaultStyles = { bg: '#f9fafb', border: '#e5e7eb', text: '#374151', count: '#6b7280' };
 
-              {/* Skills extracted */}
-              {resumeParsedData.skills_extracted?.length > 0 && (
-                <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-3">
-                  <p className="text-xs font-semibold text-gray-600 mb-2">Skills Extracted ({resumeParsedData.skills_extracted.length})</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(resumeParsedData.skills_extracted as Array<{name: string; category: string; frequency: number}>).map((skill, i) => {
-                      const colors: Record<string, string> = {
-                        languages: "bg-blue-50 text-blue-700 border-blue-200",
-                        frontend: "bg-purple-50 text-purple-700 border-purple-200",
-                        backend: "bg-amber-50 text-amber-700 border-amber-200",
-                        database: "bg-emerald-50 text-emerald-700 border-emerald-200",
-                        devops: "bg-orange-50 text-orange-700 border-orange-200",
-                        testing: "bg-pink-50 text-pink-700 border-pink-200",
-                        tools: "bg-gray-50 text-gray-700 border-gray-200",
-                      };
-                      const colorClass = colors[skill.category] || "bg-gray-50 text-gray-700 border-gray-200";
-                      return (
-                        <span
-                          key={i}
-                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${colorClass}`}
-                        >
-                          {skill.name}
-                          {skill.frequency > 1 && (
-                            <span className="ml-1 text-[9px] opacity-60">×{skill.frequency}</span>
-                          )}
+            const groups: Record<string, { label: string; styles: typeof defaultStyles; skills: Skill[] }> = {};
+            allSkills.forEach((s) => {
+              const mapped = categoryMap[s.category];
+              const groupLabel = mapped ? mapped.label : 'Tools & Other';
+              if (!groups[groupLabel]) {
+                groups[groupLabel] = { label: groupLabel, styles: mapped ? mapped.styles : defaultStyles, skills: [] };
+              }
+              groups[groupLabel].skills.push(s);
+            });
+            const orderedGroups = ['DSA & CS', 'Backend', 'Frontend', 'Tools & Other']
+              .filter((k) => groups[k])
+              .map((k) => groups[k]);
+
+            const totalSkills = allSkills.length;
+            const totalProjects = resumeParsedData.projects?.length || 0;
+
+            return (
+              <div className="mt-6">
+                {/* ── PART 2: Analysis section header ── */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-[18px] w-[18px]" style={{ color: '#16a34a' }} />
+                    <span className="text-base font-bold" style={{ color: '#111827' }}>Resume Analysis</span>
+                  </div>
+                  <span className="rounded-full px-2.5 py-0.5 text-xs" style={{ background: '#f9fafb', border: '1px solid #e5e7eb', color: '#6b7280' }}>
+                    {totalSkills} skills · {totalProjects} projects
+                  </span>
+                </div>
+
+                {/* ── PART 3: Skills Extracted card ── */}
+                {totalSkills > 0 && (
+                  <div className="rounded-xl p-5" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-semibold" style={{ color: '#111827' }}>Skills Extracted ({totalSkills})</span>
+                    </div>
+                    <div className="space-y-5">
+                      {orderedGroups.map((group) => (
+                        <div key={group.label}>
+                          <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: '#9ca3af', letterSpacing: '0.06em' }}>{group.label}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {group.skills.map((skill, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center rounded-md px-2.5 py-[3px] text-xs font-medium"
+                                style={{ background: group.styles.bg, border: `1px solid ${group.styles.border}`, color: group.styles.text }}
+                              >
+                                {skill.name}
+                                {skill.frequency > 1 && (
+                                  <span className="ml-1 text-[11px] font-semibold" style={{ color: group.styles.count }}>×{skill.frequency}</span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── PART 4: Contact Info row ── */}
+                {resumeParsedData.contact && Object.values(resumeParsedData.contact).some(Boolean) && (
+                  <div className="flex items-center gap-6 mt-3 rounded-[10px] p-3.5" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+                    <span className="text-[13px] font-semibold" style={{ color: '#374151' }}>Contact Info</span>
+                    <div className="flex items-center gap-5 flex-wrap">
+                      {resumeParsedData.contact.email && (
+                        <span className="flex items-center gap-1.5 text-[13px]" style={{ color: '#374151' }}>
+                          <Mail className="h-3.5 w-3.5" style={{ color: '#9ca3af' }} />{resumeParsedData.contact.email}
                         </span>
-                      );
-                    })}
+                      )}
+                      {resumeParsedData.contact.phone && (
+                        <span className="flex items-center gap-1.5 text-[13px]" style={{ color: '#374151' }}>
+                          <Phone className="h-3.5 w-3.5" style={{ color: '#9ca3af' }} />{resumeParsedData.contact.phone}
+                        </span>
+                      )}
+                      {resumeParsedData.contact.github && (
+                        <span className="flex items-center gap-1.5 text-[13px]" style={{ color: '#374151' }}>
+                          <Github className="h-3.5 w-3.5" style={{ color: '#9ca3af' }} />github.com/{resumeParsedData.contact.github}
+                        </span>
+                      )}
+                      {resumeParsedData.contact.linkedin && (
+                        <span className="flex items-center gap-1.5 text-[13px]" style={{ color: '#374151' }}>
+                          linkedin.com/in/{resumeParsedData.contact.linkedin}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Contact info */}
-              {resumeParsedData.contact && Object.values(resumeParsedData.contact).some(Boolean) && (
-                <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-3">
-                  <p className="text-xs font-semibold text-gray-600 mb-1.5">Contact Info</p>
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                    {resumeParsedData.contact.email && (
-                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{resumeParsedData.contact.email}</span>
-                    )}
-                    {resumeParsedData.contact.phone && (
-                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{resumeParsedData.contact.phone}</span>
-                    )}
-                    {resumeParsedData.contact.github && (
-                      <span className="flex items-center gap-1"><Github className="h-3 w-3" />github.com/{resumeParsedData.contact.github}</span>
-                    )}
-                    {resumeParsedData.contact.linkedin && (
-                      <span className="flex items-center gap-1">linkedin.com/in/{resumeParsedData.contact.linkedin}</span>
-                    )}
-                  </div>
+                {/* ── PART 5: Stats row — ALL teal icons ── */}
+                <div className="grid grid-cols-3 gap-3 mt-3">
+                  {resumeParsedData.education?.length > 0 && (
+                    <div className="flex flex-col items-center gap-2 rounded-[10px] p-4 text-center" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(20,184,166,0.08)' }}>
+                        <GraduationCap className="h-[18px] w-[18px]" style={{ color: '#14b8a6' }} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: '#111827' }}>{resumeParsedData.education.length} Education</p>
+                        {resumeParsedData.education[0]?.degree && (
+                          <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{resumeParsedData.education[0].degree}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {resumeParsedData.experience?.length > 0 && (
+                    <div className="flex flex-col items-center gap-2 rounded-[10px] p-4 text-center" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(20,184,166,0.08)' }}>
+                        <Briefcase className="h-[18px] w-[18px]" style={{ color: '#14b8a6' }} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: '#111827' }}>{resumeParsedData.experience.length} Experience</p>
+                      </div>
+                    </div>
+                  )}
+                  {resumeParsedData.projects?.length > 0 && (
+                    <div className="flex flex-col items-center gap-2 rounded-[10px] p-4 text-center" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(20,184,166,0.08)' }}>
+                        <Code2 className="h-[18px] w-[18px]" style={{ color: '#14b8a6' }} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: '#111827' }}>{resumeParsedData.projects.length} Projects</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Sections summary */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {resumeParsedData.education?.length > 0 && (
-                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
-                    <GraduationCap className="h-4 w-4 mx-auto text-blue-500 mb-1" />
-                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.education.length} Education</p>
-                    {resumeParsedData.education[0]?.degree && (
-                      <p className="text-[10px] text-gray-400 mt-0.5">{resumeParsedData.education[0].degree}</p>
-                    )}
-                  </div>
-                )}
-                {resumeParsedData.experience?.length > 0 && (
-                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
-                    <Briefcase className="h-4 w-4 mx-auto text-amber-500 mb-1" />
-                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.experience.length} Experience</p>
-                  </div>
-                )}
-                {resumeParsedData.projects?.length > 0 && (
-                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
-                    <FolderGit2 className="h-4 w-4 mx-auto text-purple-500 mb-1" />
-                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.projects.length} Projects</p>
-                  </div>
-                )}
-                {resumeParsedData.certifications?.length > 0 && (
-                  <div className="rounded-lg border border-gray-100 bg-[#f9fafb] p-2.5 text-center">
-                    <Award className="h-4 w-4 mx-auto text-green-500 mb-1" />
-                    <p className="text-[11px] font-semibold text-gray-700">{resumeParsedData.certifications.length} Certs</p>
+                {/* ── PART 6: Sections detected footer ── */}
+                {resumeParsedData.sections?.length > 0 && (
+                  <div className="flex items-center gap-2 mt-4 flex-wrap">
+                    <span className="text-xs font-medium" style={{ color: '#9ca3af' }}>Sections detected:</span>
+                    {(resumeParsedData.sections as string[]).map((s, i) => (
+                      <span key={i} className="rounded-full px-2 py-0.5 text-[11px]" style={{ background: '#f9fafb', border: '1px solid #e5e7eb', color: '#6b7280' }}>
+                        {s}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
-
-              {/* Sections found */}
-              {resumeParsedData.sections?.length > 0 && (
-                <p className="text-[11px] text-gray-400">
-                  Sections detected: {resumeParsedData.sections.join(", ")}
-                </p>
-              )}
-            </div>
-          )}
+            );
+          })()}
         </div>
 
 
