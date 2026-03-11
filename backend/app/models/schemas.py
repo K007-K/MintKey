@@ -67,6 +67,8 @@ class UserResponse(BaseModel):
     internship_count: int = 0
     is_onboarded: bool = False
     settings: Optional[dict] = None
+    resume_url: Optional[str] = None
+    resume_parsed_data: Optional[dict] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
