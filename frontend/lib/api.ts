@@ -256,3 +256,17 @@ export function useUploadResume() {
     },
   });
 }
+
+// Delete user account permanently
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.delete<APIResponse>("/api/v1/users/me");
+      return data.data;
+    },
+    onSuccess: () => {
+      clearAuthToken();
+      queryClient.clear();
+    },
+  });
+}

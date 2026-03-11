@@ -174,7 +174,7 @@ def _compute_coding_streak(lc_data: dict, gh_data: dict) -> tuple[str, str]:
                 except Exception:
                     pass
         if recent > 0:
-            return f"{recent} Active", f"{recent} repos this week"
+            return f"{recent} Day{'s' if recent != 1 else ''}", "Active"
 
     return "—", "Start building"
 
@@ -241,15 +241,10 @@ async def get_dashboard_summary(
     # Coding Streak
     streak_val, streak_badge = _compute_coding_streak(leetcode_data, github_data)
 
-    # Readiness Grade — computed from all available data
+    # Readiness Grade — from analysis match scores only (State A/B model)
     resume_data = current_user.resume_parsed_data or {}
-    readiness, readiness_badge = _compute_profile_readiness(
-        leetcode_data, github_data, resume_data
-    )
-    if readiness == 0:
-        readiness = None
 
-    # Also fetch match scores for company bars + potential trend
+    # Fetch match scores for readiness + company bars
     score_result = await db.execute(
         select(CompanyMatchScore)
         .where(CompanyMatchScore.user_id == current_user.id)
@@ -257,6 +252,22 @@ async def get_dashboard_summary(
         .limit(5)
     )
     match_scores = score_result.scalars().all()
+
+    # State A: no analysis → "—", State B: real score
+    readiness = None
+    readiness_badge = "Run analysis"
+    has_analysis = False
+    if match_scores:
+        has_analysis = True
+        readiness = round(
+            sum(s.overall_score for s in match_scores) / len(match_scores)
+        )
+        if readiness >= 80:
+            readiness_badge = "Excellent"
+        elif readiness >= 60:
+            readiness_badge = "Growing"
+        else:
+            readiness_badge = "Building"
 
     # --- Recent Activity ---
     recent_activity = []
@@ -409,16 +420,19 @@ async def get_dashboard_summary(
 
     if not priority_actions:
         actions = []
+        # State A: always show 3 onboarding-oriented actions
+        if not has_analysis:
+            actions.append({"title": "Run your first AI analysis", "desc": "Get personalized recommendations from 8 AI agents analyzing your profile", "time": "~2m", "link": "/companies"})
         if not resume_data or not resume_data.get("total_skills"):
             actions.append({"title": "Upload your resume", "desc": "Get AI-powered skill extraction and personalized insights", "time": "~2m", "link": "/profile"})
-        if lc_total == 0 and current_user.leetcode_username:
-            actions.append({"title": "Solve your first LeetCode problem", "desc": "Start with an Easy — Two Sum is a great beginner problem", "time": "~20m", "link": "/dsa"})
+        if not match_scores:
+            actions.append({"title": "Browse and add target companies", "desc": "Select companies to get match scores and personalized roadmaps", "time": "~3m", "link": "/companies"})
         if lc_total > 0 and lc_hard < 10:
             actions.append({"title": "Attempt a Hard DP or Graph problem", "desc": f"You have {lc_hard} Hard solved — companies test Hard in interviews", "time": "~60m", "link": "/dsa"})
+        if lc_total == 0 and current_user.leetcode_username:
+            actions.append({"title": "Solve your first LeetCode problem", "desc": "Start with an Easy — Two Sum is a great beginner problem", "time": "~20m", "link": "/dsa"})
         if github_data and "error" not in github_data and github_data.get("original_repos", 0) < 5:
             actions.append({"title": "Build a new project on GitHub", "desc": "Original projects matter more than forks for hiring", "time": "~2h", "link": None})
-        if not match_scores:
-            actions.append({"title": "Add target companies", "desc": "Select companies to get match scores and personalized roadmaps", "time": "~3m", "link": "/companies"})
         if not actions:
             actions = [
                 {"title": "Connect your coding platforms", "desc": "Link GitHub and LeetCode to unlock your dashboard", "time": "~5m", "link": "/settings"},
@@ -434,35 +448,9 @@ async def get_dashboard_summary(
                 "score": round(s.overall_score),
             })
 
-    # Fallback: profile score breakdown as bar chart data
+    # State A: no trend data at all (frontend shows empty state)
+    # State B: real trend from match scores above
     trend_label = "Readiness Trend"
-    if not trend_data and readiness:
-        trend_label = "Profile Score Breakdown"
-        # Compute individual component scores for the chart
-        lc_pct = 0
-        gh_pct = 0
-        res_pct = 0
-        if lc_total > 0:
-            vol = min(lc_total / 150, 1.0) * 40
-            diff = min(lc_hard / max(lc_total, 1) / 0.2, 1.0) * 35
-            breadth = min((lc_medium + lc_hard) / max(lc_total, 1), 1.0) * 25
-            lc_pct = round(vol + diff + breadth)
-        if github_data and "error" not in github_data:
-            gh_pct = round(min(github_data.get("original_repos", 0) / 10, 1.0) * 30 +
-                          min(len(github_data.get("language_distribution", {})) / 5, 1.0) * 25 +
-                          25 + 20)  # Simplified
-            gh_pct = min(gh_pct, 100)
-        if resume_data and resume_data.get("total_skills"):
-            skills = resume_data.get("total_skills", 0)
-            projects = len(resume_data.get("projects", []))
-            res_pct = round(min(skills / 15, 1.0) * 30 + min(projects / 4, 1.0) * 30 + 15 + 25)
-            res_pct = min(res_pct, 100)
-        trend_data = [
-            {"week": "LeetCode", "score": lc_pct},
-            {"week": "GitHub", "score": gh_pct},
-            {"week": "Resume", "score": res_pct},
-            {"week": "Overall", "score": readiness},
-        ]
 
     # --- Resume Summary ---
     resume_summary = None

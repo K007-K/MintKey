@@ -37,3 +37,16 @@ async def update_user_profile(
         success=True,
         data=UserResponse.model_validate(updated).model_dump(),
     )
+
+
+@router.delete("/me", response_model=APIResponse)
+async def delete_user_account(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Permanently delete the current user's account and all associated data."""
+    repo = UserRepository(db)
+    deleted = await repo.delete(current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return APIResponse(success=True, data=None)
