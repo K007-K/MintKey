@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User, AnalysisResult, CompanyMatchScore, UserTargetCompany
+from app.models.db import User, AnalysisResult, CompanyMatchScore
 from app.models.schemas import APIResponse
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,7 @@ def _compute_profile_readiness(
         # Repos: up to 30pts for 10+ repos
         r = min(repos / 10, 1.0) * 30
         # Languages: up to 25pts for 5+ languages
-        l = min(langs / 5, 1.0) * 25
+        lang_pts = min(langs / 5, 1.0) * 25
         # Quality: up to 25pts for stars + descriptions
         stars = sum(rr.get("stars", 0) for rr in top_repos)
         q = min(stars / 10, 1.0) * 15 + min(
@@ -133,7 +133,7 @@ def _compute_profile_readiness(
                 except Exception:
                     pass
         rec = min(recent / 3, 1.0) * 20
-        gh_score = r + l + q + rec
+        gh_score = r + lang_pts + q + rec
         components += 35
 
     # ── Resume component (25%) ──
