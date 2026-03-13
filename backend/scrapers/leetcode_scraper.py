@@ -252,10 +252,54 @@ class LeetCodeScraper:
 
         return result
 
+    async def fetch_recent_submissions(self, username: str, limit: int = 15) -> list[dict]:
+        """Fetch recent accepted submissions using the public GraphQL endpoint."""
+        cache_key = f"leetcode:recent:{username}"
+        try:
+            cached = await redis_client.get(cache_key)
+            if cached:
+                return json.loads(cached)
+        except Exception:
+            pass
+
+        query = """
+        query recentAcSubmissions($username: String!, $limit: Int!) {
+            recentAcSubmissionList(username: $username, limit: $limit) {
+                title
+                titleSlug
+                timestamp
+                lang
+            }
+        }
+        """
+        data = await self._query(query, {"username": username, "limit": limit})
+        if not data:
+            return []
+
+        submissions = data.get("recentAcSubmissionList") or []
+        result = []
+        for sub in submissions:
+            ts = int(sub.get("timestamp", "0"))
+            from datetime import datetime, timezone
+            date_str = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d") if ts else ""
+            result.append({
+                "title": sub.get("title", ""),
+                "slug": sub.get("titleSlug", ""),
+                "lang": sub.get("lang", ""),
+                "date": date_str,
+            })
+
+        try:
+            await redis_client.set(cache_key, json.dumps(result), ex=3600)  # 1hr cache
+        except Exception:
+            pass
+
+        return result
+
     async def fetch_full_stats(self, username: str) -> dict:
         """
         Fetch complete LeetCode data for analysis.
-        Aggregates profile, problem stats, topic breakdown, and contest history.
+        Aggregates profile, problem stats, topic breakdown, contest history, and recent submissions.
         """
         profile = await self.fetch_user_profile(username)
         if not profile:
@@ -264,6 +308,7 @@ class LeetCodeScraper:
         stats = await self.fetch_problem_stats(username)
         topics = await self.fetch_topic_stats(username)
         contests = await self.fetch_contest_history(username)
+        recent = await self.fetch_recent_submissions(username)
 
         # Compute summary metrics
         solved = stats.get("solved", {}) if stats else {}
@@ -287,4 +332,5 @@ class LeetCodeScraper:
             "beats": stats.get("beats", {}) if stats else {},
             "topic_breakdown": topics[:20] if topics else [],
             "contest": contests or {},
+            "recent_submissions": recent,
         }

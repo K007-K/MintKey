@@ -6,13 +6,41 @@ from sqlalchemy import select, desc
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User, AnalysisResult, CompanyMatchScore
+from app.models.db import User, AnalysisResult, CompanyMatchScore, UserTargetCompany
 from app.models.schemas import APIResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
+
+def _build_company_scores(match_scores: list, current_user) -> list[dict]:
+    """
+    Build company scores for the dashboard response.
+    State B: real match scores from analysis.
+    State A: target companies with null scores (pre-analysis placeholders).
+    """
+    if match_scores:
+        return [
+            {
+                "company_slug": s.company_slug,
+                "overall_score": round(s.overall_score),
+            }
+            for s in match_scores
+        ]
+
+    # State A — show target companies with null scores
+    if hasattr(current_user, "target_companies") and current_user.target_companies:
+        return [
+            {
+                "company_slug": tc.company_slug,
+                "company_name": getattr(tc, "company_name", tc.company_slug),
+                "overall_score": None,
+            }
+            for tc in current_user.target_companies[:5]
+        ]
+
+    return []
 
 def _compute_github_grade(profile_data: dict) -> tuple[str, str]:
     """Compute a letter grade and badge for GitHub depth."""
@@ -192,8 +220,10 @@ async def get_dashboard_summary(
 
     github_data = {}
     leetcode_data = {}
+    codechef_data = {}
+    hackerrank_data = {}
 
-    # Scrape platforms in parallel (cached — 24hr TTL)
+    # Scrape ALL platforms in parallel (cached — 1hr/24hr TTL)
     tasks = []
 
     if current_user.github_username:
@@ -203,7 +233,7 @@ async def get_dashboard_summary(
             scraper = GitHubScraper()
             return await scraper.fetch_full_profile(current_user.github_username)
         tasks.append(("github", fetch_github()))
-    
+
     if current_user.leetcode_username:
         from scrapers.leetcode_scraper import LeetCodeScraper
 
@@ -212,7 +242,23 @@ async def get_dashboard_summary(
             return await scraper.fetch_full_stats(current_user.leetcode_username)
         tasks.append(("leetcode", fetch_leetcode()))
 
-    # Run scrapers in parallel
+    if current_user.codechef_username:
+        from scrapers.codechef_scraper import CodeChefScraper
+
+        async def fetch_codechef():
+            scraper = CodeChefScraper()
+            return await scraper.fetch_full_profile(current_user.codechef_username)
+        tasks.append(("codechef", fetch_codechef()))
+
+    if current_user.hackerrank_username:
+        from scrapers.hackerrank_scraper import HackerRankScraper
+
+        async def fetch_hackerrank():
+            scraper = HackerRankScraper()
+            return await scraper.fetch_full_profile(current_user.hackerrank_username)
+        tasks.append(("hackerrank", fetch_hackerrank()))
+
+    # Run all scrapers in parallel
     if tasks:
         results = await asyncio.gather(
             *[t[1] for t in tasks],
@@ -226,6 +272,10 @@ async def get_dashboard_summary(
                 github_data = result or {}
             elif name == "leetcode":
                 leetcode_data = result or {}
+            elif name == "codechef":
+                codechef_data = result or {}
+            elif name == "hackerrank":
+                hackerrank_data = result or {}
 
     # --- Stat Cards ---
     # LeetCode Solved
@@ -269,36 +319,77 @@ async def get_dashboard_summary(
         else:
             readiness_badge = "Building"
 
-    # --- Recent Activity ---
+    # --- Recent Activity (real events from all platforms) ---
     recent_activity = []
 
-    # GitHub recent commits
+    # GitHub recent events (from Events API)
     if github_data and "error" not in github_data:
-        for repo in (github_data.get("top_repos") or [])[:3]:
-            if repo.get("recent_commit_count", 0) > 0:
-                recent_activity.append({
-                    "activity": f"Commit to '{repo['name']}'",
-                    "platform": "GitHub",
-                    "result": "Merged",
-                    "resultStyle": "text-gray-700 bg-gray-100",
-                    "date": repo.get("updated_at", "")[:10] if repo.get("updated_at") else "Recently",
-                    "iconType": "git",
-                })
+        for event in (github_data.get("recent_events") or [])[:8]:
+            etype = event.get("type", "push")
+            icon = "git"
+            if etype == "pr":
+                result_text = "PR"
+                result_style = "text-purple-700 bg-purple-100"
+            elif etype == "create":
+                result_text = "New"
+                result_style = "text-blue-700 bg-blue-100"
+            elif etype == "issue":
+                result_text = "Issue"
+                result_style = "text-orange-700 bg-orange-100"
+            else:
+                result_text = "Pushed"
+                result_style = "text-gray-700 bg-gray-100"
 
-    # LeetCode solved breakdown
-    if lc_total > 0:
-        recent_activity.insert(0, {
-            "activity": f"{lc_hard} Hard, {lc_medium} Medium, {lc_easy} Easy solved",
-            "platform": f"LeetCode (@{leetcode_data.get('username', '')})",
-            "result": f"{lc_total} Total",
-            "resultStyle": "text-green-700 bg-green-100",
-            "date": "Lifetime",
-            "iconType": "code",
-        })
+            date_str = event.get("date", "")[:10] if event.get("date") else ""
+            recent_activity.append({
+                "activity": f"{event.get('detail', '')} — {event.get('repo', '')}",
+                "platform": "GitHub",
+                "result": result_text,
+                "resultStyle": result_style,
+                "date": date_str,
+                "iconType": icon,
+            })
+
+    # LeetCode recent submissions
+    if leetcode_data and "error" not in leetcode_data:
+        for sub in (leetcode_data.get("recent_submissions") or [])[:8]:
+            recent_activity.append({
+                "activity": f"Solved '{sub.get('title', '')}'",
+                "platform": f"LeetCode ({sub.get('lang', '')})",
+                "result": "Accepted ✓",
+                "resultStyle": "text-green-700 bg-green-100",
+                "date": sub.get("date", ""),
+                "iconType": "code",
+            })
+
+    # CodeChef recent contests
+    if codechef_data and "error" not in codechef_data:
+        for contest in (codechef_data.get("recent_activity") or [])[:5]:
+            rank_text = f"Rank #{contest.get('rank', '?')}" if contest.get("rank") else "Participated"
+            recent_activity.append({
+                "activity": f"Contest: {contest.get('title', 'CodeChef Contest')}",
+                "platform": "CodeChef",
+                "result": rank_text,
+                "resultStyle": "text-amber-700 bg-amber-100",
+                "date": contest.get("date", ""),
+                "iconType": "code",
+            })
+
+    # HackerRank recent challenges
+    if hackerrank_data and "error" not in hackerrank_data:
+        for challenge in (hackerrank_data.get("recent_activity") or [])[:5]:
+            recent_activity.append({
+                "activity": f"Solved '{challenge.get('title', '')}'" if challenge.get("title") else "Challenge completed",
+                "platform": "HackerRank",
+                "result": "Completed ✓",
+                "resultStyle": "text-emerald-700 bg-emerald-100",
+                "date": challenge.get("date", ""),
+                "iconType": "code",
+            })
 
     # Resume upload event
     if resume_data and resume_data.get("total_skills"):
-        uploaded_at = resume_data.get("uploaded_at", "")[:10] if resume_data.get("uploaded_at") else "Recently"
+        uploaded_at = resume_data.get("uploaded_at", "")[:10] if resume_data.get("uploaded_at") else ""
         recent_activity.append({
             "activity": f"Resume parsed — {resume_data.get('total_skills', 0)} skills extracted",
             "platform": "Resume AI",
@@ -307,6 +398,9 @@ async def get_dashboard_summary(
             "date": uploaded_at,
             "iconType": "code",
         })
+
+    # Sort all activity by date descending
+    recent_activity.sort(key=lambda x: x.get("date", ""), reverse=True)
 
     # Pad with placeholder if empty
     if not recent_activity:
@@ -479,6 +573,7 @@ async def get_dashboard_summary(
                     "badge": gh_badge,
                     "total_repos": github_data.get("original_repos", 0) if github_data and "error" not in github_data else 0,
                     "languages": len(github_data.get("language_distribution", {})) if github_data and "error" not in github_data else 0,
+                    "total_contributions": github_data.get("total_contributions", 0) if github_data and "error" not in github_data else 0,
                 },
                 "streak": {
                     "value": streak_val,
@@ -489,18 +584,12 @@ async def get_dashboard_summary(
                     "badge": readiness_badge,
                 },
             },
-            "recent_activity": recent_activity[:6],
+            "recent_activity": recent_activity[:10],
             "critical_gaps": critical_gaps[:3],
             "priority_actions": priority_actions[:3],
             "trend_data": trend_data if trend_data else None,
             "trend_label": trend_label,
             "resume_summary": resume_summary,
-            "company_scores": [
-                {
-                    "company_slug": s.company_slug,
-                    "overall_score": round(s.overall_score),
-                }
-                for s in match_scores
-            ] if match_scores else [],
+            "company_scores": _build_company_scores(match_scores, current_user),
         },
     )

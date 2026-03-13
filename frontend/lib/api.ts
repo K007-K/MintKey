@@ -234,6 +234,30 @@ export function useSyncLeetCode() {
   });
 }
 
+// Trigger CodeChef sync (direct mode)
+export function useSyncCodeChef() {
+  return useMutation({
+    mutationFn: async (codechef_username: string) => {
+      const { data } = await api.post<APIResponse>("/api/v1/sync/codechef/direct", {
+        codechef_username,
+      });
+      return data.data;
+    },
+  });
+}
+
+// Trigger HackerRank sync (direct mode)
+export function useSyncHackerRank() {
+  return useMutation({
+    mutationFn: async (hackerrank_username: string) => {
+      const { data } = await api.post<APIResponse>("/api/v1/sync/hackerrank/direct", {
+        hackerrank_username,
+      });
+      return data.data;
+    },
+  });
+}
+
 // Upload resume PDF (multipart/form-data)
 export function useUploadResume() {
   return useMutation({

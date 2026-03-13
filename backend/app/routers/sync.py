@@ -19,6 +19,8 @@ class SyncRequest(BaseModel):
     """Trigger platform sync for a user."""
     github_username: Optional[str] = None
     leetcode_username: Optional[str] = None
+    codechef_username: Optional[str] = None
+    hackerrank_username: Optional[str] = None
 
 
 @router.post("/trigger", response_model=APIResponse)
@@ -65,10 +67,7 @@ async def sync_github_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Synchronous GitHub sync (for development/testing).
-    Runs the scraper directly without Celery.
-    """
+    """Synchronous GitHub sync — runs scraper directly."""
     if not payload.github_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -90,9 +89,7 @@ async def sync_leetcode_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Synchronous LeetCode sync (for development/testing).
-    """
+    """Synchronous LeetCode sync — runs scraper directly."""
     if not payload.leetcode_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,6 +99,50 @@ async def sync_leetcode_direct(
     from scrapers.leetcode_scraper import LeetCodeScraper
     scraper = LeetCodeScraper()
     data = await scraper.fetch_full_stats(payload.leetcode_username)
+
+    if "error" in data:
+        return APIResponse(success=False, data=None, error=data["error"])
+
+    return APIResponse(success=True, data=data)
+
+
+@router.post("/codechef/direct", response_model=APIResponse)
+async def sync_codechef_direct(
+    payload: SyncRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Synchronous CodeChef sync — runs scraper directly."""
+    if not payload.codechef_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="codechef_username is required",
+        )
+
+    from scrapers.codechef_scraper import CodeChefScraper
+    scraper = CodeChefScraper()
+    data = await scraper.fetch_full_profile(payload.codechef_username)
+
+    if "error" in data:
+        return APIResponse(success=False, data=None, error=data["error"])
+
+    return APIResponse(success=True, data=data)
+
+
+@router.post("/hackerrank/direct", response_model=APIResponse)
+async def sync_hackerrank_direct(
+    payload: SyncRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Synchronous HackerRank sync — runs scraper directly."""
+    if not payload.hackerrank_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="hackerrank_username is required",
+        )
+
+    from scrapers.hackerrank_scraper import HackerRankScraper
+    scraper = HackerRankScraper()
+    data = await scraper.fetch_full_profile(payload.hackerrank_username)
 
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])

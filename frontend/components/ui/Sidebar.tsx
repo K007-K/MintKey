@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useSidebarStore, usePreferencesStore } from "@/lib/store";
-import { useCurrentUser, useSyncGithub, useSyncLeetCode, queryClient } from "@/lib/api";
+import { useCurrentUser, useSyncGithub, useSyncLeetCode, useSyncCodeChef, useSyncHackerRank, queryClient } from "@/lib/api";
 import { MintKeyLogoMark, MintKeyLogo } from "@/components/ui/MintKeyLogo";
 import {
   LayoutDashboard,
@@ -110,6 +110,8 @@ export default function Sidebar() {
   const { data: userData } = useCurrentUser();
   const syncGithub = useSyncGithub();
   const syncLeetCode = useSyncLeetCode();
+  const syncCodeChef = useSyncCodeChef();
+  const syncHackerRank = useSyncHackerRank();
 
   const user = userData as Record<string, unknown> | undefined;
   const userName = session?.user?.name || "User";
@@ -127,11 +129,15 @@ export default function Sidebar() {
 
     const githubUsername = (user?.github_username as string) || "";
     const leetcodeUsername = (user?.leetcode_username as string) || "";
+    const codechefUsername = (user?.codechef_username as string) || "";
+    const hackerrankUsername = (user?.hackerrank_username as string) || "";
 
     try {
       const promises: Promise<unknown>[] = [];
       if (githubUsername) promises.push(syncGithub.mutateAsync(githubUsername));
       if (leetcodeUsername) promises.push(syncLeetCode.mutateAsync(leetcodeUsername));
+      if (codechefUsername) promises.push(syncCodeChef.mutateAsync(codechefUsername));
+      if (hackerrankUsername) promises.push(syncHackerRank.mutateAsync(hackerrankUsername));
 
       if (promises.length === 0) {
         setSyncInProgress(false);

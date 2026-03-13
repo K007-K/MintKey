@@ -158,6 +158,10 @@ class GitHubScraper:
             for lang, bytes_count in sorted(language_totals.items(), key=lambda x: -x[1])
         }
 
+        # Fetch contributions count and recent events
+        contributions = await self.fetch_contribution_count(username)
+        recent_events = await self.fetch_recent_events(username)
+
         return {
             "username": username,
             "profile": {
@@ -176,4 +180,99 @@ class GitHubScraper:
             "forked_repos": len([r for r in repos if r.get("fork")]),
             "language_distribution": language_distribution,
             "top_repos": top_repos[:10],
+            "total_contributions": contributions,
+            "recent_events": recent_events,
         }
+
+    async def fetch_contribution_count(self, username: str) -> int:
+        """Fetch total contributions from the user's GitHub profile page."""
+        cache_key = f"github:contributions:{username}"
+        try:
+            cached = await redis_client.get(cache_key)
+            if cached:
+                return int(cached)
+        except Exception:
+            pass
+
+        try:
+            url = f"https://github.com/users/{username}/contributions"
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(url, headers={"User-Agent": "MintKey-Scraper"})
+                if response.status_code == 200:
+                    import re
+                    match = re.search(r'([\d,]+)\s+contributions?\s+in', response.text)
+                    if match:
+                        count = int(match.group(1).replace(",", ""))
+                        try:
+                            await redis_client.set(cache_key, str(count), ex=CACHE_TTL_GITHUB)
+                        except Exception:
+                            pass
+                        return count
+        except Exception as e:
+            logger.warning(f"Failed to fetch contribution count for {username}: {e}")
+
+        return 0
+
+    async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
+        """Fetch recent public events from the GitHub Events API."""
+        cache_key = f"github:events:{username}"
+        try:
+            cached = await redis_client.get(cache_key)
+            if cached:
+                return json.loads(cached)
+        except Exception:
+            pass
+
+        data = await self._get(f"/users/{username}/events/public?per_page={per_page}")
+        if not isinstance(data, list):
+            return []
+
+        events = []
+        for event in data[:20]:
+            event_type = event.get("type", "")
+            repo_name = event.get("repo", {}).get("name", "").split("/")[-1]
+            created_at = event.get("created_at", "")
+            payload = event.get("payload", {})
+
+            if event_type == "PushEvent":
+                commit_count = payload.get("size", 0)
+                events.append({
+                    "type": "push",
+                    "repo": repo_name,
+                    "detail": f"{commit_count} commit{'s' if commit_count != 1 else ''}",
+                    "date": created_at,
+                })
+            elif event_type == "CreateEvent":
+                ref_type = payload.get("ref_type", "repository")
+                events.append({
+                    "type": "create",
+                    "repo": repo_name,
+                    "detail": f"Created {ref_type}",
+                    "date": created_at,
+                })
+            elif event_type == "PullRequestEvent":
+                action = payload.get("action", "opened")
+                pr_title = payload.get("pull_request", {}).get("title", "")
+                events.append({
+                    "type": "pr",
+                    "repo": repo_name,
+                    "detail": f"PR {action}: {pr_title[:60]}",
+                    "date": created_at,
+                })
+            elif event_type == "IssuesEvent":
+                action = payload.get("action", "opened")
+                issue_title = payload.get("issue", {}).get("title", "")
+                events.append({
+                    "type": "issue",
+                    "repo": repo_name,
+                    "detail": f"Issue {action}: {issue_title[:60]}",
+                    "date": created_at,
+                })
+
+        try:
+            await redis_client.set(cache_key, json.dumps(events), ex=3600)  # 1hr cache
+        except Exception:
+            pass
+
+        return events
+
