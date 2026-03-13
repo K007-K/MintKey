@@ -16,8 +16,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """Rate limiter using Redis sliding window."""
 
     async def dispatch(self, request: Request, call_next):
-        # Skip health checks
+        # Skip health checks and CORS preflight
         if request.url.path in ("/health", "/docs", "/openapi.json"):
+            return await call_next(request)
+        if request.method == "OPTIONS":
             return await call_next(request)
 
         # Determine client identity and limit

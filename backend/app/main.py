@@ -32,7 +32,12 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # CORS
+    # Custom middleware (added first = innermost in Starlette stack)
+    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(RateLimitMiddleware)
+
+    # CORS — added LAST so it's the OUTERMOST middleware
+    # This ensures CORS headers are always present, even on error responses
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
@@ -40,10 +45,6 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    # Custom middleware
-    app.add_middleware(LoggingMiddleware)
-    app.add_middleware(RateLimitMiddleware)
 
     # Import and include routers
     from app.routers import users, scores, analysis, roadmap, trends, auth, sync, companies, dashboard

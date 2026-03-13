@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User, AnalysisResult, CompanyMatchScore
+from app.models.db import User, AnalysisResult, CompanyMatchScore, UserTargetCompany
 from app.models.schemas import APIResponse
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
 
-def _build_company_scores(match_scores: list, current_user) -> list[dict]:
+async def _build_company_scores(match_scores: list, current_user, db) -> list[dict]:
     """
     Build company scores for the dashboard response.
     State B: real match scores from analysis.
@@ -29,16 +29,24 @@ def _build_company_scores(match_scores: list, current_user) -> list[dict]:
             for s in match_scores
         ]
 
-    # State A — show target companies with null scores
-    if hasattr(current_user, "target_companies") and current_user.target_companies:
-        return [
-            {
-                "company_slug": tc.company_slug,
-                "company_name": getattr(tc, "company_name", tc.company_slug),
-                "overall_score": None,
-            }
-            for tc in current_user.target_companies[:5]
-        ]
+    # State A — query target companies explicitly (avoid lazy-load in async)
+    try:
+        result = await db.execute(
+            select(UserTargetCompany)
+            .where(UserTargetCompany.user_id == current_user.id)
+            .limit(5)
+        )
+        targets = result.scalars().all()
+        if targets:
+            return [
+                {
+                    "company_slug": tc.company_slug,
+                    "overall_score": None,
+                }
+                for tc in targets
+            ]
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"Target companies query failed: {e}")
 
     return []
 
@@ -590,6 +598,6 @@ async def get_dashboard_summary(
             "trend_data": trend_data if trend_data else None,
             "trend_label": trend_label,
             "resume_summary": resume_summary,
-            "company_scores": _build_company_scores(match_scores, current_user),
+            "company_scores": await _build_company_scores(match_scores, current_user, db),
         },
     )
