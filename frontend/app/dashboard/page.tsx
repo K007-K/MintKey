@@ -73,12 +73,12 @@ export default function DashboardPage() {
             subText={(gh.total_contributions as number) > 0 ? `${(gh.total_contributions as number).toLocaleString()} contributions` : undefined}
             loading={isLoading}
           />
-          <StatCard
-            icon={<FlameIcon />}
-            label="Coding Streak"
+          <StreakCard
             value={isLoading ? null : (streak.value as string) || "—"}
             badge={isLoading ? "" : (streak.badge as string) || "Start coding"}
             badgeColor={(streak.value as string) && (streak.value as string) !== "—" ? "bg-orange-50 text-orange-600" : "bg-gray-100 text-gray-600"}
+            weekActivity={(streak.week_activity as boolean[]) || []}
+            longestStreak={(streak.longest_streak as number) || 0}
             loading={isLoading}
           />
           <StatCard
@@ -320,6 +320,61 @@ function ActionItem({ action }: { action: Record<string, string> }) {
     return <Link href={action.link}>{inner}</Link>;
   }
   return inner;
+}
+
+/* ─── Streak Card with 7-Day Heatmap ─── */
+
+function StreakCard({ value, badge, badgeColor, weekActivity, longestStreak, loading = false }: {
+  value: string | null; badge: string; badgeColor: string; weekActivity: boolean[]; longestStreak: number; loading?: boolean;
+}) {
+  const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
+  // Map weekActivity (index 0 = 6 days ago, index 6 = today) to correct day labels
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ...
+  const labels: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dow = d.getDay();
+    labels.push(dayLabels[dow === 0 ? 6 : dow - 1]); // Convert to Mon=0 .. Sun=6
+  }
+
+  return (
+    <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors"><FlameIcon /></div>
+        {loading ? <div className="h-5 w-16 animate-pulse rounded-full bg-gray-100" /> : <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeColor}`}>{badge}</span>}
+      </div>
+      <div className="text-[11px] text-[#6b7280] mb-0.5">Coding Streak</div>
+      {loading ? <div className="h-8 w-20 animate-pulse rounded bg-gray-100 mt-1" /> : (
+        <div>
+          <div className="text-[28px] font-bold leading-tight text-gray-900">{value || "—"}</div>
+          {/* 7-day heatmap */}
+          {weekActivity.length === 7 && (
+            <div className="flex items-center gap-1.5 mt-2">
+              {weekActivity.map((active, i) => (
+                <div key={i} className="flex flex-col items-center gap-0.5">
+                  <div
+                    className={`w-3.5 h-3.5 rounded-full transition-colors ${
+                      active
+                        ? "bg-emerald-400 shadow-sm shadow-emerald-200"
+                        : "bg-gray-200"
+                    }`}
+                  />
+                  <span className="text-[8px] text-gray-400 font-medium">{labels[i]}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {longestStreak > 0 && (
+            <div className="text-[11px] text-gray-400 mt-1.5">
+              Longest: {longestStreak} day{longestStreak !== 1 ? "s" : ""}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ─── Stat Card with Skeleton ─── */

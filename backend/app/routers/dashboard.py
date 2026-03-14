@@ -184,35 +184,127 @@ def _compute_profile_readiness(
     return score, badge
 
 
-def _compute_coding_streak(lc_data: dict, gh_data: dict) -> tuple[str, str]:
-    """Estimate coding streak from platform activity."""
-    # Use LeetCode submission streak if available
-    lc_profile = lc_data.get("profile", {}) if lc_data and "error" not in lc_data else {}
-    streak = lc_profile.get("streak", 0) or lc_profile.get("submitStats", {}).get("streak", 0)
+def _extract_username(url_or_username: str) -> str:
+    """Extract just the username from a full profile URL or return as-is."""
+    if not url_or_username:
+        return url_or_username
+    val = url_or_username.strip().rstrip("/")
+    # CodeChef: https://www.codechef.com/users/k_007 -> k_007
+    # HackerRank: https://www.hackerrank.com/profile/kuramsasukarthi1 -> kuramsasukarthi1
+    # LeetCode: https://leetcode.com/u/OG7 -> OG7
+    if "/" in val and ("codechef.com" in val or "hackerrank.com" in val or "leetcode.com" in val or "github.com" in val):
+        return val.split("/")[-1]
+    return val
 
-    if streak and streak > 0:
-        badge = "Personal Best" if streak >= 30 else f"+{min(streak, 7)} this week"
-        return f"{streak} Days", badge
 
-    # Fallback: count repos updated recently
-    top_repos = gh_data.get("top_repos", []) if gh_data and "error" not in gh_data else []
-    if top_repos:
-        from datetime import datetime, timezone
-        recent = 0
-        for r in top_repos:
-            updated = r.get("updated_at", "")
-            if updated:
-                try:
-                    dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
-                    days_ago = (datetime.now(timezone.utc) - dt).days
-                    if days_ago <= 7:
-                        recent += 1
-                except Exception:
-                    pass
-        if recent > 0:
-            return f"{recent} Day{'s' if recent != 1 else ''}", "Active"
+def _compute_cross_platform_streak(
+    lc_data: dict, gh_data: dict, cc_data: dict, hr_data: dict
+) -> dict:
+    """
+    Compute a real cross-platform coding streak from all platform activity.
+    Returns {current_streak, longest_streak, week_activity: [bool x 7], badge}.
+    """
+    from datetime import datetime, timezone, timedelta
 
-    return "—", "Start building"
+    active_dates: set[str] = set()  # "YYYY-MM-DD" strings
+
+    # 1. LeetCode submission calendar (best data source — daily counts)
+    if lc_data and "error" not in lc_data:
+        calendar = lc_data.get("submission_calendar", {})
+        cal_dict = calendar.get("calendar", {}) if isinstance(calendar, dict) else {}
+        for date_str, count in cal_dict.items():
+            if count and int(count) > 0:
+                active_dates.add(date_str)
+        # Also add recent submission dates
+        for sub in (lc_data.get("recent_submissions") or []):
+            if sub.get("date"):
+                active_dates.add(sub["date"])
+
+    # 2. GitHub events dates
+    if gh_data and "error" not in gh_data:
+        for event in (gh_data.get("recent_events") or []):
+            date_str = event.get("date", "")[:10]
+            if date_str:
+                active_dates.add(date_str)
+
+    # 3. CodeChef contest dates
+    if cc_data and "error" not in cc_data:
+        for contest in (cc_data.get("recent_activity") or []):
+            if contest.get("date"):
+                active_dates.add(contest["date"][:10])
+
+    # 4. HackerRank challenge dates
+    if hr_data and "error" not in hr_data:
+        for challenge in (hr_data.get("recent_activity") or []):
+            if challenge.get("date"):
+                active_dates.add(challenge["date"][:10])
+
+    if not active_dates:
+        return {
+            "current_streak": 0,
+            "longest_streak": 0,
+            "week_activity": [False] * 7,
+            "badge": "Start building",
+        }
+
+    today = datetime.now(timezone.utc).date()
+
+    # Build 7-day heatmap (today = index 6, 6 days ago = index 0)
+    week_activity = []
+    for i in range(6, -1, -1):
+        d = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        week_activity.append(d in active_dates)
+
+    # Compute current streak: walk backwards from today
+    current_streak = 0
+    d = today
+    while d.strftime("%Y-%m-%d") in active_dates:
+        current_streak += 1
+        d -= timedelta(days=1)
+
+    # If today has no activity yet, check if yesterday was active (streak ongoing)
+    if current_streak == 0:
+        d = today - timedelta(days=1)
+        while d.strftime("%Y-%m-%d") in active_dates:
+            current_streak += 1
+            d -= timedelta(days=1)
+
+    # Compute longest streak from sorted dates
+    sorted_dates = sorted(active_dates)
+    longest = 1
+    run = 1
+    for i in range(1, len(sorted_dates)):
+        try:
+            prev = datetime.strptime(sorted_dates[i - 1], "%Y-%m-%d").date()
+            curr = datetime.strptime(sorted_dates[i], "%Y-%m-%d").date()
+            if (curr - prev).days == 1:
+                run += 1
+                longest = max(longest, run)
+            else:
+                run = 1
+        except ValueError:
+            run = 1
+
+    # Badge logic
+    if current_streak >= 30:
+        badge = "🔥 On Fire!"
+    elif current_streak >= 14:
+        badge = "Unstoppable"
+    elif current_streak >= 7:
+        badge = "Hot Streak"
+    elif current_streak >= 3:
+        badge = "Active"
+    elif current_streak >= 1:
+        badge = "Active"
+    else:
+        badge = "Resume streak"
+
+    return {
+        "current_streak": current_streak,
+        "longest_streak": longest if len(sorted_dates) > 1 else current_streak,
+        "week_activity": week_activity,
+        "badge": badge,
+    }
 
 
 @router.get("/summary", response_model=APIResponse)
@@ -239,7 +331,7 @@ async def get_dashboard_summary(
 
         async def fetch_github():
             scraper = GitHubScraper()
-            return await scraper.fetch_full_profile(current_user.github_username)
+            return await scraper.fetch_full_profile(_extract_username(current_user.github_username))
         tasks.append(("github", fetch_github()))
 
     if current_user.leetcode_username:
@@ -247,7 +339,7 @@ async def get_dashboard_summary(
 
         async def fetch_leetcode():
             scraper = LeetCodeScraper()
-            return await scraper.fetch_full_stats(current_user.leetcode_username)
+            return await scraper.fetch_full_stats(_extract_username(current_user.leetcode_username))
         tasks.append(("leetcode", fetch_leetcode()))
 
     if current_user.codechef_username:
@@ -255,7 +347,7 @@ async def get_dashboard_summary(
 
         async def fetch_codechef():
             scraper = CodeChefScraper()
-            return await scraper.fetch_full_profile(current_user.codechef_username)
+            return await scraper.fetch_full_profile(_extract_username(current_user.codechef_username))
         tasks.append(("codechef", fetch_codechef()))
 
     if current_user.hackerrank_username:
@@ -263,7 +355,7 @@ async def get_dashboard_summary(
 
         async def fetch_hackerrank():
             scraper = HackerRankScraper()
-            return await scraper.fetch_full_profile(current_user.hackerrank_username)
+            return await scraper.fetch_full_profile(_extract_username(current_user.hackerrank_username))
         tasks.append(("hackerrank", fetch_hackerrank()))
 
     # Run all scrapers in parallel
@@ -296,8 +388,11 @@ async def get_dashboard_summary(
     # GitHub Depth Grade
     gh_grade, gh_badge = _compute_github_grade(github_data)
 
-    # Coding Streak
-    streak_val, streak_badge = _compute_coding_streak(leetcode_data, github_data)
+    # Coding Streak — cross-platform
+    streak_info = _compute_cross_platform_streak(leetcode_data, github_data, codechef_data, hackerrank_data)
+    current_streak = streak_info["current_streak"]
+    streak_val = f"{current_streak} Day{'s' if current_streak != 1 else ''}" if current_streak > 0 else "—"
+    streak_badge = streak_info["badge"]
 
     # Readiness Grade — from analysis match scores only (State A/B model)
     resume_data = current_user.resume_parsed_data or {}
@@ -586,6 +681,8 @@ async def get_dashboard_summary(
                 "streak": {
                     "value": streak_val,
                     "badge": streak_badge,
+                    "week_activity": streak_info["week_activity"],
+                    "longest_streak": streak_info["longest_streak"],
                 },
                 "readiness": {
                     "value": readiness,

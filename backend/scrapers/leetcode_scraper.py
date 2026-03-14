@@ -207,6 +207,63 @@ class LeetCodeScraper:
 
         return all_topics
 
+    async def fetch_submission_calendar(self, username: str) -> dict:
+        """Fetch the submission calendar (daily activity counts for the past year)."""
+        cache_key = f"leetcode:calendar:{username}"
+        try:
+            cached = await redis_client.get(cache_key)
+            if cached:
+                return json.loads(cached)
+        except Exception:
+            pass
+
+        query = """
+        query userProfileCalendar($username: String!, $year: Int) {
+            matchedUser(username: $username) {
+                userCalendar(year: $year) {
+                    activeYears
+                    streak
+                    totalActiveDays
+                    submissionCalendar
+                }
+            }
+        }
+        """
+        from datetime import datetime
+        current_year = datetime.now().year
+        data = await self._query(query, {"username": username, "year": current_year})
+
+        result = {
+            "streak": 0,
+            "total_active_days": 0,
+            "calendar": {},  # {date_string: count}
+        }
+
+        if data and data.get("matchedUser"):
+            cal_data = data["matchedUser"].get("userCalendar", {})
+            result["streak"] = cal_data.get("streak", 0) or 0
+            result["total_active_days"] = cal_data.get("totalActiveDays", 0) or 0
+
+            # submissionCalendar is a JSON string: {"unix_timestamp": count, ...}
+            calendar_str = cal_data.get("submissionCalendar", "{}")
+            try:
+                raw_cal = json.loads(calendar_str) if isinstance(calendar_str, str) else (calendar_str or {})
+                # Convert unix timestamps to date strings
+                from datetime import timezone
+                for ts_str, count in raw_cal.items():
+                    ts = int(ts_str)
+                    date_str = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
+                    result["calendar"][date_str] = count
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        try:
+            await redis_client.set(cache_key, json.dumps(result), ex=3600)  # 1hr cache
+        except Exception:
+            pass
+
+        return result
+
     async def fetch_contest_history(self, username: str) -> Optional[dict]:
         """Fetch contest participation and rating."""
         cache_key = f"leetcode:contests:{username}"
@@ -309,6 +366,7 @@ class LeetCodeScraper:
         topics = await self.fetch_topic_stats(username)
         contests = await self.fetch_contest_history(username)
         recent = await self.fetch_recent_submissions(username)
+        calendar = await self.fetch_submission_calendar(username)
 
         # Compute summary metrics
         solved = stats.get("solved", {}) if stats else {}
@@ -333,4 +391,5 @@ class LeetCodeScraper:
             "topic_breakdown": topics[:20] if topics else [],
             "contest": contests or {},
             "recent_submissions": recent,
+            "submission_calendar": calendar,
         }

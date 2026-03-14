@@ -236,8 +236,6 @@ class GitHubScraper:
 
             if event_type == "PushEvent":
                 commit_count = payload.get("size", 0)
-                if commit_count == 0:
-                    continue  # Skip empty/force pushes
                 raw_events.append({
                     "type": "push",
                     "repo": repo_name,
@@ -284,10 +282,11 @@ class GitHubScraper:
                     idx = seen_pushes[key]
                     events[idx]["commits"] = events[idx].get("commits", 0) + ev.get("commits", 0)
                     c = events[idx]["commits"]
-                    events[idx]["detail"] = f"{c} commit{'s' if c != 1 else ''}"
+                    repo = events[idx]["repo"]
+                    events[idx]["detail"] = f"{c} commit{'s' if c != 1 else ''}" if c > 0 else f"Pushed to {repo}"
                 else:
                     c = ev.get("commits", 0)
-                    ev["detail"] = f"{c} commit{'s' if c != 1 else ''}"
+                    ev["detail"] = f"{c} commit{'s' if c != 1 else ''}" if c > 0 else f"Pushed to {ev['repo']}"
                     seen_pushes[key] = len(events)
                     events.append(ev)
             else:
