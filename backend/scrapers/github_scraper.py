@@ -227,8 +227,8 @@ class GitHubScraper:
         if not isinstance(data, list):
             return []
 
-        events = []
-        for event in data[:20]:
+        raw_events = []
+        for event in data[:30]:
             event_type = event.get("type", "")
             repo_name = event.get("repo", {}).get("name", "").split("/")[-1]
             created_at = event.get("created_at", "")
@@ -236,15 +236,18 @@ class GitHubScraper:
 
             if event_type == "PushEvent":
                 commit_count = payload.get("size", 0)
-                events.append({
+                if commit_count == 0:
+                    continue  # Skip empty/force pushes
+                raw_events.append({
                     "type": "push",
                     "repo": repo_name,
-                    "detail": f"{commit_count} commit{'s' if commit_count != 1 else ''}",
+                    "commits": commit_count,
+                    "detail": "",  # Will be set after consolidation
                     "date": created_at,
                 })
             elif event_type == "CreateEvent":
                 ref_type = payload.get("ref_type", "repository")
-                events.append({
+                raw_events.append({
                     "type": "create",
                     "repo": repo_name,
                     "detail": f"Created {ref_type}",
@@ -253,7 +256,7 @@ class GitHubScraper:
             elif event_type == "PullRequestEvent":
                 action = payload.get("action", "opened")
                 pr_title = payload.get("pull_request", {}).get("title", "")
-                events.append({
+                raw_events.append({
                     "type": "pr",
                     "repo": repo_name,
                     "detail": f"PR {action}: {pr_title[:60]}",
@@ -262,12 +265,37 @@ class GitHubScraper:
             elif event_type == "IssuesEvent":
                 action = payload.get("action", "opened")
                 issue_title = payload.get("issue", {}).get("title", "")
-                events.append({
+                raw_events.append({
                     "type": "issue",
                     "repo": repo_name,
                     "detail": f"Issue {action}: {issue_title[:60]}",
                     "date": created_at,
                 })
+
+        # Consolidate same-repo same-day push events into one entry
+        events = []
+        seen_pushes: dict[str, int] = {}  # "repo|date" -> index in events
+        for ev in raw_events:
+            if ev["type"] == "push":
+                day = ev["date"][:10]
+                key = f"{ev['repo']}|{day}"
+                if key in seen_pushes:
+                    # Add commits to existing entry
+                    idx = seen_pushes[key]
+                    events[idx]["commits"] = events[idx].get("commits", 0) + ev.get("commits", 0)
+                    c = events[idx]["commits"]
+                    events[idx]["detail"] = f"{c} commit{'s' if c != 1 else ''}"
+                else:
+                    c = ev.get("commits", 0)
+                    ev["detail"] = f"{c} commit{'s' if c != 1 else ''}"
+                    seen_pushes[key] = len(events)
+                    events.append(ev)
+            else:
+                events.append(ev)
+
+        # Remove internal "commits" field, keep only display fields
+        for ev in events:
+            ev.pop("commits", None)
 
         try:
             await redis_client.set(cache_key, json.dumps(events), ex=3600)  # 1hr cache

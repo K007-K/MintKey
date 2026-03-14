@@ -70,6 +70,7 @@ export default function DashboardPage() {
             value={isLoading ? null : (gh.grade as string) || "—"}
             badge={isLoading ? "" : (gh.badge as string) || "Not connected"}
             badgeColor={(gh.grade as string) && (gh.grade as string) !== "—" ? "bg-teal-50 text-teal-600" : "bg-gray-100 text-gray-500"}
+            subText={(gh.total_contributions as number) > 0 ? `${(gh.total_contributions as number).toLocaleString()} contributions` : undefined}
             loading={isLoading}
           />
           <StatCard
@@ -98,7 +99,7 @@ export default function DashboardPage() {
               <div>
                 <h2 className="text-base font-semibold text-gray-900">{(d?.trend_label as string) || "Readiness Trend"}</h2>
                 <p className="text-xs text-gray-400">
-                  {trendData ? "Your profile score across platforms" : "Connect platforms to see your scores"}
+                  {trendData ? "Your profile score across platforms" : "Run your first AI analysis to see trends"}
                 </p>
               </div>
             </div>
@@ -149,7 +150,9 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 {displayScores.slice(0, 5).map((s: Record<string, unknown>) => {
                   const slug = (s.company_slug as string) || "";
-                  const score = Math.round((s.overall_score as number) || 0);
+                  const rawScore = s.overall_score;
+                  const isPending = rawScore === null || rawScore === undefined;
+                  const score = isPending ? 0 : Math.round(rawScore as number);
                   const color = score >= 80 ? "#16a34a" : score >= 60 ? "#2563eb" : "#1e293b";
                   return (
                     <Link key={slug} href={`/company/${slug}`} className="block group">
@@ -158,11 +161,19 @@ export default function DashboardPage() {
                           <CompanyLogo name={slug} />
                           <span className="text-sm font-medium text-gray-900 capitalize group-hover:text-teal-600 transition-colors">{slug.replace(/-/g, " ")}</span>
                         </div>
-                        <span className="text-sm font-bold text-gray-900">{score}%</span>
+                        {isPending ? (
+                          <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Pending</span>
+                        ) : (
+                          <span className="text-sm font-bold text-gray-900">{score}%</span>
+                        )}
                       </div>
-                      <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${score}%`, backgroundColor: color }} />
-                      </div>
+                      {isPending ? (
+                        <div className="w-full h-2.5 rounded-full border border-dashed border-gray-200 bg-gray-50" />
+                      ) : (
+                        <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${score}%`, backgroundColor: color }} />
+                        </div>
+                      )}
                     </Link>
                   );
                 })}
@@ -313,8 +324,8 @@ function ActionItem({ action }: { action: Record<string, string> }) {
 
 /* ─── Stat Card with Skeleton ─── */
 
-function StatCard({ icon, label, value, badge, badgeColor, loading = false }: {
-  icon: React.ReactNode; label: string; value: string | null; badge: string; badgeColor: string; loading?: boolean;
+function StatCard({ icon, label, value, badge, badgeColor, subText, loading = false }: {
+  icon: React.ReactNode; label: string; value: string | null; badge: string; badgeColor: string; subText?: string; loading?: boolean;
 }) {
   return (
     <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
@@ -323,7 +334,12 @@ function StatCard({ icon, label, value, badge, badgeColor, loading = false }: {
         {loading ? <div className="h-5 w-16 animate-pulse rounded-full bg-gray-100" /> : <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeColor}`}>{badge}</span>}
       </div>
       <div className="text-[11px] text-[#6b7280] mb-0.5">{label}</div>
-      {loading ? <div className="h-8 w-20 animate-pulse rounded bg-gray-100 mt-1" /> : <div className="text-[28px] font-bold leading-tight text-gray-900">{value || "—"}</div>}
+      {loading ? <div className="h-8 w-20 animate-pulse rounded bg-gray-100 mt-1" /> : (
+        <div>
+          <div className="text-[28px] font-bold leading-tight text-gray-900">{value || "—"}</div>
+          {subText && <div className="text-[11px] text-gray-400 mt-0.5">{subText}</div>}
+        </div>
+      )}
     </div>
   );
 }
