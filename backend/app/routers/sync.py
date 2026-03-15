@@ -67,16 +67,33 @@ async def sync_github_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Synchronous GitHub sync — runs scraper directly."""
+    """Synchronous GitHub sync — clears cache first, then runs scraper."""
     if not payload.github_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="github_username is required",
         )
 
+    # Clear Redis caches for this user so we get fresh data
+    from app.core.redis import redis_client
+    username = payload.github_username
+    cache_keys = [
+        f"github:profile:{username}",
+        f"github:repos:{username}",
+        f"github:contributions:{username}",
+        f"github:calendar:{username}:current",
+        f"github:calendar:{username}:{__import__('datetime').datetime.now().year}",
+        f"github:events:v3:{username}",
+    ]
+    for key in cache_keys:
+        try:
+            await redis_client.delete(key)
+        except Exception:
+            pass
+
     from scrapers.github_scraper import GitHubScraper
     scraper = GitHubScraper()
-    data = await scraper.fetch_full_profile(payload.github_username)
+    data = await scraper.fetch_full_profile(username)
 
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
@@ -89,16 +106,31 @@ async def sync_leetcode_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Synchronous LeetCode sync — runs scraper directly."""
+    """Synchronous LeetCode sync — clears cache first, then runs scraper."""
     if not payload.leetcode_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="leetcode_username is required",
         )
 
+    # Clear Redis caches for this user so we get fresh data
+    from app.core.redis import redis_client
+    username = payload.leetcode_username
+    cache_keys = [
+        f"leetcode:stats:{username}",
+        f"leetcode:calendar:{username}",
+        f"leetcode:submissions:{username}",
+        f"leetcode:profile:{username}",
+    ]
+    for key in cache_keys:
+        try:
+            await redis_client.delete(key)
+        except Exception:
+            pass
+
     from scrapers.leetcode_scraper import LeetCodeScraper
     scraper = LeetCodeScraper()
-    data = await scraper.fetch_full_stats(payload.leetcode_username)
+    data = await scraper.fetch_full_stats(username)
 
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
