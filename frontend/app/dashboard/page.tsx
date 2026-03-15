@@ -260,17 +260,24 @@ export default function DashboardPage() {
                   <th className="pb-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">Platform</th>
                   <th className="pb-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">Result</th>
                   <th className="pb-3 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-400">Date</th>
+                  <th className="pb-3 w-8"></th>
                 </tr>
               </thead>
               <tbody>
                 {recentActivity.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-[#f9fafb] transition-colors">
+                  <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-[#f9fafb] transition-colors group">
                     <td className="py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
                           <ActivityIcon type={(item.iconType as "code" | "video" | "git") || "code"} />
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{item.activity}</span>
+                        {item.link ? (
+                          <a href={item.link as string} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-teal-600 transition-colors">
+                            {item.activity}
+                          </a>
+                        ) : (
+                          <span className="text-sm font-medium text-gray-900">{item.activity}</span>
+                        )}
                       </div>
                     </td>
                     <td className="py-4"><span className="text-sm text-gray-500">{item.platform}</span></td>
@@ -278,6 +285,13 @@ export default function DashboardPage() {
                       <span className={`inline-flex rounded-md px-2.5 py-0.5 text-xs font-semibold ${item.resultStyle || "text-gray-700 bg-gray-100"}`}>{item.result}</span>
                     </td>
                     <td className="py-4 text-right text-sm text-gray-400">{item.date}</td>
+                    <td className="py-4 text-center">
+                      {item.link ? (
+                        <a href={item.link as string} target="_blank" rel="noopener noreferrer" title="Open on platform" className="inline-flex items-center justify-center text-gray-300 hover:text-teal-500 transition-colors">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>

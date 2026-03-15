@@ -227,21 +227,30 @@ class GitHubScraper:
         if not isinstance(data, list):
             return []
 
+        repo_owner = username  # For building GitHub URLs
         raw_events = []
         for event in data[:30]:
             event_type = event.get("type", "")
-            repo_name = event.get("repo", {}).get("name", "").split("/")[-1]
+            repo_full = event.get("repo", {}).get("name", "")
+            repo_name = repo_full.split("/")[-1]
             created_at = event.get("created_at", "")
             payload = event.get("payload", {})
 
             if event_type == "PushEvent":
                 commit_count = payload.get("size", 0)
+                # Extract latest commit message
+                commits_list = payload.get("commits", [])
+                commit_msg = ""
+                if commits_list:
+                    commit_msg = commits_list[-1].get("message", "").split("\n")[0][:60]
                 raw_events.append({
                     "type": "push",
                     "repo": repo_name,
                     "commits": commit_count,
+                    "commit_msg": commit_msg,
                     "detail": "",  # Will be set after consolidation
                     "date": created_at,
+                    "url": f"https://github.com/{repo_full}",
                 })
             elif event_type == "CreateEvent":
                 ref_type = payload.get("ref_type", "repository")
@@ -250,24 +259,29 @@ class GitHubScraper:
                     "repo": repo_name,
                     "detail": f"Created {ref_type}",
                     "date": created_at,
+                    "url": f"https://github.com/{repo_full}",
                 })
             elif event_type == "PullRequestEvent":
                 action = payload.get("action", "opened")
                 pr_title = payload.get("pull_request", {}).get("title", "")
+                pr_url = payload.get("pull_request", {}).get("html_url", f"https://github.com/{repo_full}/pulls")
                 raw_events.append({
                     "type": "pr",
                     "repo": repo_name,
                     "detail": f"PR {action}: {pr_title[:60]}",
                     "date": created_at,
+                    "url": pr_url,
                 })
             elif event_type == "IssuesEvent":
                 action = payload.get("action", "opened")
                 issue_title = payload.get("issue", {}).get("title", "")
+                issue_url = payload.get("issue", {}).get("html_url", f"https://github.com/{repo_full}/issues")
                 raw_events.append({
                     "type": "issue",
                     "repo": repo_name,
                     "detail": f"Issue {action}: {issue_title[:60]}",
                     "date": created_at,
+                    "url": issue_url,
                 })
 
         # Consolidate same-repo same-day push events into one entry
@@ -278,23 +292,35 @@ class GitHubScraper:
                 day = ev["date"][:10]
                 key = f"{ev['repo']}|{day}"
                 if key in seen_pushes:
-                    # Add commits to existing entry
+                    # Add commits to existing entry; keep latest commit_msg
                     idx = seen_pushes[key]
                     events[idx]["commits"] = events[idx].get("commits", 0) + ev.get("commits", 0)
                     c = events[idx]["commits"]
                     repo = events[idx]["repo"]
-                    events[idx]["detail"] = f"{c} commit{'s' if c != 1 else ''}" if c > 0 else f"Pushed to {repo}"
+                    # Keep the first (most recent) commit message
+                    if not events[idx].get("commit_msg") and ev.get("commit_msg"):
+                        events[idx]["commit_msg"] = ev["commit_msg"]
+                    msg = events[idx].get("commit_msg", "")
+                    if c > 0:
+                        events[idx]["detail"] = f"{c} commit{'s' if c != 1 else ''}" + (f" — {msg}" if msg else "")
+                    else:
+                        events[idx]["detail"] = f"Pushed to {repo}"
                 else:
                     c = ev.get("commits", 0)
-                    ev["detail"] = f"{c} commit{'s' if c != 1 else ''}" if c > 0 else f"Pushed to {ev['repo']}"
+                    msg = ev.get("commit_msg", "")
+                    if c > 0:
+                        ev["detail"] = f"{c} commit{'s' if c != 1 else ''}" + (f" — {msg}" if msg else "")
+                    else:
+                        ev["detail"] = f"Pushed to {ev['repo']}"
                     seen_pushes[key] = len(events)
                     events.append(ev)
             else:
                 events.append(ev)
 
-        # Remove internal "commits" field, keep only display fields
+        # Remove internal fields, keep only display fields
         for ev in events:
             ev.pop("commits", None)
+            ev.pop("commit_msg", None)
 
         try:
             await redis_client.set(cache_key, json.dumps(events), ex=3600)  # 1hr cache

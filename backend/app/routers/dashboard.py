@@ -451,11 +451,13 @@ async def get_dashboard_summary(
                 "resultStyle": result_style,
                 "date": date_str,
                 "iconType": icon,
+                "link": event.get("url", ""),
             })
 
     # LeetCode recent submissions
     if leetcode_data and "error" not in leetcode_data:
         for sub in (leetcode_data.get("recent_submissions") or [])[:8]:
+            slug = sub.get("slug", "")
             recent_activity.append({
                 "activity": f"Solved '{sub.get('title', '')}'",
                 "platform": f"LeetCode ({sub.get('lang', '')})",
@@ -463,9 +465,11 @@ async def get_dashboard_summary(
                 "resultStyle": "text-green-700 bg-green-100",
                 "date": sub.get("date", ""),
                 "iconType": "code",
+                "link": f"https://leetcode.com/problems/{slug}/submissions/" if slug else "",
             })
 
     # CodeChef recent contests
+    cc_username = _extract_username(current_user.codechef_username) if current_user.codechef_username else ""
     if codechef_data and "error" not in codechef_data:
         for contest in (codechef_data.get("recent_activity") or [])[:5]:
             rank_text = f"Rank #{contest.get('rank', '?')}" if contest.get("rank") else "Participated"
@@ -476,9 +480,11 @@ async def get_dashboard_summary(
                 "resultStyle": "text-amber-700 bg-amber-100",
                 "date": contest.get("date", ""),
                 "iconType": "code",
+                "link": f"https://www.codechef.com/users/{cc_username}" if cc_username else "",
             })
 
     # HackerRank recent challenges
+    hr_username = _extract_username(current_user.hackerrank_username) if current_user.hackerrank_username else ""
     if hackerrank_data and "error" not in hackerrank_data:
         for challenge in (hackerrank_data.get("recent_activity") or [])[:5]:
             recent_activity.append({
@@ -488,6 +494,7 @@ async def get_dashboard_summary(
                 "resultStyle": "text-emerald-700 bg-emerald-100",
                 "date": challenge.get("date", ""),
                 "iconType": "code",
+                "link": f"https://www.hackerrank.com/profile/{hr_username}" if hr_username else "",
             })
 
     # Resume upload event
@@ -500,6 +507,7 @@ async def get_dashboard_summary(
             "resultStyle": "text-teal-700 bg-teal-100",
             "date": uploaded_at,
             "iconType": "code",
+            "link": "",
         })
 
     # Sort all activity by date descending
