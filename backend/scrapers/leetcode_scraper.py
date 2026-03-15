@@ -1,6 +1,7 @@
 # LeetCode GraphQL scraper — unofficial public endpoint
 import logging
 from typing import Optional
+from datetime import datetime, timezone
 import httpx
 from app.core.redis import redis_client
 import json
@@ -207,9 +208,10 @@ class LeetCodeScraper:
 
         return all_topics
 
-    async def fetch_submission_calendar(self, username: str) -> dict:
-        """Fetch the submission calendar (daily activity counts for the past year)."""
-        cache_key = f"leetcode:calendar:{username}"
+    async def fetch_submission_calendar(self, username: str, year: int | None = None) -> dict:
+        """Fetch the submission calendar (daily activity counts) for a specific year."""
+        target_year = year or datetime.now().year
+        cache_key = f"leetcode:calendar:{username}:{target_year}"
         try:
             cached = await redis_client.get(cache_key)
             if cached:
@@ -229,27 +231,26 @@ class LeetCodeScraper:
             }
         }
         """
-        from datetime import datetime
-        current_year = datetime.now().year
-        data = await self._query(query, {"username": username, "year": current_year})
+        data = await self._query(query, {"username": username, "year": target_year})
 
         result = {
             "streak": 0,
             "total_active_days": 0,
             "calendar": {},  # {date_string: count}
+            "active_years": [],
         }
 
         if data and data.get("matchedUser"):
             cal_data = data["matchedUser"].get("userCalendar", {})
             result["streak"] = cal_data.get("streak", 0) or 0
             result["total_active_days"] = cal_data.get("totalActiveDays", 0) or 0
+            result["active_years"] = cal_data.get("activeYears", []) or []
 
             # submissionCalendar is a JSON string: {"unix_timestamp": count, ...}
             calendar_str = cal_data.get("submissionCalendar", "{}")
             try:
                 raw_cal = json.loads(calendar_str) if isinstance(calendar_str, str) else (calendar_str or {})
                 # Convert unix timestamps to date strings
-                from datetime import timezone
                 for ts_str, count in raw_cal.items():
                     ts = int(ts_str)
                     date_str = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
@@ -257,11 +258,49 @@ class LeetCodeScraper:
             except (json.JSONDecodeError, ValueError):
                 pass
 
+        # Old years get longer cache, current year gets short cache
+        ttl = 3600 if target_year == datetime.now().year else 86400 * 30
         try:
-            await redis_client.set(cache_key, json.dumps(result), ex=3600)  # 1hr cache
+            await redis_client.set(cache_key, json.dumps(result), ex=ttl)
         except Exception:
             pass
 
+        return result
+
+    async def fetch_full_history_calendar(self, username: str) -> dict[str, dict[str, int]]:
+        """
+        Fetch ALL historical LeetCode submission data using activeYears.
+        Returns { "2023": { "2023-01-15": 5, ... }, "2024": { ... }, ... }
+        """
+        import asyncio
+
+        # First fetch current year to get activeYears list
+        current_data = await self.fetch_submission_calendar(username)
+        active_years = current_data.get("active_years", [])
+
+        if not active_years:
+            # No active years — return what we have
+            current_year = datetime.now().year
+            return {str(current_year): current_data.get("calendar", {})} if current_data.get("calendar") else {}
+
+        result: dict[str, dict[str, int]] = {}
+        current_year = datetime.now().year
+
+        # Current year is already fetched
+        if current_data.get("calendar"):
+            result[str(current_year)] = current_data["calendar"]
+
+        # Fetch remaining active years
+        for yr in active_years:
+            if yr == current_year:
+                continue  # Already fetched
+            cal_data = await self.fetch_submission_calendar(username, year=yr)
+            if cal_data.get("calendar"):
+                result[str(yr)] = cal_data["calendar"]
+            await asyncio.sleep(0.3)  # Rate limit safety
+
+        logger.info(f"LeetCode full history for {username}: {len(result)} years, "
+                     f"{sum(len(v) for v in result.values())} active days")
         return result
 
     async def fetch_contest_history(self, username: str) -> Optional[dict]:

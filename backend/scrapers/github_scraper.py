@@ -1,6 +1,7 @@
 # GitHub REST API scraper using httpx async with Redis caching
 import logging
 from typing import Optional
+from datetime import datetime
 import httpx
 from app.core.config import settings
 from app.core.redis import redis_client
@@ -215,12 +216,13 @@ class GitHubScraper:
 
         return 0
 
-    async def fetch_contribution_calendar(self, username: str) -> dict:
+    async def fetch_contribution_calendar(self, username: str, year: int | None = None) -> dict:
         """
-        Fetch per-day contribution data for the past year from GitHub's contributions page.
-        Returns { "YYYY-MM-DD": count, ... } for all days with contributions > 0.
+        Fetch per-day contribution data from GitHub's contributions page.
+        If year is specified, fetches that specific year. Otherwise fetches current view.
+        Returns { "YYYY-MM-DD": level, ... } for all days with contributions > 0.
         """
-        cache_key = f"github:calendar:{username}"
+        cache_key = f"github:calendar:{username}:{year or 'current'}"
         try:
             cached = await redis_client.get(cache_key)
             if cached:
@@ -231,14 +233,14 @@ class GitHubScraper:
         calendar: dict[str, int] = {}
         try:
             url = f"https://github.com/users/{username}/contributions"
+            if year:
+                url += f"?from={year}-01-01&to={year}-12-31"
+
             async with httpx.AsyncClient(timeout=15) as client:
                 response = await client.get(url, headers={"User-Agent": "MintKey-Scraper"})
                 if response.status_code == 200:
                     import re
-                    # Parse the contribution cells from the HTML/SVG
-                    # Each cell has: data-date="YYYY-MM-DD" data-level="0-4"
-                    # and text like "N contributions on Month Day"
-                    # Pattern to extract date and contribution count
+                    # Parse data-date and data-level from the SVG cells
                     cells = re.findall(
                         r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"',
                         response.text,
@@ -247,41 +249,70 @@ class GitHubScraper:
                         if int(level) > 0:
                             calendar[date_str] = int(level)
 
-                    # If the simple pattern didn't find entries, try the tooltip text pattern
+                    # Fallback: try tooltip text pattern
                     if not calendar:
-                        # Alternative: "N contribution(s) on Month Day, Year"
                         entries = re.findall(
                             r'(\d+)\s+contributions?\s+on\s+\w+\s+\w+\s+\d+,\s+\d+.*?data-date="(\d{4}-\d{2}-\d{2})"',
                             response.text,
                             re.DOTALL,
                         )
                         if not entries:
-                            # Try reversed order (date first, then count in text)
                             entries = re.findall(
                                 r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*>.*?(\d+)\s+contributions?',
                                 response.text,
                                 re.DOTALL,
                             )
                             for date_str, count_str in entries:
-                                count = int(count_str)
-                                if count > 0:
-                                    calendar[date_str] = count
+                                if int(count_str) > 0:
+                                    calendar[date_str] = int(count_str)
                         else:
                             for count_str, date_str in entries:
-                                count = int(count_str)
-                                if count > 0:
-                                    calendar[date_str] = count
+                                if int(count_str) > 0:
+                                    calendar[date_str] = int(count_str)
 
             if calendar:
+                ttl = CACHE_TTL_GITHUB if not year or year == datetime.now().year else 86400 * 30  # 30 days for old years
                 try:
-                    await redis_client.set(cache_key, json.dumps(calendar), ex=CACHE_TTL_GITHUB)
+                    await redis_client.set(cache_key, json.dumps(calendar), ex=ttl)
                 except Exception:
                     pass
 
         except Exception as e:
-            logger.warning(f"Failed to fetch contribution calendar for {username}: {e}")
+            logger.warning(f"Failed to fetch contribution calendar for {username} year={year}: {e}")
 
         return calendar
+
+    async def fetch_full_history_calendar(self, username: str) -> dict[str, dict[str, int]]:
+        """
+        Fetch ALL historical contribution data since the user's GitHub account creation.
+        Returns { "2023": { "2023-01-15": 2, ... }, "2024": { ... }, ... }
+        """
+        import asyncio
+
+        # Get account creation year from profile
+        profile = await self._get(f"/users/{username}")
+        if not profile or not isinstance(profile, dict) or not profile.get("created_at"):
+            # Fallback: just fetch current year
+            cal = await self.fetch_contribution_calendar(username)
+            current_year = datetime.now().year
+            return {str(current_year): cal}
+
+        created_at = profile["created_at"]  # "2023-03-15T..."
+        start_year = int(created_at[:4])
+        current_year = datetime.now().year
+
+        result: dict[str, dict[str, int]] = {}
+        for yr in range(start_year, current_year + 1):
+            cal = await self.fetch_contribution_calendar(username, year=yr)
+            if cal:
+                result[str(yr)] = cal
+            # Rate limit safety: small delay between years
+            if yr < current_year:
+                await asyncio.sleep(0.3)
+
+        logger.info(f"GitHub full history for {username}: {len(result)} years, "
+                     f"{sum(len(v) for v in result.values())} active days")
+        return result
 
     async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""

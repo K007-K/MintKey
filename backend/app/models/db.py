@@ -55,6 +55,7 @@ class User(Base):
     github_oauth_id = Column(String(100), nullable=True, unique=True)
     is_onboarded = Column(Boolean, default=False)
     settings = Column(JSONB, nullable=True, default=dict)
+    activity_calendar = Column(JSONB, nullable=True, default=dict)
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

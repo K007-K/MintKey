@@ -316,6 +316,7 @@ export default function DashboardPage() {
           currentStreak={(streak.current_streak as number) || 0}
           longestStreak={(streak.longest_streak as number) || 0}
           totalActiveDays={(streak.total_active_days as number) || 0}
+          availableYears={(streak.available_years as number[]) || [new Date().getFullYear()]}
           onClose={() => setShowHeatmap(false)}
         />
       )}
@@ -438,12 +439,52 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, totalActiveDays, onClose }: {
+function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, totalActiveDays, availableYears, onClose }: {
   yearlyHeatmap: Record<string, { count: number; platforms: string[] }>;
-  currentStreak: number; longestStreak: number; totalActiveDays: number; onClose: () => void;
+  currentStreak: number; longestStreak: number; totalActiveDays: number;
+  availableYears: number[];
+  onClose: () => void;
 }) {
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [yearData, setYearData] = useState<Record<string, { count: number; platforms: string[] }> | null>(null);
+  const [loadingYear, setLoadingYear] = useState(false);
+  const [yearSummaries, setYearSummaries] = useState<{ year: number; active_days: number }[]>([]);
   const [enabledPlatforms, setEnabledPlatforms] = useState<Set<string>>(new Set(PLATFORMS));
   const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number; platforms: string[] } | null>(null);
+
+  // Determine which heatmap data to use
+  const activeHeatmap = (selectedYear === currentYear ? yearlyHeatmap : yearData) || {};
+
+  // Fetch year data when switching years
+  const fetchYearData = async (year: number) => {
+    if (year === currentYear) {
+      setYearData(null);
+      return;
+    }
+    setLoadingYear(true);
+    try {
+      const token = document.cookie.split(";").find(c => c.trim().startsWith("token="))?.split("=")[1]
+        || localStorage.getItem("token") || "";
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/dashboard/heatmap?year=${year}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setYearData(json.data.heatmap || {});
+        if (json.data.year_summaries) setYearSummaries(json.data.year_summaries);
+      }
+    } catch { /* ignore */ }
+    setLoadingYear(false);
+  };
+
+  const navigateYear = (delta: number) => {
+    const newYear = selectedYear + delta;
+    const minYear = availableYears.length > 0 ? Math.min(...availableYears) : currentYear;
+    if (newYear < minYear || newYear > currentYear) return;
+    setSelectedYear(newYear);
+    fetchYearData(newYear);
+  };
 
   const togglePlatform = (p: string) => {
     setEnabledPlatforms(prev => {
@@ -453,33 +494,47 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
     });
   };
 
-  // Build 52×7 grid (columns=weeks, rows=Mon..Sun)
+  // Build 52×7 grid for the selected year
+  const isCurrentYear = selectedYear === currentYear;
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
-  // Find the start: go back ~52 weeks to the nearest Monday
-  const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - 364);
-  // Align to Monday
-  const startDow = startDate.getDay(); // 0=Sun
+  let startDate: Date;
+  let endDate: Date;
+
+  if (isCurrentYear) {
+    // Show past year from today
+    endDate = new Date(today);
+    startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 364);
+  } else {
+    // Show full calendar year
+    startDate = new Date(selectedYear, 0, 1); // Jan 1
+    endDate = new Date(selectedYear, 11, 31); // Dec 31
+  }
+
+  // Align start to Monday
+  const startDow = startDate.getDay();
   const offsetToMon = startDow === 0 ? -6 : 1 - startDow;
   startDate.setDate(startDate.getDate() + offsetToMon);
 
-  // Build weeks array: each week is 7 cells
+  // Build weeks array
   const weeks: { date: string; count: number; platforms: string[]; isToday: boolean }[][] = [];
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
 
-  while (currentDate <= today || weeks.length < 53) {
+  while (currentDate <= endDate || weeks.length < 53) {
     const week: { date: string; count: number; platforms: string[]; isToday: boolean }[] = [];
     for (let dow = 0; dow < 7; dow++) {
       const dateStr = currentDate.toISOString().slice(0, 10);
-      const entry = yearlyHeatmap[dateStr];
-      const filteredPlatforms = entry ? entry.platforms.filter(p => enabledPlatforms.has(p)) : [];
+      const entry = activeHeatmap[dateStr];
+      const entryPlatforms = entry?.platforms || (typeof entry === "object" && entry ? [] : []);
+      const filteredPlatforms = entryPlatforms.filter((p: string) => enabledPlatforms.has(p));
       const isFuture = currentDate > today;
+      const entryCount = entry?.count || (typeof entry === "number" ? entry : 0);
 
       week.push({
         date: dateStr,
-        count: isFuture ? -1 : filteredPlatforms.length,
+        count: isFuture ? -1 : (filteredPlatforms.length > 0 ? entryCount : (entry ? 0 : 0)),
         platforms: filteredPlatforms,
         isToday: dateStr === todayStr,
       });
@@ -490,11 +545,10 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
     if (weeks.length >= 53) break;
   }
 
-  // Month labels: track which weeks start a new month
+  // Month labels
   const monthLabels: { col: number; label: string }[] = [];
   let lastMonth = -1;
   weeks.forEach((week, wi) => {
-    // Use the first visible day of the week (Monday = index 0)
     const firstDay = week[0];
     if (firstDay) {
       const m = new Date(firstDay.date).getMonth();
@@ -507,8 +561,10 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 
   // Recompute stats based on enabled platform filter
   let filteredActiveDays = 0;
-  Object.values(yearlyHeatmap).forEach(entry => {
-    if (entry.platforms.some(p => enabledPlatforms.has(p))) filteredActiveDays++;
+  Object.values(activeHeatmap).forEach(entry => {
+    if (entry && typeof entry === "object" && "platforms" in entry) {
+      if ((entry as { platforms: string[] }).platforms.some((p: string) => enabledPlatforms.has(p))) filteredActiveDays++;
+    }
   });
 
   const getColor = (count: number): string => {
@@ -519,6 +575,9 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
     return "bg-emerald-600";
   };
 
+  const canGoBack = availableYears.length > 0 && selectedYear > Math.min(...availableYears);
+  const canGoForward = selectedYear < currentYear;
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -526,16 +585,58 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 
       {/* Modal */}
       <div className="relative w-full max-w-4xl rounded-xl border border-gray-200 bg-white shadow-2xl overflow-hidden">
-        {/* Header */}
+        {/* Header with year navigation */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Coding Activity</h2>
-            <p className="text-sm text-gray-400 mt-0.5">Cross-platform activity over the past year</p>
+            <p className="text-sm text-gray-400 mt-0.5">Cross-platform activity history</p>
+          </div>
+          {/* Year Navigator */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigateYear(-1)}
+              disabled={!canGoBack}
+              className={`p-1.5 rounded-lg transition-colors ${canGoBack ? "hover:bg-gray-100 text-gray-600" : "text-gray-200 cursor-not-allowed"}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+            </button>
+            <span className="text-xl font-bold text-gray-900 min-w-[60px] text-center">{selectedYear}</span>
+            <button
+              onClick={() => navigateYear(1)}
+              disabled={!canGoForward}
+              className={`p-1.5 rounded-lg transition-colors ${canGoForward ? "hover:bg-gray-100 text-gray-600" : "text-gray-200 cursor-not-allowed"}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
+            </button>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="h-5 w-5 text-gray-400" />
           </button>
         </div>
+
+        {/* Year summary tiles */}
+        {availableYears.length > 1 && (
+          <div className="px-6 py-2 bg-gray-50/30 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
+            {availableYears.map(yr => {
+              const summary = yearSummaries.find(s => s.year === yr);
+              const isSelected = yr === selectedYear;
+              return (
+                <button
+                  key={yr}
+                  onClick={() => { setSelectedYear(yr); fetchYearData(yr); }}
+                  className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium border transition-all ${
+                    isSelected
+                      ? "border-teal-200 bg-teal-50 text-teal-700"
+                      : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="font-bold">{yr}</span>
+                  {summary && <span className="ml-1 text-[10px] opacity-70">{summary.active_days}d</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Stats bar */}
         <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-6">
@@ -554,7 +655,7 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
             <div className="text-[10px] text-gray-400 uppercase tracking-wide">Longest Streak</div>
           </div>
 
-          {/* Platform filter toggles — pushed right */}
+          {/* Platform filter toggles */}
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[10px] text-gray-400 uppercase tracking-wide mr-1">Platforms:</span>
             {PLATFORMS.map(p => (
@@ -576,55 +677,62 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 
         {/* Heatmap grid */}
         <div className="px-6 py-5 overflow-x-auto">
-          <div className="relative" style={{ minWidth: "fit-content" }}>
-            {/* Month labels row — positioned above the grid */}
-            <div className="flex" style={{ paddingLeft: "32px", height: "16px", marginBottom: "4px" }}>
-              {monthLabels.map((ml, i) => {
-                const nextCol = i + 1 < monthLabels.length ? monthLabels[i + 1].col : weeks.length;
-                const span = nextCol - ml.col;
-                return (
-                  <div
-                    key={i}
-                    className="text-[10px] text-gray-400 font-medium"
-                    style={{ width: `${span * 15}px`, flexShrink: 0 }}
-                  >
-                    {ml.label}
-                  </div>
-                );
-              })}
+          {loadingYear ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-spin h-8 w-8 border-2 border-teal-400 border-t-transparent rounded-full" />
+              <span className="ml-3 text-sm text-gray-400">Loading {selectedYear} data...</span>
             </div>
-            {/* Grid: day labels + week columns */}
-            <div className="flex gap-[2px]">
-              {/* Day labels */}
-              <div className="flex flex-col gap-[2px] mr-1 pt-0">
-                {["Mon", "", "Wed", "", "Fri", "", "Sun"].map((label, i) => (
-                  <div key={i} className="h-[13px] flex items-center">
-                    <span className="text-[9px] text-gray-400 w-6 text-right">{label}</span>
+          ) : (
+            <div className="relative" style={{ minWidth: "fit-content" }}>
+              {/* Month labels row */}
+              <div className="flex" style={{ paddingLeft: "32px", height: "16px", marginBottom: "4px" }}>
+                {monthLabels.map((ml, i) => {
+                  const nextCol = i + 1 < monthLabels.length ? monthLabels[i + 1].col : weeks.length;
+                  const span = nextCol - ml.col;
+                  return (
+                    <div
+                      key={i}
+                      className="text-[10px] text-gray-400 font-medium"
+                      style={{ width: `${span * 15}px`, flexShrink: 0 }}
+                    >
+                      {ml.label}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Grid: day labels + week columns */}
+              <div className="flex gap-[2px]">
+                {/* Day labels */}
+                <div className="flex flex-col gap-[2px] mr-1 pt-0">
+                  {["Mon", "", "Wed", "", "Fri", "", "Sun"].map((label, i) => (
+                    <div key={i} className="h-[13px] flex items-center">
+                      <span className="text-[9px] text-gray-400 w-6 text-right">{label}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Weeks */}
+                {weeks.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-[2px]">
+                    {week.map((cell, di) => (
+                      <div
+                        key={di}
+                        className={`w-[13px] h-[13px] rounded-[2px] transition-colors ${getColor(cell.count)} ${
+                          cell.isToday ? "ring-2 ring-teal-400 ring-offset-1" : ""
+                        } ${cell.count >= 0 ? "cursor-pointer hover:ring-1 hover:ring-gray-300" : ""}`}
+                        onMouseEnter={(e) => {
+                          if (cell.count >= 0) {
+                            const rect = (e.target as HTMLElement).getBoundingClientRect();
+                            setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 8, date: cell.date, count: cell.count, platforms: cell.platforms });
+                          }
+                        }}
+                        onMouseLeave={() => setTooltip(null)}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>
-              {/* Weeks */}
-              {weeks.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-[2px]">
-                  {week.map((cell, di) => (
-                    <div
-                      key={di}
-                      className={`w-[13px] h-[13px] rounded-[2px] transition-colors ${getColor(cell.count)} ${
-                        cell.isToday ? "ring-2 ring-teal-400 ring-offset-1" : ""
-                      } ${cell.count >= 0 ? "cursor-pointer hover:ring-1 hover:ring-gray-300" : ""}`}
-                      onMouseEnter={(e) => {
-                        if (cell.count >= 0) {
-                          const rect = (e.target as HTMLElement).getBoundingClientRect();
-                          setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 8, date: cell.date, count: cell.count, platforms: cell.platforms });
-                        }
-                      }}
-                      onMouseLeave={() => setTooltip(null)}
-                    />
-                  ))}
-                </div>
-              ))}
             </div>
-          </div>
+          )}
 
           {/* Legend */}
           <div className="flex items-center gap-1.5 mt-4 justify-end">
@@ -643,11 +751,11 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
             className="fixed z-[10000] px-3 py-2 rounded-lg bg-gray-900 text-white text-[11px] shadow-lg pointer-events-none"
             style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%, -100%)" }}
           >
-            <div className="font-semibold">{new Date(tooltip.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</div>
+            <div className="font-semibold">{new Date(tooltip.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</div>
             {tooltip.count > 0 ? (
               <>
-                <div className="text-emerald-300">{tooltip.count} platform{tooltip.count > 1 ? "s" : ""} active</div>
-                <div className="text-gray-400">{tooltip.platforms.join(", ")}</div>
+                <div className="text-emerald-300">{tooltip.count} contribution{tooltip.count > 1 ? "s" : ""}</div>
+                {tooltip.platforms.length > 0 && <div className="text-gray-400">{tooltip.platforms.join(", ")}</div>}
               </>
             ) : (
               <div className="text-gray-400">No activity</div>

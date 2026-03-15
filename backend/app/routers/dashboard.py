@@ -402,6 +402,11 @@ async def get_dashboard_summary(
             elif name == "hackerrank":
                 hackerrank_data = result or {}
 
+    # --- Build & Store Multi-Year Activity Calendar ---
+    await _build_and_store_activity_calendar(
+        current_user, github_data, leetcode_data, codechef_data, hackerrank_data, db
+    )
+
     # --- Stat Cards ---
     # LeetCode Solved
     lc_summary = leetcode_data.get("summary", {}) if leetcode_data and "error" not in leetcode_data else {}
@@ -719,6 +724,7 @@ async def get_dashboard_summary(
                     "longest_streak": streak_info["longest_streak"],
                     "yearly_heatmap": streak_info["yearly_heatmap"],
                     "total_active_days": streak_info["total_active_days"],
+                    "available_years": _get_available_years(current_user),
                 },
                 "readiness": {
                     "value": readiness,
@@ -732,5 +738,220 @@ async def get_dashboard_summary(
             "trend_label": trend_label,
             "resume_summary": resume_summary,
             "company_scores": await _build_company_scores(match_scores, current_user, db),
+        },
+    )
+
+
+def _get_available_years(user) -> list[int]:
+    """Extract available years from stored activity_calendar."""
+    cal = user.activity_calendar or {}
+    years = []
+    for key in cal:
+        if key.startswith("_"):
+            continue
+        try:
+            years.append(int(key))
+        except ValueError:
+            continue
+    return sorted(years) if years else [datetime.now().year]
+
+
+async def _build_and_store_activity_calendar(
+    user, gh_data: dict, lc_data: dict, cc_data: dict, hr_data: dict, db: AsyncSession
+) -> None:
+    """
+    Build multi-year activity calendar from all platforms and persist to DB.
+    First sync: fetch full history from account creation.
+    Subsequent syncs: only refresh current year.
+    """
+    from datetime import datetime
+    import json
+
+    existing_cal = user.activity_calendar or {}
+    meta = existing_cal.get("_meta", {})
+    is_first_sync = not meta.get("last_full_sync")
+    current_year = datetime.now().year
+
+    merged: dict[str, dict[str, dict]] = {}
+
+    # Copy existing data (except _meta)
+    for yr_key, yr_data in existing_cal.items():
+        if yr_key.startswith("_"):
+            continue
+        merged[yr_key] = yr_data if isinstance(yr_data, dict) else {}
+
+    try:
+        if is_first_sync:
+            # --- FULL HISTORY FETCH ---
+            logger.info(f"First sync for user {user.id} — fetching full activity history")
+
+            # GitHub full history
+            if user.github_username and gh_data and "error" not in gh_data:
+                from scrapers.github_scraper import GitHubScraper
+                gh_scraper = GitHubScraper()
+                gh_username = _extract_username(user.github_username)
+                gh_history = await gh_scraper.fetch_full_history_calendar(gh_username)
+                for yr_str, yr_cal in gh_history.items():
+                    if yr_str not in merged:
+                        merged[yr_str] = {}
+                    for date_str, level in yr_cal.items():
+                        if date_str not in merged[yr_str]:
+                            merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                        elif isinstance(merged[yr_str][date_str], (int, float)):
+                            merged[yr_str][date_str] = {"count": int(merged[yr_str][date_str]), "platforms": []}
+                        merged[yr_str][date_str]["count"] = merged[yr_str][date_str].get("count", 0) + level
+                        if "GitHub" not in merged[yr_str][date_str].get("platforms", []):
+                            merged[yr_str][date_str].setdefault("platforms", []).append("GitHub")
+
+            # LeetCode full history
+            if user.leetcode_username and lc_data and "error" not in lc_data:
+                from scrapers.leetcode_scraper import LeetCodeScraper
+                lc_scraper = LeetCodeScraper()
+                lc_username = _extract_username(user.leetcode_username)
+                lc_history = await lc_scraper.fetch_full_history_calendar(lc_username)
+                for yr_str, yr_cal in lc_history.items():
+                    if yr_str not in merged:
+                        merged[yr_str] = {}
+                    for date_str, count in yr_cal.items():
+                        if date_str not in merged[yr_str]:
+                            merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                        elif isinstance(merged[yr_str][date_str], (int, float)):
+                            merged[yr_str][date_str] = {"count": int(merged[yr_str][date_str]), "platforms": []}
+                        merged[yr_str][date_str]["count"] = merged[yr_str][date_str].get("count", 0) + count
+                        if "LeetCode" not in merged[yr_str][date_str].get("platforms", []):
+                            merged[yr_str][date_str].setdefault("platforms", []).append("LeetCode")
+
+            meta["last_full_sync"] = datetime.now().isoformat()
+        else:
+            # --- INCREMENTAL SYNC (current year only) ---
+            logger.info(f"Incremental sync for user {user.id} — refreshing year {current_year}")
+            yr_str = str(current_year)
+            merged[yr_str] = {}  # Reset current year data
+
+            # GitHub current year
+            if user.github_username and gh_data and "error" not in gh_data:
+                from scrapers.github_scraper import GitHubScraper
+                gh_scraper = GitHubScraper()
+                gh_username = _extract_username(user.github_username)
+                gh_cal = await gh_scraper.fetch_contribution_calendar(gh_username, year=current_year)
+                for date_str, level in gh_cal.items():
+                    if date_str not in merged[yr_str]:
+                        merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                    merged[yr_str][date_str]["count"] += level
+                    if "GitHub" not in merged[yr_str][date_str].get("platforms", []):
+                        merged[yr_str][date_str].setdefault("platforms", []).append("GitHub")
+
+            # LeetCode current year
+            if user.leetcode_username and lc_data and "error" not in lc_data:
+                from scrapers.leetcode_scraper import LeetCodeScraper
+                lc_scraper = LeetCodeScraper()
+                lc_username = _extract_username(user.leetcode_username)
+                lc_cal_data = await lc_scraper.fetch_submission_calendar(lc_username, year=current_year)
+                for date_str, count in lc_cal_data.get("calendar", {}).items():
+                    if date_str not in merged[yr_str]:
+                        merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                    merged[yr_str][date_str]["count"] += count
+                    if "LeetCode" not in merged[yr_str][date_str].get("platforms", []):
+                        merged[yr_str][date_str].setdefault("platforms", []).append("LeetCode")
+
+        # Add CodeChef contest dates (from ratingData — sparse)
+        if cc_data and "error" not in cc_data:
+            for contest in cc_data.get("rating_data", []):
+                end_date = contest.get("end_date") or contest.get("getdtime", "")
+                if end_date and len(end_date) >= 10:
+                    date_str = end_date[:10]
+                    yr_str = date_str[:4]
+                    if yr_str not in merged:
+                        merged[yr_str] = {}
+                    if date_str not in merged[yr_str]:
+                        merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                    elif isinstance(merged[yr_str][date_str], (int, float)):
+                        merged[yr_str][date_str] = {"count": int(merged[yr_str][date_str]), "platforms": []}
+                    merged[yr_str][date_str]["count"] = merged[yr_str][date_str].get("count", 0) + 1
+                    if "CodeChef" not in merged[yr_str][date_str].get("platforms", []):
+                        merged[yr_str][date_str].setdefault("platforms", []).append("CodeChef")
+
+        # Add HackerRank recent challenge dates
+        if hr_data and "error" not in hr_data:
+            for challenge in hr_data.get("recent_activity", []):
+                created = challenge.get("created_at", "")
+                if created and len(created) >= 10:
+                    date_str = created[:10]
+                    yr_str = date_str[:4]
+                    if yr_str not in merged:
+                        merged[yr_str] = {}
+                    if date_str not in merged[yr_str]:
+                        merged[yr_str][date_str] = {"count": 0, "platforms": []}
+                    elif isinstance(merged[yr_str][date_str], (int, float)):
+                        merged[yr_str][date_str] = {"count": int(merged[yr_str][date_str]), "platforms": []}
+                    merged[yr_str][date_str]["count"] = merged[yr_str][date_str].get("count", 0) + 1
+                    if "HackerRank" not in merged[yr_str][date_str].get("platforms", []):
+                        merged[yr_str][date_str].setdefault("platforms", []).append("HackerRank")
+
+        meta["last_sync"] = datetime.now().isoformat()
+        meta["oldest_year"] = min(int(k) for k in merged if not k.startswith("_")) if merged else current_year
+        merged["_meta"] = meta
+
+        # Persist to DB
+        from sqlalchemy import update
+        stmt = update(User).where(User.id == user.id).values(activity_calendar=merged)
+        await db.execute(stmt)
+        await db.commit()
+
+        total_days = sum(len(v) for k, v in merged.items() if not k.startswith("_"))
+        logger.info(f"Activity calendar saved for user {user.id}: {len(merged) - 1} years, {total_days} active days")
+
+    except Exception as e:
+        logger.error(f"Failed to build activity calendar for user {user.id}: {e}")
+
+
+# --- Heatmap Endpoint ---
+@router.get("/heatmap")
+async def get_heatmap(
+    year: int | None = None,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get heatmap data for a specific year from stored activity_calendar."""
+    from datetime import datetime
+
+    cal = current_user.activity_calendar or {}
+    target_year = year or datetime.now().year
+    yr_str = str(target_year)
+
+    year_data = cal.get(yr_str, {})
+    meta = cal.get("_meta", {})
+
+    # Build available years with summary stats
+    year_summaries = []
+    available_years = []
+    for key in sorted(cal.keys()):
+        if key.startswith("_"):
+            continue
+        try:
+            yr = int(key)
+            available_years.append(yr)
+            yr_entries = cal[key]
+            active_days = len(yr_entries) if isinstance(yr_entries, dict) else 0
+            year_summaries.append({"year": yr, "active_days": active_days})
+        except ValueError:
+            continue
+
+    if not available_years:
+        available_years = [target_year]
+        year_summaries = [{"year": target_year, "active_days": 0}]
+
+    return APIResponse(
+        success=True,
+        data={
+            "year": target_year,
+            "heatmap": year_data,
+            "available_years": available_years,
+            "year_summaries": year_summaries,
+            "meta": {
+                "oldest_year": meta.get("oldest_year", target_year),
+                "last_sync": meta.get("last_sync"),
+                "last_full_sync": meta.get("last_full_sync"),
+            },
         },
     )
