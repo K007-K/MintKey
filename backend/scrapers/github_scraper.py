@@ -215,7 +215,7 @@ class GitHubScraper:
 
     async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""
-        cache_key = f"github:events:{username}"
+        cache_key = f"github:events:v2:{username}"
         try:
             cached = await redis_client.get(cache_key)
             if cached:

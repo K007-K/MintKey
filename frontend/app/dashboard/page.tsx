@@ -287,7 +287,7 @@ export default function DashboardPage() {
                     <td className="py-4 text-right text-sm text-gray-400">{item.date}</td>
                     <td className="py-4 text-center">
                       {item.link ? (
-                        <a href={item.link as string} target="_blank" rel="noopener noreferrer" title="Open on platform" className="inline-flex items-center justify-center text-gray-300 hover:text-teal-500 transition-colors">
+                        <a href={item.link as string} target="_blank" rel="noopener noreferrer" title="Open on platform" className="inline-flex items-center justify-center text-teal-400 hover:text-teal-600 transition-colors">
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       ) : null}
