@@ -215,7 +215,7 @@ class GitHubScraper:
 
     async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""
-        cache_key = f"github:events:v2:{username}"
+        cache_key = f"github:events:v3:{username}"
         try:
             cached = await redis_client.get(cache_key)
             if cached:
@@ -236,12 +236,35 @@ class GitHubScraper:
             payload = event.get("payload", {})
 
             if event_type == "PushEvent":
+                # Public Events API strips commits/size; use head SHA fallback
                 commit_count = payload.get("size", 0)
-                # Extract latest commit message
                 commits_list = payload.get("commits", [])
                 commit_msg = ""
+                head_sha = payload.get("head", "")
+                before_sha = payload.get("before", "")
+
                 if commits_list:
+                    # If commits array is present, use it directly
                     commit_msg = commits_list[-1].get("message", "").split("\n")[0][:60]
+                elif head_sha and repo_full:
+                    # Fallback: fetch commit message from head SHA
+                    try:
+                        commit_data = await self._get(f"/repos/{repo_full}/commits/{head_sha}")
+                        if isinstance(commit_data, dict) and "commit" in commit_data:
+                            commit_msg = commit_data["commit"].get("message", "").split("\n")[0][:60]
+                        # Estimate commit count from compare if both SHAs exist
+                        if not commit_count and before_sha and before_sha != "0000000000000000000000000000000000000000":
+                            try:
+                                compare = await self._get(f"/repos/{repo_full}/compare/{before_sha[:7]}...{head_sha[:7]}")
+                                if isinstance(compare, dict):
+                                    commit_count = compare.get("total_commits", 1)
+                            except Exception:
+                                commit_count = 1  # At least 1 commit if we have a head SHA
+                        elif not commit_count:
+                            commit_count = 1
+                    except Exception:
+                        pass
+
                 raw_events.append({
                     "type": "push",
                     "repo": repo_name,
