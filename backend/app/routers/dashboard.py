@@ -209,8 +209,8 @@ def _compute_cross_platform_streak(
     from datetime import datetime, timezone, timedelta
     from collections import defaultdict
 
-    # Track per-platform dates: date_str -> set of platform names
-    date_platforms: dict[str, set[str]] = defaultdict(set)
+    # Track per-platform per-day contribution counts: date_str -> { "GitHub": 3, "LeetCode": 2, ... }
+    date_platform_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
     # 1. LeetCode submission calendar (best data source — daily counts)
     if lc_data and "error" not in lc_data:
@@ -218,37 +218,38 @@ def _compute_cross_platform_streak(
         cal_dict = calendar.get("calendar", {}) if isinstance(calendar, dict) else {}
         for date_str, count in cal_dict.items():
             if count and int(count) > 0:
-                date_platforms[date_str].add("LeetCode")
+                date_platform_counts[date_str]["LeetCode"] += int(count)
         # Also add recent submission dates
         for sub in (lc_data.get("recent_submissions") or []):
             if sub.get("date"):
-                date_platforms[sub["date"]].add("LeetCode")
+                date_platform_counts[sub["date"]]["LeetCode"] += 1
 
     # 2. GitHub — contribution calendar (full year) + recent events (supplement)
     if gh_data and "error" not in gh_data:
         # Primary source: per-day contribution calendar (365 days)
         contribution_cal = gh_data.get("contribution_calendar") or {}
-        for date_str in contribution_cal:
-            date_platforms[date_str].add("GitHub")
-        # Supplement: recent events (for recent precision)
+        for date_str, count in contribution_cal.items():
+            c = int(count) if isinstance(count, (int, str)) and str(count).isdigit() else 1
+            date_platform_counts[date_str]["GitHub"] += c
+        # Supplement: recent events (only if not already counted from calendar)
         for event in (gh_data.get("recent_events") or []):
             date_str = event.get("date", "")[:10]
-            if date_str:
-                date_platforms[date_str].add("GitHub")
+            if date_str and date_str not in contribution_cal:
+                date_platform_counts[date_str]["GitHub"] += 1
 
     # 3. CodeChef contest dates
     if cc_data and "error" not in cc_data:
         for contest in (cc_data.get("recent_activity") or []):
             if contest.get("date"):
-                date_platforms[contest["date"][:10]].add("CodeChef")
+                date_platform_counts[contest["date"][:10]]["CodeChef"] += 1
 
     # 4. HackerRank challenge dates
     if hr_data and "error" not in hr_data:
         for challenge in (hr_data.get("recent_activity") or []):
             if challenge.get("date"):
-                date_platforms[challenge["date"][:10]].add("HackerRank")
+                date_platform_counts[challenge["date"][:10]]["HackerRank"] += 1
 
-    active_dates = set(date_platforms.keys())
+    active_dates = set(date_platform_counts.keys())
 
     if not active_dates:
         return {
@@ -298,13 +299,13 @@ def _compute_cross_platform_streak(
         except ValueError:
             run = 1
 
-    # Build yearly heatmap — ALL dates from all platforms (frontend filters by year)
+    # Build yearly heatmap — ALL dates, with per-platform contribution counts
     yearly_heatmap = {}
-    for d_str, plats in date_platforms.items():
-        platforms = sorted(plats)
+    for d_str, plat_counts in date_platform_counts.items():
+        total = sum(plat_counts.values())
         yearly_heatmap[d_str] = {
-            "count": len(platforms),
-            "platforms": platforms,
+            "count": total,                   # total contributions across all platforms
+            "platforms": dict(plat_counts),    # { "GitHub": 3, "LeetCode": 2 }
         }
 
     # Badge logic

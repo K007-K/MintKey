@@ -312,7 +312,7 @@ export default function DashboardPage() {
       {/* Yearly Heatmap Modal */}
       {showHeatmap && (
         <YearlyHeatmapModal
-          yearlyHeatmap={(streak.yearly_heatmap as Record<string, { count: number; platforms: string[] }>) || {}}
+          yearlyHeatmap={(streak.yearly_heatmap as Record<string, { count: number; platforms: Record<string, number> }>) || {}}
           currentStreak={(streak.current_streak as number) || 0}
           longestStreak={(streak.longest_streak as number) || 0}
           totalActiveDays={(streak.total_active_days as number) || 0}
@@ -439,8 +439,16 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+// Helper: format Date as YYYY-MM-DD in LOCAL timezone (avoids toISOString UTC shift)
+const localDateStr = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, totalActiveDays, availableYears, onClose }: {
-  yearlyHeatmap: Record<string, { count: number; platforms: string[] }>;
+  yearlyHeatmap: Record<string, { count: number; platforms: Record<string, number> }>;
   currentStreak: number; longestStreak: number; totalActiveDays: number;
   availableYears: number[];
   onClose: () => void;
@@ -448,11 +456,11 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [enabledPlatforms, setEnabledPlatforms] = useState<Set<string>>(new Set(PLATFORMS));
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number; platforms: string[] } | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number; platforms: Record<string, number> } | null>(null);
 
   // Filter yearlyHeatmap by selected year prefix (e.g. "2025-" or "2026-")
   const yearPrefix = `${selectedYear}-`;
-  const activeHeatmap: Record<string, { count: number; platforms: string[] }> = {};
+  const activeHeatmap: Record<string, { count: number; platforms: Record<string, number> }> = {};
   for (const [dateStr, entry] of Object.entries(yearlyHeatmap)) {
     if (dateStr.startsWith(yearPrefix)) {
       activeHeatmap[dateStr] = entry;
@@ -477,7 +485,7 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
   // Build 52×7 grid for the selected year
   const isCurrentYear = selectedYear === currentYear;
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = localDateStr(today);
 
   let startDate: Date;
   let endDate: Date;
@@ -492,22 +500,31 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
   startDate.setDate(startDate.getDate() + offsetToMon);
 
   // Build weeks array
-  const weeks: { date: string; count: number; platforms: string[]; isToday: boolean }[][] = [];
+  const weeks: { date: string; count: number; platforms: Record<string, number>; isToday: boolean }[][] = [];
   const currentDate = new Date(startDate);
 
   while (currentDate <= endDate || weeks.length < 53) {
-    const week: { date: string; count: number; platforms: string[]; isToday: boolean }[] = [];
+    const week: { date: string; count: number; platforms: Record<string, number>; isToday: boolean }[] = [];
     for (let dow = 0; dow < 7; dow++) {
-      const dateStr = currentDate.toISOString().slice(0, 10);
+      const dateStr = localDateStr(currentDate);
       const entry = activeHeatmap[dateStr];
-      const entryPlatforms = entry?.platforms || (typeof entry === "object" && entry ? [] : []);
-      const filteredPlatforms = entryPlatforms.filter((p: string) => enabledPlatforms.has(p));
       const isFuture = currentDate > today;
-      const entryCount = entry?.count || (typeof entry === "number" ? entry : 0);
+
+      // Compute filtered count based on enabled platforms
+      let filteredCount = 0;
+      const filteredPlatforms: Record<string, number> = {};
+      if (entry?.platforms) {
+        for (const [plat, cnt] of Object.entries(entry.platforms)) {
+          if (enabledPlatforms.has(plat)) {
+            filteredPlatforms[plat] = cnt;
+            filteredCount += cnt;
+          }
+        }
+      }
 
       week.push({
         date: dateStr,
-        count: isFuture ? -1 : (filteredPlatforms.length > 0 ? entryCount : (entry ? 0 : 0)),
+        count: isFuture ? -1 : filteredCount,
         platforms: filteredPlatforms,
         isToday: dateStr === todayStr,
       });
@@ -538,8 +555,9 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
   // Recompute stats based on enabled platform filter
   let filteredActiveDays = 0;
   Object.values(activeHeatmap).forEach(entry => {
-    if (entry && typeof entry === "object" && "platforms" in entry) {
-      if ((entry as { platforms: string[] }).platforms.some((p: string) => enabledPlatforms.has(p))) filteredActiveDays++;
+    if (entry?.platforms) {
+      const hasEnabledPlatform = Object.keys(entry.platforms).some(p => enabledPlatforms.has(p));
+      if (hasEnabledPlatform) filteredActiveDays++;
     }
   });
 
@@ -728,7 +746,11 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
             {tooltip.count > 0 ? (
               <>
                 <div className="text-emerald-300">{tooltip.count} contribution{tooltip.count > 1 ? "s" : ""}</div>
-                {tooltip.platforms.length > 0 && <div className="text-gray-400">{tooltip.platforms.join(", ")}</div>}
+                {Object.keys(tooltip.platforms).length > 0 && (
+                  <div className="text-gray-400">
+                    {Object.entries(tooltip.platforms).map(([plat, cnt]) => `${plat}: ${cnt}`).join(", ")}
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-gray-400">No activity</div>
