@@ -744,6 +744,7 @@ async def get_dashboard_summary(
 
 def _get_available_years(user) -> list[int]:
     """Extract available years from stored activity_calendar."""
+    from datetime import datetime
     cal = user.activity_calendar or {}
     years = []
     for key in cal:
@@ -765,7 +766,7 @@ async def _build_and_store_activity_calendar(
     Subsequent syncs: only refresh current year.
     """
     from datetime import datetime
-    import json
+
 
     existing_cal = user.activity_calendar or {}
     meta = existing_cal.get("_meta", {})
