@@ -502,16 +502,9 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
   let startDate: Date;
   let endDate: Date;
 
-  if (isCurrentYear) {
-    // Show past year from today
-    endDate = new Date(today);
-    startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 364);
-  } else {
-    // Show full calendar year
-    startDate = new Date(selectedYear, 0, 1); // Jan 1
-    endDate = new Date(selectedYear, 11, 31); // Dec 31
-  }
+  // Always show full calendar year: Jan 1 → Dec 31
+  startDate = new Date(selectedYear, 0, 1); // Jan 1
+  endDate = new Date(selectedYear, 11, 31); // Dec 31
 
   // Align start to Monday
   const startDow = startDate.getDay();
