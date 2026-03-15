@@ -576,19 +576,24 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 
         {/* Heatmap grid */}
         <div className="px-6 py-5 overflow-x-auto">
-          {/* Month labels */}
-          <div className="flex ml-8 mb-1">
-            {monthLabels.map((ml, i) => (
-              <div
-                key={i}
-                className="text-[10px] text-gray-400 font-medium"
-                style={{ position: "absolute", left: `${32 + ml.col * 15}px` }}
-              >
-                {ml.label}
-              </div>
-            ))}
-          </div>
-          <div className="relative mt-4">
+          <div className="relative" style={{ minWidth: "fit-content" }}>
+            {/* Month labels row — positioned above the grid */}
+            <div className="flex" style={{ paddingLeft: "32px", height: "16px", marginBottom: "4px" }}>
+              {monthLabels.map((ml, i) => {
+                const nextCol = i + 1 < monthLabels.length ? monthLabels[i + 1].col : weeks.length;
+                const span = nextCol - ml.col;
+                return (
+                  <div
+                    key={i}
+                    className="text-[10px] text-gray-400 font-medium"
+                    style={{ width: `${span * 15}px`, flexShrink: 0 }}
+                  >
+                    {ml.label}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Grid: day labels + week columns */}
             <div className="flex gap-[2px]">
               {/* Day labels */}
               <div className="flex flex-col gap-[2px] mr-1 pt-0">

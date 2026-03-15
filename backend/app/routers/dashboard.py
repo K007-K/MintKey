@@ -709,6 +709,7 @@ async def get_dashboard_summary(
                 "streak": {
                     "value": streak_val,
                     "badge": streak_badge,
+                    "current_streak": current_streak,
                     "week_activity": streak_info["week_activity"],
                     "longest_streak": streak_info["longest_streak"],
                     "yearly_heatmap": streak_info["yearly_heatmap"],
