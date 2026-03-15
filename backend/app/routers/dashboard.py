@@ -202,11 +202,14 @@ def _compute_cross_platform_streak(
 ) -> dict:
     """
     Compute a real cross-platform coding streak from all platform activity.
-    Returns {current_streak, longest_streak, week_activity: [bool x 7], badge}.
+    Returns {current_streak, longest_streak, week_activity, badge, yearly_heatmap, total_active_days}.
+    yearly_heatmap: { "YYYY-MM-DD": { "count": N, "platforms": ["GitHub", ...] } }
     """
     from datetime import datetime, timezone, timedelta
+    from collections import defaultdict
 
-    active_dates: set[str] = set()  # "YYYY-MM-DD" strings
+    # Track per-platform dates: date_str -> set of platform names
+    date_platforms: dict[str, set[str]] = defaultdict(set)
 
     # 1. LeetCode submission calendar (best data source — daily counts)
     if lc_data and "error" not in lc_data:
@@ -214,30 +217,32 @@ def _compute_cross_platform_streak(
         cal_dict = calendar.get("calendar", {}) if isinstance(calendar, dict) else {}
         for date_str, count in cal_dict.items():
             if count and int(count) > 0:
-                active_dates.add(date_str)
+                date_platforms[date_str].add("LeetCode")
         # Also add recent submission dates
         for sub in (lc_data.get("recent_submissions") or []):
             if sub.get("date"):
-                active_dates.add(sub["date"])
+                date_platforms[sub["date"]].add("LeetCode")
 
     # 2. GitHub events dates
     if gh_data and "error" not in gh_data:
         for event in (gh_data.get("recent_events") or []):
             date_str = event.get("date", "")[:10]
             if date_str:
-                active_dates.add(date_str)
+                date_platforms[date_str].add("GitHub")
 
     # 3. CodeChef contest dates
     if cc_data and "error" not in cc_data:
         for contest in (cc_data.get("recent_activity") or []):
             if contest.get("date"):
-                active_dates.add(contest["date"][:10])
+                date_platforms[contest["date"][:10]].add("CodeChef")
 
     # 4. HackerRank challenge dates
     if hr_data and "error" not in hr_data:
         for challenge in (hr_data.get("recent_activity") or []):
             if challenge.get("date"):
-                active_dates.add(challenge["date"][:10])
+                date_platforms[challenge["date"][:10]].add("HackerRank")
+
+    active_dates = set(date_platforms.keys())
 
     if not active_dates:
         return {
@@ -245,6 +250,8 @@ def _compute_cross_platform_streak(
             "longest_streak": 0,
             "week_activity": [False] * 7,
             "badge": "Start building",
+            "yearly_heatmap": {},
+            "total_active_days": 0,
         }
 
     today = datetime.now(timezone.utc).date()
@@ -285,6 +292,17 @@ def _compute_cross_platform_streak(
         except ValueError:
             run = 1
 
+    # Build yearly heatmap — past 365 days with platform breakdown
+    yearly_heatmap = {}
+    for i in range(365):
+        d_str = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        if d_str in date_platforms:
+            platforms = sorted(date_platforms[d_str])
+            yearly_heatmap[d_str] = {
+                "count": len(platforms),
+                "platforms": platforms,
+            }
+
     # Badge logic
     if current_streak >= 30:
         badge = "🔥 On Fire!"
@@ -304,6 +322,8 @@ def _compute_cross_platform_streak(
         "longest_streak": longest if len(sorted_dates) > 1 else current_streak,
         "week_activity": week_activity,
         "badge": badge,
+        "yearly_heatmap": yearly_heatmap,
+        "total_active_days": len(active_dates),
     }
 
 
@@ -691,6 +711,8 @@ async def get_dashboard_summary(
                     "badge": streak_badge,
                     "week_activity": streak_info["week_activity"],
                     "longest_streak": streak_info["longest_streak"],
+                    "yearly_heatmap": streak_info["yearly_heatmap"],
+                    "total_active_days": streak_info["total_active_days"],
                 },
                 "readiness": {
                     "value": readiness,

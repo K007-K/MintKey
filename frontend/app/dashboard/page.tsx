@@ -1,13 +1,14 @@
 // Main dashboard — wired to real scraped platform data
 "use client";
 
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useDashboardSummary, useMatchScores, useCurrentUser } from "@/lib/api";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 
 /* ─── Dashboard Page ─── */
@@ -47,6 +48,9 @@ export default function DashboardPage() {
   // Chart: only show real trend data, no fake placeholder
   const chartData = trendData && trendData.length > 0 ? trendData : null;
 
+  // Heatmap modal state
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
   return (
     <DashboardLayout
       title={`${greeting}, ${userName}`}
@@ -79,6 +83,10 @@ export default function DashboardPage() {
             badgeColor={(streak.value as string) && (streak.value as string) !== "—" ? "bg-orange-50 text-orange-600" : "bg-gray-100 text-gray-600"}
             weekActivity={(streak.week_activity as boolean[]) || []}
             longestStreak={(streak.longest_streak as number) || 0}
+            currentStreak={(streak.current_streak as number) || 0}
+            yearlyHeatmap={(streak.yearly_heatmap as Record<string, { count: number; platforms: string[] }>) || {}}
+            totalActiveDays={(streak.total_active_days as number) || 0}
+            onOpenHeatmap={() => setShowHeatmap(true)}
             loading={isLoading}
           />
           <StatCard
@@ -300,6 +308,17 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      {/* Yearly Heatmap Modal */}
+      {showHeatmap && (
+        <YearlyHeatmapModal
+          yearlyHeatmap={(streak.yearly_heatmap as Record<string, { count: number; platforms: string[] }>) || {}}
+          currentStreak={(streak.current_streak as number) || 0}
+          longestStreak={(streak.longest_streak as number) || 0}
+          totalActiveDays={(streak.total_active_days as number) || 0}
+          onClose={() => setShowHeatmap(false)}
+        />
+      )}
     </DashboardLayout>
   );
 }
@@ -338,23 +357,29 @@ function ActionItem({ action }: { action: Record<string, string> }) {
 
 /* ─── Streak Card with 7-Day Heatmap ─── */
 
-function StreakCard({ value, badge, badgeColor, weekActivity, longestStreak, loading = false }: {
-  value: string | null; badge: string; badgeColor: string; weekActivity: boolean[]; longestStreak: number; loading?: boolean;
+function StreakCard({ value, badge, badgeColor, weekActivity, longestStreak, currentStreak, yearlyHeatmap, totalActiveDays, onOpenHeatmap, loading = false }: {
+  value: string | null; badge: string; badgeColor: string; weekActivity: boolean[]; longestStreak: number;
+  currentStreak: number;
+  yearlyHeatmap: Record<string, { count: number; platforms: string[] }>;
+  totalActiveDays: number;
+  onOpenHeatmap: () => void;
+  loading?: boolean;
 }) {
   const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
-  // Map weekActivity (index 0 = 6 days ago, index 6 = today) to correct day labels
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ...
   const labels: string[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dow = d.getDay();
-    labels.push(dayLabels[dow === 0 ? 6 : dow - 1]); // Convert to Mon=0 .. Sun=6
+    labels.push(dayLabels[dow === 0 ? 6 : dow - 1]);
   }
 
   return (
-    <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+    <div
+      onClick={onOpenHeatmap}
+      className="rounded-lg border border-[#e5e7eb] bg-white p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors"><FlameIcon /></div>
         {loading ? <div className="h-5 w-16 animate-pulse rounded-full bg-gray-100" /> : <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeColor}`}>{badge}</span>}
@@ -363,30 +388,268 @@ function StreakCard({ value, badge, badgeColor, weekActivity, longestStreak, loa
       {loading ? <div className="h-8 w-20 animate-pulse rounded bg-gray-100 mt-1" /> : (
         <div>
           <div className="text-[28px] font-bold leading-tight text-gray-900">{value || "—"}</div>
-          {/* 7-day heatmap */}
+          {/* 7-day heatmap with today indicator */}
           {weekActivity.length === 7 && (
             <div className="flex items-center gap-1.5 mt-2">
-              {weekActivity.map((active, i) => (
-                <div key={i} className="flex flex-col items-center gap-0.5">
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full transition-colors ${
-                      active
-                        ? "bg-emerald-400 shadow-sm shadow-emerald-200"
-                        : "bg-gray-200"
-                    }`}
-                  />
-                  <span className="text-[8px] text-gray-400 font-medium">{labels[i]}</span>
+              {weekActivity.map((active, i) => {
+                const isToday = i === 6;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-0.5">
+                    <div className="relative">
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full transition-colors ${
+                          active
+                            ? "bg-emerald-400 shadow-sm shadow-emerald-200"
+                            : "bg-gray-200"
+                        }`}
+                      />
+                      {/* Today pulsing ring */}
+                      {isToday && (
+                        <div className="absolute -inset-[3px] rounded-full border-2 border-teal-400 animate-pulse opacity-60" />
+                      )}
+                    </div>
+                    <span className={`text-[8px] font-medium ${isToday ? "text-teal-500" : "text-gray-400"}`}>{labels[i]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className="flex items-center justify-between mt-1.5">
+            {longestStreak > 0 && (
+              <div className="text-[11px] text-gray-400">
+                Longest: {longestStreak} day{longestStreak !== 1 ? "s" : ""}
+              </div>
+            )}
+            <div className="text-[10px] text-teal-500 opacity-0 group-hover:opacity-100 transition-opacity">
+              View heatmap →
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Yearly Heatmap Modal ─── */
+
+const PLATFORMS = ["GitHub", "LeetCode", "CodeChef", "HackerRank"];
+const PLATFORM_COLORS: Record<string, string> = {
+  GitHub: "bg-gray-800", LeetCode: "bg-amber-500", CodeChef: "bg-teal-600", HackerRank: "bg-green-600",
+};
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, totalActiveDays, onClose }: {
+  yearlyHeatmap: Record<string, { count: number; platforms: string[] }>;
+  currentStreak: number; longestStreak: number; totalActiveDays: number; onClose: () => void;
+}) {
+  const [enabledPlatforms, setEnabledPlatforms] = useState<Set<string>>(new Set(PLATFORMS));
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number; platforms: string[] } | null>(null);
+
+  const togglePlatform = (p: string) => {
+    setEnabledPlatforms(prev => {
+      const next = new Set(prev);
+      if (next.has(p)) { next.delete(p); } else { next.add(p); }
+      return next;
+    });
+  };
+
+  // Build 52×7 grid (columns=weeks, rows=Mon..Sun)
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+
+  // Find the start: go back ~52 weeks to the nearest Monday
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - 364);
+  // Align to Monday
+  const startDow = startDate.getDay(); // 0=Sun
+  const offsetToMon = startDow === 0 ? -6 : 1 - startDow;
+  startDate.setDate(startDate.getDate() + offsetToMon);
+
+  // Build weeks array: each week is 7 cells
+  const weeks: { date: string; count: number; platforms: string[]; isToday: boolean }[][] = [];
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= today || weeks.length < 53) {
+    const week: { date: string; count: number; platforms: string[]; isToday: boolean }[] = [];
+    for (let dow = 0; dow < 7; dow++) {
+      const dateStr = currentDate.toISOString().slice(0, 10);
+      const entry = yearlyHeatmap[dateStr];
+      const filteredPlatforms = entry ? entry.platforms.filter(p => enabledPlatforms.has(p)) : [];
+      const isFuture = currentDate > today;
+
+      week.push({
+        date: dateStr,
+        count: isFuture ? -1 : filteredPlatforms.length,
+        platforms: filteredPlatforms,
+        isToday: dateStr === todayStr,
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    weeks.push(week);
+    if (weeks.length >= 53) break;
+  }
+
+  // Month labels: track which weeks start a new month
+  const monthLabels: { col: number; label: string }[] = [];
+  let lastMonth = -1;
+  weeks.forEach((week, wi) => {
+    // Use the first visible day of the week (Monday = index 0)
+    const firstDay = week[0];
+    if (firstDay) {
+      const m = new Date(firstDay.date).getMonth();
+      if (m !== lastMonth) {
+        monthLabels.push({ col: wi, label: MONTHS[m] });
+        lastMonth = m;
+      }
+    }
+  });
+
+  // Recompute stats based on enabled platform filter
+  let filteredActiveDays = 0;
+  Object.values(yearlyHeatmap).forEach(entry => {
+    if (entry.platforms.some(p => enabledPlatforms.has(p))) filteredActiveDays++;
+  });
+
+  const getColor = (count: number): string => {
+    if (count < 0) return "bg-gray-50"; // future
+    if (count === 0) return "bg-gray-100";
+    if (count === 1) return "bg-emerald-200";
+    if (count <= 2) return "bg-emerald-400";
+    return "bg-emerald-600";
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-4xl rounded-xl border border-gray-200 bg-white shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Coding Activity</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Cross-platform activity over the past year</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            <X className="h-5 w-5 text-gray-400" />
+          </button>
+        </div>
+
+        {/* Stats bar */}
+        <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-6">
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-900">{filteredActiveDays}</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wide">Active Days</div>
+          </div>
+          <div className="w-px h-8 bg-gray-200" />
+          <div className="text-center">
+            <div className="text-lg font-bold text-emerald-600">{currentStreak}</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wide">Current Streak</div>
+          </div>
+          <div className="w-px h-8 bg-gray-200" />
+          <div className="text-center">
+            <div className="text-lg font-bold text-orange-500">{longestStreak}</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wide">Longest Streak</div>
+          </div>
+
+          {/* Platform filter toggles — pushed right */}
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide mr-1">Platforms:</span>
+            {PLATFORMS.map(p => (
+              <button
+                key={p}
+                onClick={() => togglePlatform(p)}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium border transition-all ${
+                  enabledPlatforms.has(p)
+                    ? "border-teal-200 bg-teal-50 text-teal-700"
+                    : "border-gray-200 bg-gray-50 text-gray-400 line-through"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${enabledPlatforms.has(p) ? PLATFORM_COLORS[p] : "bg-gray-300"}`} />
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Heatmap grid */}
+        <div className="px-6 py-5 overflow-x-auto">
+          {/* Month labels */}
+          <div className="flex ml-8 mb-1">
+            {monthLabels.map((ml, i) => (
+              <div
+                key={i}
+                className="text-[10px] text-gray-400 font-medium"
+                style={{ position: "absolute", left: `${32 + ml.col * 15}px` }}
+              >
+                {ml.label}
+              </div>
+            ))}
+          </div>
+          <div className="relative mt-4">
+            <div className="flex gap-[2px]">
+              {/* Day labels */}
+              <div className="flex flex-col gap-[2px] mr-1 pt-0">
+                {["Mon", "", "Wed", "", "Fri", "", "Sun"].map((label, i) => (
+                  <div key={i} className="h-[13px] flex items-center">
+                    <span className="text-[9px] text-gray-400 w-6 text-right">{label}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Weeks */}
+              {weeks.map((week, wi) => (
+                <div key={wi} className="flex flex-col gap-[2px]">
+                  {week.map((cell, di) => (
+                    <div
+                      key={di}
+                      className={`w-[13px] h-[13px] rounded-[2px] transition-colors ${getColor(cell.count)} ${
+                        cell.isToday ? "ring-2 ring-teal-400 ring-offset-1" : ""
+                      } ${cell.count >= 0 ? "cursor-pointer hover:ring-1 hover:ring-gray-300" : ""}`}
+                      onMouseEnter={(e) => {
+                        if (cell.count >= 0) {
+                          const rect = (e.target as HTMLElement).getBoundingClientRect();
+                          setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 8, date: cell.date, count: cell.count, platforms: cell.platforms });
+                        }
+                      }}
+                      onMouseLeave={() => setTooltip(null)}
+                    />
+                  ))}
                 </div>
               ))}
             </div>
-          )}
-          {longestStreak > 0 && (
-            <div className="text-[11px] text-gray-400 mt-1.5">
-              Longest: {longestStreak} day{longestStreak !== 1 ? "s" : ""}
-            </div>
-          )}
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-1.5 mt-4 justify-end">
+            <span className="text-[10px] text-gray-400">Less</span>
+            <div className="w-[11px] h-[11px] rounded-[2px] bg-gray-100" />
+            <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-200" />
+            <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-400" />
+            <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-600" />
+            <span className="text-[10px] text-gray-400">More</span>
+          </div>
         </div>
-      )}
+
+        {/* Tooltip */}
+        {tooltip && (
+          <div
+            className="fixed z-[10000] px-3 py-2 rounded-lg bg-gray-900 text-white text-[11px] shadow-lg pointer-events-none"
+            style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%, -100%)" }}
+          >
+            <div className="font-semibold">{new Date(tooltip.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</div>
+            {tooltip.count > 0 ? (
+              <>
+                <div className="text-emerald-300">{tooltip.count} platform{tooltip.count > 1 ? "s" : ""} active</div>
+                <div className="text-gray-400">{tooltip.platforms.join(", ")}</div>
+              </>
+            ) : (
+              <div className="text-gray-400">No activity</div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
