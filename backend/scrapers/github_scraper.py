@@ -158,8 +158,9 @@ class GitHubScraper:
             for lang, bytes_count in sorted(language_totals.items(), key=lambda x: -x[1])
         }
 
-        # Fetch contributions count and recent events
+        # Fetch contributions count, contribution calendar, and recent events
         contributions = await self.fetch_contribution_count(username)
+        contribution_calendar = await self.fetch_contribution_calendar(username)
         recent_events = await self.fetch_recent_events(username)
 
         return {
@@ -181,6 +182,7 @@ class GitHubScraper:
             "language_distribution": language_distribution,
             "top_repos": top_repos[:10],
             "total_contributions": contributions,
+            "contribution_calendar": contribution_calendar,
             "recent_events": recent_events,
         }
 
@@ -212,6 +214,74 @@ class GitHubScraper:
             logger.warning(f"Failed to fetch contribution count for {username}: {e}")
 
         return 0
+
+    async def fetch_contribution_calendar(self, username: str) -> dict:
+        """
+        Fetch per-day contribution data for the past year from GitHub's contributions page.
+        Returns { "YYYY-MM-DD": count, ... } for all days with contributions > 0.
+        """
+        cache_key = f"github:calendar:{username}"
+        try:
+            cached = await redis_client.get(cache_key)
+            if cached:
+                return json.loads(cached)
+        except Exception:
+            pass
+
+        calendar: dict[str, int] = {}
+        try:
+            url = f"https://github.com/users/{username}/contributions"
+            async with httpx.AsyncClient(timeout=15) as client:
+                response = await client.get(url, headers={"User-Agent": "MintKey-Scraper"})
+                if response.status_code == 200:
+                    import re
+                    # Parse the contribution cells from the HTML/SVG
+                    # Each cell has: data-date="YYYY-MM-DD" data-level="0-4"
+                    # and text like "N contributions on Month Day"
+                    # Pattern to extract date and contribution count
+                    cells = re.findall(
+                        r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"',
+                        response.text,
+                    )
+                    for date_str, level in cells:
+                        if int(level) > 0:
+                            calendar[date_str] = int(level)
+
+                    # If the simple pattern didn't find entries, try the tooltip text pattern
+                    if not calendar:
+                        # Alternative: "N contribution(s) on Month Day, Year"
+                        entries = re.findall(
+                            r'(\d+)\s+contributions?\s+on\s+\w+\s+\w+\s+\d+,\s+\d+.*?data-date="(\d{4}-\d{2}-\d{2})"',
+                            response.text,
+                            re.DOTALL,
+                        )
+                        if not entries:
+                            # Try reversed order (date first, then count in text)
+                            entries = re.findall(
+                                r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*>.*?(\d+)\s+contributions?',
+                                response.text,
+                                re.DOTALL,
+                            )
+                            for date_str, count_str in entries:
+                                count = int(count_str)
+                                if count > 0:
+                                    calendar[date_str] = count
+                        else:
+                            for count_str, date_str in entries:
+                                count = int(count_str)
+                                if count > 0:
+                                    calendar[date_str] = count
+
+            if calendar:
+                try:
+                    await redis_client.set(cache_key, json.dumps(calendar), ex=CACHE_TTL_GITHUB)
+                except Exception:
+                    pass
+
+        except Exception as e:
+            logger.warning(f"Failed to fetch contribution calendar for {username}: {e}")
+
+        return calendar
 
     async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""

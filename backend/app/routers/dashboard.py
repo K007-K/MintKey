@@ -223,8 +223,13 @@ def _compute_cross_platform_streak(
             if sub.get("date"):
                 date_platforms[sub["date"]].add("LeetCode")
 
-    # 2. GitHub events dates
+    # 2. GitHub — contribution calendar (full year) + recent events (supplement)
     if gh_data and "error" not in gh_data:
+        # Primary source: per-day contribution calendar (365 days)
+        contribution_cal = gh_data.get("contribution_calendar") or {}
+        for date_str in contribution_cal:
+            date_platforms[date_str].add("GitHub")
+        # Supplement: recent events (for recent precision)
         for event in (gh_data.get("recent_events") or []):
             date_str = event.get("date", "")[:10]
             if date_str:
