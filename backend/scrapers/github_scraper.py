@@ -227,7 +227,6 @@ class GitHubScraper:
         if not isinstance(data, list):
             return []
 
-        repo_owner = username  # For building GitHub URLs
         raw_events = []
         for event in data[:30]:
             event_type = event.get("type", "")
