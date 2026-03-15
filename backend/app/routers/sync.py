@@ -143,16 +143,29 @@ async def sync_codechef_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Synchronous CodeChef sync — runs scraper directly."""
+    """Synchronous CodeChef sync — clears cache first, then runs scraper."""
     if not payload.codechef_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="codechef_username is required",
         )
 
+    # Clear Redis caches for this user so we get fresh data
+    from app.core.redis import redis_client
+    username = payload.codechef_username
+    cache_keys = [
+        f"codechef:profile:{username}",
+        f"codechef:activity:{username}",
+    ]
+    for key in cache_keys:
+        try:
+            await redis_client.delete(key)
+        except Exception:
+            pass
+
     from scrapers.codechef_scraper import CodeChefScraper
     scraper = CodeChefScraper()
-    data = await scraper.fetch_full_profile(payload.codechef_username)
+    data = await scraper.fetch_full_profile(username)
 
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
