@@ -298,19 +298,14 @@ def _compute_cross_platform_streak(
         except ValueError:
             run = 1
 
-    # Build yearly heatmap — current calendar year only (Jan 1 → today)
+    # Build yearly heatmap — ALL dates from all platforms (frontend filters by year)
     yearly_heatmap = {}
-    year_start = today.replace(month=1, day=1)
-    d = year_start
-    while d <= today:
-        d_str = d.strftime("%Y-%m-%d")
-        if d_str in date_platforms:
-            platforms = sorted(date_platforms[d_str])
-            yearly_heatmap[d_str] = {
-                "count": len(platforms),
-                "platforms": platforms,
-            }
-        d += timedelta(days=1)
+    for d_str, plats in date_platforms.items():
+        platforms = sorted(plats)
+        yearly_heatmap[d_str] = {
+            "count": len(platforms),
+            "platforms": platforms,
+        }
 
     # Badge logic
     if current_streak >= 30:

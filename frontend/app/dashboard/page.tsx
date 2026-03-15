@@ -447,43 +447,23 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 }) {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [yearData, setYearData] = useState<Record<string, { count: number; platforms: string[] }> | null>(null);
-  const [loadingYear, setLoadingYear] = useState(false);
-  const [yearSummaries, setYearSummaries] = useState<{ year: number; active_days: number }[]>([]);
   const [enabledPlatforms, setEnabledPlatforms] = useState<Set<string>>(new Set(PLATFORMS));
   const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number; platforms: string[] } | null>(null);
 
-  // Determine which heatmap data to use
-  const activeHeatmap = (selectedYear === currentYear ? yearlyHeatmap : yearData) || {};
-
-  // Fetch year data when switching years
-  const fetchYearData = async (year: number) => {
-    if (year === currentYear) {
-      setYearData(null);
-      return;
+  // Filter yearlyHeatmap by selected year prefix (e.g. "2025-" or "2026-")
+  const yearPrefix = `${selectedYear}-`;
+  const activeHeatmap: Record<string, { count: number; platforms: string[] }> = {};
+  for (const [dateStr, entry] of Object.entries(yearlyHeatmap)) {
+    if (dateStr.startsWith(yearPrefix)) {
+      activeHeatmap[dateStr] = entry;
     }
-    setLoadingYear(true);
-    try {
-      const token = document.cookie.split(";").find(c => c.trim().startsWith("token="))?.split("=")[1]
-        || localStorage.getItem("token") || "";
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/dashboard/heatmap?year=${year}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      if (json.success && json.data) {
-        setYearData(json.data.heatmap || {});
-        if (json.data.year_summaries) setYearSummaries(json.data.year_summaries);
-      }
-    } catch { /* ignore */ }
-    setLoadingYear(false);
-  };
+  }
 
   const navigateYear = (delta: number) => {
     const newYear = selectedYear + delta;
     const minYear = availableYears.length > 0 ? Math.min(...availableYears) : currentYear;
     if (newYear < minYear || newYear > currentYear) return;
     setSelectedYear(newYear);
-    fetchYearData(newYear);
   };
 
   const togglePlatform = (p: string) => {
@@ -538,16 +518,19 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
     if (weeks.length >= 53) break;
   }
 
-  // Month labels
+  // Month labels — only for dates within the selected year
   const monthLabels: { col: number; label: string }[] = [];
   let lastMonth = -1;
   weeks.forEach((week, wi) => {
     const firstDay = week[0];
     if (firstDay) {
-      const m = new Date(firstDay.date).getMonth();
-      if (m !== lastMonth) {
-        monthLabels.push({ col: wi, label: MONTHS[m] });
-        lastMonth = m;
+      const d = new Date(firstDay.date);
+      if (d.getFullYear() === selectedYear) {
+        const m = d.getMonth();
+        if (m !== lastMonth) {
+          monthLabels.push({ col: wi, label: MONTHS[m] });
+          lastMonth = m;
+        }
       }
     }
   });
@@ -611,12 +594,14 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
         {availableYears.length > 1 && (
           <div className="px-6 py-2 bg-gray-50/30 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
             {availableYears.map(yr => {
-              const summary = yearSummaries.find(s => s.year === yr);
+              // Count active days for this year from local data
+              const yrPrefix = `${yr}-`;
+              const activeDays = Object.keys(yearlyHeatmap).filter(d => d.startsWith(yrPrefix)).length;
               const isSelected = yr === selectedYear;
               return (
                 <button
                   key={yr}
-                  onClick={() => { setSelectedYear(yr); fetchYearData(yr); }}
+                  onClick={() => { setSelectedYear(yr); }}
                   className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium border transition-all ${
                     isSelected
                       ? "border-teal-200 bg-teal-50 text-teal-700"
@@ -624,7 +609,7 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
                   }`}
                 >
                   <span className="font-bold">{yr}</span>
-                  {summary && <span className="ml-1 text-[10px] opacity-70">{summary.active_days}d</span>}
+                  {activeDays > 0 && <span className="ml-1 text-[10px] opacity-70">{activeDays}d</span>}
                 </button>
               );
             })}
@@ -670,12 +655,7 @@ function YearlyHeatmapModal({ yearlyHeatmap, currentStreak, longestStreak, total
 
         {/* Heatmap grid */}
         <div className="px-6 py-5 overflow-x-auto">
-          {loadingYear ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin h-8 w-8 border-2 border-teal-400 border-t-transparent rounded-full" />
-              <span className="ml-3 text-sm text-gray-400">Loading {selectedYear} data...</span>
-            </div>
-          ) : (
+          {(
             <div className="relative" style={{ minWidth: "fit-content" }}>
               {/* Month labels row */}
               <div className="flex" style={{ paddingLeft: "32px", height: "16px", marginBottom: "4px" }}>
