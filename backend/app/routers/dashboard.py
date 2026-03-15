@@ -213,16 +213,19 @@ def _compute_cross_platform_streak(
     date_platform_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
     # 1. LeetCode submission calendar (best data source — daily counts)
+    lc_calendar_dates: set[str] = set()
     if lc_data and "error" not in lc_data:
         calendar = lc_data.get("submission_calendar", {})
         cal_dict = calendar.get("calendar", {}) if isinstance(calendar, dict) else {}
         for date_str, count in cal_dict.items():
             if count and int(count) > 0:
                 date_platform_counts[date_str]["LeetCode"] += int(count)
-        # Also add recent submission dates
+                lc_calendar_dates.add(date_str)
+        # Only add recent submissions for dates NOT already in the calendar
         for sub in (lc_data.get("recent_submissions") or []):
-            if sub.get("date"):
-                date_platform_counts[sub["date"]]["LeetCode"] += 1
+            d = (sub.get("date") or "")[:10]
+            if d and d not in lc_calendar_dates:
+                date_platform_counts[d]["LeetCode"] += 1
 
     # 2. GitHub — contribution calendar (full year) + recent events (supplement)
     if gh_data and "error" not in gh_data:

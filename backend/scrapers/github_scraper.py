@@ -240,57 +240,42 @@ class GitHubScraper:
                 response = await client.get(url, headers={"User-Agent": "MintKey-Scraper"})
                 if response.status_code == 200:
                     import re
-                    # Priority 1: Parse data-date + data-count (actual contribution count)
-                    cells_with_count = re.findall(
-                        r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-count="(\d+)"',
-                        response.text,
+                    html = response.text
+
+                    # Strategy: Match <tool-tip for="cell-id">N contributions on ...</tool-tip>
+                    # to <td id="cell-id" data-date="YYYY-MM-DD"> cells for exact counts.
+
+                    # Step 1: Build cell id → date mapping
+                    cells = re.findall(
+                        r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*id="([^"]+)"',
+                        html,
                     )
-                    if not cells_with_count:
-                        # Try reversed attribute order
-                        cells_with_count = re.findall(
-                            r'data-count="(\d+)"[^>]*data-date="(\d{4}-\d{2}-\d{2})"',
-                            response.text,
+                    if not cells:
+                        cells = re.findall(
+                            r'id="([^"]+)"[^>]*data-date="(\d{4}-\d{2}-\d{2})"',
+                            html,
                         )
-                        cells_with_count = [(d, c) for c, d in cells_with_count]
+                        cells = [(d, cid) for cid, d in cells]
+                    id_to_date = {cid: d for d, cid in cells}
 
-                    if cells_with_count:
-                        for date_str, count_str in cells_with_count:
-                            if int(count_str) > 0:
-                                calendar[date_str] = int(count_str)
-                    else:
-                        # Priority 2: Parse tooltip text patterns like "12 contributions on ..."
-                        # Modern GitHub uses <tool-tip> elements near the cells
-                        tooltip_entries = re.findall(
-                            r'(\d+)\s+contributions?\s+on\s+\w+,?\s+(\w+\s+\d+,?\s+\d{4})',
-                            response.text,
+                    # Step 2: Parse tool-tip elements: for="cell-id" ... >N contribution(s) on ...
+                    tips = re.findall(
+                        r'for="([^"]+)"[^>]*>(\d+)\s+contributions?\s+on\s+[^<]+',
+                        html,
+                    )
+                    for tip_for, count_str in tips:
+                        if tip_for in id_to_date and int(count_str) > 0:
+                            calendar[id_to_date[tip_for]] = int(count_str)
+
+                    # Fallback: if no tool-tips matched, use data-level (0-4 approximation)
+                    if not calendar:
+                        level_cells = re.findall(
+                            r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"',
+                            html,
                         )
-                        if tooltip_entries:
-                            from datetime import datetime as dt
-                            for count_str, date_text in tooltip_entries:
-                                try:
-                                    # Try "March 15, 2026" format
-                                    parsed_date = dt.strptime(date_text.strip(), "%B %d, %Y")
-                                    d_str = parsed_date.strftime("%Y-%m-%d")
-                                    if int(count_str) > 0:
-                                        calendar[d_str] = int(count_str)
-                                except ValueError:
-                                    try:
-                                        parsed_date = dt.strptime(date_text.strip(), "%B %d %Y")
-                                        d_str = parsed_date.strftime("%Y-%m-%d")
-                                        if int(count_str) > 0:
-                                            calendar[d_str] = int(count_str)
-                                    except ValueError:
-                                        pass
-
-                        # Priority 3: Fallback to data-level (0-4 scale, less accurate)
-                        if not calendar:
-                            cells = re.findall(
-                                r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"',
-                                response.text,
-                            )
-                            for date_str, level in cells:
-                                if int(level) > 0:
-                                    calendar[date_str] = int(level)
+                        for date_str, level in level_cells:
+                            if int(level) > 0:
+                                calendar[date_str] = int(level)
 
             if calendar:
                 ttl = CACHE_TTL_GITHUB if not year or year == datetime.now().year else 86400 * 30  # 30 days for old years
