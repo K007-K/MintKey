@@ -117,10 +117,13 @@ async def sync_leetcode_direct(
     from app.core.redis import redis_client
     username = payload.leetcode_username
     cache_keys = [
-        f"leetcode:stats:{username}",
-        f"leetcode:calendar:{username}",
-        f"leetcode:submissions:{username}",
         f"leetcode:profile:{username}",
+        f"leetcode:stats:{username}",
+        f"leetcode:topics:{username}",
+        f"leetcode:calendar:{username}",
+        f"leetcode:calendar:{username}:{__import__('datetime').datetime.now().year}",
+        f"leetcode:contests:{username}",
+        f"leetcode:recent:{username}",
     ]
     for key in cache_keys:
         try:
