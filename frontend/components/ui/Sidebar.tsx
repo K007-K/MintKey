@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useSidebarStore, usePreferencesStore } from "@/lib/store";
+import { useToast } from "@/lib/useToast";
 import { useCurrentUser, useSyncGithub, useSyncLeetCode, useSyncCodeChef, useSyncHackerRank, queryClient } from "@/lib/api";
 import { MintKeyLogoMark, MintKeyLogo } from "@/components/ui/MintKeyLogo";
 import {
@@ -105,7 +106,8 @@ function Tooltip({
 export default function Sidebar() {
   const pathname = usePathname();
   const { isOpen, toggle } = useSidebarStore();
-  const { syncInProgress, setSyncInProgress, setLastSyncedAt } = usePreferencesStore();
+  const { syncInProgress, setSyncInProgress, setLastSyncedAt, setPlatformSyncStatus } = usePreferencesStore();
+  const { addToast } = useToast();
   const { data: session } = useSession();
   const { data: userData } = useCurrentUser();
   const syncGithub = useSyncGithub();
@@ -126,35 +128,64 @@ export default function Sidebar() {
   const handleSyncNow = async () => {
     if (syncInProgress) return;
     setSyncInProgress(true);
+    addToast({ message: "Syncing all platforms...", type: "info", duration: 3000 });
 
     const githubUsername = (user?.github_username as string) || "";
     const leetcodeUsername = (user?.leetcode_username as string) || "";
     const codechefUsername = (user?.codechef_username as string) || "";
     const hackerrankUsername = (user?.hackerrank_username as string) || "";
 
-    try {
-      const promises: Promise<unknown>[] = [];
-      if (githubUsername) promises.push(syncGithub.mutateAsync(githubUsername));
-      if (leetcodeUsername) promises.push(syncLeetCode.mutateAsync(leetcodeUsername));
-      if (codechefUsername) promises.push(syncCodeChef.mutateAsync(codechefUsername));
-      if (hackerrankUsername) promises.push(syncHackerRank.mutateAsync(hackerrankUsername));
+    interface SyncTask { key: string; promise: Promise<unknown> }
+    const tasks: SyncTask[] = [];
 
-      if (promises.length === 0) {
-        setSyncInProgress(false);
-        return;
-      }
-
-      await Promise.allSettled(promises);
-
-      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
-      queryClient.invalidateQueries({ queryKey: ["scores"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-
-      setLastSyncedAt(new Date().toISOString());
-    } catch {
-      // Sync failed
+    if (githubUsername) {
+      setPlatformSyncStatus("GitHub", { status: "syncing", lastSynced: null });
+      tasks.push({ key: "GitHub", promise: syncGithub.mutateAsync(githubUsername) });
     }
+    if (leetcodeUsername) {
+      setPlatformSyncStatus("LeetCode", { status: "syncing", lastSynced: null });
+      tasks.push({ key: "LeetCode", promise: syncLeetCode.mutateAsync(leetcodeUsername) });
+    }
+    if (codechefUsername) {
+      setPlatformSyncStatus("CodeChef", { status: "syncing", lastSynced: null });
+      tasks.push({ key: "CodeChef", promise: syncCodeChef.mutateAsync(codechefUsername) });
+    }
+    if (hackerrankUsername) {
+      setPlatformSyncStatus("HackerRank", { status: "syncing", lastSynced: null });
+      tasks.push({ key: "HackerRank", promise: syncHackerRank.mutateAsync(hackerrankUsername) });
+    }
+
+    if (tasks.length === 0) {
+      addToast({ message: "No platforms connected", type: "warning" });
+      setSyncInProgress(false);
+      return;
+    }
+
+    const results = await Promise.allSettled(tasks.map((t) => t.promise));
+    const now = new Date().toISOString();
+    const failed: string[] = [];
+
+    results.forEach((result, i) => {
+      const key = tasks[i].key;
+      if (result.status === "fulfilled") {
+        setPlatformSyncStatus(key, { status: "success", lastSynced: now });
+      } else {
+        failed.push(key);
+        setPlatformSyncStatus(key, { status: "error", lastSynced: null, errorMsg: "Sync failed" });
+      }
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+    queryClient.invalidateQueries({ queryKey: ["scores"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    setLastSyncedAt(now);
     setSyncInProgress(false);
+
+    if (failed.length === 0) {
+      addToast({ message: "All platforms synced successfully", type: "success" });
+    } else {
+      addToast({ message: `${failed.join(", ")} failed to sync`, type: "error", duration: 5000 });
+    }
   };
 
   /* ─── NavItem with tooltip support ─── */
