@@ -216,7 +216,7 @@ export function useSyncGithub() {
     mutationFn: async (github_username: string) => {
       const { data } = await api.post<APIResponse>("/api/v1/sync/github/direct", {
         github_username,
-      });
+      }, { timeout: 60000 }); // GitHub scraper can take 40s+ for repos with 409s
       return data.data;
     },
   });

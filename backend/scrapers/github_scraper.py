@@ -126,20 +126,23 @@ class GitHubScraper:
 
         repos = await self.fetch_repos(username)
 
-        # Compute language distribution across all repos
+        # Compute language distribution across all repos — fetch in parallel
         language_totals: dict[str, int] = {}
         top_repos = []
 
-        for repo in repos[:20]:  # Analyze top 20 repos
+        import asyncio as _asyncio
+
+        async def _process_repo(repo: dict) -> dict:
+            """Fetch languages + commits for a single repo concurrently."""
             repo_name = repo.get("name", "")
-            langs = await self.fetch_repo_languages(username, repo_name)
-            for lang, bytes_count in langs.items():
-                language_totals[lang] = language_totals.get(lang, 0) + bytes_count
-
-            # Get commit count for each top repo
-            commits = await self.fetch_repo_commits(username, repo_name, per_page=5)
-
-            top_repos.append({
+            langs_task = self.fetch_repo_languages(username, repo_name)
+            commits_task = self.fetch_repo_commits(username, repo_name, per_page=5)
+            langs, commits = await _asyncio.gather(langs_task, commits_task, return_exceptions=True)
+            if isinstance(langs, Exception):
+                langs = {}
+            if isinstance(commits, Exception):
+                commits = []
+            return {
                 "name": repo_name,
                 "description": repo.get("description", ""),
                 "stars": repo.get("stargazers_count", 0),
@@ -148,9 +151,22 @@ class GitHubScraper:
                 "topics": repo.get("topics", []),
                 "updated_at": repo.get("updated_at"),
                 "is_fork": repo.get("fork", False),
-                "recent_commit_count": len(commits),
-                "languages": langs,
-            })
+                "recent_commit_count": len(commits) if isinstance(commits, list) else 0,
+                "languages": langs if isinstance(langs, dict) else {},
+            }
+
+        # Process all repos concurrently (max 20)
+        repo_results = await _asyncio.gather(
+            *[_process_repo(repo) for repo in repos[:20]],
+            return_exceptions=True,
+        )
+
+        for result in repo_results:
+            if isinstance(result, Exception):
+                continue
+            top_repos.append(result)
+            for lang, bytes_count in result.get("languages", {}).items():
+                language_totals[lang] = language_totals.get(lang, 0) + bytes_count
 
         # Calculate language percentages
         total_bytes = sum(language_totals.values()) or 1
