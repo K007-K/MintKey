@@ -126,17 +126,24 @@ function buildCompanyPageData(raw: Record<string, unknown>): CompanyPageData {
     difficulty: (i === 0 ? "Hard" : "Med") as "Hard" | "Med" | "Easy",
   }));
 
-  // Projects — from DB or placeholder
-  const projectList: ProjectCard[] = (projects.impressive_projects || projects.must_have || [])
+  // Projects — from DB (now objects with title, desc, tags, etc.)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawProjects = projects.impressive_projects || [];
+  const projectList: ProjectCard[] = rawProjects
     .slice(0, 3)
-    .map((p: string, i: number) => ({
-      category: ["Full Stack", "Systems", "Frontend"][i % 3],
-      title: p,
-      desc: `Build a production-quality ${p.toLowerCase()} to demonstrate your skills.`,
-      tags: (techStack.preferred_languages || []).slice(0, 3),
-      hours: 20 + i * 10,
-      image: `/projects/${["fullstack", "systems", "frontend"][i % 3]}.png`,
-    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((p: any, i: number) => {
+      const isObj = typeof p === "object" && p !== null;
+      const title = isObj ? p.title : String(p);
+      return {
+        category: isObj ? (p.category || ["Full Stack", "Systems", "Frontend"][i % 3]) : ["Full Stack", "Systems", "Frontend"][i % 3],
+        title,
+        desc: isObj ? p.desc : `Build a production-quality ${title.toLowerCase()} to demonstrate your skills.`,
+        tags: isObj ? (p.tags || (techStack.preferred_languages || []).slice(0, 3)) : (techStack.preferred_languages || []).slice(0, 3),
+        hours: isObj ? (p.hours || 20 + i * 10) : 20 + i * 10,
+        image: `/projects/${["fullstack", "systems", "frontend"][i % 3]}.png`,
+      };
+    });
 
   return {
     name: raw.name as string,
@@ -360,13 +367,13 @@ export default function CompanyDetailPage() {
         {/* ─── TAB CONTENT ─── */}
         {activeTab === "Overview" && <OverviewContent data={data} slug={slug} setTab={setActiveTab} />}
         {activeTab === "DSA Requirements" && <DSARequirementsTab data={data} />}
-        {activeTab === "System Design" && <SystemDesignTab />}
-        {activeTab === "Projects" && <ProjectsTab projects={data.projects} />}
-        {activeTab === "Interview Format" && <InterviewFormatTab />}
-        {activeTab === "Resources" && <ResourcesTab />}
-        {activeTab === "Reviews" && <ReviewsTab />}
-        {activeTab === "Skill Gap Analysis" && <SkillGapTab />}
-        {activeTab === "Preparation Strategy" && <PreparationStrategyTab />}
+        {activeTab === "System Design" && <SystemDesignTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Projects" && <ProjectsTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Interview Format" && <InterviewFormatTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Resources" && <ResourcesTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Reviews" && <ReviewsTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Skill Gap Analysis" && <SkillGapTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Preparation Strategy" && <PreparationStrategyTab raw={rawCompany as Record<string, unknown>} name={name} />}
       </div>
     </DashboardLayout>
   );
@@ -691,25 +698,33 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
 /* ════════════════════════════════════════════════════════
    TAB 3 — SYSTEM DESIGN
    ════════════════════════════════════════════════════════ */
-function SystemDesignTab() {
-  const coreTopics = [
-    { icon: <Layers className="h-5 w-5 text-[#10B981]" />, name: "Load Balancing", desc: "Distribute traffic across servers to ensure high availability", importance: "High" },
-    { icon: <Database className="h-5 w-5 text-[#10B981]" />, name: "Caching", desc: "Reduce latency using in-memory data stores", importance: "High" },
-    { icon: <MessageSquare className="h-5 w-5 text-[#10B981]" />, name: "Message Queues", desc: "Async communication between services", importance: "Medium" },
-    { icon: <Server className="h-5 w-5 text-[#10B981]" />, name: "Database Sharding", desc: "Horizontal partitioning for scale", importance: "High" },
-    { icon: <Hash className="h-5 w-5 text-[#10B981]" />, name: "Consistent Hashing", desc: "Distribute data with minimal remapping", importance: "Medium" },
-    { icon: <Shield className="h-5 w-5 text-[#10B981]" />, name: "Rate Limiting", desc: "Control traffic to protect services", importance: "Medium" },
-    { icon: <GitBranch className="h-5 w-5 text-[#10B981]" />, name: "Microservices", desc: "Decompose systems into independent services", importance: "High" },
-    { icon: <Globe className="h-5 w-5 text-[#10B981]" />, name: "Distributed Systems", desc: "Coordinate across multiple nodes", importance: "High" },
-  ];
+function SystemDesignTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (raw.system_design || {}) as any;
+  const mustKnow: string[] = sysDesign.must_know_designs || [];
+  const sdDepth = sysDesign.depth || "Medium";
+  const sdRequired = sysDesign.required_at_sde1 ? "Required" : "Optional";
 
-  const problems = [
-    { name: "Design URL Shortener", difficulty: "Medium" as const, tags: ["Hashing", "Caching", "DB Design"] },
-    { name: "Design YouTube", difficulty: "Hard" as const, tags: ["CDN", "Storage", "Streaming"] },
-    { name: "Design Chat System", difficulty: "Hard" as const, tags: ["WebSockets", "Queues", "Presence"] },
-    { name: "Design Notification Service", difficulty: "Medium" as const, tags: ["Queues", "Fan-out", "Push"] },
-    { name: "Design Rate Limiter", difficulty: "Medium" as const, tags: ["Sliding Window", "Redis", "API"] },
+  const iconMap = [Layers, Database, MessageSquare, Server, Hash, Shield, GitBranch, Globe];
+  const defaultTopics = [
+    { name: "Load Balancing", desc: "Distribute traffic across servers", importance: "High" },
+    { name: "Caching", desc: "Reduce latency using in-memory stores", importance: "High" },
+    { name: "Message Queues", desc: "Async communication between services", importance: "Medium" },
+    { name: "Database Sharding", desc: "Horizontal partitioning for scale", importance: "High" },
+    { name: "Consistent Hashing", desc: "Distribute data with minimal remapping", importance: "Medium" },
+    { name: "Rate Limiting", desc: "Control traffic to protect services", importance: "Medium" },
+    { name: "Microservices", desc: "Decompose systems into independent services", importance: "High" },
+    { name: "Distributed Systems", desc: "Coordinate across multiple nodes", importance: "High" },
   ];
+  const coreTopics = defaultTopics.map((t, i) => ({ ...t, icon: (() => { const Icon = iconMap[i]; return <Icon className="h-5 w-5 text-[#10B981]" />; })() }));
+
+  const problems = mustKnow.length > 0
+    ? mustKnow.map((q, i) => ({ name: `Design: ${q}`, difficulty: (i % 2 === 0 ? "Hard" : "Medium") as "Hard" | "Medium", tags: ["System Design"] }))
+    : [
+        { name: "Design URL Shortener", difficulty: "Medium" as const, tags: ["Hashing", "Caching", "DB Design"] },
+        { name: "Design YouTube", difficulty: "Hard" as const, tags: ["CDN", "Storage", "Streaming"] },
+        { name: "Design Chat System", difficulty: "Hard" as const, tags: ["WebSockets", "Queues", "Presence"] },
+      ];
 
   return (
     <div className="space-y-8">
@@ -717,7 +732,7 @@ function SystemDesignTab() {
       <div>
         <div className="flex items-center gap-3 mb-5">
           <h3 className="text-base font-semibold text-[#111827]">Core System Design Topics</h3>
-          <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">Medium Importance</span>
+          <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">{sdRequired} · {sdDepth}</span>
         </div>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {coreTopics.map((t) => (
@@ -776,23 +791,32 @@ function SystemDesignTab() {
 /* ════════════════════════════════════════════════════════
    TAB 4 — PROJECTS
    ════════════════════════════════════════════════════════ */
-function ProjectsTab({ projects }: { projects: ProjectCard[] }) {
-  const allProjects = [
-    { category: "Full Stack", title: "Real-time Collaboration Tool", desc: "Build a Google Docs clone using WebSockets and OT/CRDT algorithms.", tags: ["React", "Node.js", "Socket.io"], hours: 20, complexity: "High" as const, image: "/projects/fullstack.png" },
-    { category: "Systems", title: "Distributed Key-Value Store", desc: "Implement a distributed KV store with sharding and replication logic.", tags: ["Go", "gRPC", "Docker"], hours: 35, complexity: "Very High" as const, image: "/projects/systems.png" },
-    { category: "Full Stack", title: "E-commerce Analytics Dashboard", desc: "Create a high-performance dashboard handling large datasets.", tags: ["Next.js", "D3.js", "GraphQL"], hours: 25, complexity: "Medium" as const, image: "/projects/frontend.png" },
-    { category: "Backend", title: "API Rate Limiter Service", desc: "Build a configurable rate limiter supporting multiple strategies.", tags: ["Node.js", "Redis", "Docker"], hours: 15, complexity: "Medium" as const },
-    { category: "Data Engineering", title: "Data Processing Pipeline", desc: "Design an ETL pipeline for real-time data processing at scale.", tags: ["Python", "Kafka", "Spark"], hours: 30, complexity: "High" as const },
-  ];
+function ProjectsTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const projectsData = (raw.projects || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const techStackData = (raw.tech_stack || {}) as any;
+  const mustHave: string[] = projectsData.must_have || [];
 
-  const techStack = [
-    { group: "Backend", items: ["Node.js", "Java", "Go", "Python"] },
-    { group: "Database", items: ["PostgreSQL", "MongoDB", "Bigtable"] },
-    { group: "Caching", items: ["Redis", "Memcached"] },
-    { group: "Messaging", items: ["Kafka", "Pub/Sub", "RabbitMQ"] },
-    { group: "Cloud", items: ["GCP", "AWS"] },
-    { group: "Infrastructure", items: ["Docker", "Kubernetes", "Terraform"] },
-  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allProjects = (projectsData.impressive_projects || []).map((p: any) => ({
+    category: p.category || "Full Stack",
+    title: p.title || p,
+    desc: p.desc || `Build a production-quality project.`,
+    tags: p.tags || (techStackData.preferred_languages || []).slice(0, 3),
+    hours: p.hours || 20,
+    complexity: p.complexity || "Medium",
+    image: undefined,
+  }));
+
+  // Build tech stack from API data
+  const techStack: { group: string; items: string[] }[] = [];
+  if (techStackData.preferred_languages?.length) techStack.push({ group: "Languages", items: techStackData.preferred_languages });
+  if (techStackData.frameworks?.length) techStack.push({ group: "Frameworks", items: techStackData.frameworks });
+  if (techStackData.databases?.length) techStack.push({ group: "Databases", items: techStackData.databases });
+  if (techStackData.cloud_platforms?.length) techStack.push({ group: "Cloud", items: techStackData.cloud_platforms });
+  if (techStackData.tools?.length) techStack.push({ group: "Tools", items: techStackData.tools });
+  if (techStack.length === 0) techStack.push({ group: "Languages", items: ["Java", "Python", "Go"] });
 
   const complexityColor = (c: string) => {
     if (c === "Very High") return "bg-[#FEF2F2] text-[#DC2626]";
@@ -805,11 +829,11 @@ function ProjectsTab({ projects }: { projects: ProjectCard[] }) {
       {/* Section 1: Project Cards */}
       <div>
         <div className="mb-1">
-          <h3 className="text-base font-semibold text-[#111827]">Project Recommendations for Google</h3>
-          <p className="text-sm text-[#9CA3AF]">Projects that have impressed Google interviewers</p>
+          <h3 className="text-base font-semibold text-[#111827]">Project Recommendations for {name}</h3>
+          <p className="text-sm text-[#9CA3AF]">Projects that have impressed {name} interviewers</p>
         </div>
         <div className="grid gap-5 grid-cols-1 md:grid-cols-2 mt-5">
-          {allProjects.map((p) => (
+          {allProjects.map((p: {category: string; title: string; desc: string; tags: string[]; hours: number; complexity: string; image?: string}) => (
             <div key={p.title} className="rounded-xl border border-[#E5E7EB] bg-white overflow-hidden hover:shadow-lg transition-shadow group">
               {/* Thumbnail */}
               <div className="relative h-[140px] overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
@@ -846,13 +870,13 @@ function ProjectsTab({ projects }: { projects: ProjectCard[] }) {
 
       {/* Section 2: Recommended Tech Stack */}
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-        <h3 className="text-base font-semibold text-[#111827] mb-5">Google-Preferred Tech Stack</h3>
+        <h3 className="text-base font-semibold text-[#111827] mb-5">{name}-Preferred Tech Stack</h3>
         <div className="space-y-4">
           {techStack.map((g) => (
             <div key={g.group} className="flex items-center gap-4">
               <span className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider w-[110px] shrink-0">{g.group}</span>
               <div className="flex flex-wrap gap-2">
-                {g.items.map((item) => (
+                {g.items.map((item: string) => (
                   <span key={item} className="border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-sm font-medium text-[#374151] bg-white hover:border-[#A7F3D0] hover:text-[#10B981] transition-colors cursor-pointer">{item}</span>
                 ))}
               </div>
@@ -860,6 +884,17 @@ function ProjectsTab({ projects }: { projects: ProjectCard[] }) {
           ))}
         </div>
       </div>
+      {/* Must-Have Tips */}
+      {mustHave.length > 0 && (
+        <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
+          <h3 className="text-sm font-semibold text-[#111827] mb-3">Must-Have for {name}</h3>
+          <ul className="space-y-2 text-sm text-[#374151]">
+            {mustHave.map((tip, i) => (
+              <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -867,16 +902,32 @@ function ProjectsTab({ projects }: { projects: ProjectCard[] }) {
 /* ════════════════════════════════════════════════════════
    TAB 5 — INTERVIEW FORMAT
    ════════════════════════════════════════════════════════ */
-function InterviewFormatTab() {
-  const stages = [
-    { label: "Recruiter Screen", duration: "30 min", desc: "Resume review and basic fit.", difficulty: "Easy" as const, filled: true },
-    { label: "Online Assessment", duration: "90 min", desc: "2-3 LeetCode problems, typically Medium-Hard.", difficulty: "Hard" as const, filled: true },
-    { label: "Technical Interview 1 (DSA)", duration: "45-60 min", desc: "Graph/Tree/DP problems. Must explain clearly.", difficulty: "Hard" as const, filled: true },
-    { label: "Technical Interview 2 (DSA)", duration: "45-60 min", desc: "More algorithmic problems + code quality.", difficulty: "Hard" as const, filled: true },
-    { label: "System Design Interview", duration: "60 min", desc: "Design a large-scale system from scratch.", difficulty: "Medium" as const, filled: false },
-    { label: "Hiring Manager Round", duration: "45 min", desc: "Behavioral + team fit + career goals.", difficulty: "Easy" as const, filled: false },
-    { label: "HR Round", duration: "30 min", desc: "Offer negotiation, logistics.", difficulty: "Easy" as const, filled: false },
-  ];
+function InterviewFormatTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const interviewFmt = (raw.interview_format || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hiringData = (raw.hiring_data || {}) as any;
+  const dosData: string[] = hiringData.dos_donts?.do || ["Explain your thought process out loud", "Write clean, optimized code", "Ask clarifying questions first"];
+  const dontsData: string[] = hiringData.dos_donts?.dont || ["Jump to code without thinking", "Use brute force without acknowledging", "Skip edge cases"];
+  const insiderTips: string[] = hiringData.insider_tips || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stats = hiringData.interview_stats || {} as any;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rounds = (interviewFmt.rounds || []) as any[];
+  const stages = rounds.length > 0
+    ? rounds.map((r: Record<string, unknown>, i: number) => ({
+        label: (r.type as string) || `Round ${i + 1}`,
+        duration: r.duration_min ? `${r.duration_min} min` : "—",
+        desc: (r.description as string) || "",
+        difficulty: (r.difficulty as string) || "Medium",
+        filled: i < Math.ceil(rounds.length / 2),
+      }))
+    : [
+        { label: "Online Assessment", duration: "90 min", desc: "Coding problems", difficulty: "Hard", filled: true },
+        { label: "Technical Interview", duration: "45-60 min", desc: "DSA + problem solving", difficulty: "Hard", filled: true },
+        { label: "Hiring Manager", duration: "45 min", desc: "Behavioral + fit", difficulty: "Easy", filled: false },
+      ];
 
   const diffBadge = (d: string) => {
     if (d === "Hard") return "bg-[#FEF2F2] text-[#DC2626]";
@@ -933,17 +984,17 @@ function InterviewFormatTab() {
           <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-5">
             <h4 className="text-sm font-bold text-[#10B981] mb-3 flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Do</h4>
             <ul className="space-y-2 text-sm text-[#374151]">
-              <li className="flex items-start gap-2"><span className="text-[#10B981]">✓</span> Explain your thought process out loud</li>
-              <li className="flex items-start gap-2"><span className="text-[#10B981]">✓</span> Write clean, optimized code</li>
-              <li className="flex items-start gap-2"><span className="text-[#10B981]">✓</span> Ask clarifying questions first</li>
+              {dosData.slice(0, 5).map((d, i) => (
+                <li key={i} className="flex items-start gap-2"><span className="text-[#10B981]">✓</span> {d}</li>
+              ))}
             </ul>
           </div>
           <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-5">
             <h4 className="text-sm font-bold text-[#EF4444] mb-3 flex items-center gap-2"><XCircle className="h-4 w-4" /> Don&apos;t</h4>
             <ul className="space-y-2 text-sm text-[#374151]">
-              <li className="flex items-start gap-2"><span className="text-[#EF4444]">✗</span> Jump to code without thinking</li>
-              <li className="flex items-start gap-2"><span className="text-[#EF4444]">✗</span> Use brute force without acknowledging</li>
-              <li className="flex items-start gap-2"><span className="text-[#EF4444]">✗</span> Skip edge cases</li>
+              {dontsData.slice(0, 5).map((d, i) => (
+                <li key={i} className="flex items-start gap-2"><span className="text-[#EF4444]">✗</span> {d}</li>
+              ))}
             </ul>
           </div>
         </div>
@@ -956,10 +1007,10 @@ function InterviewFormatTab() {
           <h3 className="text-base font-semibold text-[#111827] mb-4">Interview Stats</h3>
           <div className="space-y-4">
             {[
-              { label: "Success Rate", value: "~5%", color: "text-[#EF4444]" },
-              { label: "Avg. Rounds", value: "5-6", color: "text-[#111827]" },
-              { label: "Timeline", value: "4-6 weeks", color: "text-[#111827]" },
-              { label: "Offer Rate", value: "~2%", color: "text-[#EF4444]" },
+              { label: "Success Rate", value: stats.success_rate || "—", color: "text-[#EF4444]" },
+              { label: "Avg. Rounds", value: stats.avg_rounds || hiringData.interview_rounds || "—", color: "text-[#111827]" },
+              { label: "Timeline", value: stats.timeline_weeks ? `${stats.timeline_weeks} weeks` : "—", color: "text-[#111827]" },
+              { label: "Offer Rate", value: stats.offer_rate || "—", color: "text-[#EF4444]" },
             ].map((s) => (
               <div key={s.label} className="flex items-center justify-between">
                 <span className="text-sm text-[#6B7280]">{s.label}</span>
@@ -970,14 +1021,25 @@ function InterviewFormatTab() {
         </div>
 
         {/* Insider Tips */}
-        <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
-          <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
-          <ul className="space-y-2.5 text-sm text-[#374151]">
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Google values code readability as much as correctness</li>
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Always start with brute force, then optimize</li>
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Practice explaining your solution in plain English</li>
-          </ul>
-        </div>
+        {insiderTips.length > 0 && (
+          <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
+            <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
+            <ul className="space-y-2.5 text-sm text-[#374151]">
+              {insiderTips.slice(0, 5).map((tip, i) => (
+                <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {insiderTips.length === 0 && (
+          <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
+            <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
+            <ul className="space-y-2.5 text-sm text-[#374151]">
+              <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Always start with brute force, then optimize</li>
+              <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Practice explaining your solution in plain English</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -986,23 +1048,17 @@ function InterviewFormatTab() {
 /* ════════════════════════════════════════════════════════
    TAB 6 — RESOURCES
    ════════════════════════════════════════════════════════ */
-function ResourcesTab() {
-  const dsaResources = [
-    { name: "NeetCode 150", desc: "Best structured 150 problems for FAANG", cost: "Free", rating: 5 },
-    { name: "Striver A2Z DSA Sheet", desc: "450+ problems from basics to advanced", cost: "Free", rating: 5 },
-    { name: "LeetCode Company Questions", desc: "Filter by Google-tagged problems", cost: "Premium", rating: 4 },
-  ];
-  const sdResources = [
-    { name: "System Design Primer", desc: "Comprehensive GitHub repository for SD fundamentals", cost: "Free", rating: 5 },
-    { name: "Grokking System Design", desc: "Educative's structured course with diagrams", cost: "Paid", rating: 4 },
-    { name: "High Scalability Blog", desc: "Real architectures from top companies", cost: "Free", rating: 4 },
-  ];
-  const platforms = [
-    { name: "LeetCode", desc: "DSA Practice", cost: "Free + Premium", color: "#F59E0B" },
-    { name: "Codeforces", desc: "Competitive Programming", cost: "Free", color: "#3B82F6" },
-    { name: "InterviewBit", desc: "Structured Interview Prep", cost: "Free + Paid", color: "#10B981" },
-    { name: "Pramp", desc: "Peer Mock Interviews", cost: "Free", color: "#8B5CF6" },
-  ];
+function ResourcesTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resourcesData = (raw.resources || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsaResources: any[] = resourcesData.dsa || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sdResources: any[] = resourcesData.system_design || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const behavioralResources: any[] = resourcesData.behavioral || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const platforms: any[] = resourcesData.platforms || [];
 
   const stars = (n: number) => Array.from({ length: 5 }).map((_, i) => (
     <Star key={i} className="h-3 w-3" fill={i < n ? "#F59E0B" : "#E5E7EB"} stroke="none" />
@@ -1031,11 +1087,34 @@ function ResourcesTab() {
         </div>
       </div>
 
+      {/* Behavioral Resources */}
+      {behavioralResources.length > 0 && (
+        <div>
+          <h3 className="text-base font-semibold text-[#111827] mb-4 flex items-center gap-2"><Users className="h-4 w-4 text-[#10B981]" /> Behavioral Resources</h3>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+            {behavioralResources.map((r: {name: string; desc: string; url?: string; cost: string; rating: number}) => (
+              <div key={r.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="h-4 w-4 text-[#9CA3AF]" />
+                  <h4 className="text-sm font-bold text-[#111827]">{r.name}</h4>
+                </div>
+                <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">{r.desc}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-0.5">{stars(r.rating || 3)}</div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
+                </div>
+                {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* System Design Resources */}
       <div>
         <h3 className="text-base font-semibold text-[#111827] mb-4 flex items-center gap-2"><Layers className="h-4 w-4 text-[#10B981]" /> System Design Resources</h3>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {sdResources.map((r) => (
+          {sdResources.map((r: {name: string; desc: string; url?: string; cost: string; rating: number}) => (
             <div key={r.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="h-4 w-4 text-[#9CA3AF]" />
@@ -1043,38 +1122,38 @@ function ResourcesTab() {
               </div>
               <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">{r.desc}</p>
               <div className="flex items-center justify-between">
-                <div className="flex gap-0.5">{stars(r.rating)}</div>
+                <div className="flex gap-0.5">{stars(r.rating || 3)}</div>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
               </div>
-              <button className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline">Open Resource →</button>
+              {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a>}
             </div>
           ))}
         </div>
       </div>
 
       {/* Practice Platforms */}
-      <div>
+      {platforms.length > 0 && (<div>
         <h3 className="text-base font-semibold text-[#111827] mb-4">Practice Platforms</h3>
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-          {platforms.map((p) => (
+          {platforms.map((p: {name: string; desc: string; url?: string; cost: string; color?: string}) => (
             <div key={p.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 text-center hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="w-8 h-8 rounded-lg mx-auto mb-3 flex items-center justify-center" style={{ backgroundColor: p.color + "20" }}>
-                <Globe className="h-4 w-4" style={{ color: p.color }} />
+              <div className="w-8 h-8 rounded-lg mx-auto mb-3 flex items-center justify-center" style={{ backgroundColor: (p.color || "#10B981") + "20" }}>
+                <Globe className="h-4 w-4" style={{ color: p.color || "#10B981" }} />
               </div>
               <h4 className="text-sm font-bold text-[#111827] mb-0.5">{p.name}</h4>
               <p className="text-xs text-[#9CA3AF] mb-2">{p.desc}</p>
               <span className="text-[10px] font-medium text-[#6B7280]">{p.cost}</span>
-              <button className="block mx-auto mt-2 text-sm font-medium text-[#10B981] group-hover:underline">Visit →</button>
+              {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" className="block mx-auto mt-2 text-sm font-medium text-[#10B981] group-hover:underline">Visit →</a> : <button className="block mx-auto mt-2 text-sm font-medium text-[#10B981] group-hover:underline">Visit →</button>}
             </div>
           ))}
         </div>
-      </div>
+      </div>)}
 
       {/* Curated Prep Course Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-[#10B981] to-[#0D9488] p-8 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-bold text-white mb-1">Google Interview Prep Course</h3>
-          <p className="text-sm text-white/80">Curated by ex-Google interviewers. Covers all 5 rounds.</p>
+          <h3 className="text-lg font-bold text-white mb-1">{name} Interview Prep Course</h3>
+          <p className="text-sm text-white/80">Curated by ex-{name} interviewers. Covers all rounds.</p>
         </div>
         <button className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Start Learning</button>
       </div>
@@ -1085,13 +1164,33 @@ function ResourcesTab() {
 /* ════════════════════════════════════════════════════════
    TAB 7 — REVIEWS
    ════════════════════════════════════════════════════════ */
-function ReviewsTab() {
-  const reviews = [
-    { round: "Round 1: Technical DSA", question: "Longest Increasing Subsequence", difficulty: "Hard" as const, outcome: "Offer" as const, quote: "Optimize from O(n²) to O(n log n). Patience sorting approach expected.", rating: 4, date: "2 weeks ago", role: "SDE I" },
-    { round: "Round 2: Graph Problem", question: "Number of Islands (variation)", difficulty: "Medium" as const, outcome: "Offer" as const, quote: "DFS-based, but they wanted BFS solution and discussed time/space complexity.", rating: 4, date: "1 month ago", role: "SDE I" },
-    { round: "Round 3: System Design", question: "Design Google Docs", difficulty: "Hard" as const, outcome: "Rejected" as const, quote: "Focus on OT/CRDT for conflict resolution. They valued breadth over depth.", rating: 5, date: "2 months ago", role: "SDE II" },
-    { round: "Round 4: Behavioral", question: "Tell me about a conflict at work", difficulty: "Easy" as const, outcome: "Offer" as const, quote: "STAR format expected. They value low-ego, high-collaboration stories.", rating: 3, date: "3 months ago", role: "SDE I" },
-  ];
+function ReviewsTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hiringData = (raw.hiring_data || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const apiReviews: any[] = hiringData.interview_reviews || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stats = hiringData.interview_stats || {} as any;
+
+  const reviews = apiReviews.length > 0
+    ? apiReviews.map((r: {round: string; question: string; difficulty: string; outcome: string; quote: string; rating: number; date: string; role: string}) => ({
+        round: r.round,
+        question: r.question,
+        difficulty: r.difficulty as "Hard" | "Medium" | "Easy",
+        outcome: r.outcome as "Offer" | "Rejected",
+        quote: r.quote,
+        rating: r.rating || 3,
+        date: r.date || "Recent",
+        role: r.role || "SDE",
+      }))
+    : [
+        { round: "Technical DSA", question: "LeetCode Medium-Hard", difficulty: "Hard" as const, outcome: "Offer" as const, quote: "Standard DSA round.", rating: 4, date: "Recent", role: "SDE I" },
+      ];
+
+  const totalReviews = stats.total_reviews || reviews.length;
+  const offerCount = reviews.filter(r => r.outcome === "Offer").length;
+  const offerPct = reviews.length > 0 ? Math.round((offerCount / reviews.length) * 100) : 0;
+  const avgRating = reviews.length > 0 ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1) : "—";
 
   const diffBadge = (d: string) => {
     if (d === "Hard") return "bg-[#FEF2F2] text-[#DC2626]";
@@ -1149,19 +1248,19 @@ function ReviewsTab() {
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
-            <p className="text-xl font-bold text-[#111827]">124</p>
+            <p className="text-xl font-bold text-[#111827]">{totalReviews}</p>
             <p className="text-xs text-[#9CA3AF]">Total Reviews</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-[#10B981]">67%</p>
+            <p className="text-xl font-bold text-[#10B981]">{offerPct}%</p>
             <p className="text-xs text-[#9CA3AF]">Offer Rate</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-[#111827]">4.2/5</p>
+            <p className="text-xl font-bold text-[#111827]">{avgRating}/5</p>
             <p className="text-xs text-[#9CA3AF]">Avg Difficulty</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-[#111827]">SDE I</p>
+            <p className="text-xl font-bold text-[#111827]">{reviews[0]?.role || "SDE"}</p>
             <p className="text-xs text-[#9CA3AF]">Most Common</p>
           </div>
         </div>
@@ -1173,7 +1272,7 @@ function ReviewsTab() {
 /* ════════════════════════════════════════════════════════
    TAB 8 — SKILL GAP ANALYSIS
    ════════════════════════════════════════════════════════ */
-function SkillGapTab() {
+function SkillGapTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
   const readiness = [
     { area: "DSA", pct: 75, status: "Good Progress" },
     { area: "System Design", pct: 60, status: "Needs Work" },
@@ -1219,7 +1318,7 @@ function SkillGapTab() {
       <div className="space-y-6">
         {/* Readiness Banner */}
         <div className="rounded-xl bg-gradient-to-r from-[#F9FAFB] to-[#ECFDF5] border border-[#A7F3D0] p-6">
-          <h3 className="text-base font-semibold text-[#111827] mb-5">Your Overall Readiness for Google: SDE I</h3>
+          <h3 className="text-base font-semibold text-[#111827] mb-5">Your Overall Readiness for {name}</h3>
           <div className="space-y-3">
             {readiness.map((r) => (
               <div key={r.area} className="flex items-center gap-4">
@@ -1309,7 +1408,7 @@ function SkillGapTab() {
 /* ════════════════════════════════════════════════════════
    TAB 9 — PREPARATION STRATEGY
    ════════════════════════════════════════════════════════ */
-function PreparationStrategyTab() {
+function PreparationStrategyTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
   const [activeStep, setActiveStep] = useState(1);
   const steps = [
     { num: 1, title: "Master Dynamic Programming", desc: "Focus on 12 remaining DP problems. Target patterns: Knapsack, LCS, Matrix Chain.", est: "2-3 weeks", cta: "Start →" },
@@ -1401,7 +1500,7 @@ function PreparationStrategyTab() {
       <div className="rounded-2xl bg-gradient-to-r from-[#10B981] to-[#0D9488] p-8 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Rocket className="h-5 w-5 text-white" />
-          <h3 className="text-lg font-bold text-white">Ready to start your Google preparation?</h3>
+          <h3 className="text-lg font-bold text-white">Ready to start your {name} preparation?</h3>
         </div>
         <p className="text-sm text-white/80 mb-5">Get a personalized day-by-day roadmap based on your profile</p>
         <button className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Generate Full Roadmap →</button>
