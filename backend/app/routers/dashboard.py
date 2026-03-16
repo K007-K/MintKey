@@ -482,6 +482,7 @@ async def get_dashboard_summary(
             recent_activity.append({
                 "activity": f"{event.get('detail', '')} — {event.get('repo', '')}",
                 "platform": "GitHub",
+                "platformKey": "GitHub",
                 "result": result_text,
                 "resultStyle": result_style,
                 "date": date_str,
@@ -496,6 +497,7 @@ async def get_dashboard_summary(
             recent_activity.append({
                 "activity": f"Solved '{sub.get('title', '')}'",
                 "platform": f"LeetCode ({sub.get('lang', '')})",
+                "platformKey": "LeetCode",
                 "result": "Accepted ✓",
                 "resultStyle": "text-green-700 bg-green-100",
                 "date": sub.get("date", ""),
@@ -511,6 +513,7 @@ async def get_dashboard_summary(
             recent_activity.append({
                 "activity": f"Contest: {contest.get('title', 'CodeChef Contest')}",
                 "platform": "CodeChef",
+                "platformKey": "CodeChef",
                 "result": rank_text,
                 "resultStyle": "text-amber-700 bg-amber-100",
                 "date": contest.get("date", ""),
@@ -525,6 +528,7 @@ async def get_dashboard_summary(
             recent_activity.append({
                 "activity": f"Solved '{challenge.get('title', '')}'" if challenge.get("title") else "Challenge completed",
                 "platform": "HackerRank",
+                "platformKey": "HackerRank",
                 "result": "Completed ✓",
                 "resultStyle": "text-emerald-700 bg-emerald-100",
                 "date": challenge.get("date", ""),
@@ -538,6 +542,7 @@ async def get_dashboard_summary(
         recent_activity.append({
             "activity": f"Resume parsed — {resume_data.get('total_skills', 0)} skills extracted",
             "platform": "Resume AI",
+            "platformKey": "Resume",
             "result": "Parsed ✓",
             "resultStyle": "text-teal-700 bg-teal-100",
             "date": uploaded_at,
@@ -736,7 +741,7 @@ async def get_dashboard_summary(
                     "badge": readiness_badge,
                 },
             },
-            "recent_activity": recent_activity[:10],
+            "recent_activity": recent_activity[:25],
             "critical_gaps": critical_gaps[:3],
             "priority_actions": priority_actions[:3],
             "trend_data": trend_data if trend_data else None,

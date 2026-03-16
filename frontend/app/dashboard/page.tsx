@@ -1,14 +1,14 @@
 // Main dashboard — wired to real scraped platform data
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useDashboardSummary, useMatchScores, useCurrentUser } from "@/lib/api";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 
 /* ─── Dashboard Page ─── */
@@ -50,6 +50,41 @@ export default function DashboardPage() {
 
   // Heatmap modal state
   const [showHeatmap, setShowHeatmap] = useState(false);
+
+  // Activity filter state
+  const [activityFilter, setActivityFilter] = useState<string>("All");
+  const [showAllActivity, setShowAllActivity] = useState(false);
+
+  // Compute platform counts for filter tabs
+  const activityPlatformCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: recentActivity.length };
+    for (const item of recentActivity) {
+      const key = (item.platformKey as string) || "Other";
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    return counts;
+  }, [recentActivity]);
+
+  // Available filter tabs (only show platforms that have activities)
+  const activityFilterTabs = useMemo(() => {
+    const tabs = ["All"];
+    for (const key of ["GitHub", "LeetCode", "CodeChef", "HackerRank", "Resume"]) {
+      if (activityPlatformCounts[key]) tabs.push(key);
+    }
+    return tabs;
+  }, [activityPlatformCounts]);
+
+  // Filtered + sliced activities
+  const filteredActivity = useMemo(() => {
+    const filtered = activityFilter === "All"
+      ? recentActivity
+      : recentActivity.filter(item => (item.platformKey as string) === activityFilter);
+    return showAllActivity ? filtered : filtered.slice(0, 5);
+  }, [recentActivity, activityFilter, showAllActivity]);
+
+  const totalFilteredCount = activityFilter === "All"
+    ? recentActivity.length
+    : (activityPlatformCounts[activityFilter] || 0);
 
   return (
     <DashboardLayout
@@ -253,57 +288,106 @@ export default function DashboardPage() {
 
         {/* ─── Row 4: Recent Activity ─── */}
         <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-bold text-gray-900">Recent Activity</h2>
+            <span className="text-xs text-gray-400">{totalFilteredCount} activities</span>
           </div>
+
+          {/* Platform Filter Tabs */}
+          <div className="mb-4 flex items-center gap-1.5 overflow-x-auto pb-1">
+            {activityFilterTabs.map(tab => {
+              const isActive = activityFilter === tab;
+              const count = activityPlatformCounts[tab] || 0;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => { setActivityFilter(tab); setShowAllActivity(false); }}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-all whitespace-nowrap ${
+                    isActive
+                      ? "border-teal-200 bg-teal-50 text-teal-700 shadow-sm"
+                      : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  }`}
+                >
+                  {tab !== "All" && <PlatformDot platform={tab} />}
+                  {tab}
+                  <span className={`ml-0.5 rounded-full px-1.5 py-px text-[10px] font-bold ${
+                    isActive ? "bg-teal-100 text-teal-600" : "bg-gray-100 text-gray-400"
+                  }`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (<div key={i} className="h-12 animate-pulse rounded bg-gray-100" />))}
+              {[1, 2, 3].map((i) => (<div key={i} className="h-14 animate-pulse rounded-lg bg-gray-50" />))}
+            </div>
+          ) : filteredActivity.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 mb-3">
+                <Sparkles className="h-5 w-5 text-gray-300" />
+              </div>
+              <p className="text-sm font-medium text-gray-400">No activity yet</p>
+              <p className="text-xs text-gray-300 mt-1">Connect platforms to see your activity here</p>
             </div>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="pb-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">Activity</th>
-                  <th className="pb-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">Platform</th>
-                  <th className="pb-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">Result</th>
-                  <th className="pb-3 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-400">Date</th>
-                  <th className="pb-3 w-8"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivity.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-[#f9fafb] transition-colors group">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
-                          <ActivityIcon type={(item.iconType as "code" | "video" | "git") || "code"} />
-                        </div>
-                        {item.link ? (
-                          <a href={item.link as string} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-teal-600 transition-colors">
-                            {item.activity}
-                          </a>
-                        ) : (
-                          <span className="text-sm font-medium text-gray-900">{item.activity}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-4"><span className="text-sm text-gray-500">{item.platform}</span></td>
-                    <td className="py-4">
-                      <span className={`inline-flex rounded-md px-2.5 py-0.5 text-xs font-semibold ${item.resultStyle || "text-gray-700 bg-gray-100"}`}>{item.result}</span>
-                    </td>
-                    <td className="py-4 text-right text-sm text-gray-400">{item.date}</td>
-                    <td className="py-4 text-center">
+            <div className="space-y-1">
+              {filteredActivity.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-gray-50/80 transition-colors group"
+                >
+                  {/* Platform icon */}
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors">
+                    <PlatformActivityIcon platform={(item.platformKey as string) || "code"} />
+                  </div>
+
+                  {/* Activity description */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
                       {item.link ? (
-                        <a href={item.link as string} target="_blank" rel="noopener noreferrer" title="Open on platform" className="inline-flex items-center justify-center text-teal-400 hover:text-teal-600 transition-colors">
-                          <ExternalLink className="h-3.5 w-3.5" />
+                        <a href={item.link as string} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-900 hover:text-teal-600 transition-colors truncate">
+                          {item.activity}
                         </a>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-900 truncate">{item.activity}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] text-gray-400">{item.platform}</span>
+                      <span className="text-gray-200">·</span>
+                      <span className="text-[11px] text-gray-400">{item.date || "—"}</span>
+                    </div>
+                  </div>
+
+                  {/* Result badge */}
+                  <span className={`flex-shrink-0 inline-flex rounded-md px-2.5 py-0.5 text-[11px] font-semibold ${item.resultStyle || "text-gray-700 bg-gray-100"}`}>
+                    {item.result}
+                  </span>
+
+                  {/* External link */}
+                  {item.link ? (
+                    <a href={item.link as string} target="_blank" rel="noopener noreferrer" title="Open on platform" className="flex-shrink-0 text-gray-300 hover:text-teal-500 transition-colors opacity-0 group-hover:opacity-100">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : <div className="w-3.5" />}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Show More / Show Less */}
+          {totalFilteredCount > 5 && (
+            <button
+              onClick={() => setShowAllActivity(prev => !prev)}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-100 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              {showAllActivity ? (
+                <><ChevronUp className="h-3.5 w-3.5" /> Show Less</>
+              ) : (
+                <><ChevronDown className="h-3.5 w-3.5" /> Show More ({totalFilteredCount - 5} more)</>
+              )}
+            </button>
           )}
         </div>
 
@@ -817,4 +901,35 @@ function ActivityIcon({ type }: { type: "code" | "video" | "git" }) {
   if (type === "code") return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>);
   if (type === "video") return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="14" height="14" rx="2" /><path d="M16 10l6-3v10l-6-3" /></svg>);
   return (<svg width="16" height="16" viewBox="0 0 24 24" fill="#64748b"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>);
+}
+
+/* ─── Platform Helpers (for activity filter) ─── */
+
+const PLATFORM_DOT_COLORS: Record<string, string> = {
+  GitHub: "bg-gray-800",
+  LeetCode: "bg-amber-500",
+  CodeChef: "bg-teal-600",
+  HackerRank: "bg-green-600",
+  Resume: "bg-violet-500",
+};
+
+function PlatformDot({ platform }: { platform: string }) {
+  return <span className={`w-2 h-2 rounded-full ${PLATFORM_DOT_COLORS[platform] || "bg-gray-400"}`} />;
+}
+
+function PlatformActivityIcon({ platform }: { platform: string }) {
+  switch (platform) {
+    case "GitHub":
+      return (<svg width="16" height="16" viewBox="0 0 24 24" fill="#1f2937"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>);
+    case "LeetCode":
+      return (<svg width="16" height="16" viewBox="0 0 24 24" fill="#F89F1B"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z"/></svg>);
+    case "CodeChef":
+      return (<img src="https://cdn.codechef.com/images/cc-logo.svg" alt="CodeChef" className="h-4 w-4" style={{ objectFit: 'contain' }} />);
+    case "HackerRank":
+      return (<svg width="16" height="16" viewBox="0 0 24 24" fill="#2EC866"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.5 14h-2v-3h-3v3h-2V8h2v3h3V8h2v8z"/></svg>);
+    case "Resume":
+      return (<FileText className="h-4 w-4 text-violet-500" />);
+    default:
+      return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>);
+  }
 }
