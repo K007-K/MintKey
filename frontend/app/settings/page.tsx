@@ -5,9 +5,10 @@ import { useState, useCallback, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useCurrentUser, useUpdateProfile, useDeleteAccount, queryClient, api } from "@/lib/api";
+import { usePreferencesStore, SYNC_INTERVAL_OPTIONS } from "@/lib/store";
 import {
   AlertTriangle, Loader2, Copy, Check, X,
-  Download, FileText, Trash2, RefreshCw, Info,
+  Download, FileText, Trash2, RefreshCw, Info, Clock,
 } from "lucide-react";
 
 /* ─── Default settings shape ─── */
@@ -564,6 +565,19 @@ export default function SettingsPage() {
                 Clear Cache
               </button>
             </div>
+
+            {/* Auto-Sync Interval */}
+            <div className="flex items-center justify-between py-4 border-t border-gray-100">
+              <div>
+                <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-teal-500" />
+                  Auto-Sync Interval
+                </div>
+                <p className="mt-0.5 text-sm text-gray-400">How often MintKey refreshes your platform data</p>
+                <AutoSyncCountdown />
+              </div>
+              <AutoSyncDropdown />
+            </div>
           </div>
         </div>
 
@@ -609,4 +623,50 @@ export default function SettingsPage() {
       )}
     </DashboardLayout>
   );
+}
+
+/* ─── Auto-Sync Settings Components ─── */
+
+function AutoSyncDropdown() {
+  const { autoSyncInterval, setAutoSyncInterval } = usePreferencesStore();
+
+  return (
+    <select
+      value={autoSyncInterval}
+      onChange={(e) => setAutoSyncInterval(Number(e.target.value))}
+      className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-200 focus:border-teal-300"
+    >
+      {SYNC_INTERVAL_OPTIONS.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function AutoSyncCountdown() {
+  const { autoSyncInterval, lastSyncedAt } = usePreferencesStore();
+
+  if (autoSyncInterval === 0) {
+    return <p className="mt-1 text-xs text-gray-300">Auto-sync is disabled</p>;
+  }
+
+  if (!lastSyncedAt) {
+    return <p className="mt-1 text-xs text-teal-500">Will sync on next dashboard visit</p>;
+  }
+
+  const elapsed = Date.now() - new Date(lastSyncedAt).getTime();
+  const remaining = Math.max(0, autoSyncInterval - elapsed);
+
+  if (remaining === 0) {
+    return <p className="mt-1 text-xs text-teal-500">Will sync on next dashboard visit</p>;
+  }
+
+  const mins = Math.floor(remaining / 60_000);
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  const timeStr = hrs > 0 ? `${hrs}h ${remMins}m` : `${mins}m`;
+
+  return <p className="mt-1 text-xs text-gray-400">Next sync in ~{timeStr}</p>;
 }

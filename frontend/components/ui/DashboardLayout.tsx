@@ -5,7 +5,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/ui/Sidebar";
+import ToastContainer from "@/components/ui/ToastContainer";
 import { useSidebarStore, usePreferencesStore } from "@/lib/store";
+import { useAutoSync } from "@/lib/useAutoSync";
 import { Bell, Menu, X, Inbox } from "lucide-react";
 
 /** Format a relative time string like "3 mins ago" */
@@ -125,6 +127,9 @@ export default function DashboardLayout({
   const toggleNotif = useCallback(() => setNotifOpen((prev) => !prev), []);
   const closeNotif = useCallback(() => setNotifOpen(false), []);
 
+  // Auto-sync engine — triggers on mount if data is stale
+  useAutoSync();
+
   const userName = session?.user?.name?.split(" ")[0] || "there";
   const userInitial = (session?.user?.name || "U").charAt(0).toUpperCase();
   const userAvatar = session?.user?.image;
@@ -222,6 +227,9 @@ export default function DashboardLayout({
         {/* Main content */}
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer />
 
       {/* Animation keyframe for notification dropdown */}
       <style jsx global>{`

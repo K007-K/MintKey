@@ -524,6 +524,11 @@ export default function Sidebar() {
           </button>
         )}
 
+        {/* Per-platform sync status (expanded only) */}
+        {!collapsed && (
+          <PlatformSyncStatusPanel />
+        )}
+
         {/* FIX 9: User row */}
         {collapsed ? (
           <div
@@ -666,5 +671,53 @@ export default function Sidebar() {
         )}
       </div>
     </aside>
+  );
+}
+
+/* ─── Per-platform sync status mini panel ─── */
+
+function PlatformSyncStatusPanel() {
+  const { perPlatformStatus } = usePreferencesStore();
+  const entries = Object.entries(perPlatformStatus);
+  if (entries.length === 0) return null;
+
+  const statusDot: Record<string, string> = {
+    idle: "bg-gray-300",
+    syncing: "bg-amber-400 animate-pulse",
+    success: "bg-green-500",
+    error: "bg-red-400",
+  };
+
+  const statusLabel: Record<string, string> = {
+    idle: "—",
+    syncing: "syncing…",
+    success: "synced",
+    error: "failed",
+  };
+
+  const miniTimeAgo = (dateStr: string | null): string => {
+    if (!dateStr) return "";
+    const diff = Date.now() - new Date(dateStr).getTime();
+    if (diff < 60_000) return "just now";
+    const mins = Math.floor(diff / 60_000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h ago`;
+  };
+
+  return (
+    <div style={{ margin: "4px 16px 0", padding: "8px 10px", borderRadius: 8, background: "#f9fafb", border: "1px solid #f3f4f6" }}>
+      {entries.map(([platform, info]) => (
+        <div key={platform} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", fontSize: 11 }}>
+          <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${statusDot[info.status]}`} />
+          <span style={{ flex: 1, color: "#374151", fontWeight: 500 }}>{platform}</span>
+          <span style={{ color: info.status === "error" ? "#ef4444" : "#9ca3af", fontSize: 10, fontWeight: 500 }}>
+            {info.status === "success" && info.lastSynced
+              ? miniTimeAgo(info.lastSynced)
+              : statusLabel[info.status]}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
