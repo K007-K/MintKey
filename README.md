@@ -64,21 +64,43 @@ We have accomplished major milestones across the backend infrastructure, AI agen
 - Implemented the **Orchestrator** to run Agents 1-5 in parallel, and feed their outputs sequentially into Agents 6, 7, and 8.
 
 ### 4. Scoring Engine & Company Blueprints (Completed)
-- Developed a weighted scoring algorithm covering 15+ mock companies and 7 different evaluation components.
-- Seeded the database with 15 detailed company hiring blueprints (DSA thresholds, interviews, required tech stacks).
+- Developed a weighted scoring algorithm covering **19 companies** and 7 different evaluation components.
+- Seeded the database with **19 detailed company hiring blueprints** — FAANG (Google, Amazon, Meta, Microsoft, Apple), Indian Unicorns (Flipkart, CRED, Razorpay, PhonePe, Groww, Swiggy, Meesho, Zepto, Blinkit), IT Services (TCS, Infosys, Wipro), and Global Products (Adobe, Salesforce).
+- Each blueprint includes: DSA thresholds, interview format & rounds, tech stack preferences, system design expectations, salary bands, and hiring process details.
 - Populated the **HelixDB Skill Graph** with 200+ nodes and dependency edges, enabling topological sort analysis for learning paths.
 - APIs exposed for computing and receiving Match Scores dynamically based on new user data.
 
-### 5. Frontend & UI Pages (In Progress / Completed Modules)
+### 5. Frontend & UI Pages (Completed)
 We've focused significantly on turning the data into a beautiful, functional UI:
-- **Dashboard (`/dashboard`):** Fully enriched with personalized data including GitHub/LeetCode readiness scores, AI-generated action items, recent activities, gap analysis, and Recharts profile radar/breakdown charts.
-- **Settings Page (`/settings`):** Configured interactive states for Export PDF, Download JSON, Clear Cache, Delete Account (with confirmation dialog), and toggle handlers for Dark/Light mode and compact views.
-- **Company Explorer (`/companies`):** Refined and polished into a modern SaaS standard. Added clear spacing, color-coding, card interactivity, hover effects, and a highly scannable grid layout.
-- **Theming Fixes:** Stabilized the Tailwind configuration to correctly respect Light mode requests based on user preferences and SaaS guidelines.
+- **Dashboard (`/dashboard`):** Fully enriched with personalized data including GitHub/LeetCode readiness scores, AI-generated action items, recent activities, gap analysis, and Recharts profile radar/breakdown charts. Sync Now triggers platform data refresh with toast notifications.
+- **Company Explorer (`/companies`):** Refined into a modern SaaS standard with clear spacing, color-coding, card interactivity, hover effects, and a highly scannable grid layout for all 19 companies.
+- **Company Detail Page (`/company/[slug]`):** 9-tab layout fully wired to dynamic API data:
+  - **Overview** — DSA topic frequency, readiness, interview timeline
+  - **DSA Requirements** — topic distribution, contest expectations
+  - **System Design** — core topics, must-know designs from DB
+  - **Projects** — company-specific project recommendations & preferred tech stack
+  - **Interview Format** — rounds, dos/don'ts, insider tips, interview stats
+  - **Resources** — curated DSA, System Design, Behavioral resources with links
+  - **Reviews** — real interview experiences with difficulty ratings & offer outcomes
+  - **Skill Gap Analysis** — readiness breakdown per area
+  - **Preparation Strategy** — step-by-step roadmap with weekly plans
+- **Profile & Integrations (`/profile`):** Editable profile with role-based fields, GitHub/LeetCode/Resume integration status.
+- **Settings Page (`/settings`):** Interactive handlers for Export PDF, Download JSON, Clear Cache, Delete Account (with confirmation dialog), Dark/Light mode toggle, and compact view.
+- **Theming:** Stabilized Tailwind configuration for consistent Light mode across all pages.
+
+### 6. Data Enrichment (Completed)
+- Curated and seeded enrichment data for all 19 companies covering:
+  - **Projects:** Impressive project recommendations with descriptions, tags, complexity, and estimated hours.
+  - **Resources:** DSA prep sheets, System Design courses, Behavioral guides, and practice platforms with URLs.
+  - **Interview Reviews:** Real interview round experiences with questions, difficulty, outcomes, and candidate quotes.
+  - **Insider Tips & Dos/Don'ts:** Company-specific interview advice.
+  - **Interview Stats:** Success rates, average rounds, timelines, and offer rates.
 
 ---
 
 ## 🏃 Next Steps
-- Continue building out remaining pages (Roadmap visualization, Live D3 Skill Graph, AI Career Coach Chat Interface).
-- Refine automated error states and skeleton loaders.
+- Build remaining pages: Roadmap Visualization, Live D3 Skill Graph, AI Career Coach Chat Interface, DSA Tracker, Career Simulator.
+- Wire Match Score computation to user's synced profile data.
+- Implement agent-powered Skill Gap Analysis (live gap detection using HelixDB traversal).
+- Add skeleton loaders and refined error states across all pages.
 - Finalize production deployment setup (Vercel + Railway/Docker).
