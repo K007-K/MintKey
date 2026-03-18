@@ -1,0 +1,846 @@
+# MintKey — Complete Implementation Plan
+### From Current State to Production
+
+> **Generated**: March 17, 2026 | **Revised**: March 18, 2026 (v4 — progress update)  
+> **Owner**: Karthik  
+> **Status**: Living document — updated as we build  
+> **Review Score**: 8.4 → 9.6 → **10/10** (all fixes applied)
+
+---
+
+## Part 1: Where We Are Today
+
+### ✅ What's Done (Phase 1–4)
+
+| Phase | What | Status |
+|-------|------|--------|
+| **Phase 1** | Backend skeleton: FastAPI, 7 routers, 3 middleware, SQLAlchemy ORM (8 tables), Alembic migrations, LiteLLM client, Pydantic schemas, Docker Compose, GitHub OAuth | ✅ Complete |
+| **Phase 2** | GitHub REST scraper, LeetCode GraphQL scraper, CodeChef scraper, HackerRank scraper, Resume PDF parser, Skill taxonomy (150+), Celery + Redis task queue | ✅ Complete |
+| **Phase 3** | 8 LLM agents (GitHub Analyst, DSA Analyst, Resume Parser, Trend Watcher, Company Expert, Gap Finder, Roadmap Builder, Career Coach), Orchestrator, Tool executor (9 tools), WebSocket progress | ✅ Complete |
+| **Phase 4** | Weighted scoring algorithm (7 components), **19 company blueprints** seeded (FAANG + Indian Unicorns + IT Services + Global Products), HelixDB skill graph (200+ nodes), Gap analysis + topological sort, Match score computation | ✅ Complete |
+
+### 🔶 What's Partially Done (Phase 5)
+
+| Page | Status | Details |
+|------|--------|---------|
+| `/dashboard` | ✅ Wired | Connected to backend, shows live data |
+| `/profile` | ✅ Wired | Edit profile modal, platform usernames, avatar |
+| `/settings` | ✅ Wired | Theme, export PDF, clear cache, delete account all functional |
+| `/companies` | ✅ Wired | Connected to backend, shows all 19 companies from `company_blueprints` table |
+| `/company/[slug]` | ✅ Wired | All 9 tabs wired to dynamic API data (projects, resources, reviews, interview format, insider tips, dos/don'ts, stats) |
+| `/onboarding` | ✅ Exists | Multi-step wizard, functional |
+| `/` (Landing) | ✅ Exists | Landing page built |
+
+### 🔲 What Doesn't Exist Yet
+
+| Page | Current State |
+|------|--------------|
+| `/roadmap` | Empty placeholder page |
+| `/dsa` | Empty placeholder page |
+| `/coach` | Empty placeholder page |
+| `/skills` | No page exists |
+| `/trends` | No page exists |
+| `/simulate` | No page exists |
+| `/match/[slug]` | No page exists |
+| `/practice` | **NEW** — not in original plan |
+| `/visualizer` | **NEW** — not in original plan |
+| `/aptitude` | **NEW** — not in original plan |
+| `/projects` | **NEW** — not in original plan |
+| `/patterns` | **NEW** — not in original plan |
+| `/cheatsheets` | **NEW** — not in original plan |
+| `/resources` | **NEW** — not in original plan |
+
+### Current Database Schema (8 Tables)
+
+```
+users                     → User profiles + platform usernames
+platform_scores           → Synced GitHub/LC/CC/HR data + computed scores
+company_blueprints        → 19 company hiring blueprints (JSONB) — enriched with projects, resources, reviews, insider tips
+company_match_scores      → User vs company match scores (time-series)
+user_target_companies     → Which companies user is targeting (max 5)
+user_skill_gaps           → Identified gaps per user per company
+user_roadmaps             → Generated week-by-week roadmap data
+analysis_results          → Full 8-agent analysis output storage
+```
+
+### Current Backend Routers (9)
+
+```
+auth.py          → GitHub OAuth login/callback
+users.py         → GET/PATCH user profile
+dashboard.py     → Dashboard stats aggregation endpoint
+companies.py     → GET company blueprints list + detail
+scores.py        → POST compute match scores, GET scores
+analysis.py      → POST trigger analysis, GET status, WebSocket
+sync.py          → POST sync GitHub/LC/CC/HR
+roadmap.py       → Placeholder (empty)
+trends.py        → Placeholder (empty)
+```
+
+### Current Sidebar Navigation
+
+```
+PLATFORM:
+  Dashboard, Companies, My Roadmap, DSA Tracker, Skill Graph
+
+INTELLIGENCE:
+  Market Trends, Career Simulator, AI Coach [BETA]
+
+BOTTOM:
+  Profile & Integrations, Settings
+  [Sync Now button]
+```
+
+---
+
+## Part 2: What's Changing — The New MintKey Vision
+
+### Old Vision vs New Vision
+
+| Aspect | Old Plan | New Plan |
+|--------|----------|----------|
+| **Problem solving** | Build inside MintKey | Redirect to LeetCode/CodeChef |
+| **Content** | Link to external sites | Build natively from 10 unrecognized sources |
+| **Algorithm learning** | None planned | Full animated visualizer (AlgoMaster-style) |
+| **Aptitude prep** | None planned | LLM-powered quiz engine (replaces IndiaBix/PrepInsta) |
+| **Project learning** | None planned | Project challenge hub (from CodingChallenges.fyi) |
+| **DSA roadmaps** | User creates own | Import NeetCode/Striver's curated sheets |
+| **Problem database** | Only LC sync | Import CSES 300 problems + curated sets natively |
+| **Explanations** | None planned | LLM-generated per-problem explanations |
+| **Courses** | None planned | Display FCC/TOP curricula, redirect for completion |
+| **Patterns library** | None planned | DSA patterns reference (from RisingBrain) |
+| **Cheat sheets** | None planned | Built-in quick reference cards |
+
+### Sidebar Navigation — Updated
+
+```
+PLATFORM (existing):
+  Dashboard           → ✅ Done
+  Companies           → 🔧 Needs backend wiring
+  My Roadmap           → 🔧 Needs full build
+
+LEARN (NEW section):
+  DSA Practice         → 🔨 Problems from CSES + NeetCode/Striver lists
+  Visualizer           → 🔨 Algorithm animations (AlgoMaster-style)
+  Patterns             → 🔨 DSA patterns library (Two Pointers, etc.)
+  Courses              → 🔨 FCC + TOP course catalog → redirect
+  Projects             → 🔨 Build-your-own challenges
+
+PREPARE (renamed from Intelligence):
+  Aptitude             → 🔨 LLM quiz engine (replaces IndiaBix)
+  Skill Graph          → 🔨 D3.js force graph from HelixDB
+  AI Coach [BETA]      → 🔧 Needs full build
+
+BOTTOM:
+  Resources            → 🔨 Curated links to all 16 platforms
+  Profile              → ✅ Done
+  Settings             → ✅ Done
+```
+
+> **Note**: The old `/dsa` (DSA Tracker) route is **replaced** by `/practice` (DSA Practice). `/dsa` will redirect to `/practice`. Similarly, the old `Career Simulator` sidebar item now lives at `/simulate`.
+
+---
+
+## Part 3: New Database Tables Required
+
+### Migration 1: `external_problems`
+```sql
+CREATE TABLE external_problems (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    source TEXT NOT NULL,                    -- 'cses', 'neetcode', 'striver', 'custom'
+    external_id TEXT,                        -- Platform-specific ID
+    title TEXT NOT NULL,
+    slug TEXT,
+    difficulty TEXT,                         -- 'easy', 'medium', 'hard' or '1'-'5'
+    tags TEXT[],                             -- ['array', 'dp', 'two-pointers']
+    description TEXT,                        -- Problem statement
+    url TEXT,                                -- Original URL (or NULL if native)
+    category TEXT,                           -- 'dsa', 'competitive', 'math'
+    study_plans TEXT[],                      -- ['neetcode_150', 'blind_75', 'striver_sde']
+    company_tags TEXT[],                     -- ['google', 'amazon']
+    hints TEXT[],                            -- Progressive hints
+    solution_approach TEXT,                  -- LLM-generated approach text
+    solution_code JSONB,                     -- { python: "...", java: "...", cpp: "..." }
+    complexity_analysis TEXT,                -- "Time: O(n), Space: O(1)"
+    pattern TEXT,                            -- 'sliding_window', 'two_pointers'
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_problems_source ON external_problems(source);
+CREATE INDEX idx_problems_difficulty ON external_problems(difficulty);
+CREATE INDEX idx_problems_pattern ON external_problems(pattern);
+```
+
+### Migration 2: `user_problem_progress`
+```sql
+CREATE TABLE user_problem_progress (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    problem_id UUID REFERENCES external_problems(id) ON DELETE CASCADE,
+    status TEXT DEFAULT 'unsolved',          -- 'unsolved', 'attempted', 'solved'
+    solved_at TIMESTAMPTZ,
+    time_spent_sec INTEGER,                  -- How long user spent before solving
+    attempts_count INTEGER DEFAULT 0,        -- How many times they tried
+    notes TEXT,
+    UNIQUE(user_id, problem_id)
+);
+CREATE INDEX idx_progress_user ON user_problem_progress(user_id);
+```
+
+### Migration 3: `external_courses`
+```sql
+CREATE TABLE external_courses (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    source TEXT NOT NULL,                    -- 'freecodecamp', 'odin_project'
+    title TEXT NOT NULL,
+    slug TEXT,
+    description TEXT,
+    url TEXT NOT NULL,                       -- Redirect URL
+    path TEXT,                               -- 'foundations', 'javascript'
+    total_lessons INTEGER,
+    category TEXT,                           -- 'web_dev', 'python', 'data_science'
+    order_index INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### Migration 4: `user_course_progress`
+```sql
+CREATE TABLE user_course_progress (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    course_id UUID REFERENCES external_courses(id) ON DELETE CASCADE,
+    lessons_completed INTEGER DEFAULT 0,
+    completed_lesson_ids TEXT[],              -- ['html-elements', 'css-selectors', ...]
+    status TEXT DEFAULT 'not_started',       -- 'not_started', 'in_progress', 'completed'
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    UNIQUE(user_id, course_id)
+);
+```
+
+> **Why `completed_lesson_ids TEXT[]`?** A count alone (`lessons_completed = 3`) doesn't tell us WHICH 3 lessons were done. With the array, when a user returns after a month, we can show exactly which lessons they completed and which remain.
+
+### Migration 5: `aptitude_question_bank` + `aptitude_attempts`
+```sql
+-- Pre-generated question bank (NOT per-request LLM calls)
+-- Generate 500-1000 questions via LLM ONCE, store in DB, serve randomly
+-- Cost: ~$2 total generation vs $15-30/day if calling LLM per quiz
+CREATE TABLE aptitude_question_bank (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    category TEXT NOT NULL,                  -- 'quantitative', 'logical', 'verbal', 'data_interpretation'
+    topic TEXT NOT NULL,                     -- 'percentages', 'puzzles', 'coding_decoding'
+    company_context TEXT,                    -- 'tcs', 'infosys' or NULL (generic)
+    difficulty INTEGER DEFAULT 3,            -- 1-5
+    question_text TEXT NOT NULL,
+    options JSONB NOT NULL,                  -- ["option_a", "option_b", "option_c", "option_d"]
+    correct_answer INTEGER NOT NULL,         -- 0-3 index
+    explanation TEXT NOT NULL,               -- Step-by-step solution
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_aptitude_bank_category ON aptitude_question_bank(category);
+CREATE INDEX idx_aptitude_bank_topic ON aptitude_question_bank(topic);
+CREATE INDEX idx_aptitude_bank_company ON aptitude_question_bank(company_context);
+
+CREATE TABLE aptitude_attempts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    category TEXT NOT NULL,
+    topic TEXT,
+    company_context TEXT,
+    total_questions INTEGER NOT NULL,
+    correct_answers INTEGER NOT NULL,
+    accuracy FLOAT NOT NULL,
+    question_ids UUID[],                     -- References to aptitude_question_bank
+    user_answers JSONB,                      -- { question_id: selected_answer_index }
+    attempted_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_aptitude_user ON aptitude_attempts(user_id);
+```
+
+> **Cost fix**: Instead of calling the LLM per quiz request (~$0.05-0.10 each), we generate the entire question bank ONCE using a seed script. Serving from DB costs $0. The LLM is only called at content-generation time, never at user-request time.
+
+### Migration 6: `curated_resources`
+```sql
+CREATE TABLE curated_resources (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    source TEXT NOT NULL,                    -- 'algomaster', 'risingbrain', etc.
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    category TEXT,                           -- 'article', 'video', 'tool', 'cheat_sheet'
+    topic TEXT,                              -- 'dp', 'system_design', 'web_dev'
+    tags TEXT[],
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+---
+
+## Part 4: New Backend Files Required
+
+### New Scrapers / Importers
+
+```
+backend/scrapers/
+├── github_scraper.py          ← EXISTS
+├── leetcode_scraper.py        ← EXISTS (enhance with problem data)
+├── codechef_scraper.py        ← EXISTS
+├── hackerrank_scraper.py      ← EXISTS
+├── cses_importer.py           ← NEW: Import 300 problems from HuggingFace JSON
+├── neetcode_importer.py       ← NEW: Import NeetCode 150/250/Blind75 from GitHub
+├── striver_importer.py        ← NEW: Import SDE Sheet + A2Z from GitHub
+├── fcc_importer.py            ← NEW: Parse FreeCodeCamp curriculum JSON
+├── odin_importer.py           ← NEW: Parse Odin Project curriculum markdown
+└── challenges_scraper.py      ← NEW: Scrape codingchallenges.fyi project list
+```
+
+### New Routers
+
+```
+backend/app/routers/
+├── auth.py            ← EXISTS
+├── users.py           ← EXISTS
+├── dashboard.py       ← EXISTS
+├── companies.py       ← EXISTS (needs subpage endpoints)
+├── scores.py          ← EXISTS
+├── analysis.py        ← EXISTS
+├── sync.py            ← EXISTS
+├── roadmap.py         ← EXISTS (placeholder → needs full implementation)
+├── trends.py          ← EXISTS (placeholder → needs implementation)
+├── practice.py        ← NEW: Problem CRUD, progress tracking, study plans
+├── courses.py         ← NEW: Course catalog, progress tracking
+├── aptitude.py        ← NEW: Serve from question bank, submit answers, analytics
+├── coach.py           ← NEW: AI Coach chat endpoint
+└── resources.py       ← NEW: Curated resources CRUD
+```
+
+> **Note**: No `visualizer.py` router — the algorithm visualizer is 100% frontend-only (D3.js + React).
+
+### New Services
+
+```
+backend/app/services/
+├── scoring.py             ← EXISTS
+├── seed_companies.py      ← EXISTS
+├── skill_graph.py         ← EXISTS
+├── problem_service.py     ← NEW: Problem search, filter, study plan logic
+├── course_service.py      ← NEW: Course catalog + progress logic
+├── aptitude_service.py    ← NEW: Serve questions from bank + scoring
+└── explanation_service.py ← NEW: LLM problem explanations
+```
+
+### New Repositories
+
+```
+backend/app/repositories/
+├── users.py           ← EXISTS
+├── companies.py       ← EXISTS
+├── scores.py          ← EXISTS
+├── problems.py        ← NEW: external_problems + user_problem_progress
+├── courses.py         ← NEW: external_courses + user_course_progress
+├── aptitude.py        ← NEW: aptitude_attempts
+└── resources.py       ← NEW: curated_resources
+```
+
+### New/Modified Agent
+
+```
+backend/agents/
+├── [all 8 existing agents] ← EXISTS, no changes
+├── core/models.py          ← ADD ExplanationInput/Output schemas
+└── explanation_agent.py    ← NEW: Agent 9 — generates problem explanations
+```
+
+### New Seed Scripts
+
+```
+backend/scripts/
+├── seed_problems.py         ← NEW: Run all importers, populate external_problems
+├── seed_courses.py          ← NEW: Import FCC + TOP curricula
+├── seed_resources.py        ← NEW: Insert curated resource links
+├── seed_aptitude.py         ← NEW: LLM-generate 500-1000 aptitude questions ONCE
+└── generate_explanations.py ← NEW: LLM-generate explanations for TOP 200 problems only
+```
+
+> **`generate_explanations.py` scope**: Generate for NeetCode 150 + CSES top 50 by difficulty = **200 problems** (~$10 total). Remaining ~600 problems use on-demand Agent 9 at runtime (cached after first call, never re-generated). Do NOT run against all 800 — dedup guard prevents double-generation but costs add up.
+
+---
+
+## Part 5: New Frontend Pages
+
+### Updated Sidebar Navigation Code
+
+```typescript
+const PLATFORM_NAV = [
+  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/companies", label: "Companies", Icon: Building2 },
+  { href: "/roadmap", label: "My Roadmap", Icon: Map },
+];
+
+const LEARN_NAV = [
+  { href: "/practice", label: "DSA Practice", Icon: Code2 },
+  { href: "/visualizer", label: "Visualizer", Icon: Play },
+  { href: "/patterns", label: "DSA Patterns", Icon: Layers },
+  { href: "/courses", label: "Courses", Icon: BookOpen },
+  { href: "/projects", label: "Projects", Icon: Hammer },
+];
+
+const PREPARE_NAV = [
+  { href: "/aptitude", label: "Aptitude Prep", Icon: Brain },
+  { href: "/skills", label: "Skill Graph", Icon: GitBranch },
+  { href: "/coach", label: "AI Coach", Icon: Sparkles, badge: "BETA" },
+];
+```
+
+> **`/dsa` → `/practice` redirect**: The old `/dsa` route ("DSA Tracker" in the original sidebar) is superseded by `/practice`. Add a one-line redirect in `app/dsa/page.tsx`:
+> ```typescript
+> import { redirect } from 'next/navigation';
+> export default function DSAPage() { redirect('/practice'); }
+> ```
+
+### Page-by-Page Specification
+
+#### 1. `/practice` — DSA Practice Hub (NEW)
+
+**Data source**: `external_problems` table (seeded from CSES + NeetCode + Striver's)
+
+**Page layout**:
+- Top: Filter bar (source, difficulty, pattern, study plan, company tag, solved status)
+- Main: Problem table/grid (title, difficulty badge, tags, status, "Explain" button, "Solve ↗" link)
+- Sidebar: Study plan selector (NeetCode 150, Blind 75, Striver's SDE, CSES, etc.)
+- Bottom: Progress stats (X/150 solved, % by difficulty, streak)
+
+**API calls**:
+- `GET /api/practice/problems?plan=neetcode_150&difficulty=medium&pattern=sliding_window`
+- `PATCH /api/practice/progress/{problem_id}` → mark solved/unsolved
+- `GET /api/practice/stats` → user progress summary
+- `POST /api/practice/explain/{problem_id}` → LLM explanation
+
+**User flow**: Browse problems → click "Explain" to read AI explanation → click "Solve ↗" to open on LeetCode/CSES → return and mark as solved
+
+---
+
+#### 2. `/visualizer` — Algorithm Visualizer (NEW)
+
+**Built with**: D3.js + Framer Motion (React components)
+
+**Page layout**:
+- Left: Algorithm selector (categorized: Sorting, Searching, Trees, Graphs, DP, etc.)
+- Center: Visualization canvas (animated arrays, graphs, trees)
+- Right: Step log with variable state
+- Bottom: Playback controls (Play, Pause, Step Forward, Step Back, Speed slider)
+
+**No backend API needed** — all visualization logic is frontend-only React components.
+
+**28 algorithms to build** (in priority order):
+1. Bubble Sort, Selection Sort, Insertion Sort, Merge Sort, Quick Sort
+2. Binary Search, Linear Search
+3. Two Pointers, Sliding Window
+4. BFS (tree), DFS (tree), Inorder/Preorder/Postorder
+5. BFS (graph), DFS (graph)
+6. Stack push/pop, Queue enqueue/dequeue
+7. Linked list reversal, cycle detection
+8. Dijkstra, Topological Sort
+9. DP Fibonacci (memoization vs tabulation), Knapsack, LCS
+
+---
+
+#### 3. `/patterns` — DSA Patterns Library (NEW)
+
+**Data**: LLM-generated content stored in `curated_resources` or static MDX files
+
+**16 patterns to cover**:
+Two Pointers, Sliding Window, Fast & Slow Pointers, Merge Intervals, Cyclic Sort, In-place Reversal, BFS, DFS, Two Heaps, Subsets/Permutations, Modified Binary Search, Bitwise XOR, Top K Elements, K-way Merge, 0/1 Knapsack, Topological Sort
+
+**Each pattern page**: Explanation, when to use, template code (Python + Java), 5-10 example problems linked to `/practice`, visual diagram
+
+---
+
+#### 4. `/courses` — Course Catalog (NEW)
+
+**Data**: `external_courses` table (seeded from FCC + TOP)
+
+**Page layout**:
+- Grid of course cards: title, source badge (FCC/TOP), lesson count, category, progress bar
+- Click card → course detail: lesson list, descriptions, progress checkboxes
+- "Start on FreeCodeCamp ↗" / "Start on Odin Project ↗" redirect buttons
+
+**API calls**:
+- `GET /api/courses?source=freecodecamp&category=web_dev`
+- `PATCH /api/courses/progress/{course_id}` → update lessons completed
+
+---
+
+#### 5. `/projects` — Project Challenge Hub (NEW)
+
+**Data**: Seeded from CodingChallenges.fyi + Coders Section
+
+**Page layout**:
+- Filterable grid: project cards with title, category, difficulty, tech stack tags
+- Click → project detail: description, requirements, milestones, "Ask AI for hint" button
+- Submit completed project: GitHub repo URL input → displayed on profile
+
+---
+
+#### 6. `/aptitude` — Aptitude Prep Engine (NEW)
+
+**Data**: Pre-generated question bank in `aptitude_question_bank` table (~500-1000 questions seeded by `seed_aptitude.py`). Results stored in `aptitude_attempts`.
+
+**Page layout**:
+- Category selector: Quantitative, Logical, Verbal, Data Interpretation
+- Optional company filter: TCS, Infosys, Wipro, Cognizant, etc.
+- Difficulty selector: Easy / Medium / Hard
+- Quiz interface: one question at a time, 4 MCQ options, submit → instant feedback + step-by-step explanation
+- Results: score, accuracy by topic, improvement suggestions, topic-wise breakdown chart
+
+**API calls**:
+- `GET /api/aptitude/quiz?category=quantitative&topic=percentages&company=tcs&count=10` → returns 10 random questions from the bank
+- `POST /api/aptitude/submit` → check answers against bank, store attempt, return explanations
+- `GET /api/aptitude/analytics` → accuracy trends by category/topic over time
+
+> **Zero LLM cost at runtime.** All questions are pre-generated and stored in the DB. The LLM is only called once during the `seed_aptitude.py` script. New questions can be added periodically by re-running the script.
+
+---
+
+#### 7. `/coach` — AI Coach Chat (EXISTS, needs build)
+
+**Uses**: Agent 8 (Career Coach) — already exists in backend (`agents/career_coach.py`, temperature 0.8)
+
+**Page layout**:
+- Chat interface (full-height, message bubbles)
+- User types question → agent responds with personalized advice
+- Agent proactively surfaces insights on first load: "Based on your latest sync, here are 3 things to focus on this week"
+- Suggested prompts: "What should I study this week?", "Am I ready for Google?", "What's my biggest weakness?"
+
+**Context passed per message**:
+- User's latest platform scores (GitHub, LC, CC, HR)
+- User's skill gaps per target company
+- User's roadmap progress (current week, completion %)
+- User's aptitude accuracy by category
+- User's problem-solving stats (solved count, difficulty breakdown)
+- Full merged analysis from last orchestrator run
+
+**Chat history storage**: `JSONB` array in the existing `users.settings` column (key: `coach_history`), capped at last 50 messages. No new table needed.
+
+**API**:
+- `POST /api/coach/message` → `{ message: string }` → returns AI response with context
+- `GET /api/coach/history` → returns last 50 messages
+- `DELETE /api/coach/history` → clear chat history
+
+---
+
+#### 8. `/resources` — Curated Resources Hub (NEW)
+
+**Data**: `curated_resources` table
+
+**Page layout**: Categorized link directory with search/filter
+- DSA & Algorithms: Striver's, NeetCode, AlgoMaster links
+- Web Development: FCC, TOP, Coders Section links  
+- Competitive Programming: LeetCode, CodeChef, HackerRank, CSES links
+- Placement Prep: PrepInsta, IndiaBix, TopperWorld links
+- System Design: CodingChallenges.fyi, RisingBrain links
+
+---
+
+#### 9. `/companies` — ✅ DONE: Wired to Backend
+
+**Completed**: Connected to `company_blueprints` table via `GET /api/companies` endpoint. All 9 tabs on `/company/[slug]` now read from JSONB fields (projects, resources, interview_format, hiring_data including reviews, stats, insider tips, dos/don'ts). 19 companies fully enriched.
+
+---
+
+#### 10. `/roadmap` — Build Full Page (EXISTS as placeholder)
+
+**Data**: `user_roadmaps` table (already populated by Agent 7)
+
+**Page layout**: Week-by-week timeline with tasks, problem counts, milestones, progress tracking
+
+---
+
+#### 11. `/match/[slug]` — Match Score Report (CORE PAGE)
+
+**Data**: `company_match_scores` table + `user_skill_gaps` table
+
+**This is the CORE user journey**: Dashboard score bar → click → `/match/google` → see full breakdown. Every company card, every score indicator, every roadmap leads here. This is the page that answers "Why is my Google score 64%?"
+
+**Page layout**:
+- Hero: Overall match score (large circular gauge) + status label ("Preparing" / "Almost Ready" / "Ready")
+- Breakdown: 7-component radar chart (DSA, Projects, Resume, Academic, Stack, System Design, Behavioral) with score per component
+- Gaps: Prioritized list from `user_skill_gaps` — BLOCKING (red) / IMPORTANT (orange) / NICE_TO_HAVE (green)
+- History: Line chart showing score trend over time (from `company_match_scores` time-series)
+- Actions: "Generate Roadmap" button → links to `/roadmap/[slug]`, "Start Practice" → links to `/practice` filtered by company tags
+
+**API calls**:
+- `GET /api/scores/{company_slug}` → current match score + breakdown (EXISTS)
+- `GET /api/scores/{company_slug}/history` → score trend data (NEW endpoint)
+- `GET /api/skills/gaps?company={slug}` → skill gaps for this company (NEW endpoint)
+
+---
+
+#### 12. `/skills` — Skill Graph (D3.js Force Graph)
+
+**Data**: HelixDB skill graph via `GET /api/skills/graph` new endpoint
+
+**Page layout**:
+- Full-screen force-directed graph (D3.js `d3-force`)
+- **Nodes**: 200+ skills from HelixDB, sized by importance/centrality
+- **Edges**: Dependency relationships (directed, weighted) — e.g., "Binary Search" → depends on "Arrays", "Sorting"
+- **Colors**: Green = user has this skill, Red = user lacks this skill (gap), Gray = neutral
+- **Click node**: Shows skill detail panel — description, current level, required level per company, learning resources
+- **Zoom + Pan**: Standard D3 zoom behavior
+- **Filter**: Toggle by category (DSA, Web Dev, System Design, Languages)
+
+**API calls**:
+- `GET /api/skills/graph` → returns nodes + edges from HelixDB (NEW endpoint)
+- `GET /api/skills/{skill_name}` → skill detail + user's level (NEW endpoint)
+
+---
+
+#### 13. `/cheatsheets` — Quick Reference Cards (NEW)
+
+**Data**: Static JSON/MDX files or `curated_resources` table (category = 'cheat_sheet')
+
+**Page layout**:
+- Grid of cheat sheet cards: HTML, CSS, JavaScript, React, Python, Java, Git, SQL, Data Structures, System Design
+- Each card → full cheat sheet page with syntax, common patterns, examples
+- Print-friendly / dark mode toggle
+
+**Content source**: LLM-generated once via `scripts/generate_cheatsheets.py`, stored as static JSON or in DB
+
+---
+
+## Part 6: Build Order — Sprint Plan (Revised)
+
+> **Sprint reorder rationale**: The core product loop is Dashboard → Company Score → Match Report → Roadmap → Coach. This path must work end-to-end before we add learning features. "Nice-to-have" features (Visualizer, Patterns, Cheatsheets) move to later sprints.
+
+### Sprint 1: Fix Companies + Match Report + Roadmap (1 week)
+**Goal**: Complete the core user journey end-to-end
+
+| Wire `/companies` to backend `company_blueprints` data | Frontend | `companies/page.tsx` | ✅ Done |
+| Wire `/company/[slug]` tabs to JSONB fields | Frontend | `company/[slug]/page.tsx` | ✅ Done |
+| Enrich 19 companies with projects, resources, reviews, tips | Backend | `enrich_companies.py` + JSON data files | ✅ Done |
+| **Build `/match/[slug]`** — the core match score breakdown page | Frontend + Backend | `match/[slug]/page.tsx`, `routers/scores.py` | 🔲 TODO |
+| Add `GET /api/scores/{slug}/history` endpoint | Backend | `routers/scores.py` | 🔲 TODO |
+| Add `GET /api/skills/gaps?company={slug}` endpoint | Backend | `routers/scores.py` | 🔲 TODO |
+| Build `/roadmap` with `user_roadmaps` data | Frontend | `roadmap/page.tsx` | 🔲 TODO |
+| Build `/roadmap/[slug]` for company-specific roadmap | Frontend | `roadmap/[slug]/page.tsx` | 🔲 TODO |
+
+> **Why `/match/[slug]` is Sprint 1**: Every company score bar in the dashboard, every company card — they all point here. Without this page, the entire app has a broken primary CTA.
+
+---
+
+### Sprint 2: Problem Database + DSA Practice (1.5 weeks)
+**Goal**: Import ~750-800 unique problems and build the practice page
+
+| Task | Type | Files |
+|------|------|-------|
+| Alembic migration: `external_problems` + `user_problem_progress` | DB | `migrations/` |
+| CSES importer (HuggingFace JSON) | Backend | `scrapers/cses_importer.py` |
+| NeetCode importer (GitHub repos) | Backend | `scrapers/neetcode_importer.py` |
+| Striver's importer (GitHub repos) | Backend | `scrapers/striver_importer.py` |
+| **Deduplication logic** in seed script | Backend | `scripts/seed_problems.py` |
+| Problems router: list, filter, progress | Backend | `routers/practice.py` |
+| Problems repository + service | Backend | `repositories/problems.py`, `services/problem_service.py` |
+| Build `/practice` page | Frontend | `practice/page.tsx` |
+| Build problem detail with "Solve ↗" redirect | Frontend | `practice/[id]/page.tsx` |
+
+> **Problem count reality check**:
+> - CSES: ~300 unique problems
+> - NeetCode 150: 150 (all map to LeetCode)
+> - NeetCode 250: 250 (superset of 150)
+> - Blind 75: 75 (subset of NeetCode 150)
+> - Striver's A2Z: 455 (significant overlap with NeetCode on LC problems)
+> - After deduplication: **~750-800 unique problems**
+> - One problem tagged with ALL study plans it belongs to via `study_plans TEXT[]`
+
+---
+
+### Sprint 3: AI Coach + Roadmap Wiring (1 week)
+**Goal**: Complete the advisory core — roadmap + coach are central to placement outcomes
+
+| Task | Type | Files |
+|------|------|-------|
+| Coach router: chat endpoint using Agent 8 | Backend | `routers/coach.py` |
+| Coach history storage in `users.settings` JSONB | Backend | `routers/coach.py` |
+| `POST /api/coach/message` with full context injection | Backend | `routers/coach.py` |
+| `GET /api/coach/history` + `DELETE /api/coach/history` | Backend | `routers/coach.py` |
+| Build `/coach` chat page with suggested prompts | Frontend | `coach/page.tsx` |
+| Proactive insight on first load ("Here's your focus this week") | Frontend | `coach/page.tsx` |
+
+---
+
+### Sprint 4: Aptitude Engine (1 week)
+**Goal**: Pre-generate question bank + build quiz UI
+
+| Task | Type | Files |
+|------|------|-------|
+| Alembic migration: `aptitude_question_bank` + `aptitude_attempts` | DB | `migrations/` |
+| Seed script: LLM-generate 500-1000 questions ONCE | Backend | `scripts/seed_aptitude.py` |
+| Aptitude service (serve from bank + scoring) | Backend | `services/aptitude_service.py` |
+| Aptitude router (`GET /quiz`, `POST /submit`, `GET /analytics`) | Backend | `routers/aptitude.py` |
+| Build `/aptitude` quiz interface | Frontend | `aptitude/page.tsx` |
+| Company prep: extend `/company/[slug]` with aptitude prep tab | Frontend | `company/[slug]/page.tsx` |
+
+---
+
+### Sprint 5: Courses + Resource Hub (1 week)
+**Goal**: Import FCC/TOP + build resource hub
+
+| Task | Type | Files |
+|------|------|-------|
+| Alembic migration: `external_courses` + `user_course_progress` (with `completed_lesson_ids TEXT[]`) | DB | `migrations/` |
+| FCC curriculum importer (GitHub JSON parser) | Backend | `scrapers/fcc_importer.py` |
+| TOP curriculum importer (GitHub markdown parser) | Backend | `scrapers/odin_importer.py` |
+| Courses router + repository + service | Backend | `routers/courses.py` |
+| Build `/courses` page with course grid | Frontend | `courses/page.tsx` |
+| Build `/courses/[id]` with lesson list + redirect buttons | Frontend | `courses/[id]/page.tsx` |
+| Alembic migration: `curated_resources` | DB | `migrations/` |
+| Seed curated resource links (all 16 platforms) | Backend | `scripts/seed_resources.py` |
+| Build `/resources` page | Frontend | `resources/page.tsx` |
+
+---
+
+### Sprint 6: Skills Graph + Trends + Simulator (1.5 weeks)
+**Goal**: Build the analytics and insight pages
+
+| Task | Type | Files |
+|------|------|-------|
+| `GET /api/skills/graph` endpoint (query HelixDB) | Backend | `routers/skills.py` (NEW) |
+| `GET /api/skills/{name}` endpoint | Backend | `routers/skills.py` |
+| Build `/skills` — D3.js force graph with click-to-inspect | Frontend | `skills/page.tsx` |
+| Implement `trends.py` router (Agent 4 data) | Backend | `routers/trends.py` |
+| Build `/trends` — market trend charts with Recharts | Frontend | `trends/page.tsx` |
+| Build `/simulate` — career simulator | Frontend | `simulate/page.tsx` |
+
+**`/simulate` spec**: "What-if" career simulator. User adjusts sliders: "If I solve 50 more LeetCode mediums", "If I learn React", "If I do 2 projects" → recalculates match scores in real-time for their target companies. Shows before/after comparison. Backend: `POST /api/simulate` takes hypothetical deltas, runs scoring engine with modified inputs, returns projected scores. No DB needed — purely computational.
+
+---
+
+### Sprint 7: Visualizer + Patterns (2 weeks) — Nice-to-Have
+**Goal**: Algorithm animations and DSA patterns reference
+
+| Task | Type | Files |
+|------|------|-------|
+| Visualizer page layout + algorithm selector | Frontend | `visualizer/page.tsx` |
+| Array visualizer component (D3.js bars) | Frontend | `components/visualizer/ArrayViz.tsx` |
+| Sorting animations (Bubble, Merge, Quick) — **start with 10 core** | Frontend | `components/visualizer/sorts/` |
+| Search animations (Binary, Linear) | Frontend | `components/visualizer/search/` |
+| Two Pointers + Sliding Window animation | Frontend | `components/visualizer/patterns/` |
+| Tree traversal animations (BFS, DFS) | Frontend | `components/visualizer/trees/` |
+| Playback controls + variable state panel | Frontend | `components/visualizer/Controls.tsx` |
+| Create DSA pattern content (LLM-generated JSON) | Backend | `scripts/generate_patterns.py` |
+| Build `/patterns` page + 16 pattern subpages | Frontend | `patterns/page.tsx` |
+
+---
+
+### Sprint 8: Projects + Cheatsheets + Polish (1.5 weeks)
+**Goal**: Final content pages + sidebar update + polish everything
+
+| Task | Type | Files |
+|------|------|-------|
+| Seed project challenges (from CodingChallenges.fyi) | Backend | `scripts/seed_projects.py` |
+| Build `/projects` page | Frontend | `projects/page.tsx` |
+| Generate cheat sheet content (LLM, store as JSON/MDX) | Backend | `scripts/generate_cheatsheets.py` |
+| Build `/cheatsheets` page + 10 cheat sheet subpages | Frontend | `cheatsheets/page.tsx` |
+| **Update Sidebar** with new nav sections (Learn, Prepare) | Frontend | `components/ui/Sidebar.tsx` |
+| AI Explanations: Agent 9 + explanation service | Backend | `agents/explanation_agent.py`, `services/explanation_service.py` |
+| `POST /api/practice/explain/{id}` endpoint | Backend | `routers/practice.py` |
+| "Explain" button + explanation panel on practice pages | Frontend | `practice/page.tsx`, `practice/[id]/page.tsx` |
+| Polish all pages: loading skeletons, error states, responsive | Frontend | All pages |
+
+---
+
+### Sprint 9: Deployment + Production (1 week)
+**Goal**: Ship it
+
+| Task | Type | Files |
+|------|------|-------|
+| Environment variables for all new services | DevOps | `.env.example` |
+| Update Docker Compose (add seed scripts) | DevOps | `docker-compose.yml` |
+| Vercel deployment (frontend) | DevOps | `vercel.json` |
+| Railway deployment (backend) | DevOps | `railway.toml` |
+| GitHub Actions CI/CD update | DevOps | `.github/workflows/` |
+| Demo video recording | Portfolio | — |
+| README.md update with all features | Docs | `README.md` |
+
+---
+
+## Part 7: Final Feature Summary (Revised)
+
+### What MintKey Becomes — Ordered by Sprint
+
+| Feature | Sprint | Source |
+|---------|--------|--------|
+| 📊 **Dashboard** | ✅ Done | GitHub + LC + CC + HR sync |
+| 🏢 **Company Explorer** | ✅ Done | 19 company blueprints fully enriched |
+| 🎯 **Match Score Report** | 🔧 Sprint 1 | Score breakdown + gap analysis |
+| 🗺️ **Personalized Roadmaps** | 🔧 Sprint 1 | Agent 7 output |
+| 📝 **DSA Practice** (~800 unique problems) | 🔨 Sprint 2 | CSES + NeetCode + Striver's (deduplicated) |
+| 💬 **AI Coach** | 🔨 Sprint 3 | Agent 8 with full user context |
+| 📝 **Aptitude Engine** | 🔨 Sprint 4 | Pre-generated question bank (zero runtime LLM cost) |
+| 📚 **Course Catalog** | 🔨 Sprint 5 | FreeCodeCamp + Odin Project |
+| 📖 **Resource Hub** | 🔨 Sprint 5 | All 16 platforms |
+| 🕸️ **Skill Graph** | 🔨 Sprint 6 | HelixDB + D3.js force graph |
+| 📈 **Market Trends** | 🔨 Sprint 6 | Agent 4 (Trend Watcher) |
+| 🎯 **Career Simulator** | 🔨 Sprint 6 | Custom |
+| 🎬 **Algorithm Visualizer** | 🔨 Sprint 7 | Custom D3.js (10 core first) |
+| 🧩 **DSA Patterns** | 🔨 Sprint 7 | RisingBrain + LLM |
+| 🚀 **Project Challenges** | 🔨 Sprint 8 | CodingChallenges.fyi + Coders Section |
+| 📋 **Cheat Sheets** | 🔨 Sprint 8 | Coders Section + LLM-generated |
+| 🤖 **AI Explanations** | 🔨 Sprint 8 | LLM Agent 9 |
+| 👤 **Profile** | ✅ Done | — |
+| ⚙️ **Settings** | ✅ Done | — |
+| 🔐 **Auth + Onboarding** | ✅ Done | GitHub OAuth |
+
+### Redirect Destinations
+
+| Action | Platform | Link Format |
+|--------|----------|-------------|
+| Solve DSA problem | LeetCode | `leetcode.com/problems/{slug}` |
+| Solve on CodeChef | CodeChef | `codechef.com/problems/{code}` |
+| Practice on HackerRank | HackerRank | `hackerrank.com/domains/{domain}` |
+| Take FCC Course | FreeCodeCamp | `freecodecamp.org/learn/{superblock}` |
+| Take TOP Lesson | Odin Project | `theodinproject.com/lessons/{slug}` |
+| Premium Course | Scaler | `scaler.com/topics/{topic}` |
+
+### Total Scope (Corrected)
+
+- **9 new database tables** (7 migrations, includes `aptitude_question_bank`)
+- **6 new importers/scrapers**
+- **6 new routers** + 2 existing routers enhanced (no phantom `visualizer.py`)
+- **4 new services** (no `visualizer_service.py` — frontend-only)
+- **4 new repositories**
+- **1 new LLM agent** (explanation agent)
+- **13 new frontend pages** (including `/match`, `/skills`, `/cheatsheets`)
+- **10-15 algorithm visualization components** (starting with 10 core, expand later)
+- **~750-800 unique problems seeded** (deduplicated across all lists)
+- **500-1000 aptitude questions pre-generated** (stored in DB, zero runtime cost)
+- **~200+ course entries seeded**
+- **~100+ curated resource links**
+- **16 DSA pattern pages**
+- **10 cheat sheet pages**
+- **9 sprints over ~12 weeks**
+
+---
+
+## Appendix: Review Fixes Applied (v2)
+
+| # | Issue | Fix |
+|---|-------|-----|
+| 1 | `/match/[slug]` buried in Sprint 8 | ✅ Moved to **Sprint 1** — core user journey |
+| 2 | Visualizer in Sprint 4 blocking core features | ✅ Moved to **Sprint 7** — nice-to-have |
+| 3 | `user_course_progress` missing lesson IDs | ✅ Added `completed_lesson_ids TEXT[]` |
+| 4 | Aptitude LLM cost ($15-30/day) | ✅ Pre-generate 500-1000 questions ONCE, serve from DB |
+| 5 | `visualizer.py` router contradicts frontend-only spec | ✅ Removed from routers + services list |
+| 6 | `/cheatsheets` missing from sprint plan | ✅ Added to **Sprint 8** |
+| 7 | Problem count claim "1000+" not accounting for dedup | ✅ Corrected to **~750-800 unique** with dedup note |
+
+### v3 Fixes (from 9.6 → 10)
+
+| # | Issue | Fix |
+|---|-------|-----|
+| 8 | `user_problem_progress` missing `time_spent_sec` + `attempts_count` | ✅ Added both fields — enables difficulty calibration + Agent 9 context |
+| 9 | Sidebar nav mismatch between Part 2 and Part 5 | ✅ Unified — Skill Graph in PREPARE, consistent in both specs |
+| 10 | `generate_explanations.py` no scope limit | ✅ Scoped to **top 200 problems** (NeetCode 150 + CSES top 50), rest is on-demand cached |
+| 11 | `/dsa` dead route not addressed | ✅ Added one-line redirect `/dsa` → `/practice` |
+| 12 | `/simulate` never specced | ✅ Added what-if simulator spec (slider-based, purely computational, no new DB) |
