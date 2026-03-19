@@ -385,10 +385,10 @@ export default function MatchReportPage() {
             </p>
 
             <div className="flex gap-3 flex-wrap mt-5">
-              <button className="flex items-center gap-2 rounded-lg bg-[#10B981] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
+              <Link href={`/roadmap/${slug}`} className="flex items-center gap-2 rounded-lg bg-[#10B981] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
                 <Sparkles className="h-4 w-4" /> Generate Preparation Roadmap
-              </button>
-              <button className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-5 py-2.5 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
+              </Link>
+              <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-5 py-2.5 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
                 <Download className="h-4 w-4" /> Download Report
               </button>
             </div>
@@ -624,7 +624,7 @@ export default function MatchReportPage() {
 
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F3F4F6]">
                   <span className="text-xs text-[#9CA3AF] flex items-center gap-1"><Clock className="h-3 w-3" /> {a.weeks}</span>
-                  <button className="text-sm font-medium text-[#10B981] hover:underline">Start →</button>
+                  <Link href={`/roadmap/${slug}`} className="text-sm font-medium text-[#10B981] hover:underline">Start →</Link>
                 </div>
               </div>
             ))}

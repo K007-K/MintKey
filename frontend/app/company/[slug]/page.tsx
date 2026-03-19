@@ -342,9 +342,9 @@ export default function CompanyDetailPage() {
                 <Link href={`/match/${slug}`} className="flex-1 rounded-lg border border-[#E5E7EB] px-5 py-3 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] active:scale-[0.98] transition-all text-center">
                   Full Report
                 </Link>
-                <button className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#10B981] px-5 py-3 text-sm font-semibold text-white hover:bg-[#059669] active:scale-[0.98] transition-all">
+                <Link href={`/roadmap/${slug}`} className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#10B981] px-5 py-3 text-sm font-semibold text-white hover:bg-[#059669] active:scale-[0.98] transition-all">
                   <Sparkles className="h-4 w-4" /> Roadmap
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -380,8 +380,8 @@ export default function CompanyDetailPage() {
         {activeTab === "Interview Format" && <InterviewFormatTab raw={rawCompany as Record<string, unknown>} name={name} />}
         {activeTab === "Resources" && <ResourcesTab raw={rawCompany as Record<string, unknown>} name={name} />}
         {activeTab === "Reviews" && <ReviewsTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Skill Gap Analysis" && <SkillGapTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Preparation Strategy" && <PreparationStrategyTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Skill Gap Analysis" && <SkillGapTab raw={rawCompany as Record<string, unknown>} name={name} slug={slug} />}
+        {activeTab === "Preparation Strategy" && <PreparationStrategyTab raw={rawCompany as Record<string, unknown>} name={name} slug={slug} />}
       </div>
     </DashboardLayout>
   );
@@ -1089,7 +1089,7 @@ function ResourcesTab({ raw, name }: { raw: Record<string, unknown>; name: strin
                 <div className="flex gap-0.5">{stars(r.rating)}</div>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
               </div>
-              <button className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline">Open Resource →</button>
+              {r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a> : <span className="mt-3 text-sm font-medium text-[#9CA3AF] block">Coming soon</span>}
             </div>
           ))}
         </div>
@@ -1280,7 +1280,7 @@ function ReviewsTab({ raw, name }: { raw: Record<string, unknown>; name: string 
 /* ════════════════════════════════════════════════════════
    TAB 8 — SKILL GAP ANALYSIS
    ════════════════════════════════════════════════════════ */
-function SkillGapTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
   const readiness = [
     { area: "DSA", pct: 75, status: "Good Progress" },
     { area: "System Design", pct: 60, status: "Needs Work" },
@@ -1342,7 +1342,7 @@ function SkillGapTab({ raw, name }: { raw: Record<string, unknown>; name: string
           <div className="flex items-center gap-4 mt-5">
             <span className="text-sm text-[#6B7280]">Composite Score:</span>
             <span className="text-lg font-bold text-[#111827]">67%</span>
-            <button className="ml-auto rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">Generate Roadmap →</button>
+            <Link href={`/roadmap/${slug}`} className="ml-auto rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">Generate Roadmap →</Link>
           </div>
         </div>
 
@@ -1416,7 +1416,7 @@ function SkillGapTab({ raw, name }: { raw: Record<string, unknown>; name: string
 /* ════════════════════════════════════════════════════════
    TAB 9 — PREPARATION STRATEGY
    ════════════════════════════════════════════════════════ */
-function PreparationStrategyTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+function PreparationStrategyTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
   const [activeStep, setActiveStep] = useState(1);
   const steps = [
     { num: 1, title: "Master Dynamic Programming", desc: "Focus on 12 remaining DP problems. Target patterns: Knapsack, LCS, Matrix Chain.", est: "2-3 weeks", cta: "Start →" },
@@ -1511,7 +1511,7 @@ function PreparationStrategyTab({ raw, name }: { raw: Record<string, unknown>; n
           <h3 className="text-lg font-bold text-white">Ready to start your {name} preparation?</h3>
         </div>
         <p className="text-sm text-white/80 mb-5">Get a personalized day-by-day roadmap based on your profile</p>
-        <button className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Generate Full Roadmap →</button>
+        <Link href={`/roadmap/${slug}`} className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Generate Full Roadmap →</Link>
       </div>
     </div>
   );

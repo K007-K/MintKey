@@ -144,7 +144,12 @@ function skillBarColor(p: number) { return p >= 70 ? "#10B981" : p >= 50 ? "#F59
    ═══════════════════════════════════════════════════════ */
 export default function RoadmapPage() {
   const { slug } = useParams<{ slug: string }>();
-  const data = ROADMAP_DATA[slug || "google"] || ROADMAP_DATA.google;
+  const staticData = ROADMAP_DATA[slug || "google"];
+  const data = staticData || ROADMAP_DATA.google;
+
+  // Use actual slug-based name if no static entry exists
+  const companyName = staticData ? data.company.name : (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Company");
+  const companyRole = staticData ? data.company.role : "Software Engineer";
 
   const [activeWeek, setActiveWeek] = useState(4);
   const [simSelected, setSimSelected] = useState<boolean[]>(data.scoreSimulator.map(s => s.selected));
@@ -175,14 +180,14 @@ export default function RoadmapPage() {
         {/* ═══ PAGE HEADER ═══ */}
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[#111827]">My {data.company.name} Roadmap</h1>
-            <p className="text-sm text-[#6B7280]">{data.company.role} · {data.weeksTotal} week plan</p>
+            <h1 className="text-2xl font-bold text-[#111827]">My {companyName} Roadmap</h1>
+            <p className="text-sm text-[#6B7280]">{companyRole} · {data.weeksTotal} week plan</p>
           </div>
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
+            <button onClick={() => alert('Roadmap regeneration will be available once the AI agent pipeline is connected.')} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
               <RefreshCw className="h-4 w-4" /> Regenerate Roadmap
             </button>
-            <button className="flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
+            <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
               <Download className="h-4 w-4" /> Export Plan
             </button>
           </div>

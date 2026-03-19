@@ -204,7 +204,7 @@ export default function CompaniesPage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-0.5">
             <h2 className="text-base font-bold text-[#111827]">Your Target Companies</h2>
-            <button className="text-xs text-[#6B7280] hover:text-[#10B981] transition-colors">Edit targets</button>
+            <button onClick={() => document.getElementById('all-companies')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs text-[#6B7280] hover:text-[#10B981] transition-colors">Edit targets</button>
           </div>
           <p className="text-xs text-[#9CA3AF] mb-3">Companies you&apos;re actively preparing for</p>
 
@@ -261,7 +261,7 @@ export default function CompaniesPage() {
       )}
 
       {/* ── All Companies ── */}
-      <section>
+      <section id="all-companies">
         <div className="flex items-center justify-between mb-0.5">
           <h2 className="text-base font-bold text-[#111827]">All Companies</h2>
           <span className="text-xs text-[#9CA3AF]">Showing <span className="font-bold text-[#374151]">{filteredCompanies.length}</span> companies</span>
