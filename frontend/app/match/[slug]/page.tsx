@@ -20,8 +20,8 @@ import {
 } from "recharts";
 import { useMatchScores, useScoreHistory, useSkillGaps, useCompany } from "@/lib/api";
 
-/* ─── Static match data ─── */
-const MATCH_DATA: Record<string, {
+/* ─── Types ─── */
+type MatchReportData = {
   name: string; role: string; matchScore: number;
   status: "Strong" | "Good" | "Needs Work" | "Critical";
   weeksToReadiness: number; targetScore: number; gapToClose: number;
@@ -40,87 +40,206 @@ const MATCH_DATA: Record<string, {
   targetScoreLine: number;
   whyScore: { strong: string[]; weak: string[] };
   simulator: { scenarios: { label: string; action: string; currentScore: number; newScore: number }[] };
-}> = {
-  google: {
-    name: "Google", role: "Software Development Engineer I (L3)",
-    matchScore: 67, status: "Needs Work", weeksToReadiness: 10,
-    targetScore: 85, gapToClose: 18, problemsToSolve: 87, lastUpdated: "2 hours ago",
-    breakdown: [
-      { component: "DSA", icon: "code", yourScore: 75, target: 90, gap: -15, tooltip: "Data structures & algorithms problem-solving proficiency" },
-      { component: "Projects", icon: "layers", yourScore: 45, target: 85, gap: -40, tooltip: "Quality and depth of portfolio projects" },
-      { component: "Tech Stack", icon: "settings", yourScore: 70, target: 85, gap: -15, tooltip: "Alignment of your tech stack with company requirements" },
-      { component: "Academics", icon: "graduation", yourScore: 80, target: 80, gap: 0, tooltip: "Academic background and GPA alignment" },
-      { component: "Internships", icon: "briefcase", yourScore: 65, target: 85, gap: -20, tooltip: "Relevant work experience and internship quality" },
-      { component: "Consistency", icon: "trending-up", yourScore: 85, target: 90, gap: -5, tooltip: "How regularly you solve problems and commit code" },
-    ],
-    radarData: [
-      { axis: "Projects", user: 45, target: 85 },
-      { axis: "DSA", user: 75, target: 90 },
-      { axis: "Consistency", user: 85, target: 90 },
-      { axis: "Internships", user: 65, target: 85 },
-      { axis: "Academics", user: 80, target: 80 },
-      { axis: "Tech Stack", user: 70, target: 85 },
-    ],
-    dsaAnalysis: {
-      total: { solved: 342, required: 450 },
-      easy: { solved: 156, required: 150 },
-      medium: { solved: 142, required: 200 },
-      hard: { solved: 44, required: 100 },
-      topics: [
-        { name: "Dynamic Programming", solved: 28, required: 60, gap: -32 },
-        { name: "Graphs", solved: 45, required: 65, gap: -20 },
-        { name: "Trees", solved: 52, required: 60, gap: -8 },
-        { name: "Heaps & Priority Queues", solved: 18, required: 40, gap: -22 },
-        { name: "Backtracking", solved: 22, required: 35, gap: -13 },
-        { name: "Sliding Window", solved: 38, required: 40, gap: -2 },
-      ],
-    },
-    topActions: [
-      { title: "Master Dynamic Programming", desc: "Complete 32 DP problems focusing on patterns like Knapsack, LIS, and LCS.", impact: 12, weeks: "3-4 weeks", iconColor: "red", effort: "High", roi: "Very High" },
-      { title: "Build System Design Project", desc: "Create a distributed system project (e.g., URL shortener or chat app).", impact: 10, weeks: "2-3 weeks", iconColor: "amber", effort: "Medium", roi: "High" },
-      { title: "Strengthen Graph Algorithms", desc: "Focus on advanced graph problems: Dijkstra, Bellman-Ford, Floyd-Warshall.", impact: 8, weeks: "2 weeks", iconColor: "blue", effort: "Medium", roi: "High" },
-      { title: "Complete Hard Problems", desc: "Solve 56 more Hard-level problems across all topics to meet target.", impact: 6, weeks: "4-5 weeks", iconColor: "purple", effort: "High", roi: "Medium" },
-      { title: "Mock Interview Practice", desc: "Complete 8 mock interviews focusing on communication and problem-solving.", impact: 5, weeks: "4 weeks", iconColor: "green", effort: "Low", roi: "High" },
-      { title: "Participate in Contests", desc: "Join 6 weekly contests to improve speed and accuracy under pressure.", impact: 4, weeks: "6 weeks", iconColor: "orange", effort: "Low", roi: "Medium" },
-    ],
-    scoreHistory: [
-      { month: "Jan", score: 42, projected: null },
-      { month: "Feb", score: 45, projected: null },
-      { month: "Mar", score: 48, projected: null },
-      { month: "Apr", score: 52, projected: null },
-      { month: "May", score: 55, projected: null },
-      { month: "Jun", score: 60, projected: null },
-      { month: "Jul", score: 63, projected: null },
-      { month: "Aug", score: 65, projected: null },
-      { month: "Sep", score: 65, projected: 65 },
-      { month: "Oct", score: null, projected: 68 },
-      { month: "Nov", score: null, projected: 73 },
-      { month: "Dec", score: null, projected: 78 },
-    ],
-    targetScoreLine: 85,
-    whyScore: {
-      strong: [
-        "Academics meet the expected benchmark for Google L3",
-        "Coding consistency is strong — regular commits and problem-solving",
-        "DSA fundamentals are above average for Easy & Medium problems",
-      ],
-      weak: [
-        "Project depth significantly below industry expectation (45% vs 85%)",
-        "Hard problem count critically lower than target (44/100)",
-        "Limited system design exposure — needs immediate attention",
-        "Internship experience gap — fewer relevant tech internships",
-      ],
-    },
-    simulator: {
-      scenarios: [
-        { label: "Solve 50 more DSA problems", action: "50 more problems", currentScore: 67, newScore: 74 },
-        { label: "Build 1 backend project", action: "1 backend project", currentScore: 67, newScore: 78 },
-        { label: "Complete 20 Hard problems", action: "20 Hard problems", currentScore: 67, newScore: 72 },
-        { label: "Do all 3 actions above", action: "all 3 combined", currentScore: 67, newScore: 85 },
-      ],
-    },
-  },
 };
+
+/* ─── Weight key → display label / icon mapping ─── */
+const WEIGHT_MAP: Record<string, { label: string; icon: string; tooltip: string; targetPct: number }> = {
+  dsa_score:            { label: "DSA",          icon: "code",        tooltip: "Data structures & algorithms proficiency",       targetPct: 90 },
+  project_score:        { label: "Projects",     icon: "layers",      tooltip: "Quality and depth of portfolio projects",        targetPct: 85 },
+  system_design_score:  { label: "System Design",icon: "settings",    tooltip: "System design knowledge and practical experience",targetPct: 85 },
+  stack_alignment:      { label: "Tech Stack",   icon: "settings",    tooltip: "Alignment of your tech stack with company needs", targetPct: 85 },
+  academic_score:       { label: "Academics",    icon: "graduation",  tooltip: "Academic background and GPA alignment",          targetPct: 80 },
+  internship_score:     { label: "Internships",  icon: "briefcase",   tooltip: "Relevant work experience quality",               targetPct: 85 },
+  consistency_index:    { label: "Consistency",  icon: "trending-up", tooltip: "Regular problem-solving and code commits",       targetPct: 90 },
+};
+
+const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
+
+/* ─── Build match report from real company data ─── */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildMatchReport(company: Record<string, any> | null, userScores: any[] | null, slug: string): MatchReportData {
+  // Company data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hiring = (company?.hiring_data || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (company?.dsa_requirements || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const weights = (company?.scoring_weights || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (company?.system_design || {}) as any;
+
+  const companyName = (company?.name as string) || (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Company");
+  const roles = hiring.roles || [];
+  const role = roles[0] || "Software Engineer";
+
+  // Total required problems from DSA config
+  const minProblems = dsa.minimum_problems || {};
+  const totalRequired = minProblems.total || 300;
+  const diffDist = dsa.difficulty_distribution || {};
+
+  // Score from user data (if available)
+  let matchScore = 0;
+  let statusLabel: MatchReportData["status"] = "Needs Work";
+  let weeksAway = 12;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let componentScores: Record<string, number> = {};
+  let hasRealScores = false;
+
+  if (userScores && Array.isArray(userScores)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const match = userScores.find((s: any) => s.company_slug === slug);
+    if (match) {
+      hasRealScores = true;
+      matchScore = Math.round(match.overall_score || 0);
+      statusLabel = match.status_label || (matchScore >= 85 ? "Strong" : matchScore >= 70 ? "Good" : matchScore >= 50 ? "Needs Work" : "Critical");
+      weeksAway = match.weeks_away ?? Math.max(2, Math.round((85 - matchScore) / 3));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bd = (match.breakdown as any) || {};
+      componentScores = bd.component_scores || {};
+    }
+  }
+
+  // Build component breakdown from scoring_weights
+  const weightEntries = Object.entries(weights).filter(([k]) => WEIGHT_MAP[k]);
+  const breakdown = weightEntries.map(([key, weightVal]) => {
+    const w = WEIGHT_MAP[key];
+    const weight = Number(weightVal) || 0;
+    const userScore = hasRealScores ? Math.round(componentScores[key] || 0) : 0;
+    // Target proportional to how important this component is
+    const target = w.targetPct;
+    return {
+      component: w.label,
+      icon: w.icon,
+      yourScore: userScore,
+      target,
+      gap: userScore - target,
+      tooltip: `${w.tooltip} (weight: ${Math.round(weight * 100)}%)`,
+    };
+  });
+
+  // If no scoring_weights in DB, provide defaults
+  if (breakdown.length === 0) {
+    const defaults = [
+      { component: "DSA", icon: "code", yourScore: 0, target: 90, gap: -90, tooltip: "Data structures & algorithms" },
+      { component: "Projects", icon: "layers", yourScore: 0, target: 85, gap: -85, tooltip: "Portfolio project quality" },
+      { component: "Tech Stack", icon: "settings", yourScore: 0, target: 85, gap: -85, tooltip: "Tech stack alignment" },
+      { component: "Academics", icon: "graduation", yourScore: 0, target: 80, gap: -80, tooltip: "Academic background" },
+      { component: "Internships", icon: "briefcase", yourScore: 0, target: 85, gap: -85, tooltip: "Work experience" },
+      { component: "Consistency", icon: "trending-up", yourScore: 0, target: 90, gap: -90, tooltip: "Coding consistency" },
+    ];
+    breakdown.push(...defaults);
+  }
+
+  // Radar data from breakdown
+  const radarData = breakdown.map((b) => ({ axis: b.component, user: b.yourScore, target: b.target }));
+
+  // DSA Analysis: build from dsa_requirements topic_targets
+  const topicTargets = dsa.topic_targets || {};
+  const topics = Object.entries(topicTargets).map(([key, val]) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const t = val as any;
+    const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+    const required = t.recommended || t.minimum || 30;
+    const solved = 0; // No user progress data yet
+    return { name: label, solved, required, gap: solved - required };
+  }).sort((a, b) => a.gap - b.gap).slice(0, 8);
+
+  // Difficulty breakdown
+  const easyPct = diffDist.easy_pct || 30;
+  const medPct = diffDist.medium_pct || 50;
+  const hardPct = diffDist.hard_pct || 20;
+  const easyReq = Math.round(totalRequired * easyPct / 100);
+  const medReq = Math.round(totalRequired * medPct / 100);
+  const hardReq = Math.round(totalRequired * hardPct / 100);
+
+  const dsaAnalysis = {
+    total: { solved: 0, required: totalRequired },
+    easy: { solved: 0, required: easyReq },
+    medium: { solved: 0, required: medReq },
+    hard: { solved: 0, required: hardReq },
+    topics,
+  };
+
+  // Top Actions: derived from scoring weights — prioritize highest weight components
+  const sortedWeights = weightEntries
+    .map(([key, w]) => ({ key, label: WEIGHT_MAP[key]?.label || key, weight: Number(w) || 0 }))
+    .sort((a, b) => b.weight - a.weight);
+
+  const actionTemplates: Record<string, { title: string; desc: string; weeks: string; effort: "Low" | "Medium" | "High"; roi: "Low" | "Medium" | "High" | "Very High" }> = {
+    dsa_score: { title: "Master DSA Fundamentals", desc: `Solve ${totalRequired} problems focusing on company-specific patterns.`, weeks: "4-6 weeks", effort: "High", roi: "Very High" },
+    project_score: { title: "Build Portfolio Projects", desc: "Create production-quality projects demonstrating system design skills.", weeks: "3-4 weeks", effort: "Medium", roi: "High" },
+    system_design_score: { title: "Learn System Design", desc: `Study ${(sysDesign.must_know_designs || []).slice(0, 3).join(", ") || "distributed systems"}.`, weeks: "2-3 weeks", effort: "Medium", roi: "High" },
+    stack_alignment: { title: "Align Tech Stack", desc: "Build projects using company's preferred technologies.", weeks: "2-3 weeks", effort: "Medium", roi: "Medium" },
+    academic_score: { title: "Strengthen Fundamentals", desc: "Review CS fundamentals: OS, DBMS, Networking concepts.", weeks: "1-2 weeks", effort: "Low", roi: "Medium" },
+    internship_score: { title: "Gain Experience", desc: "Seek internships or contribute to open-source projects.", weeks: "4-8 weeks", effort: "High", roi: "High" },
+    consistency_index: { title: "Build Consistency", desc: "Maintain daily solving streaks and regular GitHub commits.", weeks: "Ongoing", effort: "Low", roi: "High" },
+  };
+
+  const topActions = sortedWeights.slice(0, 6).map((sw, i) => {
+    const tmpl = actionTemplates[sw.key] || { title: `Improve ${sw.label}`, desc: `Focus on improving your ${sw.label.toLowerCase()} score.`, weeks: "2-4 weeks", effort: "Medium" as const, roi: "Medium" as const };
+    const impact = Math.round(sw.weight * 20);
+    return {
+      ...tmpl,
+      impact,
+      iconColor: ACTION_COLORS[i % ACTION_COLORS.length],
+    };
+  });
+
+  // Why Score: build from breakdown
+  const strongAreas = breakdown.filter(b => b.yourScore >= b.target || b.gap >= -5).map(b => 
+    hasRealScores ? `${b.component} meets the expected benchmark for ${companyName}` : `${b.component} target: ${b.target}% (${Math.round(Number(weights[Object.keys(WEIGHT_MAP).find(k => WEIGHT_MAP[k].label === b.component) || ""] || 0) * 100)}% weight)`
+  );
+  const weakAreas = breakdown.filter(b => b.gap < -5).map(b => 
+    hasRealScores ? `${b.component} gap: ${b.yourScore}% vs ${b.target}% target (${Math.abs(b.gap)}% behind)` : `${b.component} requires ${b.target}% — needs focused preparation`
+  );
+
+  // Score Simulator: based on actual scoring weights
+  const simScenarios = sortedWeights.slice(0, 3).map((sw) => {
+    const boost = Math.round(sw.weight * 15);
+    return {
+      label: `Improve ${sw.label} by 15%`,
+      action: `+15% ${sw.label}`,
+      currentScore: matchScore,
+      newScore: Math.min(100, matchScore + boost),
+    };
+  });
+  // Add combined scenario
+  const totalBoost = simScenarios.reduce((sum, s) => sum + (s.newScore - s.currentScore), 0);
+  simScenarios.push({
+    label: "Do all 3 actions above",
+    action: "all 3 combined",
+    currentScore: matchScore,
+    newScore: Math.min(100, matchScore + totalBoost),
+  });
+
+  // Quick stats
+  const targetScore = 85;
+  const gapToClose = Math.max(0, targetScore - matchScore);
+  const problemsToSolve = totalRequired;
+
+  return {
+    name: companyName,
+    role,
+    matchScore,
+    status: statusLabel,
+    weeksToReadiness: weeksAway,
+    targetScore,
+    gapToClose,
+    problemsToSolve,
+    lastUpdated: hasRealScores ? "Just now" : "Not analyzed yet",
+    breakdown,
+    radarData,
+    dsaAnalysis,
+    topActions,
+    scoreHistory: [], // Populated separately from history API
+    targetScoreLine: targetScore,
+    whyScore: {
+      strong: strongAreas.length > 0 ? strongAreas : ["Run analysis to see your strengths"],
+      weak: weakAreas.length > 0 ? weakAreas : ["Run analysis to identify gaps"],
+    },
+    simulator: { scenarios: simScenarios },
+  };
+}
 
 /* ─── Icon helpers ─── */
 function ComponentIcon({ type }: { type: string }) {
@@ -218,74 +337,25 @@ export default function MatchReportPage() {
   const { data: rawGaps } = useSkillGaps(slug || "");
   const { data: rawCompany } = useCompany(slug || "");
 
-  // Build page data: merge real API data with static fallback
-  const data = useMemo(() => {
-    const fallback = MATCH_DATA[slug || "google"] || MATCH_DATA.google;
+  // Build page data from company API + user scores
+  const data = useMemo((): MatchReportData => {
+    const report = buildMatchReport(
+      rawCompany as Record<string, unknown> | null,
+      rawScores as unknown[] | null,
+      slug || ""
+    );
 
-    // Get real match score for this company
-    let matchScore = fallback.matchScore;
-    let breakdown = fallback.breakdown;
-    let statusLabel = fallback.status;
-    let weeksAway = fallback.weeksToReadiness;
-    if (rawScores && Array.isArray(rawScores)) {
-      const match = (rawScores as { company_slug: string; overall_score: number; breakdown?: Record<string, unknown>; status_label?: string; weeks_away?: number }[])
-        .find((s) => s.company_slug === slug);
-      if (match) {
-        matchScore = Math.round(match.overall_score);
-        statusLabel = (match.status_label as typeof fallback.status) || fallback.status;
-        weeksAway = match.weeks_away ?? fallback.weeksToReadiness;
-        // Build breakdown from component_scores if available
-        const bd = match.breakdown as { component_scores?: Record<string, number>; weights?: Record<string, number> } | null;
-        if (bd?.component_scores) {
-          const cs = bd.component_scores;
-          breakdown = [
-            { component: "DSA", icon: "code", yourScore: Math.round(cs.dsa_score ?? 0), target: 90, gap: Math.round((cs.dsa_score ?? 0) - 90), tooltip: "Data structures & algorithms" },
-            { component: "Projects", icon: "layers", yourScore: Math.round(cs.project_score ?? 0), target: 85, gap: Math.round((cs.project_score ?? 0) - 85), tooltip: "Portfolio project quality" },
-            { component: "Tech Stack", icon: "settings", yourScore: Math.round(cs.tech_stack_score ?? 0), target: 85, gap: Math.round((cs.tech_stack_score ?? 0) - 85), tooltip: "Tech stack alignment" },
-            { component: "Academics", icon: "graduation", yourScore: Math.round(cs.academic_score ?? 0), target: 80, gap: Math.round((cs.academic_score ?? 0) - 80), tooltip: "Academic background" },
-            { component: "Internships", icon: "briefcase", yourScore: Math.round(cs.internship_score ?? 0), target: 85, gap: Math.round((cs.internship_score ?? 0) - 85), tooltip: "Work experience" },
-            { component: "Consistency", icon: "trending-up", yourScore: Math.round(cs.consistency_score ?? 0), target: 90, gap: Math.round((cs.consistency_score ?? 0) - 90), tooltip: "Coding consistency" },
-          ];
-        }
-      }
-    }
-
-    // Build score history from real data or fallback
-    let scoreHistory = fallback.scoreHistory;
+    // Build score history from real data or leave empty
     if (rawHistory && Array.isArray(rawHistory) && rawHistory.length > 0) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h, i) => ({
+      report.scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h: { overall_score: number; computed_at: string }, i: number) => ({
         month: months[new Date(h.computed_at).getMonth()] || `M${i}`,
         score: Math.round(h.overall_score),
         projected: null,
       }));
     }
 
-    // Get company name from real data
-    const companyName = (rawCompany as Record<string, unknown>)?.name as string || fallback.name;
-    const role = (((rawCompany as Record<string, unknown>)?.hiring_data as Record<string, unknown>)?.roles as string[] | undefined)?.[0] || fallback.role;
-
-    // Build radar from breakdown
-    const radarData = breakdown.map((b) => ({
-      axis: b.component,
-      user: b.yourScore,
-      target: b.target,
-    }));
-
-    return {
-      ...fallback,
-      name: companyName,
-      role,
-      matchScore,
-      status: statusLabel,
-      weeksToReadiness: weeksAway,
-      targetScore: 85,
-      gapToClose: Math.max(0, 85 - matchScore),
-      breakdown,
-      radarData,
-      scoreHistory,
-      lastUpdated: rawScores ? "Just now" : fallback.lastUpdated,
-    };
+    return report;
   }, [slug, rawScores, rawHistory, rawGaps, rawCompany]);
 
   const [timeFilter, setTimeFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");

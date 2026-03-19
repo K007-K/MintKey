@@ -16,8 +16,10 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-/* ═══ STATIC DATA ═══ */
-const ROADMAP_DATA: Record<string, {
+import { useCompany } from "@/lib/api";
+
+/* ═══ Types for roadmap data ═══ */
+type RoadmapPageData = {
   company: { slug: string; name: string; role: string };
   currentScore: number; targetScore: number; weeksTotal: number; weeksCompleted: number;
   progressPercent: number; streak: number; lastSolved: string; problemsThisWeek: number;
@@ -42,79 +44,236 @@ const ROADMAP_DATA: Record<string, {
     skillProgress: { skill: string; progress: number }[];
   };
   nextActions: { title: string; desc: string; impact: number; duration: string; iconColor: string }[];
-}> = {
-  google: {
-    company: { slug: "google", name: "Google", role: "Software Engineer I" },
-    currentScore: 67, targetScore: 85, weeksTotal: 10, weeksCompleted: 3,
-    progressPercent: 35, streak: 14, lastSolved: "Today", problemsThisWeek: 18,
-    phases: [
-      { id: 1, name: "Foundation", weeks: "1-3", status: "complete", progress: 100 },
-      { id: 2, name: "Core DSA", weeks: "4-8", status: "active", progress: 60 },
-      { id: 3, name: "Projects", weeks: "9-12", status: "locked", progress: 0 },
-      { id: 4, name: "Final Prep", weeks: "13-17", status: "locked", progress: 0 },
-    ],
-    weeks: [
-      { number: 1, theme: "Arrays & Two Pointers", hoursPerDay: 4, progressPercent: 100, dsaProblems: [{ id: 1, name: "Arrays Basics", count: 5, difficulty: "Easy", status: "done" }, { id: 2, name: "Two Pointers", count: 5, difficulty: "Easy", status: "done" }, { id: 3, name: "Sliding Window", count: 5, difficulty: "Medium", status: "done" }], dailyPlan: [{ day: "Monday", task: "Solve 5 Array basics problems", isToday: false }, { day: "Tuesday", task: "Two Pointers pattern practice", isToday: false }, { day: "Wednesday", task: "Sliding Window problems", isToday: false }, { day: "Thursday", task: "Mixed practice session", isToday: false }, { day: "Friday", task: "Review and revise weak areas", isToday: false }, { day: "Saturday", task: "Mock test — Arrays", isToday: false }, { day: "Sunday", task: "Rest & light review", isToday: false }], resources: [{ type: "video", name: "NeetCode Arrays Playlist", url: "#" }, { type: "link", name: "LeetCode Arrays Tag", url: "#" }, { type: "doc", name: "Two Pointers Cheatsheet", url: "#" }], projectTask: { name: "Set up GitHub repo with README", impact: 2, effort: "Low", hours: 2 }, milestone: "Complete Foundation Week 1" },
-      { number: 2, theme: "Linked Lists & Stacks", hoursPerDay: 4, progressPercent: 100, dsaProblems: [{ id: 1, name: "Linked Lists", count: 5, difficulty: "Medium", status: "done" }, { id: 2, name: "Stack & Queue", count: 5, difficulty: "Medium", status: "done" }, { id: 3, name: "Monotonic Stack", count: 3, difficulty: "Medium", status: "done" }], dailyPlan: [{ day: "Monday", task: "Linked List reversal patterns", isToday: false }, { day: "Tuesday", task: "Stack-based problems", isToday: false }, { day: "Wednesday", task: "Queue and Deque patterns", isToday: false }, { day: "Thursday", task: "Monotonic Stack problems", isToday: false }, { day: "Friday", task: "Mixed linked list + stack", isToday: false }, { day: "Saturday", task: "Mock test — Stacks", isToday: false }, { day: "Sunday", task: "Rest & light review", isToday: false }], resources: [{ type: "video", name: "NeetCode Stacks Playlist", url: "#" }, { type: "link", name: "LeetCode Stack Tag", url: "#" }, { type: "doc", name: "Stack Patterns Guide", url: "#" }], projectTask: { name: "Implement stack-based feature", impact: 2, effort: "Low", hours: 3 }, milestone: "Complete Foundation Week 2" },
-      { number: 3, theme: "Trees & Binary Search", hoursPerDay: 4, progressPercent: 100, dsaProblems: [{ id: 1, name: "Binary Trees", count: 5, difficulty: "Medium", status: "done" }, { id: 2, name: "BST Operations", count: 5, difficulty: "Medium", status: "done" }, { id: 3, name: "Binary Search", count: 5, difficulty: "Medium", status: "done" }], dailyPlan: [{ day: "Monday", task: "Binary Tree traversals", isToday: false }, { day: "Tuesday", task: "BST insert/delete/search", isToday: false }, { day: "Wednesday", task: "Binary Search variations", isToday: false }, { day: "Thursday", task: "Tree DFS/BFS problems", isToday: false }, { day: "Friday", task: "Mixed tree problems", isToday: false }, { day: "Saturday", task: "Mock test — Trees", isToday: false }, { day: "Sunday", task: "Rest & light review", isToday: false }], resources: [{ type: "video", name: "NeetCode Trees Playlist", url: "#" }, { type: "link", name: "LeetCode Trees Tag", url: "#" }, { type: "doc", name: "Tree Patterns Guide", url: "#" }], projectTask: { name: "Add tree-based data structure", impact: 3, effort: "Medium", hours: 4 }, milestone: "Complete Foundation Phase" },
-      { number: 4, theme: "Dynamic Programming Foundation", hoursPerDay: 5, progressPercent: 40, dsaProblems: [{ id: 1, name: "Graph BFS/DFS", count: 5, difficulty: "Medium", status: "done" }, { id: 2, name: "DP 1D Patterns", count: 5, difficulty: "Medium", status: "today" }, { id: 3, name: "DP Knapsack", count: 5, difficulty: "Medium", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Solve 5 DP 1D Pattern problems on LeetCode", isToday: true }, { day: "Tuesday", task: "Solve 5 DP 1D Pattern problems (continued)", isToday: false }, { day: "Wednesday", task: "Study DP Knapsack patterns — Aditya Verma playlist", isToday: false }, { day: "Thursday", task: "Solve 5 DP Knapsack problems on LeetCode", isToday: false }, { day: "Friday", task: "Implement DP solution — add to GitHub project", isToday: false }, { day: "Saturday", task: "Mock interview — 1 DSA problem timed (45 min)", isToday: false }, { day: "Sunday", task: "Review weak problems + update DSA tracker", isToday: false }], resources: [{ type: "video", name: "Aditya Verma DP Playlist", url: "#" }, { type: "link", name: "LeetCode DP Tag", url: "#" }, { type: "doc", name: "CSES DP Section", url: "#" }], projectTask: { name: "Add Redis caching layer to your backend project", impact: 4, effort: "Medium", hours: 6 }, milestone: "Complete all Week 4 tasks to unlock Phase 3" },
-      { number: 5, theme: "DP Advanced Patterns", hoursPerDay: 5, progressPercent: 0, dsaProblems: [{ id: 1, name: "DP on Grids", count: 5, difficulty: "Medium", status: "upcoming" }, { id: 2, name: "DP on Strings", count: 5, difficulty: "Hard", status: "upcoming" }, { id: 3, name: "DP Optimization", count: 5, difficulty: "Hard", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Grid DP problems", isToday: false }, { day: "Tuesday", task: "String DP — LCS, Edit Distance", isToday: false }, { day: "Wednesday", task: "Matrix Chain Multiplication", isToday: false }, { day: "Thursday", task: "DP bitmask problems", isToday: false }, { day: "Friday", task: "Project work — API endpoints", isToday: false }, { day: "Saturday", task: "Mock interview", isToday: false }, { day: "Sunday", task: "Review + tracker update", isToday: false }], resources: [{ type: "video", name: "Striver DP Series", url: "#" }, { type: "link", name: "LeetCode DP Hard", url: "#" }, { type: "doc", name: "DP Patterns Cheatsheet", url: "#" }], projectTask: { name: "Build REST API endpoints", impact: 5, effort: "Medium", hours: 8 }, milestone: "Complete DP Advanced module" },
-      { number: 6, theme: "Graph Algorithms", hoursPerDay: 5, progressPercent: 0, dsaProblems: [{ id: 1, name: "Dijkstra's Algorithm", count: 3, difficulty: "Hard", status: "upcoming" }, { id: 2, name: "Union Find", count: 4, difficulty: "Medium", status: "upcoming" }, { id: 3, name: "Topological Sort", count: 3, difficulty: "Medium", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Dijkstra's shortest path", isToday: false }, { day: "Tuesday", task: "Bellman-Ford algorithm", isToday: false }, { day: "Wednesday", task: "Union-Find problems", isToday: false }, { day: "Thursday", task: "Topological sort problems", isToday: false }, { day: "Friday", task: "Project — database integration", isToday: false }, { day: "Saturday", task: "Mock interview", isToday: false }, { day: "Sunday", task: "Review + tracker update", isToday: false }], resources: [{ type: "video", name: "William Fiset Graphs", url: "#" }, { type: "link", name: "LeetCode Graph Tag", url: "#" }, { type: "doc", name: "Graph Algorithms Guide", url: "#" }], projectTask: { name: "Add database layer to project", impact: 4, effort: "High", hours: 10 }, milestone: "Complete Graph module" },
-      { number: 7, theme: "Heaps & Greedy", hoursPerDay: 5, progressPercent: 0, dsaProblems: [{ id: 1, name: "Heap Problems", count: 5, difficulty: "Medium", status: "upcoming" }, { id: 2, name: "Greedy Algorithms", count: 5, difficulty: "Medium", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Priority Queue basics", isToday: false }, { day: "Tuesday", task: "K-way merge problems", isToday: false }, { day: "Wednesday", task: "Greedy interval problems", isToday: false }, { day: "Thursday", task: "Activity selection & scheduling", isToday: false }, { day: "Friday", task: "Project work", isToday: false }, { day: "Saturday", task: "Mock interview", isToday: false }, { day: "Sunday", task: "Review", isToday: false }], resources: [{ type: "video", name: "Heap Playlist", url: "#" }, { type: "link", name: "LeetCode Heap Tag", url: "#" }, { type: "doc", name: "Greedy Patterns", url: "#" }], projectTask: { name: "Implement priority queue feature", impact: 3, effort: "Medium", hours: 5 }, milestone: "Complete Heap & Greedy modules" },
-      { number: 8, theme: "Backtracking & Recursion", hoursPerDay: 5, progressPercent: 0, dsaProblems: [{ id: 1, name: "Backtracking Basics", count: 5, difficulty: "Medium", status: "upcoming" }, { id: 2, name: "Advanced Recursion", count: 5, difficulty: "Hard", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Subsets, Permutations", isToday: false }, { day: "Tuesday", task: "N-Queens, Sudoku Solver", isToday: false }, { day: "Wednesday", task: "Word Search, Combination Sum", isToday: false }, { day: "Thursday", task: "Advanced backtracking", isToday: false }, { day: "Friday", task: "Project — testing & docs", isToday: false }, { day: "Saturday", task: "Full mock interview", isToday: false }, { day: "Sunday", task: "Phase 2 comprehensive review", isToday: false }], resources: [{ type: "video", name: "Backtracking Masterclass", url: "#" }, { type: "link", name: "LeetCode Backtracking", url: "#" }, { type: "doc", name: "Recursion Tree Method", url: "#" }], projectTask: { name: "Deploy project to Railway", impact: 5, effort: "Medium", hours: 4 }, milestone: "Complete Core DSA Phase" },
-      { number: 9, theme: "System Design Basics", hoursPerDay: 5, progressPercent: 0, dsaProblems: [{ id: 1, name: "Design Patterns", count: 3, difficulty: "Medium", status: "upcoming" }, { id: 2, name: "System Components", count: 3, difficulty: "Medium", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Load balancers & proxies", isToday: false }, { day: "Tuesday", task: "Database sharding & replication", isToday: false }, { day: "Wednesday", task: "Caching strategies", isToday: false }, { day: "Thursday", task: "Message queues", isToday: false }, { day: "Friday", task: "Design URL shortener", isToday: false }, { day: "Saturday", task: "Mock system design", isToday: false }, { day: "Sunday", task: "Review", isToday: false }], resources: [{ type: "video", name: "System Design Primer", url: "#" }, { type: "link", name: "Grokking System Design", url: "#" }, { type: "doc", name: "System Design Template", url: "#" }], projectTask: { name: "Build URL shortener project", impact: 8, effort: "High", hours: 15 }, milestone: "Complete System Design basics" },
-      { number: 10, theme: "Final Review & Mock Interviews", hoursPerDay: 6, progressPercent: 0, dsaProblems: [{ id: 1, name: "Mixed Hard Problems", count: 10, difficulty: "Hard", status: "upcoming" }, { id: 2, name: "Timed Practice", count: 5, difficulty: "Medium", status: "upcoming" }], dailyPlan: [{ day: "Monday", task: "Full-length mock interview", isToday: false }, { day: "Tuesday", task: "Weak area revision", isToday: false }, { day: "Wednesday", task: "System design practice", isToday: false }, { day: "Thursday", task: "Behavioral prep", isToday: false }, { day: "Friday", task: "Final mock interview", isToday: false }, { day: "Saturday", task: "Light review only", isToday: false }, { day: "Sunday", task: "Rest before interviews", isToday: false }], resources: [{ type: "video", name: "Google Interview Tips", url: "#" }, { type: "link", name: "Pramp Mock Interviews", url: "#" }, { type: "doc", name: "Interview Day Checklist", url: "#" }], projectTask: { name: "Polish portfolio & update resume", impact: 5, effort: "Low", hours: 4 }, milestone: "Ready for Google interviews!" },
-    ],
-    scoreSimulator: [
-      { task: "Master Dynamic Programming", impact: 12, selected: true },
-      { task: "Build Backend Project", impact: 10, selected: true },
-      { task: "System Design Basics", impact: 7, selected: false },
-      { task: "Mock Interviews", impact: 6, selected: false },
-      { task: "Graph Algorithms", impact: 8, selected: false },
-      { task: "Participate in Contests", impact: 4, selected: false },
-    ],
-    taskBoard: {
-      todo: [
-        { title: "Master Dynamic Programming", impact: 12, effort: "High", difficulty: "Hard", duration: "3 weeks", iconColor: "red" },
-        { title: "Build Backend Project", impact: 10, effort: "High", difficulty: "Hard", duration: "2 weeks", iconColor: "amber" },
-        { title: "Graph Algorithms", impact: 8, effort: "Medium", difficulty: "Medium", duration: "2 weeks", iconColor: "blue" },
-        { title: "System Design Basics", impact: 7, effort: "Medium", difficulty: "Medium", duration: "3 weeks", iconColor: "purple" },
-        { title: "Mock Interviews", impact: 6, effort: "Medium", difficulty: "Medium", duration: "4 weeks", iconColor: "green" },
-      ],
-      inProgress: [
-        { title: "DP 1D Problems", impact: 6, progress: 40, difficulty: "Medium", duration: "1 week" },
-        { title: "REST API Project", impact: 5, progress: 70, difficulty: "Medium", duration: "ongoing" },
-        { title: "Binary Search Practice", impact: 4, progress: 55, difficulty: "Medium", duration: "1 week" },
-      ],
-      done: ["Graph BFS/DFS", "Arrays & Strings", "Two Pointers", "Linked Lists", "Stack & Queue"],
-    },
-    charts: {
-      scoreHistory: [
-        { month: "Jan", score: 42, projected: null }, { month: "Feb", score: 45, projected: null },
-        { month: "Mar", score: 48, projected: null }, { month: "Apr", score: 52, projected: null },
-        { month: "May", score: 55, projected: null }, { month: "Jun", score: 60, projected: null },
-        { month: "Jul", score: 63, projected: null }, { month: "Aug", score: 65, projected: null },
-        { month: "Sep", score: 67, projected: 67 }, { month: "Oct", score: null, projected: 70 },
-        { month: "Nov", score: null, projected: 74 }, { month: "Dec", score: null, projected: 78 },
-      ],
-      problemsPerWeek: [
-        { week: "W1", count: 25 }, { week: "W2", count: 28 }, { week: "W3", count: 32 }, { week: "W4", count: 22 },
-        { week: "W5", count: 30 }, { week: "W6", count: 27 }, { week: "W7", count: 34 }, { week: "W8", count: 32 },
-      ],
-      skillProgress: [
-        { skill: "Dynamic Programming", progress: 55 },
-        { skill: "Graph Algorithms", progress: 80 },
-        { skill: "System Design", progress: 30 },
-        { skill: "Projects", progress: 35 },
-      ],
-    },
-    nextActions: [
-      { title: "Master Dynamic Programming", desc: "Focus on DP patterns and solve 32 problems (Knapsack, LCS, Matrix Chain).", impact: 12, duration: "3 weeks", iconColor: "red" },
-      { title: "System Design Project", desc: "Build a distributed backend system like URL shortener or key-value store.", impact: 10, duration: "2 weeks", iconColor: "amber" },
-      { title: "Mock Interviews", desc: "Complete 8 mock interview sessions focusing on communication and problem-solving.", impact: 6, duration: "4 weeks", iconColor: "blue" },
-    ],
-  },
 };
+
+const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/* ─── Build roadmap from company API data ─── */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildRoadmapData(company: Record<string, any> | null, slug: string): RoadmapPageData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hiring = (company?.hiring_data || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (company?.dsa_requirements || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const weights = (company?.scoring_weights || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (company?.system_design || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resources = (company?.resources || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const behavioral = (company?.behavioral || {}) as any;
+
+  const companyName = (company?.name as string) || (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Company");
+  const role = (hiring.roles || [])[0] || "Software Engineer";
+
+  // Extract DSA topics sorted by frequency (most important first)
+  const topicTargets = dsa.topic_targets || {};
+  const topicEntries = Object.entries(topicTargets)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map(([key, val]: [string, any]) => ({
+      key,
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+      frequency: val.frequency_pct || 50,
+      minimum: val.minimum || 20,
+      recommended: val.recommended || 30,
+    }))
+    .sort((a, b) => b.frequency - a.frequency);
+
+  const totalRequired = (dsa.minimum_problems?.total) || 300;
+
+  // Real resources from company data
+  const dsaResources = (resources.dsa || []).slice(0, 3);
+  const sdResources = (resources.system_design || []).slice(0, 3);
+  const behResources = (resources.behavioral || []).slice(0, 3);
+  const platforms = (resources.platforms || []).slice(0, 3);
+
+  // Build resources for a given section
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function mapResources(resList: any[], fallbackType: "video" | "link" | "doc"): { type: "video" | "link" | "doc"; name: string; url: string }[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return resList.map((r: any) => ({
+      type: (r.url?.includes("youtube") || r.url?.includes("video")) ? "video" as const : r.url?.includes("leetcode") ? "link" as const : fallbackType,
+      name: r.name || "Resource",
+      url: r.url || "#",
+    }));
+  }
+
+  // System design must-knows
+  const mustKnowDesigns = sysDesign.must_know_designs || [];
+  const sdRequired = sysDesign.required_at_sde1 || false;
+
+  // Calculate weeks based on DSA weight
+  const dsaWeight = Number(weights.dsa_score || 0.3);
+  const projWeight = Number(weights.project_score || 0.15);
+  const sdWeight = Number(weights.system_design_score || 0.1);
+  const totalWeeks = Math.max(8, Math.round(totalRequired / 30)); // ~30 problems/week pace
+
+  // Build phases from scoring weights
+  const dsaWeeks = Math.round(totalWeeks * 0.5);
+  const projWeeks = Math.round(totalWeeks * 0.25);
+  const sdWeeks = sdRequired ? Math.round(totalWeeks * 0.15) : 1;
+  const finalWeeks = Math.max(1, totalWeeks - dsaWeeks - projWeeks - sdWeeks);
+
+  const phases = [
+    { id: 1, name: "DSA Foundation", weeks: `1-${dsaWeeks}`, status: "active" as const, progress: 0 },
+    { id: 2, name: "Projects & Stack", weeks: `${dsaWeeks + 1}-${dsaWeeks + projWeeks}`, status: "locked" as const, progress: 0 },
+    { id: 3, name: sdRequired ? "System Design" : "Advanced Topics", weeks: `${dsaWeeks + projWeeks + 1}-${dsaWeeks + projWeeks + sdWeeks}`, status: "locked" as const, progress: 0 },
+    { id: 4, name: "Final Prep", weeks: `${totalWeeks - finalWeeks + 1}-${totalWeeks}`, status: "locked" as const, progress: 0 },
+  ];
+
+  // Build weekly plans from DSA topics
+  const weeks: RoadmapPageData["weeks"] = [];
+  let topicIdx = 0;
+
+  for (let w = 1; w <= Math.min(totalWeeks, 12); w++) {
+    // Each week covers 1-2 DSA topics
+    const weekTopics = topicEntries.slice(topicIdx, topicIdx + 2);
+    if (weekTopics.length === 0) break;
+    topicIdx = (topicIdx + 2) % topicEntries.length;
+
+    const theme = weekTopics.map(t => t.label).join(" & ");
+    const isFirstWeek = w === 1;
+    const isFinalWeek = w === totalWeeks;
+
+    // DSA problems for the week
+    const dsaProblems = weekTopics.map((t, i) => ({
+      id: i + 1,
+      name: t.label,
+      count: Math.min(10, Math.round(t.recommended / Math.ceil(totalWeeks / 2))),
+      difficulty: t.frequency >= 70 ? "Hard" : t.frequency >= 50 ? "Medium" : "Easy",
+      status: "upcoming" as const,
+    }));
+
+    // Daily plan based on the week topics
+    const dailyPlan = DAYS.map((day, dayIdx) => {
+      let task = "";
+      if (dayIdx < 2) task = `Solve ${weekTopics[0]?.label || "DSA"} problems (pattern practice)`;
+      else if (dayIdx < 4) task = weekTopics[1] ? `Solve ${weekTopics[1].label} problems` : `Mixed ${weekTopics[0]?.label || "DSA"} practice`;
+      else if (dayIdx === 4) task = "Project work / code review";
+      else if (dayIdx === 5) task = "Mock interview / timed practice";
+      else task = "Rest & light review";
+      return { day, task, isToday: false };
+    });
+
+    // Resources: use real URLs from company data
+    let weekResources: { type: "video" | "link" | "doc"; name: string; url: string }[];
+    if (w <= dsaWeeks) {
+      weekResources = mapResources(dsaResources, "link");
+    } else if (w <= dsaWeeks + projWeeks) {
+      weekResources = mapResources(platforms, "link");
+    } else if (w <= dsaWeeks + projWeeks + sdWeeks) {
+      weekResources = mapResources(sdResources, "doc");
+    } else {
+      weekResources = mapResources(behResources, "doc");
+    }
+    // Fallback if empty
+    if (weekResources.length === 0) {
+      weekResources = [{ type: "link", name: `${companyName} Prep Resources`, url: "#" }];
+    }
+
+    const projectTask = isFirstWeek
+      ? { name: "Set up GitHub repo with README", impact: 2, effort: "Low", hours: 2 }
+      : isFinalWeek
+        ? { name: "Polish portfolio & update resume", impact: 5, effort: "Low", hours: 4 }
+        : { name: `Build ${theme.toLowerCase()} feature for portfolio project`, impact: 3, effort: "Medium", hours: 5 };
+
+    weeks.push({
+      number: w,
+      theme,
+      hoursPerDay: w <= 3 ? 4 : 5,
+      progressPercent: 0,
+      dsaProblems,
+      dailyPlan,
+      resources: weekResources,
+      projectTask,
+      milestone: w === dsaWeeks ? "Complete DSA Foundation Phase" : w === totalWeeks ? `Ready for ${companyName} interviews!` : `Complete Week ${w} tasks`,
+    });
+  }
+
+  // Score simulator from weights
+  const weightEntries = Object.entries(weights)
+    .filter(([k]) => ["dsa_score", "project_score", "system_design_score", "stack_alignment", "internship_score", "consistency_index"].includes(k))
+    .map(([k, v]) => ({ key: k, weight: Number(v) || 0 }))
+    .sort((a, b) => b.weight - a.weight);
+
+  const labelMap: Record<string, string> = {
+    dsa_score: "Master DSA", project_score: "Build Projects", system_design_score: "System Design",
+    stack_alignment: "Align Tech Stack", internship_score: "Get Experience", consistency_index: "Build Consistency",
+  };
+
+  const scoreSimulator = weightEntries.slice(0, 6).map((sw, i) => ({
+    task: labelMap[sw.key] || sw.key,
+    impact: Math.round(sw.weight * 20),
+    selected: i < 2,
+  }));
+
+  // Task board from DSA topics
+  const todoTopics = topicEntries.slice(0, 5);
+  const taskBoard = {
+    todo: todoTopics.map((t, i) => ({
+      title: `Master ${t.label}`,
+      impact: Math.round(t.frequency / 10),
+      effort: t.frequency >= 70 ? "High" : "Medium",
+      difficulty: t.frequency >= 70 ? "Hard" : "Medium",
+      duration: `${Math.ceil(t.recommended / 10)} weeks`,
+      iconColor: ACTION_COLORS[i % ACTION_COLORS.length],
+    })),
+    inProgress: [] as { title: string; impact: number; progress: number; difficulty: string; duration: string }[],
+    done: [] as string[],
+  };
+
+  // Charts — set up empty/target data
+  const skillProgress = topicEntries.slice(0, 5).map(t => ({
+    skill: t.label,
+    progress: 0,
+  }));
+
+  const charts = {
+    scoreHistory: [] as { month: string; score: number | null; projected: number | null }[],
+    problemsPerWeek: weeks.slice(0, 8).map((_, i) => ({ week: `W${i + 1}`, count: 0 })),
+    skillProgress,
+  };
+
+  // Next actions from weight priorities
+  const actionDesc: Record<string, string> = {
+    dsa_score: `Focus on ${topicEntries.slice(0, 3).map(t => t.label).join(", ")} — top patterns for ${companyName}.`,
+    project_score: "Build production-quality portfolio projects demonstrating full-stack skills.",
+    system_design_score: mustKnowDesigns.length > 0
+      ? `Study: ${mustKnowDesigns.slice(0, 3).join(", ")}.`
+      : "Learn system design fundamentals — load balancers, caching, databases.",
+    stack_alignment: "Build projects using the company's preferred technologies.",
+    internship_score: "Seek internships or contribute to open-source projects.",
+    consistency_index: "Maintain daily solving streaks and regular GitHub commits.",
+  };
+
+  const nextActions = weightEntries.slice(0, 3).map((sw, i) => ({
+    title: labelMap[sw.key] || sw.key,
+    desc: actionDesc[sw.key] || `Improve your ${labelMap[sw.key] || sw.key} score.`,
+    impact: Math.round(sw.weight * 20),
+    duration: `${Math.ceil(sw.weight * 10)} weeks`,
+    iconColor: ACTION_COLORS[i],
+  }));
+
+  return {
+    company: { slug: slug || "", name: companyName, role },
+    currentScore: 0,
+    targetScore: 85,
+    weeksTotal: totalWeeks,
+    weeksCompleted: 0,
+    progressPercent: 0,
+    streak: 0,
+    lastSolved: "Not started",
+    problemsThisWeek: 0,
+    phases,
+    weeks,
+    scoreSimulator,
+    taskBoard,
+    charts,
+    nextActions,
+  };
+}
 
 /* ─── Icon helpers ─── */
 const iconBg: Record<string, string> = { red: "bg-red-50", amber: "bg-amber-50", blue: "bg-blue-50", purple: "bg-purple-50", green: "bg-green-50", orange: "bg-orange-50" };
@@ -144,18 +303,38 @@ function skillBarColor(p: number) { return p >= 70 ? "#10B981" : p >= 50 ? "#F59
    ═══════════════════════════════════════════════════════ */
 export default function RoadmapPage() {
   const { slug } = useParams<{ slug: string }>();
-  const staticData = ROADMAP_DATA[slug || "google"];
-  const data = staticData || ROADMAP_DATA.google;
+  const { data: rawCompany, isLoading } = useCompany(slug || "");
 
-  // Use actual slug-based name if no static entry exists
-  const companyName = staticData ? data.company.name : (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Company");
-  const companyRole = staticData ? data.company.role : "Software Engineer";
+  // Build roadmap from company API data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = buildRoadmapData(rawCompany as Record<string, any> | null, slug || "");
 
-  const [activeWeek, setActiveWeek] = useState(4);
-  const [simSelected, setSimSelected] = useState<boolean[]>(data.scoreSimulator.map(s => s.selected));
+  const companyName = data.company.name;
+  const companyRole = data.company.role;
+
+  const [activeWeek, setActiveWeek] = useState(1);
+  const [simSelected, setSimSelected] = useState<boolean[]>(data.scoreSimulator.map((s: { selected: boolean }) => s.selected));
   const [chartFilter, setChartFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");
 
-  const currentWeekData = data.weeks[activeWeek - 1] || data.weeks[3];
+  // Safe access to current week data — fallback to first week or a placeholder
+  const currentWeekData = data.weeks[activeWeek - 1] || data.weeks[0] || {
+    number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0,
+    dsaProblems: [], dailyPlan: [], resources: [], 
+    projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0 },
+    milestone: "Loading...",
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-20">
+          <RefreshCw className="h-8 w-8 animate-spin text-[#10B981]" />
+          <span className="ml-3 text-sm text-[#6B7280]">Loading roadmap...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   // Simulator calculations
   const simProjected = data.currentScore + simSelected.reduce((sum, sel, i) => sel ? sum + data.scoreSimulator[i].impact : sum, 0);
