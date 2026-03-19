@@ -3,10 +3,11 @@ import logging
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User
+from app.models.db import User, UserSkillGap
 from app.models.schemas import APIResponse, MatchScoreResponse
 from app.repositories.scores import ScoreRepository
 
@@ -119,3 +120,39 @@ async def compute_match_scores(
         success=True,
         data=scores,
     )
+
+
+@router.get("/gaps/{company_slug}", response_model=APIResponse)
+async def get_skill_gaps(
+    company_slug: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get identified skill gaps for a specific company."""
+    try:
+        result = await db.execute(
+            select(UserSkillGap)
+            .where(
+                UserSkillGap.user_id == current_user.id,
+                UserSkillGap.company_slug == company_slug,
+            )
+            .order_by(UserSkillGap.priority)
+        )
+        gaps = result.scalars().all()
+
+        return APIResponse(
+            success=True,
+            data=[
+                {
+                    "skill_name": g.skill_name,
+                    "priority": g.priority.value if g.priority else "nice_to_have",
+                    "current_level": g.current_level,
+                    "required_level": g.required_level,
+                    "dependency_chain": g.dependency_chain,
+                }
+                for g in gaps
+            ],
+        )
+    except Exception as e:
+        logger.error(f"Failed to get skill gaps for {company_slug}: {e}")
+        return APIResponse(success=False, data=[], error="Failed to fetch skill gaps")

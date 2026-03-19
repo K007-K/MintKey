@@ -1,7 +1,7 @@
 // Match Score Report page — premium analytics report view
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
@@ -11,13 +11,14 @@ import {
   Code2, Layers, Settings, GraduationCap, Briefcase, TrendingUp,
   Brain, GitBranch, BarChart3, BookOpen, Users, Trophy,
   XCircle, CheckCircle2, AlertCircle, Zap, ShieldAlert, Flame,
-  SlidersHorizontal
+  SlidersHorizontal, Loader2
 } from "lucide-react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer
 } from "recharts";
+import { useMatchScores, useScoreHistory, useSkillGaps, useCompany } from "@/lib/api";
 
 /* ─── Static match data ─── */
 const MATCH_DATA: Record<string, {
@@ -212,9 +213,95 @@ function InfoTooltip({ text }: { text: string }) {
 export default function MatchReportPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const data = MATCH_DATA[slug || "google"] || MATCH_DATA.google;
+  const { data: rawScores, isLoading: scoresLoading } = useMatchScores();
+  const { data: rawHistory } = useScoreHistory(slug || "");
+  const { data: rawGaps } = useSkillGaps(slug || "");
+  const { data: rawCompany } = useCompany(slug || "");
+
+  // Build page data: merge real API data with static fallback
+  const data = useMemo(() => {
+    const fallback = MATCH_DATA[slug || "google"] || MATCH_DATA.google;
+
+    // Get real match score for this company
+    let matchScore = fallback.matchScore;
+    let breakdown = fallback.breakdown;
+    let statusLabel = fallback.status;
+    let weeksAway = fallback.weeksToReadiness;
+    if (rawScores && Array.isArray(rawScores)) {
+      const match = (rawScores as { company_slug: string; overall_score: number; breakdown?: Record<string, unknown>; status_label?: string; weeks_away?: number }[])
+        .find((s) => s.company_slug === slug);
+      if (match) {
+        matchScore = Math.round(match.overall_score);
+        statusLabel = (match.status_label as typeof fallback.status) || fallback.status;
+        weeksAway = match.weeks_away ?? fallback.weeksToReadiness;
+        // Build breakdown from component_scores if available
+        const bd = match.breakdown as { component_scores?: Record<string, number>; weights?: Record<string, number> } | null;
+        if (bd?.component_scores) {
+          const cs = bd.component_scores;
+          breakdown = [
+            { component: "DSA", icon: "code", yourScore: Math.round(cs.dsa_score ?? 0), target: 90, gap: Math.round((cs.dsa_score ?? 0) - 90), tooltip: "Data structures & algorithms" },
+            { component: "Projects", icon: "layers", yourScore: Math.round(cs.project_score ?? 0), target: 85, gap: Math.round((cs.project_score ?? 0) - 85), tooltip: "Portfolio project quality" },
+            { component: "Tech Stack", icon: "settings", yourScore: Math.round(cs.tech_stack_score ?? 0), target: 85, gap: Math.round((cs.tech_stack_score ?? 0) - 85), tooltip: "Tech stack alignment" },
+            { component: "Academics", icon: "graduation", yourScore: Math.round(cs.academic_score ?? 0), target: 80, gap: Math.round((cs.academic_score ?? 0) - 80), tooltip: "Academic background" },
+            { component: "Internships", icon: "briefcase", yourScore: Math.round(cs.internship_score ?? 0), target: 85, gap: Math.round((cs.internship_score ?? 0) - 85), tooltip: "Work experience" },
+            { component: "Consistency", icon: "trending-up", yourScore: Math.round(cs.consistency_score ?? 0), target: 90, gap: Math.round((cs.consistency_score ?? 0) - 90), tooltip: "Coding consistency" },
+          ];
+        }
+      }
+    }
+
+    // Build score history from real data or fallback
+    let scoreHistory = fallback.scoreHistory;
+    if (rawHistory && Array.isArray(rawHistory) && rawHistory.length > 0) {
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h, i) => ({
+        month: months[new Date(h.computed_at).getMonth()] || `M${i}`,
+        score: Math.round(h.overall_score),
+        projected: null,
+      }));
+    }
+
+    // Get company name from real data
+    const companyName = (rawCompany as Record<string, unknown>)?.name as string || fallback.name;
+    const role = (((rawCompany as Record<string, unknown>)?.hiring_data as Record<string, unknown>)?.roles as string[] | undefined)?.[0] || fallback.role;
+
+    // Build radar from breakdown
+    const radarData = breakdown.map((b) => ({
+      axis: b.component,
+      user: b.yourScore,
+      target: b.target,
+    }));
+
+    return {
+      ...fallback,
+      name: companyName,
+      role,
+      matchScore,
+      status: statusLabel,
+      weeksToReadiness: weeksAway,
+      targetScore: 85,
+      gapToClose: Math.max(0, 85 - matchScore),
+      breakdown,
+      radarData,
+      scoreHistory,
+      lastUpdated: rawScores ? "Just now" : fallback.lastUpdated,
+    };
+  }, [slug, rawScores, rawHistory, rawGaps, rawCompany]);
+
   const [timeFilter, setTimeFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");
   const [activeScenario, setActiveScenario] = useState<number | null>(null);
+
+  // Loading state
+  if (scoresLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-[#10B981]" />
+          <span className="ml-3 text-sm text-[#6B7280]">Loading match report...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   /* Time filter slicing */
   const filterMap = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12 };

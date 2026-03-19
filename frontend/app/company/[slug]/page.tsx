@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
-import { useCompany } from "@/lib/api";
+import { useCompany, useMatchScores } from "@/lib/api";
 import {
   ChevronRight, Briefcase, MapPin, Clock, DollarSign,
   Code2, Blocks, Star, AlertCircle, BookOpen, ExternalLink, ArrowRight,
@@ -236,11 +236,19 @@ export default function CompanyDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
   const { data: rawCompany, isLoading, isError } = useCompany(slug);
+  const { data: rawScores } = useMatchScores();
 
   const data = useMemo(() => {
     if (!rawCompany) return null;
-    return buildCompanyPageData(rawCompany as Record<string, unknown>);
-  }, [rawCompany]);
+    const pageData = buildCompanyPageData(rawCompany as Record<string, unknown>);
+    // Merge real match score if available
+    if (rawScores && Array.isArray(rawScores)) {
+      const match = (rawScores as { company_slug: string; overall_score: number }[])
+        .find((s) => s.company_slug === slug);
+      if (match) pageData.matchScore = Math.round(match.overall_score);
+    }
+    return pageData;
+  }, [rawCompany, rawScores, slug]);
 
   const name = data?.name || slug.charAt(0).toUpperCase() + slug.slice(1);
 

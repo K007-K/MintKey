@@ -7,7 +7,7 @@ import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
 import { Search, Bell, ChevronDown, X, Plus, Loader2 } from "lucide-react";
-import { useCompanies } from "@/lib/api";
+import { useCompanies, useMatchScores } from "@/lib/api";
 
 /* ── Company UI type ────────────────────────────────────────────── */
 
@@ -74,6 +74,7 @@ function scoreBarColor(score: number) {
 export default function CompaniesPage() {
   const router = useRouter();
   const { data: rawCompanies, isLoading, isError } = useCompanies();
+  const { data: rawScores } = useMatchScores();
   const [search, setSearch] = useState("");
   const [targetSlugs, setTargetSlugs] = useState<string[]>([
     "google", "meta", "amazon", "microsoft",
@@ -83,11 +84,26 @@ export default function CompaniesPage() {
   const [dsaFilter, setDsaFilter] = useState("All DSA Levels");
   const [packageFilter, setPackageFilter] = useState("All Package Ranges");
 
-  /* Transform API data */
+  /* Build a slug → score lookup from real match scores */
+  const scoreMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (rawScores && Array.isArray(rawScores)) {
+      for (const s of rawScores as { company_slug: string; overall_score: number }[]) {
+        map[s.company_slug] = Math.round(s.overall_score);
+      }
+    }
+    return map;
+  }, [rawScores]);
+
+  /* Transform API data + merge real scores */
   const allCompanies: Company[] = useMemo(() => {
     if (!rawCompanies || !Array.isArray(rawCompanies)) return [];
-    return (rawCompanies as Record<string, unknown>[]).map(transformCompany);
-  }, [rawCompanies]);
+    return (rawCompanies as Record<string, unknown>[]).map((raw) => {
+      const c = transformCompany(raw);
+      c.score = scoreMap[c.slug] ?? 0;
+      return c;
+    });
+  }, [rawCompanies, scoreMap]);
 
   /* Derive targets from slugs */
   const targets = useMemo(

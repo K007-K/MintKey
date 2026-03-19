@@ -94,6 +94,20 @@ export function useScoreHistory(companySlug: string) {
   });
 }
 
+// Skill gaps for a specific company
+export function useSkillGaps(companySlug: string) {
+  return useQuery({
+    queryKey: ["scores", "gaps", companySlug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/scores/gaps/${companySlug}`
+      );
+      return data.data;
+    },
+    enabled: !!companySlug,
+  });
+}
+
 // Trigger analysis
 export function useTriggerAnalysis() {
   return useMutation({
