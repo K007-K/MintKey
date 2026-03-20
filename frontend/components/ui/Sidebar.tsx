@@ -30,7 +30,7 @@ const PLATFORM_NAV = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/companies", label: "Companies", Icon: Building2 },
   { href: "/roadmap", label: "My Roadmap", Icon: Map },
-  { href: "/dsa", label: "DSA Tracker", Icon: Code2 },
+  { href: "/practice", label: "DSA Practice", Icon: Code2 },
   { href: "/skills", label: "Skill Graph", Icon: GitBranch },
 ];
 
