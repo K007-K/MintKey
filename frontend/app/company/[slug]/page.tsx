@@ -374,7 +374,7 @@ export default function CompanyDetailPage() {
 
         {/* ─── TAB CONTENT ─── */}
         {activeTab === "Overview" && <OverviewContent data={data} slug={slug} setTab={setActiveTab} />}
-        {activeTab === "DSA Requirements" && <DSARequirementsTab data={data} />}
+        {activeTab === "DSA Requirements" && <DSARequirementsTab data={data} raw={rawCompany as Record<string, unknown>} />}
         {activeTab === "System Design" && <SystemDesignTab raw={rawCompany as Record<string, unknown>} name={name} />}
         {activeTab === "Projects" && <ProjectsTab raw={rawCompany as Record<string, unknown>} name={name} />}
         {activeTab === "Interview Format" && <InterviewFormatTab raw={rawCompany as Record<string, unknown>} name={name} />}
@@ -575,21 +575,52 @@ function OverviewContent({ data, slug, setTab }: { data: CompanyPageData; slug: 
 /* ════════════════════════════════════════════════════════
    TAB 2 — DSA REQUIREMENTS
    ════════════════════════════════════════════════════════ */
-function DSARequirementsTab({ data }: { data: CompanyPageData }) {
+function DSARequirementsTab({ data, raw }: { data: CompanyPageData; raw: Record<string, unknown> }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (raw.dsa_requirements || {}) as any;
+  const minProblems = dsa.minimum_problems || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const weights = (raw.scoring_weights || {}) as any;
+  const dsaWeight = parseFloat(weights.dsa_score || "0.25");
+
   const difficulty = [
-    { label: "Easy", required: 100, user: 72, color: "#10B981", borderColor: "#A7F3D0" },
-    { label: "Medium", required: 200, user: 145, color: "#F59E0B", borderColor: "#FDE68A" },
-    { label: "Hard", required: 80, user: 28, color: "#EF4444", borderColor: "#FECACA" },
-    { label: "Total", required: 400, user: 245, color: "#10B981", borderColor: "#6EE7B7" },
+    { label: "Easy", required: minProblems.easy || 50, user: 0, color: "#10B981", borderColor: "#A7F3D0" },
+    { label: "Medium", required: minProblems.medium || 100, user: 0, color: "#F59E0B", borderColor: "#FDE68A" },
+    { label: "Hard", required: minProblems.hard || 30, user: 0, color: "#EF4444", borderColor: "#FECACA" },
+    { label: "Total", required: minProblems.total || 200, user: 0, color: "#10B981", borderColor: "#6EE7B7" },
   ];
-  const topics = [
-    { name: "Dynamic Programming", required: 40, user: 28 },
-    { name: "Graphs", required: 30, user: 22 },
-    { name: "Trees", required: 30, user: 25 },
-    { name: "Backtracking", required: 25, user: 10 },
-    { name: "Sliding Window", required: 20, user: 18 },
-    { name: "Heap / Priority Queue", required: 20, user: 8 },
-    { name: "Binary Search", required: 15, user: 12 },
+
+  // Build topics from API topic_targets
+  const topicTargets = dsa.topic_targets || {};
+  const topics = Object.entries(topicTargets)
+    .map(([key, val]: [string, unknown]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = val as any;
+      const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      return { name: label, required: t.recommended || 20, user: 0 };
+    })
+    .sort((a, b) => b.required - a.required)
+    .slice(0, 8);
+
+  // Contest expectations from API
+  const recRating = dsa.recommended_rating || "1800+";
+  const contestImportance = dsa.contest_importance || (dsaWeight >= 0.35 ? "Important" : "Helpful");
+  const cpRequired = dsa.cp_required ? "Required" : "Optional";
+
+  // Readiness: 0% when no user data
+  const totalRequired = minProblems.total || 200;
+  const totalSolved = 0;
+  const readinessPct = totalRequired > 0 ? Math.round((totalSolved / totalRequired) * 100) : 0;
+
+  // Generate tips from company data
+  const topTopic = topics[0]?.name || "DSA";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const behavioral = (raw.behavioral || {}) as any;
+  const companyName = (raw.name as string) || "this company";
+  const tips = [
+    `Focus on ${topTopic} — ${companyName} emphasizes this in ${Math.round(dsaWeight * 100)}% of scoring.`,
+    `Target ${minProblems.medium || 100}+ medium problems — this is the most tested difficulty level.`,
+    behavioral.type === "Leadership Principles" ? `Prepare STAR stories for ${companyName}'s Leadership Principles.` : "Practice explaining your approach clearly — communication is always graded.",
   ];
 
   return (
@@ -599,7 +630,7 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
         {/* Section 1: Problem Difficulty Targets */}
         <div className="grid gap-4 grid-cols-2">
           {difficulty.map((d) => {
-            const pct = Math.round((d.user / d.required) * 100);
+            const pct = d.required > 0 ? Math.round((d.user / d.required) * 100) : 0;
             return (
               <div key={d.label} className="rounded-xl border bg-white p-5" style={{ borderColor: "#e5e7eb", borderLeftWidth: 4, borderLeftColor: d.borderColor }}>
                 <div className="flex items-center gap-2 mb-1">
@@ -620,22 +651,26 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
         {/* Section 2: Topic Distribution */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <h3 className="text-base font-semibold text-[#111827] mb-5">DSA Topic Breakdown</h3>
-          <div className="space-y-4">
-            {topics.map((t) => {
-              const pct = Math.round((t.user / t.required) * 100);
-              const met = t.user >= t.required;
-              return (
-                <div key={t.name} className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-[#374151] w-[180px] shrink-0">{t.name}</span>
-                  <div className="flex-1 h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: met ? "#10B981" : "#F59E0B" }} />
+          {topics.length > 0 ? (
+            <div className="space-y-4">
+              {topics.map((t) => {
+                const pct = t.required > 0 ? Math.round((t.user / t.required) * 100) : 0;
+                const met = t.user >= t.required;
+                return (
+                  <div key={t.name} className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-[#374151] w-[180px] shrink-0">{t.name}</span>
+                    <div className="flex-1 h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: met ? "#10B981" : "#F59E0B" }} />
+                    </div>
+                    <span className="text-xs text-[#9CA3AF] w-[130px] shrink-0 text-right">{t.required} problems required</span>
+                    <span className={`text-xs font-medium w-[60px] shrink-0 text-right ${met ? "text-[#10B981]" : pct >= 60 ? "text-[#F59E0B]" : "text-[#EF4444]"}`}>You: {t.user}</span>
                   </div>
-                  <span className="text-xs text-[#9CA3AF] w-[130px] shrink-0 text-right">{t.required} problems required</span>
-                  <span className={`text-xs font-medium w-[60px] shrink-0 text-right ${met ? "text-[#10B981]" : pct >= 60 ? "text-[#F59E0B]" : "text-[#EF4444]"}`}>You: {t.user}</span>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-[#9CA3AF]">Topic targets not available for this company yet.</p>
+          )}
           <div className="mt-4 text-right">
             <button className="text-sm font-medium text-[#10B981] hover:underline">View All Topics →</button>
           </div>
@@ -646,15 +681,15 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-xs text-[#9CA3AF] mb-1">Recommended Rating</p>
-              <p className="text-lg font-bold text-[#111827]">1800+</p>
+              <p className="text-lg font-bold text-[#111827]">{recRating}</p>
             </div>
             <div className="text-center border-x border-[#F3F4F6]">
               <p className="text-xs text-[#9CA3AF] mb-1">Weekly Contest</p>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">Helpful</span>
+              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">{contestImportance}</span>
             </div>
             <div className="text-center">
               <p className="text-xs text-[#9CA3AF] mb-1">CP Experience</p>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#F3F4F6] text-[#6B7280]">Optional</span>
+              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#F3F4F6] text-[#6B7280]">{cpRequired}</span>
             </div>
           </div>
         </div>
@@ -665,13 +700,13 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
         {/* DSA Readiness */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 text-center">
           <h3 className="text-base font-semibold text-[#111827] mb-4">Your DSA Readiness</h3>
-          <div className="text-5xl font-bold text-[#10B981] mb-1">67%</div>
-          <p className="text-xs text-[#9CA3AF] mb-5">245 of 400 target problems solved</p>
+          <div className="text-5xl font-bold text-[#9CA3AF] mb-1">{readinessPct}%</div>
+          <p className="text-xs text-[#9CA3AF] mb-5">{totalSolved} of {totalRequired} target problems solved</p>
           <div className="space-y-3 text-left">
             {[
-              { label: "Easy", user: 72, req: 100, color: "#10B981" },
-              { label: "Medium", user: 145, req: 200, color: "#F59E0B" },
-              { label: "Hard", user: 28, req: 80, color: "#EF4444" },
+              { label: "Easy", user: 0, req: minProblems.easy || 50, color: "#10B981" },
+              { label: "Medium", user: 0, req: minProblems.medium || 100, color: "#F59E0B" },
+              { label: "Hard", user: 0, req: minProblems.hard || 30, color: "#EF4444" },
             ].map((d) => (
               <div key={d.label}>
                 <div className="flex justify-between text-xs mb-1">
@@ -679,23 +714,24 @@ function DSARequirementsTab({ data }: { data: CompanyPageData }) {
                   <span className="text-[#9CA3AF]">{d.user}/{d.req}</span>
                 </div>
                 <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${(d.user / d.req) * 100}%`, backgroundColor: d.color }} />
+                  <div className="h-full rounded-full" style={{ width: `${d.req > 0 ? (d.user / d.req) * 100 : 0}%`, backgroundColor: d.color }} />
                 </div>
               </div>
             ))}
           </div>
-          <button className="mt-5 w-full rounded-lg border border-[#10B981] text-[#10B981] py-2.5 text-sm font-medium hover:bg-[#ECFDF5] transition-colors">
+          <p className="mt-4 text-xs text-[#9CA3AF] italic">Run analysis to see your progress</p>
+          <button className="mt-3 w-full rounded-lg border border-[#10B981] text-[#10B981] py-2.5 text-sm font-medium hover:bg-[#ECFDF5] transition-colors">
             Practice Problems →
           </button>
         </div>
 
-        {/* Quick Tips */}
+        {/* Quick Tips — company-specific */}
         <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
           <h3 className="text-sm font-semibold text-[#111827] mb-3">Quick Tips</h3>
           <ul className="space-y-2.5 text-sm text-[#374151]">
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Focus on DP patterns (Knapsack, LCS, Matrix Chain) — Google asks DP in 60% of rounds</li>
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Practice explaining your approach before coding — communication is graded</li>
-            <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Aim for O(n log n) or better — brute force alone won't pass Google rounds</li>
+            {tips.map((tip, i) => (
+              <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
+            ))}
           </ul>
         </div>
       </div>
@@ -1281,33 +1317,67 @@ function ReviewsTab({ raw, name }: { raw: Record<string, unknown>; name: string 
    TAB 8 — SKILL GAP ANALYSIS
    ════════════════════════════════════════════════════════ */
 function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (raw.dsa_requirements || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (raw.system_design || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const projectsData = (raw.projects || {}) as any;
+  const minProblems = dsa.minimum_problems || {};
+  const mustKnowDesigns = sysDesign.must_know_designs || [];
+  const impressiveProjects = projectsData.impressive_projects || [];
+
+  // Readiness: 0% until user runs analysis
   const readiness = [
-    { area: "DSA", pct: 75, status: "Good Progress" },
-    { area: "System Design", pct: 60, status: "Needs Work" },
-    { area: "Projects", pct: 45, status: "Critical Gap" },
-    { area: "Interview Prep", pct: 70, status: "On Track" },
+    { area: "DSA", pct: 0, status: "Not Analyzed" },
+    { area: "System Design", pct: 0, status: "Not Analyzed" },
+    { area: "Projects", pct: 0, status: "Not Analyzed" },
+    { area: "Interview Prep", pct: 0, status: "Not Analyzed" },
   ];
 
-  const gapTable = [
-    { skill: "Dynamic Prog.", required: "40 problems", yours: "28 problems", gap: "-12 problems", severity: "warning" as const },
-    { skill: "Graphs", required: "30 problems", yours: "22 problems", gap: "-8 problems", severity: "warning" as const },
-    { skill: "System Design", required: "10 topics", yours: "3 topics", gap: "-7 topics", severity: "critical" as const },
-    { skill: "Trees", required: "30 problems", yours: "25 problems", gap: "-5 problems", severity: "ok" as const },
-    { skill: "Backtracking", required: "25 problems", yours: "10 problems", gap: "-15 problems", severity: "critical" as const },
-    { skill: "Projects", required: "3 production", yours: "1 project", gap: "-2 projects", severity: "critical" as const },
-    { skill: "Contest Rating", required: "1800+", yours: "1450", gap: "-350 pts", severity: "warning" as const },
-  ];
+  // Build gap table dynamically from company requirements
+  const topicTargets = dsa.topic_targets || {};
+  const gapTable: { skill: string; required: string; yours: string; gap: string; severity: "critical" | "warning" | "ok" }[] = [];
+  Object.entries(topicTargets)
+    .sort(([, a]: [string, unknown], [, b]: [string, unknown]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((b as any).recommended || 0) - ((a as any).recommended || 0);
+    })
+    .slice(0, 5)
+    .forEach(([key, val]: [string, unknown]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = val as any;
+      const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const req = t.recommended || 20;
+      gapTable.push({ skill: label, required: `${req} problems`, yours: "0 problems", gap: `-${req}`, severity: "critical" });
+    });
+  if (mustKnowDesigns.length > 0) {
+    gapTable.push({ skill: "System Design", required: `${mustKnowDesigns.length} topics`, yours: "0 topics", gap: `-${mustKnowDesigns.length}`, severity: "critical" });
+  }
+  if (impressiveProjects.length > 0) {
+    gapTable.push({ skill: "Projects", required: `${impressiveProjects.length} projects`, yours: "0 projects", gap: `-${impressiveProjects.length}`, severity: "critical" });
+  }
 
-  const weakAreas = [
-    { name: "Dynamic Programming", gap: "12 problems", priority: "High", cta: "Practice DP Problems →", border: "border-[#F59E0B]" },
-    { name: "System Design", gap: "7 topics", priority: "Critical", cta: "Start System Design →", border: "border-[#EF4444]" },
-    { name: "Projects", gap: "2 production projects", priority: "High", cta: "Browse Templates →", border: "border-[#F59E0B]" },
-  ];
+  // Weak areas from top gaps
+  const weakAreas = gapTable.slice(0, 3).map((g) => ({
+    name: g.skill,
+    gap: g.required,
+    priority: "Critical" as const,
+    cta: g.skill === "System Design" ? "Start System Design →" : g.skill === "Projects" ? "Browse Templates →" : `Practice ${g.skill} →`,
+    border: "border-[#EF4444]",
+  }));
+
+  // Blockers from company requirements
+  const blockers = [
+    minProblems.total ? `DSA: 0 of ${minProblems.total} target problems solved` : null,
+    mustKnowDesigns.length > 0 ? `System Design: 0 of ${mustKnowDesigns.length} topics covered` : null,
+    impressiveProjects.length > 0 ? `Projects: 0 of ${impressiveProjects.length} required` : null,
+  ].filter(Boolean) as string[];
 
   const statusColor = (s: string) => {
     if (s === "Good Progress" || s === "On Track") return "text-[#10B981]";
     if (s === "Needs Work") return "text-[#F59E0B]";
-    return "text-[#EF4444]";
+    return "text-[#9CA3AF]";
   };
 
   const barColor = (pct: number) => pct > 70 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#EF4444";
@@ -1332,7 +1402,7 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
               <div key={r.area} className="flex items-center gap-4">
                 <span className="text-sm font-medium text-[#374151] w-[120px] shrink-0">{r.area}</span>
                 <div className="flex-1 h-2.5 rounded-full bg-[#E5E7EB] overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${r.pct}%`, backgroundColor: barColor(r.pct) }} />
+                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(r.pct, 2)}%`, backgroundColor: barColor(r.pct) }} />
                 </div>
                 <span className="text-sm font-bold text-[#111827] w-10">{r.pct}%</span>
                 <span className={`text-xs font-medium w-[100px] text-right ${statusColor(r.status)}`}>{r.status}</span>
@@ -1341,9 +1411,10 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
           </div>
           <div className="flex items-center gap-4 mt-5">
             <span className="text-sm text-[#6B7280]">Composite Score:</span>
-            <span className="text-lg font-bold text-[#111827]">67%</span>
+            <span className="text-lg font-bold text-[#9CA3AF]">—</span>
             <Link href={`/roadmap/${slug}`} className="ml-auto rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">Generate Roadmap →</Link>
           </div>
+          <p className="text-xs text-[#9CA3AF] italic mt-3">Run analysis to see your personalized readiness scores</p>
         </div>
 
         {/* Gap Table */}
@@ -1382,8 +1453,8 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-bold text-[#111827]">{w.name}</span>
               </div>
-              <p className="text-xs text-[#9CA3AF] mb-1">Gap: {w.gap}</p>
-              <p className="text-xs text-[#9CA3AF] mb-3">Priority: <span className={w.priority === "Critical" ? "text-[#EF4444] font-semibold" : "text-[#F59E0B] font-semibold"}>{w.priority}</span></p>
+              <p className="text-xs text-[#9CA3AF] mb-1">Need: {w.gap}</p>
+              <p className="text-xs text-[#9CA3AF] mb-3">Priority: <span className="text-[#EF4444] font-semibold">{w.priority}</span></p>
               <button className="text-sm font-medium text-[#10B981] hover:underline">{w.cta}</button>
             </div>
           ))}
@@ -1394,18 +1465,18 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
       <div className="space-y-5">
         {/* Readiness Score */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 text-center">
-          <div className="text-5xl font-bold text-[#10B981] mb-1">67%</div>
+          <div className="text-5xl font-bold text-[#9CA3AF] mb-1">—</div>
           <p className="text-sm text-[#6B7280] mb-1">Match Score</p>
-          <p className="text-xs text-[#9CA3AF]">Top 32% of applicants at this stage</p>
+          <p className="text-xs text-[#9CA3AF]">Run analysis to calculate your score</p>
         </div>
 
-        {/* What's Holding You Back */}
+        {/* What's Holding You Back — from API */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="text-sm font-semibold text-[#111827] mb-4">What&apos;s Holding You Back</h3>
+          <h3 className="text-sm font-semibold text-[#111827] mb-4">Requirements for {name}</h3>
           <ul className="space-y-3 text-sm text-[#6B7280]">
-            <li className="flex items-start gap-2"><AlertCircle className="h-4 w-4 text-[#EF4444] shrink-0 mt-0.5" /> Projects: Only 1 of 3 required</li>
-            <li className="flex items-start gap-2"><AlertCircle className="h-4 w-4 text-[#EF4444] shrink-0 mt-0.5" /> System Design: Not started</li>
-            <li className="flex items-start gap-2"><AlertCircle className="h-4 w-4 text-[#F59E0B] shrink-0 mt-0.5" /> DSA: 28 of 40 DP problems</li>
+            {blockers.map((b, i) => (
+              <li key={i} className="flex items-start gap-2"><AlertCircle className="h-4 w-4 text-[#EF4444] shrink-0 mt-0.5" /> {b}</li>
+            ))}
           </ul>
         </div>
       </div>
@@ -1418,27 +1489,65 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
    ════════════════════════════════════════════════════════ */
 function PreparationStrategyTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
   const [activeStep, setActiveStep] = useState(1);
-  const steps = [
-    { num: 1, title: "Master Dynamic Programming", desc: "Focus on 12 remaining DP problems. Target patterns: Knapsack, LCS, Matrix Chain.", est: "2-3 weeks", cta: "Start →" },
-    { num: 2, title: "Improve Graph Algorithms", desc: "Practice BFS/DFS variations, Dijkstra, Union-Find.", est: "1-2 weeks", cta: "Start →" },
-    { num: 3, title: "Build a Distributed Backend Project", desc: "Choose: Key-Value Store or Real-time Collaboration Tool.", est: "3-4 weeks", cta: "View Templates →" },
-    { num: 4, title: "Start System Design Preparation", desc: "Begin with Load Balancing, then Caching fundamentals.", est: "2 weeks", cta: "Resources →" },
-    { num: 5, title: "Practice Mock Interviews", desc: "2-3 mock interviews/week in final stretch.", est: "2 weeks", cta: "Schedule →" },
-  ];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dsa = (raw.dsa_requirements || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sysDesign = (raw.system_design || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const behavioral = (raw.behavioral || {}) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const projectsData = (raw.projects || {}) as any;
+  const minProblems = dsa.minimum_problems || {};
+  const topicTargets = dsa.topic_targets || {};
+  const mustKnowDesigns = sysDesign.must_know_designs || [];
+  const impressiveProjects = projectsData.impressive_projects || [];
+
+  // Generate steps from company data
+  const sortedTopics = Object.entries(topicTargets)
+    .map(([key, val]: [string, unknown]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = val as any;
+      return { name: key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()), count: t.recommended || 20 };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  const steps: { num: number; title: string; desc: string; est: string; cta: string }[] = [];
+  let stepNum = 1;
+  // Step 1-2: Top 2 DSA topics
+  if (sortedTopics[0]) {
+    steps.push({ num: stepNum++, title: `Master ${sortedTopics[0].name}`, desc: `Solve ${sortedTopics[0].count}+ problems. This is ${name}'s most tested topic.`, est: "2-3 weeks", cta: "Start →" });
+  }
+  if (sortedTopics[1]) {
+    steps.push({ num: stepNum++, title: `Strengthen ${sortedTopics[1].name}`, desc: `Target ${sortedTopics[1].count}+ problems in this area.`, est: "1-2 weeks", cta: "Start →" });
+  }
+  // Step 3: Projects
+  if (impressiveProjects.length > 0) {
+    const projTitle = typeof impressiveProjects[0] === "object" ? impressiveProjects[0].title : impressiveProjects[0];
+    steps.push({ num: stepNum++, title: "Build a Standout Project", desc: `${name} values: ${projTitle}. Build ${impressiveProjects.length} production-quality project(s).`, est: "3-4 weeks", cta: "View Templates →" });
+  }
+  // Step 4: System Design
+  if (mustKnowDesigns.length > 0) {
+    steps.push({ num: stepNum++, title: "System Design Preparation", desc: `Cover: ${mustKnowDesigns.slice(0, 3).join(", ")}${mustKnowDesigns.length > 3 ? ` + ${mustKnowDesigns.length - 3} more` : ""}.`, est: "2 weeks", cta: "Resources →" });
+  }
+  // Step 5: Mock interviews & behavioral
+  steps.push({ num: stepNum++, title: "Mock Interviews & Behavioral", desc: behavioral.type === "Leadership Principles" ? `Prepare STAR stories for ${name}'s Leadership Principles.` : `Practice ${behavioral.type || "behavioral"} questions. 2-3 mocks/week.`, est: "2 weeks", cta: "Schedule →" });
+
+  // Weekly plan from topics
+  const totalProblems = minProblems.total || 200;
   const weeklyPlan = [
-    { week: "Week 1-2", task: "Solve 20 DP problems (focus: Knapsack, LCS, Coin Change)", current: true },
-    { week: "Week 3-4", task: "Practice Graph algorithms (BFS/DFS, Dijkstra, Topo sort)", current: false },
-    { week: "Week 5-6", task: "Build distributed backend project + write README", current: false },
-    { week: "Week 7", task: "Start System Design: URL shortener, Chat System", current: false },
-    { week: "Week 8", task: "Mock interviews (2-3/week), behavioral prep, review", current: false },
+    { week: "Week 1-2", task: sortedTopics[0] ? `Solve ${sortedTopics[0].count} ${sortedTopics[0].name} problems` : `Solve ${Math.round(totalProblems * 0.3)} Easy + Medium problems`, current: true },
+    { week: "Week 3-4", task: sortedTopics[1] ? `Practice ${sortedTopics[1].name} (${sortedTopics[1].count} problems)` : `Practice Medium + Hard problems`, current: false },
+    { week: "Week 5-6", task: impressiveProjects.length > 0 ? `Build project + polish README/docs` : `Solve remaining ${Math.round(totalProblems * 0.3)} problems + build 1 project`, current: false },
+    { week: "Week 7", task: mustKnowDesigns.length > 0 ? `System Design: ${mustKnowDesigns.slice(0, 2).join(", ")}` : "Review weak topics + practice Hard problems", current: false },
+    { week: "Week 8", task: `Mock interviews (2-3/week), ${behavioral.type || "behavioral"} prep, full review`, current: false },
   ];
 
   const projections = [
-    { label: "Current Score", pct: 67, delta: null },
-    { label: "After DSA (Week 4)", pct: 78, delta: "+11%" },
-    { label: "After Projects (Week 6)", pct: 85, delta: "+7%" },
-    { label: "After Mocks (Week 8)", pct: 90, delta: "+5%" },
+    { label: "Current Score", pct: 0, delta: null },
+    { label: "After DSA (Week 4)", pct: 40, delta: "+40%" },
+    { label: "After Projects (Week 6)", pct: 65, delta: "+25%" },
+    { label: "After Mocks (Week 8)", pct: 85, delta: "+20%" },
   ];
 
   return (
