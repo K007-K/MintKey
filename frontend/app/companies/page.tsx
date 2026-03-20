@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
-import { Search, Bell, ChevronDown, X, Plus, Loader2 } from "lucide-react";
+import { Search, ChevronDown, X, Plus, Loader2 } from "lucide-react";
 import { useCompanies, useMatchScores } from "@/lib/api";
 
 /* ── Company UI type ────────────────────────────────────────────── */
@@ -82,7 +82,6 @@ export default function CompaniesPage() {
   const [visibleCount, setVisibleCount] = useState(9);
   const [companyTypeFilter, setCompanyTypeFilter] = useState("All Company Types");
   const [dsaFilter, setDsaFilter] = useState("All DSA Levels");
-  const [packageFilter, setPackageFilter] = useState("All Package Ranges");
 
   /* Build a slug → score lookup from real match scores */
   const scoreMap = useMemo(() => {
@@ -136,9 +135,7 @@ export default function CompaniesPage() {
   /* Filter + search */
   const filteredCompanies = nonTargeted.filter((c: Company) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (dsaFilter === "Hard" && c.difficulty !== "Hard") return false;
-    if (dsaFilter === "Medium" && c.difficulty !== "Medium") return false;
-    if (dsaFilter === "Easy" && c.difficulty !== "Easy") return false;
+    if (dsaFilter !== "All DSA Levels" && c.difficulty !== dsaFilter) return false;
     if (companyTypeFilter !== "All Company Types" && c.category !== companyTypeFilter) return false;
     return true;
   });
@@ -173,22 +170,16 @@ export default function CompaniesPage() {
   return (
     <DashboardLayout title="Company Explorer" subtitle="Browse companies and see how ready you are">
       {/* ── Search bar row ── */}
-      <div className="flex items-center justify-between mb-5">
-        <div />
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
-            <input
-              type="text"
-              placeholder="Search companies..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-56 rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-colors"
-            />
-          </div>
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] transition-all">
-            <Bell className="h-4 w-4" />
-          </button>
+      <div className="flex items-center justify-end mb-5">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+          <input
+            type="text"
+            placeholder="Search companies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 w-56 rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-colors"
+          />
         </div>
       </div>
 
@@ -196,7 +187,6 @@ export default function CompaniesPage() {
       <div className="flex items-center gap-3 mb-6 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3">
         <FilterDropdown value={companyTypeFilter} onChange={setCompanyTypeFilter} options={companyTypes} />
         <FilterDropdown value={dsaFilter} onChange={setDsaFilter} options={["All DSA Levels", "Hard", "Medium", "Easy"]} />
-        <FilterDropdown value={packageFilter} onChange={setPackageFilter} options={["All Package Ranges"]} />
       </div>
 
       {/* ── Your Target Companies ── */}
@@ -215,12 +205,13 @@ export default function CompaniesPage() {
                 onClick={() => router.push(`/company/${t.slug}`)}
                 className="relative rounded-xl border border-[#E5E7EB] bg-white p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-[#D1D5DB] group"
               >
-                {/* Remove button */}
+                {/* Remove button — always visible */}
                 <button
                   onClick={(e) => { e.stopPropagation(); removeTarget(t.slug); }}
-                  className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[#D1D5DB] opacity-0 group-hover:opacity-100 hover:text-[#6B7280] hover:bg-[#F3F4F6] transition-all"
+                  className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-all"
+                  title={`Remove ${t.name} from targets`}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
 
                 {/* Logo */}
