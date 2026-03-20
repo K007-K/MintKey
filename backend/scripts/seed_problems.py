@@ -4,8 +4,9 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from sqlalchemy import text
-from app.core.database import async_engine
+from sqlalchemy import text, insert
+from app.core.database import engine as async_engine
+from app.models.db import ExternalProblem
 
 logger = logging.getLogger(__name__)
 
@@ -226,31 +227,23 @@ async def seed_problems():
         await conn.execute(text("DELETE FROM user_problem_progress"))
         await conn.execute(text("DELETE FROM external_problems"))
 
-        # Batch insert
+        # Batch insert using ORM insert for proper ARRAY handling
         inserted = 0
         for p in deduped:
             await conn.execute(
-                text("""
-                    INSERT INTO external_problems
-                        (source, external_id, title, slug, difficulty, tags, url, category,
-                         study_plans, pattern, lc_number)
-                    VALUES
-                        (:source, :external_id, :title, :slug, :difficulty, :tags, :url, :category,
-                         :study_plans, :pattern, :lc_number)
-                """),
-                {
-                    "source": p["source"],
-                    "external_id": p.get("external_id"),
-                    "title": p["title"],
-                    "slug": p.get("slug"),
-                    "difficulty": p.get("difficulty"),
-                    "tags": p.get("tags"),
-                    "url": p.get("url"),
-                    "category": p.get("category", "dsa"),
-                    "study_plans": p.get("study_plans"),
-                    "pattern": p.get("pattern"),
-                    "lc_number": p.get("lc_number"),
-                },
+                insert(ExternalProblem).values(
+                    source=p["source"],
+                    external_id=p.get("external_id"),
+                    title=p["title"],
+                    slug=p.get("slug"),
+                    difficulty=p.get("difficulty"),
+                    tags=list(p.get("tags") or []),
+                    url=p.get("url"),
+                    category=p.get("category", "dsa"),
+                    study_plans=list(p.get("study_plans") or []),
+                    pattern=p.get("pattern"),
+                    lc_number=p.get("lc_number"),
+                )
             )
             inserted += 1
 
