@@ -47,7 +47,7 @@ def create_app() -> FastAPI:
     )
 
     # Import and include routers
-    from app.routers import users, scores, analysis, roadmap, trends, auth, sync, companies, dashboard
+    from app.routers import users, scores, analysis, roadmap, trends, auth, sync, companies, dashboard, dsa
     app.include_router(auth.router)
     app.include_router(users.router)
     app.include_router(scores.router)
@@ -57,6 +57,7 @@ def create_app() -> FastAPI:
     app.include_router(sync.router)
     app.include_router(companies.router)
     app.include_router(dashboard.router)
+    app.include_router(dsa.router)
 
     # Health check
     @app.get("/health", tags=["health"])
