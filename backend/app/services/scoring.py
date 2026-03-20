@@ -222,6 +222,7 @@ class ScoringEngine:
         dsa: Optional[DSAAnalysis] = None,
         resume: Optional[ResumeData] = None,
         blueprint: Optional[CompanyBlueprintModel] = None,
+        platform_dsa_progress: Optional[dict] = None,
     ) -> dict:
         """
         Compute a weighted match score (0-100) for a user against a company.
@@ -231,7 +232,7 @@ class ScoringEngine:
 
         # Component scores (0-100 each)
         scores = {
-            "dsa": self._score_dsa(dsa),
+            "dsa": self._score_dsa(dsa, platform_dsa_progress),
             "projects": self._score_projects(github),
             "academic": self._score_academic(resume, blueprint),
             "stack": self._score_stack(github, resume, blueprint),
@@ -255,28 +256,74 @@ class ScoringEngine:
             "readiness": self._score_to_readiness(total),
         }
 
-    def _score_dsa(self, dsa: Optional[DSAAnalysis]) -> float:
-        """Score DSA proficiency (0-100)."""
-        if not dsa:
-            return 0
+    def _score_dsa(
+        self, dsa: Optional[DSAAnalysis], platform_progress: Optional[dict] = None
+    ) -> float:
+        """Score DSA proficiency (0-100).
 
-        score = dsa.dsa_depth_score
-        if score > 0:
-            return min(score, 100)
+        Blends two signals:
+        - LeetCode external score (from Agent 2 / DSAAnalysis)
+        - Platform progress (from user_dsa_progress table)
 
-        # Fallback: compute from raw stats
-        total = dsa.total_solved
-        if total >= 400:
-            return 90
-        elif total >= 300:
-            return 75
-        elif total >= 200:
-            return 60
-        elif total >= 100:
-            return 45
-        elif total >= 50:
-            return 30
-        return max(total * 0.5, 5)
+        If both exist: 40% LeetCode + 60% Platform (reward using our system).
+        If only one exists: use that alone.
+        """
+        leetcode_score = 0.0
+        platform_score = 0.0
+        has_leetcode = False
+        has_platform = False
+
+        # LeetCode score
+        if dsa:
+            has_leetcode = True
+            if dsa.dsa_depth_score > 0:
+                leetcode_score = min(dsa.dsa_depth_score, 100)
+            else:
+                total = dsa.total_solved
+                if total >= 400:
+                    leetcode_score = 90
+                elif total >= 300:
+                    leetcode_score = 75
+                elif total >= 200:
+                    leetcode_score = 60
+                elif total >= 100:
+                    leetcode_score = 45
+                elif total >= 50:
+                    leetcode_score = 30
+                else:
+                    leetcode_score = max(total * 0.5, 5)
+
+        # Platform progress score
+        if platform_progress:
+            total_solved = platform_progress.get("total_solved", 0)
+            topics_touched = len(platform_progress.get("by_topic", {}))
+
+            if total_solved > 0:
+                has_platform = True
+                # Coverage: how many of 150 (NeetCode baseline) solved
+                coverage = min(total_solved / 150, 1.0)
+                # Breadth: how many topics touched out of ~18
+                breadth = min(topics_touched / 18, 1.0)
+                # Difficulty balance bonus
+                easy = platform_progress.get("easy", 0)
+                medium = platform_progress.get("medium", 0)
+                hard = platform_progress.get("hard", 0)
+                diff_total = easy + medium + hard
+                balance = 0.5
+                if diff_total > 0:
+                    # Reward having medium+hard over easy-heavy
+                    balance = min(((medium * 1.5 + hard * 3) / diff_total) / 2, 1.0)
+
+                platform_score = (coverage * 0.5 + breadth * 0.3 + balance * 0.2) * 100
+
+        # Blend
+        if has_leetcode and has_platform:
+            return min(leetcode_score * 0.4 + platform_score * 0.6, 100)
+        elif has_platform:
+            return min(platform_score, 100)
+        elif has_leetcode:
+            return leetcode_score
+        return 0
 
     def _score_projects(self, github: Optional[GitHubAnalysis]) -> float:
         """Score project quality (0-100)."""
@@ -413,6 +460,7 @@ class ScoringEngine:
         dsa: Optional[DSAAnalysis] = None,
         resume: Optional[ResumeData] = None,
         blueprints: Optional[dict[str, CompanyBlueprintModel]] = None,
+        platform_dsa_progress: Optional[dict] = None,
     ) -> dict[str, dict]:
         """Compute match scores for all target companies."""
         results = {}
@@ -424,5 +472,6 @@ class ScoringEngine:
                 dsa=dsa,
                 resume=resume,
                 blueprint=blueprint,
+                platform_dsa_progress=platform_dsa_progress,
             )
         return results

@@ -160,3 +160,34 @@ class OnboardingStep2(BaseModel):
 
 class OnboardingStep4(BaseModel):
     target_companies: list[str] = Field(max_length=5)
+
+
+# --- DSA Progress schemas ---
+class DSAProgressToggle(BaseModel):
+    """Mark a problem solved or unsolved."""
+    lc_number: Optional[int] = None
+    title: str
+    difficulty: str = "Medium"
+    topic: str = "General"
+    sheet: str = "neetcode_150"
+    solved: bool = True
+
+
+class DSAProgressBulkSync(BaseModel):
+    """Bulk sync solved problems from localStorage."""
+    sheet: str = "neetcode_150"
+    problems: list[dict]
+
+
+class DSAProgressResponse(BaseModel):
+    """Single DSA progress record."""
+    lc_number: Optional[int] = None
+    title: str
+    difficulty: str
+    topic: str
+    sheet: str
+    solved: bool
+    solved_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

@@ -9,6 +9,7 @@ import { useDSAProgress } from "@/lib/useDSAProgress";
 /* ── Types ─────────────────────────────────────────────── */
 interface Problem {
   _id: string;           // unique key for React rendering
+  _topic: string;        // topic this problem belongs to
   lc_number: number;
   title: string;
   difficulty: "Easy" | "Medium" | "Hard";
@@ -121,6 +122,7 @@ export default function DSAPage() {
           list.push({
             ...p,
             _id: id,
+            _topic: topicName,
             lc_number: (p.lc_number as number) || 0,
             title: (p.title as string) || "Untitled",
             difficulty: (p.difficulty as "Easy" | "Medium" | "Hard") || "Medium",
@@ -331,7 +333,7 @@ export default function DSAPage() {
                       }`}
                     >
                       <div>
-                        <SolvedCheck checked={checked} onClick={() => toggleSolved(p.lc_number)} />
+                        <SolvedCheck checked={checked} onClick={() => toggleSolved(p.lc_number, { title: p.title, difficulty: p.difficulty, topic: p._topic, sheet: activeSheet })} />
                       </div>
                       <div className="text-xs text-[#9CA3AF] font-mono">{p.lc_number}</div>
                       <div className="text-sm font-medium text-[#111827] truncate pr-3">{p.title}</div>

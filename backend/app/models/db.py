@@ -68,6 +68,7 @@ class User(Base):
     skill_gaps = relationship("UserSkillGap", back_populates="user", cascade="all, delete-orphan")
     roadmaps = relationship("UserRoadmap", back_populates="user", cascade="all, delete-orphan")
     analyses = relationship("AnalysisResult", back_populates="user", cascade="all, delete-orphan")
+    dsa_progress = relationship("UserDSAProgress", back_populates="user", cascade="all, delete-orphan")
 
 
 class PlatformScore(Base):
@@ -201,3 +202,23 @@ class AnalysisResult(Base):
     completed_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="analyses")
+
+
+class UserDSAProgress(Base):
+    """Tracks which DSA problems a user has solved on the platform."""
+    __tablename__ = "user_dsa_progress"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    lc_number = Column(Integer, nullable=True)
+    title = Column(Text, nullable=False)
+    difficulty = Column(String(10), nullable=False)
+    topic = Column(String(100), nullable=False)
+    sheet = Column(String(50), nullable=False)
+    solved = Column(Boolean, default=True)
+
+    solved_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="dsa_progress")
