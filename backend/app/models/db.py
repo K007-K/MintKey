@@ -5,7 +5,7 @@ from sqlalchemy import (
     Column, String, Float, Integer, Boolean, DateTime, Text,
     ForeignKey, Enum as SAEnum
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
 from sqlalchemy.orm import DeclarativeBase, relationship
 import enum
 
@@ -69,6 +69,7 @@ class User(Base):
     roadmaps = relationship("UserRoadmap", back_populates="user", cascade="all, delete-orphan")
     analyses = relationship("AnalysisResult", back_populates="user", cascade="all, delete-orphan")
     dsa_progress = relationship("UserDSAProgress", back_populates="user", cascade="all, delete-orphan")
+    problem_progress = relationship("UserProblemProgress", back_populates="user", cascade="all, delete-orphan")
 
 
 class PlatformScore(Base):
@@ -222,3 +223,49 @@ class UserDSAProgress(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="dsa_progress")
+
+
+class ExternalProblem(Base):
+    """Unified problem database — CSES, NeetCode, Striver, Blind 75, etc."""
+    __tablename__ = "external_problems"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    source = Column(Text, nullable=False)
+    external_id = Column(Text, nullable=True)
+    title = Column(Text, nullable=False)
+    slug = Column(Text, nullable=True)
+    difficulty = Column(Text, nullable=True)
+    tags = Column(ARRAY(Text), nullable=True)
+    description = Column(Text, nullable=True)
+    url = Column(Text, nullable=True)
+    category = Column(Text, nullable=True)
+    study_plans = Column(ARRAY(Text), nullable=True)
+    company_tags = Column(ARRAY(Text), nullable=True)
+    hints = Column(ARRAY(Text), nullable=True)
+    solution_approach = Column(Text, nullable=True)
+    solution_code = Column(JSONB, nullable=True)
+    complexity_analysis = Column(Text, nullable=True)
+    pattern = Column(Text, nullable=True)
+    lc_number = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    progress = relationship("UserProblemProgress", back_populates="problem", cascade="all, delete-orphan")
+
+
+class UserProblemProgress(Base):
+    """Tracks which problems a user has solved/attempted."""
+    __tablename__ = "user_problem_progress"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    problem_id = Column(UUID(as_uuid=True), ForeignKey("external_problems.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(Text, default="unsolved")
+    solved_at = Column(DateTime, nullable=True)
+    time_spent_sec = Column(Integer, nullable=True)
+    attempts_count = Column(Integer, default=0)
+    notes = Column(Text, nullable=True)
+
+    user = relationship("User", back_populates="problem_progress")
+    problem = relationship("ExternalProblem", back_populates="progress")
+
