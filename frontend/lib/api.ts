@@ -308,3 +308,100 @@ export function useDeleteAccount() {
     },
   });
 }
+
+// --- Practice API Hooks ---
+
+interface PracticeFilters {
+  source?: string;
+  difficulty?: string;
+  study_plan?: string;
+  pattern?: string;
+  search?: string;
+  page?: number;
+  per_page?: number;
+}
+
+// Fetch problems with filters + pagination
+export function useProblems(filters: PracticeFilters = {}) {
+  return useQuery({
+    queryKey: ["practice", "problems", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.source && filters.source !== "All") params.set("source", filters.source.toLowerCase());
+      if (filters.difficulty && filters.difficulty !== "All") params.set("difficulty", filters.difficulty);
+      if (filters.study_plan) params.set("study_plan", filters.study_plan);
+      if (filters.pattern) params.set("pattern", filters.pattern);
+      if (filters.search) params.set("search", filters.search);
+      params.set("page", String(filters.page || 1));
+      params.set("per_page", String(filters.per_page || 50));
+      const { data } = await api.get<APIResponse>(`/api/v1/practice/problems?${params}`);
+      return data.data;
+    },
+  });
+}
+
+// Fetch single problem detail
+export function useProblemDetail(problemId: string) {
+  return useQuery({
+    queryKey: ["practice", "problem", problemId],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(`/api/v1/practice/problems/${problemId}`);
+      return data.data;
+    },
+    enabled: !!problemId,
+  });
+}
+
+// Fetch study plan stats
+export function useStudyPlans() {
+  return useQuery({
+    queryKey: ["practice", "plans"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/practice/plans");
+      return data.data;
+    },
+  });
+}
+
+// Fetch user practice stats (auth required)
+export function usePracticeStats() {
+  return useQuery({
+    queryKey: ["practice", "stats"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/practice/stats");
+      return data.data;
+    },
+  });
+}
+
+// Fetch user progress for all problems (auth required)
+export function usePracticeProgress() {
+  return useQuery({
+    queryKey: ["practice", "progress"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/practice/progress");
+      return data.data;
+    },
+  });
+}
+
+// Update problem progress (auth required)
+export function useUpdateProblemProgress() {
+  return useMutation({
+    mutationFn: async ({
+      problemId,
+      status,
+    }: {
+      problemId: string;
+      status: "solved" | "attempted" | "unsolved";
+    }) => {
+      const { data } = await api.patch<APIResponse>(
+        `/api/v1/practice/progress/${problemId}?status=${status}`
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["practice"] });
+    },
+  });
+}
