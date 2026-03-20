@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, delete
+from sqlalchemy import select, func
 from app.models.db import UserDSAProgress
 
 

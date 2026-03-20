@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, and_
 from app.models.db import ExternalProblem, UserProblemProgress
 
 
