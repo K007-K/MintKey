@@ -8,6 +8,7 @@ import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
 import { Search, ChevronDown, X, Plus, Loader2 } from "lucide-react";
 import { useCompanies, useMatchScores } from "@/lib/api";
+import { useTargetCompanies } from "@/lib/useTargetCompanies";
 
 /* ── Company UI type ────────────────────────────────────────────── */
 
@@ -75,10 +76,8 @@ export default function CompaniesPage() {
   const router = useRouter();
   const { data: rawCompanies, isLoading, isError } = useCompanies();
   const { data: rawScores } = useMatchScores();
+  const { targetSlugs, addTarget, removeTarget } = useTargetCompanies();
   const [search, setSearch] = useState("");
-  const [targetSlugs, setTargetSlugs] = useState<string[]>([
-    "google", "meta", "amazon", "microsoft",
-  ]);
   const [visibleCount, setVisibleCount] = useState(9);
   const [companyTypeFilter, setCompanyTypeFilter] = useState("All Company Types");
   const [dsaFilter, setDsaFilter] = useState("All DSA Levels");
@@ -122,14 +121,12 @@ export default function CompaniesPage() {
     [allCompanies]
   );
 
-  const removeTarget = (slug: string) => {
-    setTargetSlugs((prev) => prev.filter((s) => s !== slug));
+  const removeTargetCompany = (slug: string) => {
+    removeTarget(slug);
   };
 
-  const addTarget = (company: Company) => {
-    if (!targetSlugs.includes(company.slug) && targetSlugs.length < 5) {
-      setTargetSlugs((prev) => [...prev, company.slug]);
-    }
+  const addTargetCompany = (company: Company) => {
+    addTarget(company.slug);
   };
 
   /* Filter + search */
@@ -207,7 +204,7 @@ export default function CompaniesPage() {
               >
                 {/* Remove button — always visible */}
                 <button
-                  onClick={(e) => { e.stopPropagation(); removeTarget(t.slug); }}
+                  onClick={(e) => { e.stopPropagation(); removeTargetCompany(t.slug); }}
                   className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-all"
                   title={`Remove ${t.name} from targets`}
                 >
@@ -311,7 +308,7 @@ export default function CompaniesPage() {
                     View Details
                   </Link>
                   <button
-                    onClick={(e) => { e.stopPropagation(); addTarget(c); }}
+                    onClick={(e) => { e.stopPropagation(); addTargetCompany(c); }}
                     disabled={isTargeted}
                     className={`flex-1 flex items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                       isTargeted

@@ -7,38 +7,45 @@ import DashboardLayout from "@/components/ui/DashboardLayout";
 import { CompanyLogoIcon } from "@/components/ui/CompanyLogos";
 import { Plus, Clock, Loader2, Info } from "lucide-react";
 import { useCompanies, useMatchScores } from "@/lib/api";
+import { useTargetCompanies } from "@/lib/useTargetCompanies";
 
 /* ── SVG Circular Progress Ring ─────────────────────────── */
-function ScoreRing({ pct, size = 48 }: { pct: number; size?: number }) {
-  const r = (size - 6) / 2;
+function ScoreRing({ pct, size = 52 }: { pct: number; size?: number }) {
+  const strokeW = 4.5;
+  const r = (size - strokeW * 2) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
   const hasScore = pct > 0;
+  const cx = size / 2;
+  const cy = size / 2;
 
   return (
-    <svg width={size} height={size} className="flex-shrink-0">
-      {/* Background circle */}
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E5E7EB" strokeWidth={4} />
-      {/* Progress arc */}
+    <svg width={size} height={size} className="flex-shrink-0" viewBox={`0 0 ${size} ${size}`}>
+      {/* Background track */}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E7EB" strokeWidth={strokeW} />
+      {/* Colored arc */}
       {hasScore && (
         <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="#10B981" strokeWidth={4}
+          cx={cx} cy={cy} r={r}
+          fill="none" stroke="#10B981" strokeWidth={strokeW}
           strokeDasharray={circ} strokeDashoffset={offset}
           strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          transform={`rotate(-90 ${cx} ${cy})`}
           className="transition-all duration-700"
         />
       )}
-      {/* Center text */}
-      <text
-        x={size / 2} y={size / 2}
-        textAnchor="middle" dominantBaseline="central"
-        className="font-bold"
-        style={{ fontSize: hasScore ? 13 : 14, fill: hasScore ? "#111827" : "#9CA3AF" }}
-      >
-        {hasScore ? `${pct}%` : "—"}
-      </text>
+      {/* Center label */}
+      {hasScore ? (
+        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
+          style={{ fontSize: 14, fontWeight: 700, fill: "#111827" }}>
+          {pct}%
+        </text>
+      ) : (
+        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
+          style={{ fontSize: 16, fontWeight: 700, fill: "#9CA3AF" }}>
+          &#x2014;
+        </text>
+      )}
     </svg>
   );
 }
@@ -98,7 +105,7 @@ function buildRoadmapCard(raw: Record<string, any>, score: number): RoadmapCard 
 export default function RoadmapPage() {
   const { data: rawCompanies, isLoading } = useCompanies();
   const { data: rawScores } = useMatchScores();
-  const [targetSlugs] = useState<string[]>(["google", "amazon", "microsoft"]);
+  const { targetSlugs } = useTargetCompanies();
 
   /* Build score lookup */
   const scoreMap = useMemo(() => {
@@ -135,7 +142,7 @@ export default function RoadmapPage() {
 
   return (
     <DashboardLayout title="My Roadmaps" subtitle="Your personalized preparation plans for target companies">
-      <div className="max-w-[900px] space-y-6">
+      <div className="max-w-[900px] mx-auto space-y-6">
 
         {/* ── Header badge ── */}
         <div className="flex items-center justify-between">
