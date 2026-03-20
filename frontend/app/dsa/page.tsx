@@ -8,6 +8,7 @@ import { useDSAProgress } from "@/lib/useDSAProgress";
 
 /* ── Types ─────────────────────────────────────────────── */
 interface Problem {
+  _id: string;           // unique key for React rendering
   lc_number: number;
   title: string;
   difficulty: "Easy" | "Medium" | "Hard";
@@ -104,15 +105,28 @@ export default function DSAPage() {
   /* Reset page when filters change */
   useEffect(() => { setPage(1); }, [activeTopic, search, diffFilter, unsolvedOnly, activeSheet]);
 
-  /* Build flat problem list */
+  /* Build flat problem list with unique _id per row */
   const allProblems = useMemo<Problem[]>(() => {
     if (!sheetData?.topics) return [];
     const list: Problem[] = [];
-    for (const [, problems] of Object.entries(sheetData.topics)) {
+    const seen = new Set<string>();
+    for (const [topicName, problems] of Object.entries(sheetData.topics)) {
       if (Array.isArray(problems)) {
-        for (const p of problems) {
-          list.push(p as Problem);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (problems as any[]).forEach((p: any, idx: number) => {
+          // Build a unique id: prefer lc_number, fallback to topic+index
+          let id = p.lc_number ? String(p.lc_number) : `${topicName}-${idx}`;
+          if (seen.has(id)) id = `${topicName}-${idx}-${id}`;
+          seen.add(id);
+          list.push({
+            ...p,
+            _id: id,
+            lc_number: (p.lc_number as number) || 0,
+            title: (p.title as string) || "Untitled",
+            difficulty: (p.difficulty as "Easy" | "Medium" | "Hard") || "Medium",
+            url: (p.url as string) || "",
+          } as Problem);
+        });
       }
     }
     return list;
@@ -311,7 +325,7 @@ export default function DSAPage() {
                   const checked = isSolved(p.lc_number);
                   return (
                     <div
-                      key={p.lc_number}
+                      key={p._id}
                       className={`grid grid-cols-[40px_50px_1fr_100px_100px_50px] items-center px-4 py-3 transition-colors ${
                         checked ? "bg-[#F0FDF4]/50" : "hover:bg-[#FAFAFA]"
                       }`}
