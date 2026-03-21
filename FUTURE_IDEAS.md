@@ -21,3 +21,10 @@ Ideas discussed but deferred for future implementation.
 - [ ] **8 LLM Agents** — GitHub Analyst, DSA Analyst, Resume Parser, Trend Watcher, Company Expert, Gap Finder, Roadmap Builder, Career Coach
 - [ ] **Roadmap page** (`/roadmap/[company]`) — Week-by-week preparation plan
 - [ ] **Career Coach page** — AI coaching messages
+
+## Learning Platforms (New Scopes)
+- [ ] **Aptitude Engine** — Pre-generated quiz system for logical, quantitative, verbal, and data interpretation topics (zero runtime LLM cost).
+- [ ] **D3.js Algorithm Visualizer** — Interactive animated visualizer for 28 core algorithms (Sorting, Searching, Two Pointers, Trees).
+- [ ] **LLM Explanations Cache** — Explanations generated on-demand by Agent 9 and cached for future users to minimize API costs.
+- [ ] **Career "What-If" Simulator** — Real-time slider-based calculator showing project score impact of hypothetical scenarios.
+- [ ] **Cheatsheets & Patterns Library** — Curated reference cards and templates (16 DSA patterns).
