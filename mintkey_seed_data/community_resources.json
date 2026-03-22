@@ -1,0 +1,167 @@
+{
+  "Reddit": {
+    "subreddits": [
+      {
+        "name": "r/leetcode",
+        "members": "400k+",
+        "focus": "LeetCode problem discussions, interview prep"
+      },
+      {
+        "name": "r/cscareerquestions",
+        "members": "900k+",
+        "focus": "Career advice, salary negotiations, interview experiences"
+      },
+      {
+        "name": "r/csMajors",
+        "members": "300k+",
+        "focus": "CS student discussions, internships"
+      },
+      {
+        "name": "r/ExperiencedDevs",
+        "members": "200k+",
+        "focus": "Senior developer discussions"
+      },
+      {
+        "name": "r/programming",
+        "members": "6M+",
+        "focus": "General programming news and discussions"
+      },
+      {
+        "name": "r/learnprogramming",
+        "members": "4M+",
+        "focus": "Beginner programming help"
+      },
+      {
+        "name": "r/webdev",
+        "members": "2M+",
+        "focus": "Web development discussions"
+      },
+      {
+        "name": "r/datascience",
+        "members": "1M+",
+        "focus": "Data science careers and learning"
+      },
+      {
+        "name": "r/IndianWorkplace",
+        "members": "100k+",
+        "focus": "Indian tech workplace discussions"
+      },
+      {
+        "name": "r/developersIndia",
+        "members": "300k+",
+        "focus": "Indian developer community"
+      }
+    ]
+  },
+  "Stack Overflow": {
+    "top_tags": [
+      "javascript",
+      "python",
+      "java",
+      "c#",
+      "php",
+      "android",
+      "html",
+      "css",
+      "node.js",
+      "reactjs",
+      "typescript",
+      "sql",
+      "c++",
+      "r",
+      "angular",
+      "flutter",
+      "django",
+      "spring-boot",
+      "docker",
+      "aws",
+      "git",
+      "linux",
+      "postgresql",
+      "mongodb",
+      "redis",
+      "kubernetes",
+      "graphql",
+      "next.js",
+      "tailwindcss",
+      "rust"
+    ]
+  },
+  "YouTube Channels": [
+    {
+      "name": "NeetCode",
+      "subscribers": "1M+",
+      "focus": "LeetCode solutions, DSA patterns"
+    },
+    {
+      "name": "Striver (take U forward)",
+      "subscribers": "800k+",
+      "focus": "Complete DSA course, interview prep"
+    },
+    {
+      "name": "Abdul Bari",
+      "subscribers": "1.5M+",
+      "focus": "Algorithms, DS fundamentals"
+    },
+    {
+      "name": "freeCodeCamp",
+      "subscribers": "10M+",
+      "focus": "Full courses on everything"
+    },
+    {
+      "name": "Fireship",
+      "subscribers": "3M+",
+      "focus": "Quick tech explainers, 100 seconds series"
+    },
+    {
+      "name": "Traversy Media",
+      "subscribers": "2.2M+",
+      "focus": "Web development tutorials"
+    },
+    {
+      "name": "The Coding Train",
+      "subscribers": "1.8M+",
+      "focus": "Creative coding, algorithms visualization"
+    },
+    {
+      "name": "CS Dojo",
+      "subscribers": "1.5M+",
+      "focus": "DSA, interview prep"
+    },
+    {
+      "name": "Back To Back SWE",
+      "subscribers": "350k+",
+      "focus": "Interview prep, detailed explanations"
+    },
+    {
+      "name": "Kunal Kushwaha",
+      "subscribers": "800k+",
+      "focus": "DSA, open source, DevOps"
+    },
+    {
+      "name": "Apna College",
+      "subscribers": "6M+",
+      "focus": "DSA in Hindi, web development"
+    },
+    {
+      "name": "Love Babbar",
+      "subscribers": "1.3M+",
+      "focus": "DSA sheet, placement prep"
+    },
+    {
+      "name": "CodeWithHarry",
+      "subscribers": "15M+",
+      "focus": "Programming tutorials in Hindi"
+    },
+    {
+      "name": "William Fiset",
+      "subscribers": "200k+",
+      "focus": "Graph theory, algorithms"
+    },
+    {
+      "name": "Errichto",
+      "subscribers": "200k+",
+      "focus": "Competitive programming"
+    }
+  ]
+}

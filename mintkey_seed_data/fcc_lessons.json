@@ -1,0 +1,88 @@
+{
+  "source": "freeCodeCamp",
+  "url": "https://www.freecodecamp.org",
+  "certifications": [
+    {
+      "name": "Responsive Web Design",
+      "hours": 300,
+      "lessons": [
+        "Learn HTML by Building a Cat Photo App",
+        "Learn Basic CSS by Building a Cafe Menu",
+        "Learn CSS Colors by Building Colored Markers",
+        "Learn HTML Forms by Building a Registration Form",
+        "Survey Form (Certification Project)",
+        "Learn the CSS Box Model by Building a Rothko Painting",
+        "Learn CSS Flexbox by Building a Photo Gallery",
+        "Learn Typography by Building a Nutrition Label",
+        "Learn Accessibility by Building a Quiz",
+        "Tribute Page (Project)",
+        "Learn CSS Pseudo Selectors by Building a Balance Sheet",
+        "Learn Intermediate CSS by Building a Picasso Painting",
+        "Learn Responsive Web Design by Building a Piano",
+        "Technical Documentation Page (Project)",
+        "Learn CSS Variables by Building a City Skyline",
+        "Learn CSS Grid by Building a Magazine",
+        "Product Landing Page (Project)",
+        "Personal Portfolio Webpage (Project)"
+      ]
+    },
+    {
+      "name": "JavaScript Algorithms and Data Structures",
+      "hours": 300,
+      "lessons": [
+        "Learn Introductory JavaScript by Building a Pyramid Generator",
+        "Learn Basic JavaScript by Building a Role Playing Game",
+        "Learn Form Validation by Building a Calorie Counter",
+        "Learn Basic String and Array Methods by Building a Music Player",
+        "Learn the Date Object by Building a Date Formatter",
+        "Palindrome Checker (Project)",
+        "Learn Modern JavaScript Methods by Building Football Team Cards",
+        "Learn localStorage by Building a Todo App",
+        "Learn Recursion by Building a Decimal to Binary Converter",
+        "Roman Numeral Converter (Project)",
+        "Learn Basic Algorithmic Thinking by Building a Number Sorter",
+        "Learn Advanced Array Methods by Building a Statistics Calculator",
+        "Learn Functional Programming by Building a Spreadsheet",
+        "Telephone Number Validator (Project)",
+        "Learn Basic OOP by Building a Shopping Cart",
+        "Learn Intermediate OOP by Building a Platformer Game",
+        "Learn Intermediate Algorithmic Thinking by Building a Dice Game",
+        "Cash Register (Project)",
+        "Learn Fetch and Promises by Building an fCC Authors Page",
+        "Learn Asynchronous Programming by Building an fCC Forum Leaderboard",
+        "Pokemon Search App (Project)"
+      ]
+    },
+    {
+      "name": "Front End Development Libraries",
+      "hours": 300,
+      "lessons": [
+        "Learn Bootstrap",
+        "Learn jQuery",
+        "Learn SASS",
+        "Learn React",
+        "Learn Redux",
+        "Learn React and Redux",
+        "Random Quote Machine (Project)",
+        "Markdown Previewer (Project)",
+        "Drum Machine (Project)",
+        "JavaScript Calculator (Project)",
+        "25 + 5 Clock (Project)"
+      ]
+    },
+    {
+      "name": "Back End Development and APIs",
+      "hours": 300,
+      "lessons": [
+        "Managing Packages with NPM",
+        "Basic Node and Express",
+        "MongoDB and Mongoose",
+        "Timestamp Microservice (Project)",
+        "Request Header Parser (Project)",
+        "URL Shortener (Project)",
+        "Exercise Tracker (Project)",
+        "File Metadata Microservice (Project)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "platforms": {
+    "MIT OpenCourseWare": {
+      "url": "https://ocw.mit.edu",
+      "type": "Free",
+      "cs_courses": [
+        "6.0001 \u2014 Introduction to CS and Programming Using Python",
+        "6.006 \u2014 Introduction to Algorithms",
+        "6.046J \u2014 Design and Analysis of Algorithms",
+        "6.042J \u2014 Mathematics for Computer Science",
+        "6.034 \u2014 Artificial Intelligence",
+        "6.S081 \u2014 Operating System Engineering",
+        "6.824 \u2014 Distributed Systems",
+        "6.858 \u2014 Computer Systems Security",
+        "6.031 \u2014 Software Construction",
+        "6.005 \u2014 Software Construction (older)",
+        "6.828 \u2014 Operating Systems",
+        "6.172 \u2014 Performance Engineering of Software Systems"
+      ]
+    },
+    "Khan Academy": {
+      "url": "https://www.khanacademy.org/computing",
+      "type": "Free",
+      "tracks": [
+        "Computer Programming (JS, HTML/CSS)",
+        "Computer Science (algorithms)",
+        "AP Computer Science Principles",
+        "Hour of Code",
+        "Pixar in a Box"
+      ]
+    },
+    "NPTEL": {
+      "url": "https://nptel.ac.in",
+      "type": "Free (Indian IITs/IISc)",
+      "cs_courses": [
+        "Programming, Data Structures and Algorithms Using Python (IIT Madras)",
+        "Data Structures and Algorithms (IIT Delhi)",
+        "Design and Analysis of Algorithms (IIT Bombay)",
+        "Database Management System (IIT Kharagpur)",
+        "Computer Networks (IIT Kharagpur)",
+        "Operating Systems (IIT Bombay)",
+        "Compiler Design (IIT Kanpur)",
+        "Machine Learning (IISc Bangalore)",
+        "Deep Learning (IIT Madras)",
+        "Cloud Computing (IIT Kharagpur)",
+        "Software Engineering (IIT Bombay)",
+        "Discrete Mathematics (IIT Roorkee)"
+      ]
+    },
+    "Coursera": {
+      "url": "https://www.coursera.org",
+      "type": "Freemium",
+      "top_specializations": [
+        "Algorithms Specialization (Stanford)",
+        "Data Structures and Algorithms Specialization (UCSD)",
+        "Machine Learning Specialization (Andrew Ng)",
+        "Deep Learning Specialization (Andrew Ng)",
+        "Google IT Support Professional Certificate",
+        "AWS Cloud Solutions Architect",
+        "Meta Front-End Developer Professional Certificate",
+        "IBM Full Stack Software Developer",
+        "Computer Science: Programming with a Purpose (Princeton)"
+      ]
+    },
+    "edX": {
+      "url": "https://www.edx.org",
+      "type": "Freemium",
+      "top_courses": [
+        "CS50: Introduction to Computer Science (Harvard)",
+        "Computational Thinking using Python (MIT)",
+        "Data Science MicroMasters (UC San Diego)",
+        "Algorithms and Data Structures (Microsoft)",
+        "Introduction to Linux (Linux Foundation)",
+        "Web Development with React (Microsoft)",
+        "Computer Science Essentials for Software Development (UPenn)"
+      ]
+    },
+    "freeCodeCamp": {
+      "url": "https://www.freecodecamp.org",
+      "type": "Free",
+      "certifications": [
+        {
+          "name": "Responsive Web Design",
+          "hours": 300
+        },
+        {
+          "name": "JavaScript Algorithms and Data Structures",
+          "hours": 300
+        },
+        {
+          "name": "Front End Development Libraries",
+          "hours": 300
+        },
+        {
+          "name": "Data Visualization",
+          "hours": 300
+        },
+        {
+          "name": "Back End Development and APIs",
+          "hours": 300
+        },
+        {
+          "name": "Quality Assurance",
+          "hours": 300
+        },
+        {
+          "name": "Scientific Computing with Python",
+          "hours": 300
+        },
+        {
+          "name": "Data Analysis with Python",
+          "hours": 300
+        },
+        {
+          "name": "Information Security",
+          "hours": 300
+        },
+        {
+          "name": "Machine Learning with Python",
+          "hours": 300
+        },
+        {
+          "name": "Relational Database",
+          "hours": 300
+        },
+        {
+          "name": "College Algebra with Python",
+          "hours": 300
+        }
+      ]
+    },
+    "The Odin Project": {
+      "url": "https://www.theodinproject.com",
+      "type": "Free",
+      "paths": [
+        {
+          "name": "Foundations",
+          "topics": [
+            "HTML",
+            "CSS",
+            "JavaScript Basics",
+            "Git"
+          ]
+        },
+        {
+          "name": "Full Stack JavaScript",
+          "topics": [
+            "Intermediate HTML/CSS",
+            "JavaScript",
+            "React",
+            "Node.js",
+            "Databases",
+            "Testing"
+          ]
+        },
+        {
+          "name": "Full Stack Ruby on Rails",
+          "topics": [
+            "Ruby",
+            "Rails",
+            "Databases",
+            "Advanced Ruby",
+            "JavaScript"
+          ]
+        }
+      ]
+    }
+  }
+}

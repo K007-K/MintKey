@@ -1,0 +1,499 @@
+{
+  "source": "MintKey mock interview scenarios",
+  "total": 5,
+  "scenarios": [
+    {
+      "company": "Amazon",
+      "role": "SDE-1",
+      "duration_minutes": 60,
+      "total_rounds": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "name": "Online Assessment",
+          "duration_minutes": 90,
+          "type": "coding",
+          "description": "2 coding problems (1 Medium, 1 Hard) + 2 work simulation questions. 90 minutes total.",
+          "problems": [
+            {
+              "title": "Optimal Utilization",
+              "difficulty": "Medium",
+              "topic": "Two Pointers / Sorting",
+              "description": "Given two lists of pairs [id, value], find pairs (one from each list) whose values sum is closest to a target."
+            },
+            {
+              "title": "Min Cost to Connect All Nodes",
+              "difficulty": "Hard",
+              "topic": "Graphs / MST",
+              "description": "Given n nodes and a list of edges with costs, find the minimum cost to connect all nodes. Some nodes may already be connected."
+            }
+          ],
+          "tips": [
+            "Run all test cases before submitting",
+            "Work simulation: choose answers that show Customer Obsession and Ownership",
+            "Time management: spend max 40 min per coding problem"
+          ]
+        },
+        {
+          "round": 2,
+          "name": "Phone Screen",
+          "duration_minutes": 45,
+          "type": "coding+behavioral",
+          "description": "1 coding problem (Medium) + 2 LP behavioral questions. Shared IDE.",
+          "problems": [
+            {
+              "title": "LRU Cache",
+              "difficulty": "Medium",
+              "topic": "Hash Map + Doubly Linked List",
+              "description": "Design and implement a data structure for Least Recently Used cache."
+            }
+          ],
+          "behavioral_questions": [
+            "Tell me about a time you took ownership beyond your role (Ownership LP)",
+            "Describe a time you simplified a complex process (Invent and Simplify LP)"
+          ],
+          "tips": [
+            "Think out loud \u2014 the interviewer wants to see your thought process",
+            "Ask clarifying questions before coding",
+            "Leave 15 min for behavioral questions"
+          ]
+        },
+        {
+          "round": 3,
+          "name": "Virtual Onsite \u2014 Coding",
+          "duration_minutes": 55,
+          "type": "coding",
+          "description": "2 Medium/Hard problems in 55 minutes. Focus on System Design at scale.",
+          "problems": [
+            {
+              "title": "Meeting Rooms II",
+              "difficulty": "Medium",
+              "topic": "Intervals / Heap",
+              "description": "Given meeting time intervals, find the minimum number of conference rooms required."
+            },
+            {
+              "title": "Word Ladder",
+              "difficulty": "Hard",
+              "topic": "BFS / Graph",
+              "description": "Transform one word into another by changing one letter at a time."
+            }
+          ],
+          "tips": [
+            "Optimize for time complexity \u2014 Amazon cares about scale",
+            "Write clean, production-quality code",
+            "Handle edge cases explicitly"
+          ]
+        },
+        {
+          "round": 4,
+          "name": "Bar Raiser",
+          "duration_minutes": 55,
+          "type": "behavioral+system_design",
+          "description": "Deep behavioral dive (3 LPs) + system design component. This interviewer has veto power.",
+          "behavioral_questions": [
+            "Tell me about your most impactful project (Deliver Results)",
+            "Describe a time you disagreed with your manager (Have Backbone, Disagree and Commit)",
+            "Tell me about a time you made a mistake. How did you fix it? (Earn Trust)"
+          ],
+          "system_design_topic": "Design a URL shortener like bit.ly",
+          "tips": [
+            "Bar Raiser evaluates culture fit \u2014 be authentic",
+            "Show numbers and metrics in every STAR answer",
+            "For system design: start with requirements, not solutions"
+          ]
+        }
+      ]
+    },
+    {
+      "company": "Google",
+      "role": "L3 (New Grad)",
+      "duration_minutes": 60,
+      "total_rounds": 5,
+      "rounds": [
+        {
+          "round": 1,
+          "name": "Phone Screen",
+          "duration_minutes": 45,
+          "type": "coding",
+          "description": "1-2 coding problems on Google Docs/shared IDE. Focus on clean code and optimal solutions.",
+          "problems": [
+            {
+              "title": "License Key Formatting",
+              "difficulty": "Easy",
+              "topic": "Strings",
+              "description": "Given a license key string, reformat it so groups have exactly K characters."
+            },
+            {
+              "title": "Longest Substring Without Repeating Characters",
+              "difficulty": "Medium",
+              "topic": "Sliding Window",
+              "description": "Find the length of the longest substring without repeating characters."
+            }
+          ],
+          "tips": [
+            "Google uses Google Docs \u2014 practice coding without autocomplete",
+            "Talk through your approach before coding",
+            "Consider multiple approaches and discuss tradeoffs"
+          ]
+        },
+        {
+          "round": 2,
+          "name": "Onsite \u2014 Coding 1",
+          "duration_minutes": 45,
+          "type": "coding",
+          "description": "Algorithm-heavy. Expect graph/tree problems.",
+          "problems": [
+            {
+              "title": "Number of Islands",
+              "difficulty": "Medium",
+              "topic": "BFS/DFS",
+              "description": "Given a 2D grid of '1's and '0's, count the number of islands."
+            },
+            {
+              "title": "Serialize and Deserialize Binary Tree",
+              "difficulty": "Hard",
+              "topic": "Trees",
+              "description": "Design an algorithm to serialize and deserialize a binary tree."
+            }
+          ],
+          "tips": [
+            "Optimal time complexity is expected \u2014 brute force won't pass",
+            "Write helper functions for cleaner code",
+            "Test with edge cases verbally"
+          ]
+        },
+        {
+          "round": 3,
+          "name": "Onsite \u2014 Coding 2",
+          "duration_minutes": 45,
+          "type": "coding",
+          "description": "Dynamic programming and advanced data structures.",
+          "problems": [
+            {
+              "title": "Coin Change",
+              "difficulty": "Medium",
+              "topic": "Dynamic Programming",
+              "description": "Find the minimum number of coins to make a given amount."
+            },
+            {
+              "title": "Design HashMap",
+              "difficulty": "Easy-Medium",
+              "topic": "Design / Hashing",
+              "description": "Design a HashMap without using built-in hash table libraries."
+            }
+          ],
+          "tips": [
+            "Explain your DP recurrence relation clearly",
+            "Time complexity analysis is mandatory",
+            "Ask about constraints: input size determines approach"
+          ]
+        },
+        {
+          "round": 4,
+          "name": "Onsite \u2014 System Design",
+          "duration_minutes": 45,
+          "type": "system_design",
+          "description": "For L3, this might be a lighter design question or a coding design question.",
+          "system_design_topic": "Design a web crawler",
+          "tips": [
+            "Start with functional requirements",
+            "Discuss scale: how many pages per day?",
+            "Cover: URL frontier, politeness, deduplication",
+            "Draw diagrams \u2014 Google interviewers love visual communication"
+          ]
+        },
+        {
+          "round": 5,
+          "name": "Onsite \u2014 Googliness/Behavioral",
+          "duration_minutes": 45,
+          "type": "behavioral",
+          "description": "Full behavioral round. Tests culture fit, collaboration, intellectual humility.",
+          "behavioral_questions": [
+            "Tell me about a time you failed and what you learned",
+            "Describe a time you dealt with ambiguity",
+            "Tell me about a time you had to influence someone without authority",
+            "Describe a situation where you had to disagree and commit",
+            "Tell me about your proudest technical accomplishment"
+          ],
+          "tips": [
+            "Google values humility \u2014 admit mistakes genuinely",
+            "Show curiosity and love of learning",
+            "Don't be arrogant about your achievements"
+          ]
+        }
+      ]
+    },
+    {
+      "company": "Flipkart",
+      "role": "SDE-1",
+      "duration_minutes": 45,
+      "total_rounds": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "name": "Online Coding Test",
+          "duration_minutes": 90,
+          "type": "coding",
+          "description": "3 coding problems on HackerEarth/CodeNation platform.",
+          "problems": [
+            {
+              "title": "Sorted Rotated Array Search",
+              "difficulty": "Medium",
+              "topic": "Binary Search",
+              "description": "Search for a target in a rotated sorted array."
+            },
+            {
+              "title": "Minimum Operations to Reduce to Zero",
+              "difficulty": "Medium",
+              "topic": "Sliding Window / Prefix Sum",
+              "description": "Find minimum operations to reduce array sum to zero."
+            },
+            {
+              "title": "Largest Rectangle in Histogram",
+              "difficulty": "Hard",
+              "topic": "Monotonic Stack",
+              "description": "Find the area of the largest rectangle in a histogram."
+            }
+          ],
+          "tips": [
+            "Flipkart problems are LeetCode Medium-Hard level",
+            "Partial scoring \u2014 submit even incomplete solutions",
+            "Time complexity matters \u2014 O(n\u00b2) often TLEs"
+          ]
+        },
+        {
+          "round": 2,
+          "name": "Machine Coding Round",
+          "duration_minutes": 90,
+          "type": "system_design",
+          "description": "Implement a working system in 90 minutes. Real IDE, runnable code expected.",
+          "system_design_topic": "Design a Parking Lot System \u2014 implement classes for ParkingLot, Vehicle, Ticket, PaymentProcessor with proper OOP and SOLID principles.",
+          "tips": [
+            "Focus on clean OOP design \u2014 use interfaces and abstract classes",
+            "Must compile and run \u2014 they may test your code",
+            "Follow SOLID principles \u2014 Single Responsibility is key",
+            "Have a working demo ready in 60 min, polish in remaining 30"
+          ]
+        },
+        {
+          "round": 3,
+          "name": "Problem Solving + DS/Algo",
+          "duration_minutes": 60,
+          "type": "coding",
+          "description": "2 coding problems. Whiteboard/shared IDE. Interviewer watches you code live.",
+          "problems": [
+            {
+              "title": "Clone Graph",
+              "difficulty": "Medium",
+              "topic": "BFS/DFS",
+              "description": "Deep copy a graph with random pointers."
+            },
+            {
+              "title": "Merge K Sorted Lists",
+              "difficulty": "Hard",
+              "topic": "Heap / Divide and Conquer",
+              "description": "Merge k sorted linked lists into one sorted list."
+            }
+          ],
+          "tips": [
+            "Think out loud \u2014 silent coding is a red flag at Flipkart",
+            "Discuss time and space complexity explicitly",
+            "Handle edge cases before being asked"
+          ]
+        },
+        {
+          "round": 4,
+          "name": "Hiring Manager Round",
+          "duration_minutes": 45,
+          "type": "behavioral",
+          "description": "Culture fit + past project deep dive.",
+          "behavioral_questions": [
+            "Tell me about a product you built from scratch",
+            "Describe a time you debugged a critical production issue",
+            "What's the most complex system you've worked on?",
+            "Why Flipkart and not other companies?"
+          ],
+          "tips": [
+            "Flipkart values builder DNA \u2014 show you can build, not just code",
+            "Know Flipkart's tech stack (Java, Kafka, MySQL, Kubernetes)",
+            "Ask thoughtful questions about their architecture"
+          ]
+        }
+      ]
+    },
+    {
+      "company": "TCS",
+      "role": "Digital (Higher Package)",
+      "duration_minutes": 45,
+      "total_rounds": 3,
+      "rounds": [
+        {
+          "round": 1,
+          "name": "TCS NQT (National Qualifier Test)",
+          "duration_minutes": 180,
+          "type": "aptitude+coding",
+          "description": "Part A: Aptitude (60 min) \u2014 Quant, Logical, Verbal, English. Part B: Coding (60-90 min) \u2014 2 coding problems in C/C++/Java/Python.",
+          "problems": [
+            {
+              "title": "Palindrome Check with Modifications",
+              "difficulty": "Easy",
+              "topic": "Strings",
+              "description": "Check if a string can become palindrome by removing at most one character."
+            },
+            {
+              "title": "Find the Shortest Path in a Grid",
+              "difficulty": "Medium",
+              "topic": "BFS",
+              "description": "In a grid with obstacles, find shortest path from top-left to bottom-right."
+            }
+          ],
+          "tips": [
+            "Aptitude section is elimination \u2014 accuracy over speed",
+            "Coding: focus on correctness first, optimization second",
+            "TCS NQT score determines which track you're placed in (Ninja vs Digital)",
+            "Digital cutoff is typically higher \u2014 aim for 80%+ in aptitude"
+          ]
+        },
+        {
+          "round": 2,
+          "name": "Technical Interview",
+          "duration_minutes": 45,
+          "type": "technical",
+          "description": "CS fundamentals \u2014 DBMS, OS, OOP, CN. 1-2 code-on-paper questions.",
+          "behavioral_questions": [
+            "Explain polymorphism with a real-world example",
+            "What is normalization? Explain 1NF, 2NF, 3NF",
+            "Write SQL to find the 2nd highest salary",
+            "Explain the difference between TCP and UDP",
+            "What is deadlock? How can it be prevented?"
+          ],
+          "tips": [
+            "Brush up on CS fundamentals \u2014 they ask textbook questions",
+            "Be able to write SQL queries on paper",
+            "Know your resume projects inside out \u2014 they'll ask about them",
+            "Stay calm \u2014 TCS interviewers are usually friendly"
+          ]
+        },
+        {
+          "round": 3,
+          "name": "Managerial + HR Round",
+          "duration_minutes": 30,
+          "type": "behavioral",
+          "description": "Behavioral questions about teamwork, adaptability, and why TCS.",
+          "behavioral_questions": [
+            "Tell me about your biggest college project",
+            "Why TCS specifically?",
+            "Are you willing to relocate?",
+            "Where do you see yourself in 5 years?",
+            "Tell me about a time you worked under pressure"
+          ],
+          "tips": [
+            "Research TCS's recent projects and initiatives",
+            "Express willingness to relocate and work flexible hours",
+            "Show enthusiasm for learning and growing within TCS",
+            "Keep answers concise \u2014 2 minutes max per question"
+          ]
+        }
+      ]
+    },
+    {
+      "company": "Razorpay",
+      "role": "SDE-1",
+      "duration_minutes": 60,
+      "total_rounds": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "name": "Online Assessment",
+          "duration_minutes": 75,
+          "type": "coding",
+          "description": "2-3 coding problems. Platform: HackerEarth. Focus on problem-solving speed.",
+          "problems": [
+            {
+              "title": "Valid Parentheses with Wildcards",
+              "difficulty": "Medium",
+              "topic": "Stack / Greedy",
+              "description": "Given a string with '(', ')', and '*', determine if it's valid."
+            },
+            {
+              "title": "Maximum Sum Subsequence No Two Adjacent",
+              "difficulty": "Medium",
+              "topic": "Dynamic Programming",
+              "description": "Find the maximum sum of a subsequence where no two elements are adjacent."
+            }
+          ],
+          "tips": [
+            "Razorpay values clean, readable code",
+            "Handle edge cases \u2014 fintech can't afford bugs",
+            "Focus on correctness over speed"
+          ]
+        },
+        {
+          "round": 2,
+          "name": "DSA Round 1",
+          "duration_minutes": 60,
+          "type": "coding",
+          "description": "1 Medium + 1 Hard problem. Shared IDE. Heavy focus on trees, graphs, DP.",
+          "problems": [
+            {
+              "title": "Binary Tree Maximum Path Sum",
+              "difficulty": "Hard",
+              "topic": "Trees / DFS",
+              "description": "Find the maximum path sum in a binary tree. Path can start and end at any node."
+            },
+            {
+              "title": "Implement LFU Cache",
+              "difficulty": "Hard",
+              "topic": "Design / Hash Map + DLL",
+              "description": "Design a Least Frequently Used cache with O(1) operations."
+            }
+          ],
+          "tips": [
+            "Razorpay asks harder problems than average \u2014 prepare LeetCode Hard",
+            "Write modular code \u2014 they review code quality",
+            "Discuss space-time tradeoffs thoroughly"
+          ]
+        },
+        {
+          "round": 3,
+          "name": "DSA Round 2 + System Design",
+          "duration_minutes": 60,
+          "type": "coding+system_design",
+          "description": "1 coding problem + 1 system design discussion.",
+          "problems": [
+            {
+              "title": "Rate Limiter",
+              "difficulty": "Medium",
+              "topic": "Design / Sliding Window",
+              "description": "Implement a rate limiter that allows N requests per T seconds."
+            }
+          ],
+          "system_design_topic": "Design a payment processing system \u2014 handle idempotency, retries, and double-spend prevention.",
+          "tips": [
+            "Fintech system design: focus on consistency, idempotency, audit trails",
+            "Razorpay cares deeply about reliability \u2014 discuss failure modes",
+            "Know about distributed transactions and eventual consistency"
+          ]
+        },
+        {
+          "round": 4,
+          "name": "Culture Fit + Hiring Manager",
+          "duration_minutes": 45,
+          "type": "behavioral",
+          "description": "Deep dive into past work + culture alignment.",
+          "behavioral_questions": [
+            "What's the hardest bug you've ever fixed?",
+            "Tell me about a time you built something you're proud of",
+            "How do you handle conflicting priorities?",
+            "What do you know about Razorpay's products?"
+          ],
+          "tips": [
+            "Know Razorpay's products: Payment Gateway, RazorpayX, Payroll",
+            "Show passion for fintech and building reliable systems",
+            "Ask about their engineering culture and challenges"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "categories": {
+    "Articles & Tutorials": [
+      {
+        "title": "14 Patterns to Ace Any Coding Interview",
+        "url": "https://hackernoon.com/14-patterns-to-ace-any-coding-interview-question-c5bb3357f6ed",
+        "source": "HackerNoon",
+        "topic": "patterns"
+      },
+      {
+        "title": "Grokking the System Design Interview",
+        "url": "https://www.designgurus.io/course/grokking-the-system-design-interview",
+        "source": "Design Gurus",
+        "topic": "system_design"
+      },
+      {
+        "title": "Tech Interview Handbook",
+        "url": "https://www.techinterviewhandbook.org/",
+        "source": "Yangshun",
+        "topic": "interview_prep"
+      },
+      {
+        "title": "Big-O Cheat Sheet",
+        "url": "https://www.bigocheatsheet.com/",
+        "source": "bigocheatsheet.com",
+        "topic": "complexity"
+      },
+      {
+        "title": "Visualgo \u2014 Algorithm Visualizations",
+        "url": "https://visualgo.net/",
+        "source": "NUS",
+        "topic": "visualization"
+      },
+      {
+        "title": "LeetCode Patterns by Sean Prashad",
+        "url": "https://seanprashad.com/leetcode-patterns/",
+        "source": "Sean Prashad",
+        "topic": "patterns"
+      },
+      {
+        "title": "System Design Primer (GitHub)",
+        "url": "https://github.com/donnemartin/system-design-primer",
+        "source": "GitHub",
+        "topic": "system_design"
+      },
+      {
+        "title": "Roadmap.sh \u2014 Developer Roadmaps",
+        "url": "https://roadmap.sh/",
+        "source": "roadmap.sh",
+        "topic": "career"
+      },
+      {
+        "title": "GeeksforGeeks \u2014 Company Preparation",
+        "url": "https://www.geeksforgeeks.org/company-preparation/",
+        "source": "GFG",
+        "topic": "company_prep"
+      },
+      {
+        "title": "InterviewBit \u2014 Coding Interview Questions",
+        "url": "https://www.interviewbit.com/coding-interview-questions/",
+        "source": "InterviewBit",
+        "topic": "interview_prep"
+      }
+    ],
+    "Cheat Sheets": [
+      {
+        "title": "Python Cheat Sheet",
+        "url": "https://www.pythoncheatsheet.org/",
+        "topic": "python"
+      },
+      {
+        "title": "JavaScript Cheat Sheet",
+        "url": "https://htmlcheatsheet.com/js/",
+        "topic": "javascript"
+      },
+      {
+        "title": "React Cheat Sheet",
+        "url": "https://devhints.io/react",
+        "topic": "react"
+      },
+      {
+        "title": "SQL Cheat Sheet",
+        "url": "https://learnsql.com/blog/sql-basics-cheat-sheet/",
+        "topic": "sql"
+      },
+      {
+        "title": "Git Cheat Sheet",
+        "url": "https://education.github.com/git-cheat-sheet-education.pdf",
+        "topic": "git"
+      },
+      {
+        "title": "Linux Commands Cheat Sheet",
+        "url": "https://www.guru99.com/linux-commands-cheat-sheet.html",
+        "topic": "linux"
+      },
+      {
+        "title": "Data Structures Cheat Sheet",
+        "url": "https://www.interviewcake.com/data-structures-reference",
+        "topic": "dsa"
+      },
+      {
+        "title": "CSS Flexbox Cheat Sheet",
+        "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/",
+        "topic": "css"
+      },
+      {
+        "title": "Docker Cheat Sheet",
+        "url": "https://dockerlabs.collabnix.com/docker/cheatsheet/",
+        "topic": "docker"
+      },
+      {
+        "title": "System Design Cheat Sheet",
+        "url": "https://gist.github.com/vasanthk/485d1c25737e8e72759f",
+        "topic": "system_design"
+      }
+    ],
+    "Tools & Platforms": [
+      {
+        "title": "LeetCode",
+        "url": "https://leetcode.com",
+        "category": "dsa_practice"
+      },
+      {
+        "title": "NeetCode",
+        "url": "https://neetcode.io",
+        "category": "dsa_practice"
+      },
+      {
+        "title": "Striver's A2Z Sheet",
+        "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2",
+        "category": "dsa_practice"
+      },
+      {
+        "title": "CSES Problem Set",
+        "url": "https://cses.fi/problemset/",
+        "category": "competitive"
+      },
+      {
+        "title": "CodeChef",
+        "url": "https://www.codechef.com",
+        "category": "competitive"
+      },
+      {
+        "title": "HackerRank",
+        "url": "https://www.hackerrank.com",
+        "category": "dsa_practice"
+      },
+      {
+        "title": "Frontend Mentor",
+        "url": "https://www.frontendmentor.io",
+        "category": "projects"
+      },
+      {
+        "title": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org",
+        "category": "courses"
+      },
+      {
+        "title": "The Odin Project",
+        "url": "https://www.theodinproject.com",
+        "category": "courses"
+      },
+      {
+        "title": "Excalidraw",
+        "url": "https://excalidraw.com",
+        "category": "diagramming"
+      },
+      {
+        "title": "Replit",
+        "url": "https://replit.com",
+        "category": "online_ide"
+      },
+      {
+        "title": "GitHub",
+        "url": "https://github.com",
+        "category": "version_control"
+      }
+    ]
+  }
+}

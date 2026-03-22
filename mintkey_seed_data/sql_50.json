@@ -1,0 +1,271 @@
+{
+  "source": "LeetCode SQL 50 Study Plan",
+  "url": "https://leetcode.com/studyplan/top-sql-50/",
+  "topics": {
+    "Select": [
+      {
+        "title": "Recyclable and Low Fat Products",
+        "lc": 1757,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Find Customer Referee",
+        "lc": 584,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Big Countries",
+        "lc": 595,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Article Views I",
+        "lc": 1148,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Invalid Tweets",
+        "lc": 1683,
+        "difficulty": "Easy"
+      }
+    ],
+    "Basic Joins": [
+      {
+        "title": "Replace Employee ID With Unique Identifier",
+        "lc": 1378,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Product Sales Analysis I",
+        "lc": 1068,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Customer Who Visited but Did Not Make Any Transactions",
+        "lc": 1581,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Rising Temperature",
+        "lc": 197,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Average Time of Process per Machine",
+        "lc": 1661,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Employee Bonus",
+        "lc": 577,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Students and Examinations",
+        "lc": 1280,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Managers with at Least 5 Direct Reports",
+        "lc": 570,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Confirmation Rate",
+        "lc": 1934,
+        "difficulty": "Medium"
+      }
+    ],
+    "Basic Aggregate Functions": [
+      {
+        "title": "Not Boring Movies",
+        "lc": 620,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Average Selling Price",
+        "lc": 1251,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Project Employees I",
+        "lc": 1075,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Percentage of Users Attended a Contest",
+        "lc": 1633,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Queries Quality and Percentage",
+        "lc": 1211,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Monthly Transactions I",
+        "lc": 1193,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Immediate Food Delivery II",
+        "lc": 1174,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Game Play Analysis IV",
+        "lc": 550,
+        "difficulty": "Medium"
+      }
+    ],
+    "Sorting and Grouping": [
+      {
+        "title": "Number of Unique Subjects Taught",
+        "lc": 2356,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "User Activity for Past 30 Days",
+        "lc": 1141,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Product Sales Analysis III",
+        "lc": 1070,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Classes More Than 5 Students",
+        "lc": 596,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Find Followers Count",
+        "lc": 1729,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Biggest Single Number",
+        "lc": 619,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Customers Who Bought All Products",
+        "lc": 1045,
+        "difficulty": "Medium"
+      }
+    ],
+    "Advanced Select and Joins": [
+      {
+        "title": "The Number of Employees Which Report to Each Manager",
+        "lc": 1731,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Primary Department for Each Employee",
+        "lc": 1789,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Triangle Judgement",
+        "lc": 610,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Consecutive Numbers",
+        "lc": 180,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Product Price at a Given Date",
+        "lc": 1164,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Last Person to Fit in the Bus",
+        "lc": 1204,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Count Salary Categories",
+        "lc": 1907,
+        "difficulty": "Medium"
+      }
+    ],
+    "Subqueries": [
+      {
+        "title": "Employees Whose Manager Left the Company",
+        "lc": 1978,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Exchange Seats",
+        "lc": 626,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Movie Rating",
+        "lc": 1341,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Restaurant Growth",
+        "lc": 1321,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Friend Requests II",
+        "lc": 602,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Investments in 2016",
+        "lc": 585,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Department Top Three Salaries",
+        "lc": 185,
+        "difficulty": "Hard"
+      }
+    ],
+    "Advanced String / Regex": [
+      {
+        "title": "Fix Names in a Table",
+        "lc": 1667,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Patients With a Condition",
+        "lc": 1527,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Delete Duplicate Emails",
+        "lc": 196,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Second Highest Salary",
+        "lc": 176,
+        "difficulty": "Medium"
+      },
+      {
+        "title": "Group Sold Products By The Date",
+        "lc": 1484,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "List the Products Ordered in a Period",
+        "lc": 1327,
+        "difficulty": "Easy"
+      },
+      {
+        "title": "Find Users With Valid E-Mails",
+        "lc": 1517,
+        "difficulty": "Easy"
+      }
+    ]
+  },
+  "total": 50
+}

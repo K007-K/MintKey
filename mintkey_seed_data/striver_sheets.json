@@ -1,0 +1,84 @@
+{
+  "source": "Striver (TakeUForward)",
+  "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2",
+  "sheets": [
+    {
+      "name": "Striver A2Z DSA Sheet",
+      "total_problems": 454,
+      "topics": [
+        {
+          "name": "Learn the basics",
+          "count": 31
+        },
+        {
+          "name": "Learn Important Sorting Techniques",
+          "count": 7
+        },
+        {
+          "name": "Solve Problems on Arrays [Easy -> Medium -> Hard]",
+          "count": 40
+        },
+        {
+          "name": "Binary Search [1D, 2D Arrays, Search Space]",
+          "count": 32
+        },
+        {
+          "name": "Strings [Basic and Medium]",
+          "count": 15
+        },
+        {
+          "name": "Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]",
+          "count": 31
+        },
+        {
+          "name": "Recursion [PatternWise]",
+          "count": 25
+        },
+        {
+          "name": "Bit Manipulation [Concepts & Problems]",
+          "count": 18
+        },
+        {
+          "name": "Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]",
+          "count": 30
+        },
+        {
+          "name": "Sliding Window & Two Pointer Combined Problems",
+          "count": 12
+        },
+        {
+          "name": "Heaps [Learning, Medium, Hard Problems]",
+          "count": 17
+        },
+        {
+          "name": "Greedy Algorithms [Easy, Medium/Hard]",
+          "count": 16
+        },
+        {
+          "name": "Binary Trees [Traversals, Medium and Hard Problems]",
+          "count": 39
+        },
+        {
+          "name": "Binary Search Trees [Concept and Problems]",
+          "count": 16
+        },
+        {
+          "name": "Graphs [Concepts & Problems]",
+          "count": 53
+        },
+        {
+          "name": "Dynamic Programming [Patterns and Problems]",
+          "count": 56
+        },
+        {
+          "name": "Tries",
+          "count": 7
+        },
+        {
+          "name": "Strings (Advanced)",
+          "count": 9
+        }
+      ]
+    }
+  ]
+}

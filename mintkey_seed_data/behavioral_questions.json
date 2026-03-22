@@ -1,0 +1,813 @@
+{
+  "source": "Curated for MintKey \u2014 behavioral interview question bank",
+  "total": 30,
+  "frameworks": {
+    "amazon_lp": {
+      "count": 10,
+      "description": "Amazon 16 Leadership Principles \u2014 STAR format required"
+    },
+    "googliness": {
+      "count": 5,
+      "description": "Google Googliness \u2014 humility, collaboration, curiosity"
+    },
+    "growth_mindset": {
+      "count": 3,
+      "description": "Microsoft Growth Mindset \u2014 learning from failure"
+    },
+    "builder_dna": {
+      "count": 4,
+      "description": "Indian startup culture \u2014 ownership, speed, product thinking"
+    },
+    "teamwork": {
+      "count": 5,
+      "description": "IT services \u2014 communication, team skills, process"
+    },
+    "general": {
+      "count": 3,
+      "description": "Cross-company general behavioral questions"
+    }
+  },
+  "questions": [
+    {
+      "question_text": "Tell me about a time you went above and beyond for a customer or end user.",
+      "framework": "amazon_lp",
+      "framework_category": "Customer Obsession",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "customer",
+        "empathy",
+        "initiative"
+      ],
+      "what_they_want": "Shows you prioritize customer needs, can identify what customers actually need (vs. what they say), and take extra effort without being asked.",
+      "example_answer_structure": "Situation: Describe the customer problem.\nTask: What was your responsibility.\nAction: Specific extra steps YOU took beyond the standard process.\nResult: Customer outcome + business impact (use numbers).",
+      "red_flags": [
+        "Vague 'we helped a customer' without your specific actions",
+        "No measurable outcome",
+        "Situation where you just followed standard process"
+      ],
+      "follow_up_questions": [
+        "How did you know what the customer really needed?",
+        "Would you do anything differently?",
+        "How did this change your team's approach?"
+      ]
+    },
+    {
+      "question_text": "Describe a time you prioritized customer needs over business metrics or team convenience.",
+      "framework": "amazon_lp",
+      "framework_category": "Customer Obsession",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "customer",
+        "tradeoffs",
+        "judgment"
+      ],
+      "what_they_want": "Shows genuine customer obsession even when it conflicts with short-term metrics.",
+      "example_answer_structure": "Situation: Where customer interest conflicted with internal metrics.\nTask: The tension you faced.\nAction: How you advocated for the customer approach.\nResult: Long-term customer outcome.",
+      "red_flags": [
+        "Never experienced conflict between customer and business needs",
+        "Blindly following process without thinking about customer"
+      ],
+      "follow_up_questions": [
+        "How did stakeholders react?",
+        "What was the business impact?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you took on responsibility beyond your assigned role.",
+      "framework": "amazon_lp",
+      "framework_category": "Ownership",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "ownership",
+        "initiative",
+        "leadership"
+      ],
+      "what_they_want": "Shows you act like an owner \u2014 you don't say 'that's not my job.' You noticed a gap and filled it.",
+      "example_answer_structure": "Situation: What problem existed outside your scope.\nTask: Why nobody was addressing it.\nAction: How YOU decided to take it on (without being asked).\nResult: Measurable outcome + what happened to the responsibility after.",
+      "red_flags": [
+        "Your manager asked you to do it (defeats the purpose)",
+        "Saying 'we' instead of 'I'",
+        "No measurable outcome"
+      ],
+      "follow_up_questions": [
+        "Why did you decide to take that on?",
+        "What would have happened if you hadn't?",
+        "Did ownership of that area formally shift to you?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you found a significantly simpler solution to a complex problem.",
+      "framework": "amazon_lp",
+      "framework_category": "Invent and Simplify",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "innovation",
+        "simplification",
+        "creativity"
+      ],
+      "what_they_want": "Shows you can cut through complexity, challenge assumptions, and find elegant solutions.",
+      "example_answer_structure": "Situation: The complex problem.\nTask: Why existing solutions were overengineered.\nAction: Your simpler approach and how you convinced others.\nResult: Efficiency gain, cost saved, time saved (numbers).",
+      "red_flags": [
+        "Solution was obvious to everyone",
+        "No pushback \u2014 if nobody disagreed, it wasn't inventive"
+      ],
+      "follow_up_questions": [
+        "What was the reaction from your team?",
+        "Were there any downsides to the simpler approach?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you made a critical decision with incomplete information.",
+      "framework": "amazon_lp",
+      "framework_category": "Are Right, A Lot",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "judgment",
+        "decision_making",
+        "ambiguity"
+      ],
+      "what_they_want": "Shows good judgment even with uncertainty. Willing to commit to a direction and course-correct.",
+      "example_answer_structure": "Situation: What decision needed to be made.\nTask: What information was missing and why it couldn't wait.\nAction: How you gathered available data, consulted experts, and made the call.\nResult: Whether it worked + what you'd do differently.",
+      "red_flags": [
+        "Always having perfect information",
+        "Never being wrong \u2014 saying 'I'm always right'"
+      ],
+      "follow_up_questions": [
+        "What data did you wish you had?",
+        "Would you make the same decision again?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you took a calculated risk rather than waiting for more data.",
+      "framework": "amazon_lp",
+      "framework_category": "Bias for Action",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "speed",
+        "risk_taking",
+        "decision_making"
+      ],
+      "what_they_want": "Shows you can distinguish between one-way doors (irreversible) and two-way doors (reversible) decisions. You should act fast on two-way doors.",
+      "example_answer_structure": "Situation: Time-sensitive decision.\nTask: Why waiting for more data was costly.\nAction: How you assessed relative risk and moved forward.\nResult: Outcome + what you'd do differently.",
+      "red_flags": [
+        "Taking reckless risks without any analysis",
+        "Being paralyzed by analysis \u2014 opposite of what they want"
+      ],
+      "follow_up_questions": [
+        "What was the worst case scenario?",
+        "How did you mitigate the risk?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you used data to challenge a popular assumption or decision.",
+      "framework": "amazon_lp",
+      "framework_category": "Dive Deep",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "data_driven",
+        "analysis",
+        "depth"
+      ],
+      "what_they_want": "Shows you don't accept surface-level explanations. You dig into root causes and use data to support your conclusions.",
+      "example_answer_structure": "Situation: The popular assumption or accepted belief.\nTask: What made you suspicious.\nAction: How you gathered and analyzed data.\nResult: What the data revealed + impact on the decision.",
+      "red_flags": [
+        "Going with gut feeling without data",
+        "Not being able to explain your analysis methodology"
+      ],
+      "follow_up_questions": [
+        "What tools did you use for the analysis?",
+        "How did the team react to your findings?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you had to deliver difficult feedback to a teammate or manager.",
+      "framework": "amazon_lp",
+      "framework_category": "Earn Trust",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "conflict",
+        "communication",
+        "trust"
+      ],
+      "what_they_want": "Shows you can be honest even when it's uncomfortable. You give feedback with empathy but don't avoid hard conversations.",
+      "example_answer_structure": "Situation: What performance or behavior issue existed.\nTask: Why feedback was necessary.\nAction: How you delivered it (timing, approach, tone).\nResult: How the person received it + outcome.",
+      "red_flags": [
+        "Never having given difficult feedback",
+        "Being harsh without empathy",
+        "Avoiding the conversation entirely"
+      ],
+      "follow_up_questions": [
+        "How did you prepare for the conversation?",
+        "Would you handle it differently now?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you strongly disagreed with a decision but committed to it anyway.",
+      "framework": "amazon_lp",
+      "framework_category": "Have Backbone; Disagree and Commit",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "conflict",
+        "commitment",
+        "integrity"
+      ],
+      "what_they_want": "Shows you can voice your disagreement respectfully, back it with data, but once a decision is made, you fully commit rather than sabotaging.",
+      "example_answer_structure": "Situation: The decision you disagreed with.\nTask: What was at stake.\nAction: How you voiced your disagreement + how you committed after.\nResult: Outcome + what you learned.",
+      "red_flags": [
+        "Never disagreeing with management",
+        "Passive-aggressive behavior after the decision",
+        "Still not committed ('I told them so')"
+      ],
+      "follow_up_questions": [
+        "Were you right or wrong in your concern?",
+        "How hard was it to commit?"
+      ]
+    },
+    {
+      "question_text": "Tell me about your most impactful project and how you delivered results despite obstacles.",
+      "framework": "amazon_lp",
+      "framework_category": "Deliver Results",
+      "companies": [
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "execution",
+        "obstacles",
+        "results"
+      ],
+      "what_they_want": "Shows you focus on outputs not activities. You track metrics, remove blockers, and ship even when things get hard.",
+      "example_answer_structure": "Situation: The project and its importance.\nTask: Your specific responsibility (scope, timeline, resources).\nAction: Obstacles you faced and how you overcame each.\nResult: Quantifiable delivery + business impact.",
+      "red_flags": [
+        "No numbers in the result",
+        "Blaming others for obstacles",
+        "Project wasn't impactful enough"
+      ],
+      "follow_up_questions": [
+        "What would you have done differently?",
+        "What metrics did you track?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you failed at something important. What did you learn?",
+      "framework": "googliness",
+      "framework_category": "Humility & Growth",
+      "companies": [
+        "google",
+        "meta"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "failure",
+        "growth",
+        "self_awareness"
+      ],
+      "what_they_want": "Genuine failure (not a humble brag). Shows self-awareness, ability to learn, and growth mindset. Google values people who can admit mistakes.",
+      "example_answer_structure": "Situation: The genuine failure.\nTask: What was expected of you.\nAction: What went wrong and what you learned.\nResult: How you applied the learning later.",
+      "red_flags": [
+        "'My weakness is I work too hard'",
+        "Fake failures that are actually successes",
+        "Blaming others"
+      ],
+      "follow_up_questions": [
+        "What would you do differently?",
+        "How has this changed your approach?"
+      ]
+    },
+    {
+      "question_text": "Describe a time you had to deal with significant ambiguity in a project.",
+      "framework": "googliness",
+      "framework_category": "Navigating Ambiguity",
+      "companies": [
+        "google",
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "ambiguity",
+        "problem_solving",
+        "leadership"
+      ],
+      "what_they_want": "Shows you can make progress even when requirements, scope, or direction are unclear. You create structure from chaos.",
+      "example_answer_structure": "Situation: The ambiguous project.\nTask: What was unclear and why.\nAction: How you created clarity (broke it down, asked questions, prototyped).\nResult: How the project progressed.",
+      "red_flags": [
+        "Waiting for someone to give you clear requirements",
+        "Being paralyzed by uncertainty"
+      ],
+      "follow_up_questions": [
+        "How did you decide what to focus on first?",
+        "What if your initial direction was wrong?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you had to influence someone without having formal authority over them.",
+      "framework": "googliness",
+      "framework_category": "Collaboration & Influence",
+      "companies": [
+        "google",
+        "meta",
+        "microsoft"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "influence",
+        "collaboration",
+        "leadership"
+      ],
+      "what_they_want": "Shows you can build consensus and motivate others through logic, empathy, and shared goals rather than hierarchy.",
+      "example_answer_structure": "Situation: Who you needed to influence and why.\nTask: Why you didn't have formal authority.\nAction: Techniques you used (data, empathy, shared goals).\nResult: Were you successful?",
+      "red_flags": [
+        "Using authority or pressure instead of influence",
+        "Not respecting the other person's perspective"
+      ],
+      "follow_up_questions": [
+        "What if they still disagreed?",
+        "How did you build the relationship first?"
+      ]
+    },
+    {
+      "question_text": "Describe your proudest technical accomplishment and why it matters to you.",
+      "framework": "googliness",
+      "framework_category": "Technical Excellence",
+      "companies": [
+        "google"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "technical",
+        "pride",
+        "impact"
+      ],
+      "what_they_want": "Shows depth of technical ability and passion for engineering. The 'why it matters' reveals values.",
+      "example_answer_structure": "Context: The technical challenge.\nApproach: Your solution and why you chose it.\nResult: Impact (users, performance, scale).\nWhy proud: What it means to you personally.",
+      "red_flags": [
+        "Choosing something easy",
+        "Can't explain the technical details",
+        "Only caring about the outcome, not the engineering"
+      ],
+      "follow_up_questions": [
+        "What tradeoffs did you make?",
+        "How would you improve it today?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you had to learn something very quickly to solve a problem.",
+      "framework": "googliness",
+      "framework_category": "Learn and Be Curious",
+      "companies": [
+        "google",
+        "amazon"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "learning",
+        "adaptability",
+        "curiosity"
+      ],
+      "what_they_want": "Shows intellectual curiosity and ability to ramp up fast. Google wants lifelong learners.",
+      "example_answer_structure": "Situation: The problem requiring new knowledge.\nTask: What you needed to learn and how fast.\nAction: Your learning strategy (docs, prototyping, mentors).\nResult: How you applied the new knowledge.",
+      "red_flags": [
+        "Only learning what's assigned",
+        "Not being curious about why things work"
+      ],
+      "follow_up_questions": [
+        "How do you decide what to learn next?",
+        "How do you retain new knowledge?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you received critical feedback. How did you respond and grow from it?",
+      "framework": "growth_mindset",
+      "framework_category": "Receiving Feedback",
+      "companies": [
+        "microsoft"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "feedback",
+        "growth",
+        "self_improvement"
+      ],
+      "what_they_want": "Growth mindset \u2014 you see feedback as a gift, not an attack. Shows you can change behavior based on feedback.",
+      "example_answer_structure": "Situation: The feedback you received.\nReaction: Your initial reaction (be honest).\nAction: How you processed it and changed.\nResult: Observable improvement.",
+      "red_flags": [
+        "Never received negative feedback",
+        "Dismissing feedback as wrong",
+        "Not actually changing behavior"
+      ],
+      "follow_up_questions": [
+        "How did you feel initially?",
+        "Did you agree with the feedback?"
+      ]
+    },
+    {
+      "question_text": "Describe a time you collaborated across teams to deliver something neither team could do alone.",
+      "framework": "growth_mindset",
+      "framework_category": "Collaboration",
+      "companies": [
+        "microsoft",
+        "google"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "collaboration",
+        "cross_team",
+        "communication"
+      ],
+      "what_they_want": "Shows you can work across organizational boundaries. Values shared success over individual credit.",
+      "example_answer_structure": "Situation: The cross-team challenge.\nTask: Why collaboration was necessary.\nAction: How you built the relationship and aligned goals.\nResult: What was delivered + impact.",
+      "red_flags": [
+        "Taking all credit",
+        "Not understanding the other team's constraints"
+      ],
+      "follow_up_questions": [
+        "How did you handle disagreements?",
+        "What made the collaboration successful?"
+      ]
+    },
+    {
+      "question_text": "Tell me about the most complex technical decision you've had to make.",
+      "framework": "growth_mindset",
+      "framework_category": "Technical Depth",
+      "companies": [
+        "microsoft",
+        "amazon"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "technical",
+        "decision_making",
+        "complexity"
+      ],
+      "what_they_want": "Shows depth of technical thinking, ability to weigh tradeoffs, and willingness to own the consequences.",
+      "example_answer_structure": "Context: The problem requiring a decision.\nOptions: What alternatives you considered.\nAnalysis: How you evaluated tradeoffs (performance, cost, maintainability).\nDecision: What you chose and why.\nResult: Outcome and lessons learned.",
+      "red_flags": [
+        "Only considering one option",
+        "Not thinking about tradeoffs",
+        "Can't explain the technical reasoning"
+      ],
+      "follow_up_questions": [
+        "What was the biggest tradeoff?",
+        "Would you make the same decision today?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a product you built from scratch. Walk me through the decisions you made.",
+      "framework": "builder_dna",
+      "framework_category": "Zero to One",
+      "companies": [
+        "flipkart",
+        "razorpay",
+        "cred",
+        "phonepe",
+        "zepto",
+        "meesho"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "building",
+        "product_thinking",
+        "ownership"
+      ],
+      "what_they_want": "Builder DNA \u2014 you can take something from zero to one. Shows product thinking, not just coding.",
+      "example_answer_structure": "Idea: What problem you identified.\nDesign: Key technical decisions and WHY (not just what).\nExecution: How you shipped it.\nOutcome: Users, impact, learnings.",
+      "red_flags": [
+        "Only followed instructions, never built independently",
+        "Can't explain why you made specific choices"
+      ],
+      "follow_up_questions": [
+        "What would you rebuild differently?",
+        "How did users respond?"
+      ]
+    },
+    {
+      "question_text": "Describe a time you shipped something imperfect to meet a deadline. How did you decide what to cut?",
+      "framework": "builder_dna",
+      "framework_category": "Speed vs Quality",
+      "companies": [
+        "flipkart",
+        "razorpay",
+        "cred",
+        "zepto"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "speed",
+        "pragmatism",
+        "tradeoffs"
+      ],
+      "what_they_want": "Shows you understand MVP thinking. You can distinguish must-haves from nice-to-haves.",
+      "example_answer_structure": "Situation: The deadline and constraints.\nDecision: What you cut and why.\nShipment: How the imperfect version performed.\nFollow-up: How you improved it later.",
+      "red_flags": [
+        "Never compromising on anything",
+        "Shipping garbage without a follow-up plan"
+      ],
+      "follow_up_questions": [
+        "How did you decide what to cut?",
+        "Did any cut cause problems?"
+      ]
+    },
+    {
+      "question_text": "Tell me about the most complex engineering problem you've solved.",
+      "framework": "builder_dna",
+      "framework_category": "Technical Depth",
+      "companies": [
+        "flipkart",
+        "razorpay",
+        "cred",
+        "phonepe"
+      ],
+      "difficulty": "hard",
+      "tags": [
+        "technical",
+        "problem_solving",
+        "depth"
+      ],
+      "what_they_want": "Deep technical thinking. Shows you can handle complexity, debug systematically, and arrive at elegant solutions.",
+      "example_answer_structure": "Problem: What made it complex (scale, constraints, unknowns).\nApproach: How you broke it down.\nSolution: What you built and why it was elegant.\nImpact: Performance improvement / bugs fixed / scale achieved.",
+      "red_flags": [
+        "Superficial complexity \u2014 just 'lots of code'",
+        "Can't explain the core algorithm or approach"
+      ],
+      "follow_up_questions": [
+        "What alternatives did you consider?",
+        "How did you validate your solution?"
+      ]
+    },
+    {
+      "question_text": "Describe a time you significantly improved a key metric (performance, user engagement, cost).",
+      "framework": "builder_dna",
+      "framework_category": "Impact & Metrics",
+      "companies": [
+        "flipkart",
+        "razorpay",
+        "cred",
+        "meesho"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "metrics",
+        "impact",
+        "data_driven"
+      ],
+      "what_they_want": "Shows you think in terms of measurable outcomes. Startups want people who move numbers, not just write code.",
+      "example_answer_structure": "Metric: What metric and its baseline.\nAnalysis: How you identified the opportunity.\nAction: What you changed.\nResult: Before \u2192 After numbers.",
+      "red_flags": [
+        "No numbers",
+        "Can't explain why the improvement happened",
+        "Correlation vs causation confusion"
+      ],
+      "follow_up_questions": [
+        "How did you measure the improvement?",
+        "Was it sustained?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you worked in a team on a difficult project. What was your role?",
+      "framework": "teamwork",
+      "framework_category": "Team Projects",
+      "companies": [
+        "tcs",
+        "infosys",
+        "wipro",
+        "cognizant",
+        "accenture"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "teamwork",
+        "college_project",
+        "collaboration"
+      ],
+      "what_they_want": "Basic team skills \u2014 communication, role clarity, handling disagreements. For freshers, college projects are fine.",
+      "example_answer_structure": "Project: What it was (academic/personal).\nYour Role: Specific contribution (don't say 'we did everything together').\nChallenge: A difficulty the team faced.\nResolution: How YOU helped resolve it.\nOutcome: What you delivered.",
+      "red_flags": [
+        "Not having any team project experience",
+        "'I did all the work'",
+        "Can't name specific contributions"
+      ],
+      "follow_up_questions": [
+        "Who was the leader?",
+        "How did you handle disagreements?"
+      ]
+    },
+    {
+      "question_text": "Describe a situation where you had to handle a difficult person (teammate, client, or professor).",
+      "framework": "teamwork",
+      "framework_category": "Conflict Resolution",
+      "companies": [
+        "tcs",
+        "infosys",
+        "wipro",
+        "cognizant",
+        "accenture"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "conflict",
+        "communication",
+        "emotional_intelligence"
+      ],
+      "what_they_want": "Maturity and professionalism. Shows empathy while maintaining boundaries.",
+      "example_answer_structure": "Situation: Who was difficult and how.\nImpact: How it affected work.\nAction: How you addressed it (conversation, compromise, escalation).\nResult: What happened.",
+      "red_flags": [
+        "Badmouthing the difficult person",
+        "Not attempting to resolve the conflict",
+        "Escalating immediately without trying first"
+      ],
+      "follow_up_questions": [
+        "Did you understand their perspective?",
+        "What would you do differently?"
+      ]
+    },
+    {
+      "question_text": "Tell me about your biggest project in college. What did you learn?",
+      "framework": "teamwork",
+      "framework_category": "Academic Projects",
+      "companies": [
+        "tcs",
+        "infosys",
+        "wipro",
+        "cognizant",
+        "accenture",
+        "capgemini"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "academic",
+        "project",
+        "learning"
+      ],
+      "what_they_want": "For freshers \u2014 shows technical ability, initiative, and learning mindset. Use this to showcase your best work.",
+      "example_answer_structure": "Project: Title and problem it solved.\nTech Stack: What technologies you used.\nYour Contribution: Specific features you built.\nLearning: Key technical and soft skill takeaways.",
+      "red_flags": [
+        "Can't explain your own project's architecture",
+        "Clearly didn't build it yourself",
+        "No learning \u2014 just 'we completed it'"
+      ],
+      "follow_up_questions": [
+        "What was the hardest part?",
+        "If you had more time, what would you add?"
+      ]
+    },
+    {
+      "question_text": "Why do you want to work at our company specifically?",
+      "framework": "teamwork",
+      "framework_category": "Company Fit",
+      "companies": [
+        "tcs",
+        "infosys",
+        "wipro",
+        "cognizant",
+        "accenture",
+        "capgemini"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "motivation",
+        "company_knowledge",
+        "career"
+      ],
+      "what_they_want": "Shows you've researched the company. Links your skills/goals to their mission, projects, or technology.",
+      "example_answer_structure": "Research: 1-2 specific facts about the company (recent project, technology, value).\nAlignment: How your skills/interests match.\nGrowth: What you hope to learn/contribute.",
+      "red_flags": [
+        "Generic answer that works for any company",
+        "Only mentioning salary/brand",
+        "Not knowing what the company does"
+      ],
+      "follow_up_questions": [
+        "What do you know about our recent projects?",
+        "Where do you see yourself in 3 years?"
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you missed a deadline. What happened and what did you learn?",
+      "framework": "teamwork",
+      "framework_category": "Accountability",
+      "companies": [
+        "tcs",
+        "infosys",
+        "wipro",
+        "cognizant"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "accountability",
+        "time_management",
+        "learning"
+      ],
+      "what_they_want": "Honesty and accountability. Don't deny ever missing a deadline \u2014 show what you learned from it.",
+      "example_answer_structure": "Situation: The deadline and project.\nWhat happened: Why you missed it (be honest).\nAction: What you did to recover.\nLearning: How you prevent this now.",
+      "red_flags": [
+        "'I never miss deadlines'",
+        "Blaming everyone else",
+        "No learning or behavior change"
+      ],
+      "follow_up_questions": [
+        "How did you communicate the delay?",
+        "What systems do you use now to manage time?"
+      ]
+    },
+    {
+      "question_text": "Tell me about yourself.",
+      "framework": "general",
+      "framework_category": "Introduction",
+      "companies": [
+        "all"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "introduction",
+        "elevator_pitch"
+      ],
+      "what_they_want": "A concise 90-second narrative: education \u2192 key skills \u2192 biggest achievement \u2192 why this role. Not your life story.",
+      "example_answer_structure": "Education: 1 line (degree, college).\nSkills: 2-3 key technical skills.\nHighlight: Your best project or achievement.\nWhy here: What excites you about this role.",
+      "red_flags": [
+        "Reciting your resume",
+        "Going over 2 minutes",
+        "Starting with hometown and family"
+      ],
+      "follow_up_questions": [
+        "What's your biggest strength?",
+        "What are you working on improving?"
+      ]
+    },
+    {
+      "question_text": "What is your biggest weakness?",
+      "framework": "general",
+      "framework_category": "Self-Awareness",
+      "companies": [
+        "all"
+      ],
+      "difficulty": "medium",
+      "tags": [
+        "self_awareness",
+        "honesty",
+        "growth"
+      ],
+      "what_they_want": "A real weakness (not a humble brag), paired with what you're actively doing to improve it.",
+      "example_answer_structure": "Weakness: A genuine area of improvement.\nAwareness: How you discovered it.\nAction: Specific steps you're taking to improve.\nProgress: Any improvement you've seen.",
+      "red_flags": [
+        "'I'm a perfectionist'",
+        "'I work too hard'",
+        "A weakness that directly disqualifies you for the role"
+      ],
+      "follow_up_questions": [
+        "How do you measure your improvement?",
+        "Has anyone noticed the change?"
+      ]
+    },
+    {
+      "question_text": "Where do you see yourself in 5 years?",
+      "framework": "general",
+      "framework_category": "Career Goals",
+      "companies": [
+        "all"
+      ],
+      "difficulty": "easy",
+      "tags": [
+        "career",
+        "ambition",
+        "planning"
+      ],
+      "what_they_want": "Shows ambition aligned with realistic growth at the company. Not 'CEO in 5 years' or 'I don't know.'",
+      "example_answer_structure": "Year 1-2: Master the role, contribute to team.\nYear 3-4: Take on more responsibility, mentor juniors.\nYear 5: Technical leadership or deeper specialization.",
+      "red_flags": [
+        "'I want your job'",
+        "'I'll start my own company'",
+        "'I don't really plan ahead'"
+      ],
+      "follow_up_questions": [
+        "How does this role fit into that plan?",
+        "What skills do you need to develop?"
+      ]
+    }
+  ]
+}

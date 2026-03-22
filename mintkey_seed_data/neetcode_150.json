@@ -1,0 +1,1521 @@
+{
+  "source": "NeetCode 150",
+  "total": 127,
+  "topics": {
+    "Arrays & Hashing": [
+      {
+        "lc_number": 217,
+        "title": "Contains Duplicate",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/contains-duplicate/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+contains+duplicate",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 242,
+        "title": "Valid Anagram",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/valid-anagram/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+valid+anagram",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 1299,
+        "title": "Replace Elements With Greatest Element On Right Side",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/replace-elements-with-greatest-element-on-right-side/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+replace+elements+with+greatest+element+on+right+side",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 1,
+        "title": "Two Sum",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/two-sum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+two+sum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 49,
+        "title": "Group Anagrams",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/group-anagrams/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+group+anagrams",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 347,
+        "title": "Top K Frequent Elements",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/top-k-frequent-elements/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+top+k+frequent+elements",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 238,
+        "title": "Product of Array Except Self",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/product-of-array-except-self/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+product+of+array+except+self",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 36,
+        "title": "Valid Sudoku",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/valid-sudoku/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+valid+sudoku",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 271,
+        "title": "Encode and Decode Strings",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/encode-and-decode-strings/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+encode+and+decode+strings",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 128,
+        "title": "Longest Consecutive Sequence",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-consecutive-sequence/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+consecutive+sequence",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Two Pointers": [
+      {
+        "lc_number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/valid-palindrome/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+valid+palindrome",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 167,
+        "title": "Two Sum II Input Array Is Sorted",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+two+sum+ii+input+array+is+sorted",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/3sum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+3sum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/container-with-most-water/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+container+with+most+water",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 42,
+        "title": "Trapping Rain Water",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/trapping-rain-water/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+trapping+rain+water",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Sliding Window": [
+      {
+        "lc_number": 121,
+        "title": "Best Time to Buy And Sell Stock",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+best+time+to+buy+and+sell+stock",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+substring+without+repeating+characters",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-repeating-character-replacement/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+repeating+character+replacement",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 567,
+        "title": "Permutation In String",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/permutation-in-string/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+permutation+in+string",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/minimum-window-substring/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+minimum+window+substring",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/sliding-window-maximum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+sliding+window+maximum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Stack": [
+      {
+        "lc_number": 20,
+        "title": "Valid Parentheses",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/valid-parentheses/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+valid+parentheses",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 155,
+        "title": "Min Stack",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/min-stack/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+min+stack",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 150,
+        "title": "Evaluate Reverse Polish Notation",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/evaluate-reverse-polish-notation/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+evaluate+reverse+polish+notation",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 22,
+        "title": "Generate Parentheses",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/generate-parentheses/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+generate+parentheses",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 739,
+        "title": "Daily Temperatures",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/daily-temperatures/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+daily+temperatures",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 853,
+        "title": "Car Fleet",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/car-fleet/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+car+fleet",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 84,
+        "title": "Largest Rectangle In Histogram",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+largest+rectangle+in+histogram",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Binary Search": [
+      {
+        "lc_number": 704,
+        "title": "Binary Search",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/binary-search/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+binary+search",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 74,
+        "title": "Search a 2D Matrix",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/search-a-2d-matrix/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+search+a+2d+matrix",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 875,
+        "title": "Koko Eating Bananas",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/koko-eating-bananas/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+koko+eating+bananas",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 153,
+        "title": "Find Minimum In Rotated Sorted Array",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+find+minimum+in+rotated+sorted+array",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 33,
+        "title": "Search In Rotated Sorted Array",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+search+in+rotated+sorted+array",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 981,
+        "title": "Time Based Key Value Store",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/time-based-key-value-store/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+time+based+key+value+store",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 1268,
+        "title": "Search Suggestions System",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/search-suggestions-system/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+search+suggestions+system",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 4,
+        "title": "Median of Two Sorted Arrays",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+median+of+two+sorted+arrays",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Linked List": [
+      {
+        "lc_number": 206,
+        "title": "Reverse Linked List",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/reverse-linked-list/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reverse+linked+list",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 21,
+        "title": "Merge Two Sorted Lists",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/merge-two-sorted-lists/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+merge+two+sorted+lists",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 143,
+        "title": "Reorder List",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/reorder-list/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reorder+list",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 19,
+        "title": "Remove Nth Node From End of List",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+remove+nth+node+from+end+of+list",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 138,
+        "title": "Copy List With Random Pointer",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/copy-list-with-random-pointer/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+copy+list+with+random+pointer",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 141,
+        "title": "Linked List Cycle",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/linked-list-cycle/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+linked+list+cycle",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 287,
+        "title": "Find The Duplicate Number",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/find-the-duplicate-number/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+find+the+duplicate+number",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 146,
+        "title": "LRU Cache",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/lru-cache/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+lru+cache",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 23,
+        "title": "Merge K Sorted Lists",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/merge-k-sorted-lists/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+merge+k+sorted+lists",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 25,
+        "title": "Reverse Nodes In K Group",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reverse+nodes+in+k+group",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Trees": [
+      {
+        "lc_number": 226,
+        "title": "Invert Binary Tree",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/invert-binary-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+invert+binary+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 104,
+        "title": "Maximum Depth of Binary Tree",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+maximum+depth+of+binary+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 100,
+        "title": "Same Tree",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/same-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+same+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 572,
+        "title": "Subtree of Another Tree",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/subtree-of-another-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+subtree+of+another+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 235,
+        "title": "Lowest Common Ancestor of a Binary Search Tree",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+lowest+common+ancestor+of+a+binary+search+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 102,
+        "title": "Binary Tree Level Order Traversal",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+binary+tree+level+order+traversal",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 199,
+        "title": "Binary Tree Right Side View",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/binary-tree-right-side-view/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+binary+tree+right+side+view",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 98,
+        "title": "Validate Binary Search Tree",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/validate-binary-search-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+validate+binary+search+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 230,
+        "title": "Kth Smallest Element In a Bst",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+kth+smallest+element+in+a+bst",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 105,
+        "title": "Construct Binary Tree From Preorder And Inorder Traversal",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+construct+binary+tree+from+preorder+and+inorder+traversal",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 124,
+        "title": "Binary Tree Maximum Path Sum",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+binary+tree+maximum+path+sum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 297,
+        "title": "Serialize And Deserialize Binary Tree",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+serialize+and+deserialize+binary+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Tries": [
+      {
+        "lc_number": 208,
+        "title": "Implement Trie Prefix Tree",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+implement+trie+prefix+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 211,
+        "title": "Design Add And Search Words Data Structure",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+design+add+and+search+words+data+structure",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 212,
+        "title": "Word Search II",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/word-search-ii/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+word+search+ii",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Heap / Priority Queue": [
+      {
+        "lc_number": 703,
+        "title": "Kth Largest Element In a Stream",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+kth+largest+element+in+a+stream",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 1046,
+        "title": "Last Stone Weight",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/last-stone-weight/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+last+stone+weight",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 973,
+        "title": "K Closest Points to Origin",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/k-closest-points-to-origin/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+k+closest+points+to+origin",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 215,
+        "title": "Kth Largest Element In An Array",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+kth+largest+element+in+an+array",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 621,
+        "title": "Task Scheduler",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/task-scheduler/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+task+scheduler",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 355,
+        "title": "Design Twitter",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/design-twitter/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+design+twitter",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 295,
+        "title": "Find Median From Data Stream",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/find-median-from-data-stream/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+find+median+from+data+stream",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Backtracking": [
+      {
+        "lc_number": 78,
+        "title": "Subsets",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/subsets/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+subsets",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 39,
+        "title": "Combination Sum",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/combination-sum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+combination+sum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 46,
+        "title": "Permutations",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/permutations/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+permutations",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 40,
+        "title": "Combination Sum II",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/combination-sum-ii/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+combination+sum+ii",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 79,
+        "title": "Word Search",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/word-search/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+word+search",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 131,
+        "title": "Palindrome Partitioning",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/palindrome-partitioning/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+palindrome+partitioning",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 17,
+        "title": "Letter Combinations of a Phone Number",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+letter+combinations+of+a+phone+number",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 51,
+        "title": "N Queens",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/n-queens/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+n+queens",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Graphs": [
+      {
+        "lc_number": 200,
+        "title": "Number of Islands",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/number-of-islands/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+number+of+islands",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 133,
+        "title": "Clone Graph",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/clone-graph/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+clone+graph",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 695,
+        "title": "Max Area of Island",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/max-area-of-island/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+max+area+of+island",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 417,
+        "title": "Pacific Atlantic Water Flow",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/pacific-atlantic-water-flow/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+pacific+atlantic+water+flow",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 130,
+        "title": "Surrounded Regions",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/surrounded-regions/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+surrounded+regions",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 994,
+        "title": "Rotting Oranges",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/rotting-oranges/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+rotting+oranges",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 207,
+        "title": "Course Schedule",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/course-schedule/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+course+schedule",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 210,
+        "title": "Course Schedule II",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/course-schedule-ii/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+course+schedule+ii",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 684,
+        "title": "Redundant Connection",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/redundant-connection/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+redundant+connection",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 323,
+        "title": "Number of Connected Components In An Undirected Graph",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+number+of+connected+components+in+an+undirected+graph",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 261,
+        "title": "Graph Valid Tree",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/graph-valid-tree/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+graph+valid+tree",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 127,
+        "title": "Word Ladder",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/word-ladder/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+word+ladder",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Advanced Graphs": [
+      {
+        "lc_number": 332,
+        "title": "Reconstruct Itinerary",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/reconstruct-itinerary/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reconstruct+itinerary",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 743,
+        "title": "Network Delay Time",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/network-delay-time/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+network+delay+time",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 778,
+        "title": "Swim In Rising Water",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/swim-in-rising-water/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+swim+in+rising+water",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 269,
+        "title": "Alien Dictionary",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/alien-dictionary/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+alien+dictionary",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 787,
+        "title": "Cheapest Flights Within K Stops",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+cheapest+flights+within+k+stops",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "1-D Dynamic Programming": [
+      {
+        "lc_number": 70,
+        "title": "Climbing Stairs",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/climbing-stairs/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+climbing+stairs",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 198,
+        "title": "House Robber",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/house-robber/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+house+robber",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 213,
+        "title": "House Robber II",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/house-robber-ii/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+house+robber+ii",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 5,
+        "title": "Longest Palindromic Substring",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-palindromic-substring/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+palindromic+substring",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 647,
+        "title": "Palindromic Substrings",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/palindromic-substrings/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+palindromic+substrings",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 91,
+        "title": "Decode Ways",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/decode-ways/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+decode+ways",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 322,
+        "title": "Coin Change",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/coin-change/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+coin+change",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 152,
+        "title": "Maximum Product Subarray",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/maximum-product-subarray/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+maximum+product+subarray",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 139,
+        "title": "Word Break",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/word-break/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+word+break",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 300,
+        "title": "Longest Increasing Subsequence",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+increasing+subsequence",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "2-D Dynamic Programming": [
+      {
+        "lc_number": 62,
+        "title": "Unique Paths",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/unique-paths/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+unique+paths",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 1143,
+        "title": "Longest Common Subsequence",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/longest-common-subsequence/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+longest+common+subsequence",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 309,
+        "title": "Best Time to Buy And Sell Stock With Cooldown",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+best+time+to+buy+and+sell+stock+with+cooldown",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 494,
+        "title": "Target Sum",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/target-sum/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+target+sum",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 97,
+        "title": "Interleaving String",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/interleaving-string/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+interleaving+string",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 72,
+        "title": "Edit Distance",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/edit-distance/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+edit+distance",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 312,
+        "title": "Burst Balloons",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/burst-balloons/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+burst+balloons",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Greedy": [
+      {
+        "lc_number": 53,
+        "title": "Maximum Subarray",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/maximum-subarray/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+maximum+subarray",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 55,
+        "title": "Jump Game",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/jump-game/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+jump+game",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 846,
+        "title": "Hand of Straights",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/hand-of-straights/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+hand+of+straights",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      },
+      {
+        "lc_number": 763,
+        "title": "Partition Labels",
+        "difficulty": "Hard",
+        "url": "https://leetcode.com/problems/partition-labels/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+partition+labels",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Intervals": [
+      {
+        "lc_number": 57,
+        "title": "Insert Interval",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/insert-interval/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+insert+interval",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 56,
+        "title": "Merge Intervals",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/merge-intervals/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+merge+intervals",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 435,
+        "title": "Non Overlapping Intervals",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/non-overlapping-intervals/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+non+overlapping+intervals",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      }
+    ],
+    "Math & Geometry": [
+      {
+        "lc_number": 48,
+        "title": "Rotate Image",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/rotate-image/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+rotate+image",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 54,
+        "title": "Spiral Matrix",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/spiral-matrix/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+spiral+matrix",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 73,
+        "title": "Set Matrix Zeroes",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/set-matrix-zeroes/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+set+matrix+zeroes",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 43,
+        "title": "Multiply Strings",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/multiply-strings/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+multiply+strings",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ],
+    "Bit Manipulation": [
+      {
+        "lc_number": 191,
+        "title": "Number of 1 Bits",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/number-of-1-bits/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+number+of+1+bits",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 338,
+        "title": "Counting Bits",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/counting-bits/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+counting+bits",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 190,
+        "title": "Reverse Bits",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/reverse-bits/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reverse+bits",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 268,
+        "title": "Missing Number",
+        "difficulty": "Easy",
+        "url": "https://leetcode.com/problems/missing-number/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+missing+number",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 371,
+        "title": "Sum of Two Integers",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/sum-of-two-integers/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+sum+of+two+integers",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150",
+          "blind_75"
+        ]
+      },
+      {
+        "lc_number": 7,
+        "title": "Reverse Integer",
+        "difficulty": "Medium",
+        "url": "https://leetcode.com/problems/reverse-integer/",
+        "neetcode_video": "https://www.youtube.com/results?search_query=neetcode+reverse+integer",
+        "study_plans": [
+          "neetcode_all",
+          "neetcode_150"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "sources": [
+    "IndiaBIX",
+    "PrepInsta",
+    "Freshersworld",
+    "Testbook",
+    "Oliveboard"
+  ],
+  "categories": {
+    "Quantitative Aptitude": [
+      "Number System",
+      "HCF & LCM",
+      "Percentages",
+      "Profit & Loss",
+      "Simple Interest",
+      "Compound Interest",
+      "Ratio & Proportion",
+      "Partnership",
+      "Time & Work",
+      "Pipes & Cisterns",
+      "Time, Speed & Distance",
+      "Trains",
+      "Boats & Streams",
+      "Averages",
+      "Mixtures & Alligations",
+      "Ages",
+      "Algebra",
+      "Surds & Indices",
+      "Mensuration (2D)",
+      "Mensuration (3D)",
+      "Trigonometry",
+      "Probability",
+      "Permutations & Combinations",
+      "Data Interpretation",
+      "Simplification",
+      "Approximation"
+    ],
+    "Logical Reasoning": [
+      "Coding-Decoding",
+      "Blood Relations",
+      "Directions & Distances",
+      "Seating Arrangement (Linear)",
+      "Seating Arrangement (Circular)",
+      "Puzzles",
+      "Syllogisms",
+      "Input-Output",
+      "Inequalities",
+      "Data Sufficiency",
+      "Statement & Assumptions",
+      "Statement & Conclusions",
+      "Cause & Effect",
+      "Verbal Analogy",
+      "Series Completion (Number)",
+      "Series Completion (Alphabet)",
+      "Classification (Odd One Out)",
+      "Venn Diagrams",
+      "Clocks & Calendars",
+      "Cubes & Dice",
+      "Order & Ranking",
+      "Assertion & Reason"
+    ],
+    "Verbal Ability": [
+      "Reading Comprehension",
+      "Sentence Correction",
+      "Para Jumbles",
+      "Fill in the Blanks",
+      "Synonyms & Antonyms",
+      "Idioms & Phrases",
+      "One Word Substitution",
+      "Spotting Errors",
+      "Active & Passive Voice",
+      "Direct & Indirect Speech",
+      "Cloze Test",
+      "Vocabulary"
+    ],
+    "Company-Specific Patterns": {
+      "TCS NQT": [
+        "Numerical Ability",
+        "Verbal Ability",
+        "Reasoning Ability",
+        "Programming Logic",
+        "Coding"
+      ],
+      "Infosys": [
+        "Quantitative Aptitude",
+        "Logical Reasoning",
+        "Verbal Ability",
+        "Pseudocode",
+        "Puzzle Solving"
+      ],
+      "Wipro NLTH": [
+        "Aptitude",
+        "Written Communication",
+        "Essay Writing",
+        "Coding (Java/Python/C)"
+      ],
+      "Cognizant GenC": [
+        "Quantitative Aptitude",
+        "Logical Reasoning",
+        "Verbal Ability",
+        "Automata Fix (Coding)",
+        "Hands-on Coding"
+      ],
+      "Capgemini": [
+        "Pseudo Code",
+        "Essay Writing",
+        "Game-Based Aptitude",
+        "Behavioral",
+        "Coding"
+      ],
+      "Accenture": [
+        "Cognitive & Technical Assessment",
+        "Coding Assessment",
+        "Communication Assessment"
+      ],
+      "HCL": [
+        "Aptitude",
+        "Technical",
+        "Verbal",
+        "Coding"
+      ],
+      "Tech Mahindra": [
+        "Aptitude",
+        "English",
+        "Coding",
+        "Essay"
+      ]
+    }
+  }
+}

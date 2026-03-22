@@ -1,0 +1,308 @@
+{
+  "source": "Compiled from System Design Primer + Tech Interview Handbook",
+  "topics": [
+    {
+      "name": "URL Shortener",
+      "companies": [
+        "Google",
+        "Amazon",
+        "Microsoft",
+        "Meta"
+      ],
+      "concepts": [
+        "Hashing",
+        "Base62 encoding",
+        "Database sharding",
+        "Cache (Redis)",
+        "Rate limiting"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=fMZMm_0ZhK4",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Twitter / News Feed",
+      "companies": [
+        "Meta",
+        "Twitter/X",
+        "ByteDance"
+      ],
+      "concepts": [
+        "Fan-out on write vs read",
+        "Message queue",
+        "Timeline service",
+        "Caching",
+        "Database partitioning"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=wYk0xPP_P_8",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Instagram / Photo Sharing",
+      "companies": [
+        "Meta",
+        "Google",
+        "Snap"
+      ],
+      "concepts": [
+        "CDN",
+        "Object storage (S3)",
+        "News feed generation",
+        "Image processing pipeline",
+        "Sharding"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=VJpfO6KdyWE",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Chat System (WhatsApp)",
+      "companies": [
+        "Meta",
+        "Microsoft",
+        "Snap"
+      ],
+      "concepts": [
+        "WebSocket",
+        "Message queue",
+        "Presence service",
+        "End-to-end encryption",
+        "Group chat fan-out"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=vvhC64hQZMk",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "YouTube / Video Streaming",
+      "companies": [
+        "Google",
+        "Netflix",
+        "Amazon"
+      ],
+      "concepts": [
+        "Video transcoding",
+        "CDN",
+        "Adaptive bitrate streaming",
+        "Recommendation engine",
+        "DAG processing"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=jPKTo1iGQiE",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Google Drive / Dropbox",
+      "companies": [
+        "Google",
+        "Dropbox",
+        "Microsoft"
+      ],
+      "concepts": [
+        "Block storage",
+        "File chunking",
+        "Sync conflict resolution",
+        "Deduplication",
+        "Metadata DB"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=U0xTu6E2CT8",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Web Crawler",
+      "companies": [
+        "Google",
+        "Amazon",
+        "Microsoft"
+      ],
+      "concepts": [
+        "BFS crawling",
+        "URL frontier",
+        "Politeness",
+        "Deduplication (Bloom filter)",
+        "DNS resolver"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=BKZxZwUgL3Y",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Notification System",
+      "companies": [
+        "Amazon",
+        "Meta",
+        "Apple"
+      ],
+      "concepts": [
+        "Push vs Pull",
+        "APNS/FCM",
+        "Message queue",
+        "Rate limiting",
+        "Template engine"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=bBTPZ9NdSk8",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Rate Limiter",
+      "companies": [
+        "Google",
+        "Amazon",
+        "Cloudflare"
+      ],
+      "concepts": [
+        "Token bucket",
+        "Sliding window",
+        "Fixed window",
+        "Redis",
+        "Distributed rate limiting"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=FU4WlwfS3G0",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Search Autocomplete",
+      "companies": [
+        "Google",
+        "Amazon",
+        "Microsoft"
+      ],
+      "concepts": [
+        "Trie",
+        "Zookeeper",
+        "Data sampling",
+        "Query ranking",
+        "Prefix matching"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=us0qySiUsGU",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Uber / Ride Sharing",
+      "companies": [
+        "Uber",
+        "Lyft",
+        "Ola"
+      ],
+      "concepts": [
+        "Geospatial indexing",
+        "Quadtree",
+        "WebSocket",
+        "ETA computation",
+        "Dispatch algorithm"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=umWABit-wbk",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Booking System (Hotel/Flight)",
+      "companies": [
+        "Booking.com",
+        "Airbnb",
+        "Expedia"
+      ],
+      "concepts": [
+        "Distributed transactions",
+        "Inventory management",
+        "Caching",
+        "Search ranking",
+        "Payment processing"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=YyOXt2MEkv4",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "E-commerce (Amazon)",
+      "companies": [
+        "Amazon",
+        "Flipkart",
+        "Walmart"
+      ],
+      "concepts": [
+        "Microservices",
+        "Cart service",
+        "Payment gateway",
+        "Inventory",
+        "Recommendation engine"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=EpASu_1dUdE",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Distributed Cache (Redis)",
+      "companies": [
+        "Amazon",
+        "Google",
+        "Meta"
+      ],
+      "concepts": [
+        "Consistent hashing",
+        "Cache eviction (LRU/LFU)",
+        "Write-through/Write-back",
+        "Cache stampede",
+        "Replication"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=iuqZvajTOyA",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Message Queue (Kafka)",
+      "companies": [
+        "LinkedIn",
+        "Uber",
+        "Netflix"
+      ],
+      "concepts": [
+        "Pub/Sub",
+        "Partitioning",
+        "Consumer groups",
+        "Exactly-once delivery",
+        "Offset management"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=UEJ3irRCXMY",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Key-Value Store",
+      "companies": [
+        "Amazon",
+        "Google"
+      ],
+      "concepts": [
+        "Consistent hashing",
+        "Gossip protocol",
+        "Merkle tree",
+        "Vector clock",
+        "Quorum consensus"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=rnZmdmlR-2M",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Pastebin",
+      "companies": [
+        "General"
+      ],
+      "concepts": [
+        "Key generation",
+        "Object storage",
+        "Cleanup service",
+        "Analytics",
+        "Rate limiting"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=josjRSBqEBI",
+      "difficulty": "Easy"
+    },
+    {
+      "name": "Ticket Booking (BookMyShow)",
+      "companies": [
+        "BookMyShow",
+        "Flipkart"
+      ],
+      "concepts": [
+        "Seat locking",
+        "Distributed transactions",
+        "Real-time availability",
+        "Payment timeout",
+        "Queue management"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=lBAwJgoSJ2k",
+      "difficulty": "Hard"
+    }
+  ]
+}

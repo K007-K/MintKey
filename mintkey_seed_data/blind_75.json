@@ -1,0 +1,381 @@
+{
+  "source": "Blind 75 (TeamBlind)",
+  "total": 75,
+  "problems": [
+    {
+      "title": "Two Sum",
+      "topic": "Array",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Best Time to Buy and Sell Stock",
+      "topic": "Array",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Contains Duplicate",
+      "topic": "Array",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Product of Array Except Self",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Maximum Subarray",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Maximum Product Subarray",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Find Minimum in Rotated Sorted Array",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Search in Rotated Sorted Array",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "3Sum",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Container With Most Water",
+      "topic": "Array",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Sum of Two Integers",
+      "topic": "Binary",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Number of 1 Bits",
+      "topic": "Binary",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Counting Bits",
+      "topic": "Binary",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Missing Number",
+      "topic": "Binary",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Reverse Bits",
+      "topic": "Binary",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Climbing Stairs",
+      "topic": "DP",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Coin Change",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Longest Increasing Subsequence",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Longest Common Subsequence",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Word Break",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Combination Sum",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "House Robber",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "House Robber II",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Decode Ways",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Unique Paths",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Jump Game",
+      "topic": "DP",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Clone Graph",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Course Schedule",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Pacific Atlantic Water Flow",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Number of Islands",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Longest Consecutive Sequence",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Alien Dictionary",
+      "topic": "Graph",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Graph Valid Tree",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Number of Connected Components",
+      "topic": "Graph",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Insert Interval",
+      "topic": "Interval",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Merge Intervals",
+      "topic": "Interval",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Non-overlapping Intervals",
+      "topic": "Interval",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Meeting Rooms",
+      "topic": "Interval",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Meeting Rooms II",
+      "topic": "Interval",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Reverse Linked List",
+      "topic": "Linked List",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Linked List Cycle",
+      "topic": "Linked List",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Merge Two Sorted Lists",
+      "topic": "Linked List",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Remove Nth Node From End",
+      "topic": "Linked List",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Reorder List",
+      "topic": "Linked List",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Merge K Sorted Lists",
+      "topic": "Linked List",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Set Matrix Zeroes",
+      "topic": "Matrix",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Spiral Matrix",
+      "topic": "Matrix",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Rotate Image",
+      "topic": "Matrix",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Word Search",
+      "topic": "Matrix",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Longest Substring Without Repeating Characters",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Longest Repeating Character Replacement",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Minimum Window Substring",
+      "topic": "String",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Valid Anagram",
+      "topic": "String",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Group Anagrams",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Valid Parentheses",
+      "topic": "String",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Valid Palindrome",
+      "topic": "String",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Longest Palindromic Substring",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Palindromic Substrings",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Encode and Decode Strings",
+      "topic": "String",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Maximum Depth of Binary Tree",
+      "topic": "Tree",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Same Tree",
+      "topic": "Tree",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Invert Binary Tree",
+      "topic": "Tree",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Binary Tree Maximum Path Sum",
+      "topic": "Tree",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Binary Tree Level Order Traversal",
+      "topic": "Tree",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Serialize and Deserialize Binary Tree",
+      "topic": "Tree",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Subtree of Another Tree",
+      "topic": "Tree",
+      "difficulty": "Easy"
+    },
+    {
+      "title": "Construct BT from Preorder and Inorder",
+      "topic": "Tree",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Validate BST",
+      "topic": "Tree",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Kth Smallest Element in BST",
+      "topic": "Tree",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "LCA of BST",
+      "topic": "Tree",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Implement Trie",
+      "topic": "Trie",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Design Add and Search Words",
+      "topic": "Trie",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Word Search II",
+      "topic": "Trie",
+      "difficulty": "Hard"
+    },
+    {
+      "title": "Top K Frequent Elements",
+      "topic": "Heap",
+      "difficulty": "Medium"
+    },
+    {
+      "title": "Find Median from Data Stream",
+      "topic": "Heap",
+      "difficulty": "Hard"
+    }
+  ]
+}

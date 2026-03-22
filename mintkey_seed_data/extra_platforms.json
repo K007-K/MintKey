@@ -1,0 +1,143 @@
+{
+  "Algomaster": {
+    "url": "https://blog.algomaster.io",
+    "patterns": [
+      "Sliding Window",
+      "Two Pointers",
+      "Fast & Slow Pointers",
+      "Merge Intervals",
+      "Cyclic Sort",
+      "In-place Reversal of Linked List",
+      "Tree BFS",
+      "Tree DFS",
+      "Two Heaps",
+      "Subsets",
+      "Modified Binary Search",
+      "Top K Elements",
+      "K-way Merge",
+      "Topological Sort",
+      "0/1 Knapsack",
+      "Fibonacci Numbers",
+      "Palindromic Subsequence",
+      "Longest Common Substring"
+    ]
+  },
+  "TopperWorld": {
+    "url": "https://topperworld.in",
+    "categories": [
+      "DSA Notes",
+      "Interview Questions",
+      "Project Ideas",
+      "Tech Blogs",
+      "Placement Prep"
+    ]
+  },
+  "HackerRank": {
+    "url": "https://www.hackerrank.com",
+    "domains": [
+      "Algorithms",
+      "Data Structures",
+      "Mathematics",
+      "AI",
+      "C",
+      "C++",
+      "Java",
+      "Python",
+      "Ruby",
+      "SQL",
+      "Databases",
+      "Linux Shell",
+      "Functional Programming",
+      "Regex"
+    ],
+    "tracks": [
+      "Interview Preparation Kit",
+      "30 Days of Code",
+      "10 Days of JavaScript",
+      "10 Days of Statistics",
+      "Problem Solving (Basic)",
+      "Problem Solving (Intermediate)",
+      "SQL (Basic/Intermediate/Advanced)"
+    ]
+  },
+  "CodeChef": {
+    "url": "https://www.codechef.com",
+    "difficulty_levels": [
+      "Beginner",
+      "Easy",
+      "Medium",
+      "Hard",
+      "Challenge"
+    ],
+    "features": [
+      "Long Challenges (Monthly)",
+      "Cook-Off (Bi-weekly)",
+      "Lunchtime",
+      "Starters (Weekly)",
+      "Practice Section",
+      "Learning Section"
+    ]
+  },
+  "GeeksforGeeks": {
+    "url": "https://www.geeksforgeeks.org",
+    "features": [
+      "Company-wise Practice",
+      "Topic-wise Practice",
+      "Problem of the Day",
+      "SDE Sheet",
+      "Must-Do Problems",
+      "Interview Experiences",
+      "Articles & Tutorials"
+    ],
+    "company_wise_count": "200+ companies"
+  },
+  "Scaler": {
+    "url": "https://www.scaler.com/topics",
+    "topics": [
+      "Data Structures",
+      "Algorithms",
+      "System Design",
+      "DBMS",
+      "Operating Systems",
+      "Computer Networks",
+      "OOP Concepts",
+      "SQL",
+      "JavaScript",
+      "Python",
+      "Java",
+      "C++"
+    ]
+  },
+  "LeetCode": {
+    "url": "https://leetcode.com",
+    "total_problems": "3200+",
+    "difficulty": {
+      "Easy": "~800",
+      "Medium": "~1700",
+      "Hard": "~700"
+    },
+    "features": [
+      "Daily Challenge",
+      "Weekly Contest",
+      "Biweekly Contest",
+      "Study Plans",
+      "Company Tags",
+      "Top Interview Questions",
+      "LeetCode 75",
+      "SQL 50",
+      "Introduction to Pandas",
+      "30 Days of JavaScript"
+    ],
+    "study_plans": [
+      "Top Interview 150",
+      "LeetCode 75",
+      "SQL 50",
+      "Introduction to Pandas",
+      "30 Days of JavaScript",
+      "Dynamic Programming",
+      "Binary Search",
+      "Graph Theory",
+      "Algorithm"
+    ]
+  }
+}

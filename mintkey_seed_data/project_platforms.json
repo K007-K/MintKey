@@ -1,0 +1,88 @@
+{
+  "Frontend Mentor": {
+    "url": "https://www.frontendmentor.io",
+    "difficulty_levels": [
+      "Newbie",
+      "Junior",
+      "Intermediate",
+      "Advanced",
+      "Guru"
+    ],
+    "tech_categories": [
+      "HTML/CSS",
+      "JavaScript",
+      "React",
+      "Vue",
+      "Angular",
+      "API Integration",
+      "Responsive Design"
+    ],
+    "sample_challenges": [
+      "QR Code Component",
+      "Results Summary",
+      "Interactive Rating",
+      "NFT Preview Card",
+      "Order Summary",
+      "Stats Preview Card",
+      "3-Column Preview Card",
+      "FAQ Accordion",
+      "Interactive Card Details",
+      "Advice Generator (API)",
+      "Age Calculator",
+      "Tip Calculator",
+      "E-commerce Product Page",
+      "Interactive Comments Section",
+      "REST Countries API with Theme Switcher",
+      "URL Shortening API",
+      "Kanban Task Management",
+      "Multi-Step Form",
+      "Invoice App"
+    ]
+  },
+  "DevProjects by Codementor": {
+    "url": "https://www.codementor.io/projects",
+    "categories": [
+      "HTML/CSS",
+      "JavaScript",
+      "Python",
+      "Java",
+      "React",
+      "Node.js",
+      "Full Stack"
+    ],
+    "sample_projects": [
+      "Countdown Timer",
+      "Quiz App",
+      "Weather App",
+      "E-commerce Store",
+      "Chat Application",
+      "Task Manager",
+      "Blog Platform",
+      "URL Shortener",
+      "Expense Tracker",
+      "Portfolio Website"
+    ]
+  },
+  "CodingChallenges.fyi": {
+    "url": "https://codingchallenges.fyi",
+    "description": "Build real-world tools from scratch",
+    "challenges": [
+      "Build Your Own wc Tool",
+      "Build Your Own JSON Parser",
+      "Build Your Own Compression Tool",
+      "Build Your Own cut Tool",
+      "Build Your Own Load Balancer",
+      "Build Your Own URL Shortener",
+      "Build Your Own diff Tool",
+      "Build Your Own Shell",
+      "Build Your Own cat Tool",
+      "Build Your Own Redis Server",
+      "Build Your Own HTTP Server",
+      "Build Your Own DNS Resolver",
+      "Build Your Own Memcached Server",
+      "Build Your Own sed",
+      "Build Your Own grep",
+      "Build Your Own head"
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "adobe": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "PDF Document Processor", "desc": "Build a PDF parser with text extraction, annotation support, form filling, and digital signatures.", "tags": ["Python", "PyMuPDF", "React", "FastAPI"], "hours": 35, "complexity": "High", "category": "Full Stack"},
+        {"title": "Image Editing Web App", "desc": "Browser-based image editor with layers, filters, crop/resize, and undo/redo stack.", "tags": ["React", "Canvas API", "TypeScript", "WebWorkers"], "hours": 30, "complexity": "High", "category": "Frontend"},
+        {"title": "Creative Asset Manager", "desc": "DAM system with tagging, version control, preview generation, and team collaboration.", "tags": ["React", "Node.js", "S3", "PostgreSQL"], "hours": 25, "complexity": "High", "category": "Full Stack"}
+      ],
+      "must_have": ["Creative technology or design tools projects stand out", "Strong C++ or Java fundamentals", "Adobe values deep CS knowledge"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Comprehensive DSA coverage", "cost": "Free", "rating": 5},
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Well-organized problem set", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [{"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD foundation", "cost": "Free", "rating": 5}],
+      "behavioral": [{"name": "Adobe Interview Guide", "url": "https://igotanoffer.com/blogs/tech/adobe-interview", "desc": "Adobe interview prep", "cost": "Free", "rating": 4}],
+      "platforms": [{"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}, {"name": "HackerRank", "url": "https://hackerrank.com", "desc": "Adobe OA platform", "cost": "Free", "color": "#10B981"}]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "2 coding + aptitude questions", "difficulty": "Medium", "outcome": "Offer", "quote": "HackerRank OA. Mix of DSA coding and output-based questions. Arrays/strings focus. 90 min.", "date": "2025-10", "role": "MTS-1", "rating": 3},
+      {"round": "Technical Round 1", "question": "Recursion + Graph DFS with memoization", "difficulty": "Hard", "outcome": "Offer", "quote": "Deep DSA focus. They ask about recursive solutions, then optimize with DP. Theory + implementation.", "date": "2025-09", "role": "MTS-1", "rating": 4},
+      {"round": "Technical Round 2", "question": "LLD: Design Facebook comments system", "difficulty": "Medium", "outcome": "Offer", "quote": "Class design, data members, methods. OOP evaluation. They want to see SOLID principles.", "date": "2025-08", "role": "MTS-1", "rating": 4},
+      {"round": "Technical Round 3", "question": "OS concepts (virtual memory, paging) + pointer questions in C++", "difficulty": "Medium", "outcome": "Offer", "quote": "CS fundamentals round. OS, DBMS, and C++ deep questions. Memory management is key.", "date": "2025-07", "role": "MTS-1", "rating": 4},
+      {"round": "Director Round", "question": "Behavioral + project deep-dive", "difficulty": "Easy", "outcome": "Offer", "quote": "Very senior person. Discussed past work, why Adobe, challenges faced. Cultural fit assessment.", "date": "2025-06", "role": "MTS-1", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~8%", "avg_rounds": "5-6", "timeline_weeks": "3-6", "offer_rate": "~8%", "total_reviews": 420},
+    "insider_tips": ["Adobe asks CS fundamentals — OS, DBMS, memory management are tested", "C++ knowledge is highly valued — know pointers, virtual functions, templates", "5-6 rounds is common — it's a thorough process", "LLD is asked more than HLD for MTS-1", "They value creative problem solvers — show unique approaches", "Adobe has great WLB — mention you value that in HR rounds"],
+    "dos_donts": {
+      "do": ["Brush up on CS fundamentals (OS, DBMS)", "Know C++/Java deeply — language internals", "Practice LLD problems", "Show interest in creative technology", "Prepare for 5+ rounds"],
+      "dont": ["Skip OS/DBMS prep — it's a separate round", "Ignore memory management concepts", "Neglect recursion practice", "Be unprepared for pointer questions", "Think it's only DSA — Adobe tests breadth"]
+    }
+  },
+  "salesforce": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "CRM Dashboard Builder", "desc": "Drag-and-drop dashboard builder with custom widgets, data sources, and real-time metric updates.", "tags": ["React", "TypeScript", "Node.js", "PostgreSQL"], "hours": 35, "complexity": "High", "category": "Full Stack"},
+        {"title": "Workflow Automation Engine", "desc": "Rule-based workflow engine with conditional triggers, email notifications, and approval chains.", "tags": ["Java", "Spring Boot", "RabbitMQ", "PostgreSQL"], "hours": 30, "complexity": "High", "category": "Backend"},
+        {"title": "API Gateway & Rate Limiter", "desc": "Build an API gateway with authentication, rate limiting, request logging, and multi-tenant support.", "tags": ["Go", "Redis", "PostgreSQL", "Docker"], "hours": 25, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["Enterprise SaaS or CRM related projects are strong signals", "Full-stack capability", "Understanding of multi-tenant architecture"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Best DSA prep", "cost": "Free", "rating": 5},
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Core problem set", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [{"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD foundation", "cost": "Free", "rating": 5}],
+      "behavioral": [{"name": "Salesforce Ohana Culture", "url": "https://www.salesforce.com/company/our-story/", "desc": "Understand Salesforce's values-driven culture", "cost": "Free", "rating": 4}],
+      "platforms": [{"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "2-3 medium-hard DSA: binary tree diameter + matrix rotation", "difficulty": "Hard", "outcome": "Offer", "quote": "Standard OA with medium-hard DSA. Binary trees and matrix problems are common.", "date": "2025-10", "role": "MTS", "rating": 4},
+      {"round": "Technical Round 1", "question": "LRU Cache design + implementation", "difficulty": "Medium", "outcome": "Offer", "quote": "Classic DS question. Implement from scratch including eviction. Discuss HashMap internals.", "date": "2025-09", "role": "MTS", "rating": 4},
+      {"round": "Technical Round 2", "question": "0-1 Knapsack variation + OOP discussion", "difficulty": "Hard", "outcome": "Offer", "quote": "DP problem with real-world context. Then discussed OOP principles and design patterns.", "date": "2025-08", "role": "MTS", "rating": 4},
+      {"round": "System Design", "question": "Design Google Docs (collaborative editing)", "difficulty": "Hard", "outcome": "Offer", "quote": "HLD focus: architecture, scalability, SPOF handling. Very thorough discussion on trade-offs.", "date": "2025-07", "role": "SMTS", "rating": 5}
+    ],
+    "interview_stats": {"success_rate": "~8%", "avg_rounds": "5", "timeline_weeks": "3-5", "offer_rate": "~8%", "total_reviews": 350},
+    "insider_tips": ["Salesforce has a unique 'Ohana' (family) culture — show you align with it", "'Trust' is their #1 value — demonstrate integrity in behaviorals", "Both LLD and HLD are tested — prepare both", "HashMap internals are a favorite topic — know how they work", "They may ask about Salesforce-specific tech (Apex, LWC) for CRM roles", "Presentation round is sometimes included — be ready to present a technical topic"],
+    "dos_donts": {
+      "do": ["Align with Salesforce's trust and equality values", "Know HashMap/HashTable internals", "Prepare both LLD and HLD", "Show interest in enterprise SaaS", "Be ready for a presentation round"],
+      "dont": ["Ignore Salesforce's culture and values", "Skip OOP fundamentals", "Forget to handle edge cases in coding", "Be unprepared for system design at scale", "Ignore multi-tenant architecture concepts"]
+    }
+  },
+  "tcs": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Employee Management Portal", "desc": "CRUD app with role-based access, attendance tracking, leave management, and report generation.", "tags": ["Java", "Spring MVC", "MySQL", "Bootstrap"], "hours": 20, "complexity": "Medium", "category": "Full Stack"},
+        {"title": "Student Database System", "desc": "Academic record management with grade calculation, report cards, and data export.", "tags": ["Java", "JDBC", "MySQL", "JSP"], "hours": 15, "complexity": "Medium", "category": "Full Stack"}
+      ],
+      "must_have": ["Any full-stack project with proper documentation", "Strong CS fundamentals", "Communication skills matter as much as coding at TCS"]
+    },
+    "resources": {
+      "dsa": [{"name": "GeeksforGeeks DSA Course", "url": "https://www.geeksforgeeks.org/learn-data-structures-and-algorithms-dsa-tutorial/", "desc": "Best free DSA resource for placement prep", "cost": "Free", "rating": 5}],
+      "system_design": [],
+      "behavioral": [{"name": "TCS Ninja Interview Prep", "url": "https://www.geeksforgeeks.org/tcs-interview-experience/", "desc": "TCS interview experiences from GFG", "cost": "Free", "rating": 4}],
+      "platforms": [{"name": "TCS NQT Portal", "url": "https://learning.tcsionhub.in", "desc": "Official TCS exam portal", "cost": "Free", "color": "#3B82F6"}]
+    },
+    "interview_reviews": [
+      {"round": "TCS NQT (Aptitude + Coding)", "question": "Aptitude + basic coding (fibonacci, palindrome)", "difficulty": "Easy", "outcome": "Offer", "quote": "National Qualifier Test. Aptitude math + basic coding. Medium bar. Focus on completing all sections.", "date": "2025-10", "role": "ASE", "rating": 2},
+      {"round": "Technical Interview", "question": "DBMS queries + Java basics + project discussion", "difficulty": "Easy", "outcome": "Offer", "quote": "Basic technical round. SQL queries, Java OOP concepts, and project walk-through. Not difficult.", "date": "2025-09", "role": "ASE", "rating": 2},
+      {"round": "HR Interview", "question": "Why TCS? Relocation? Bond discussion", "difficulty": "Easy", "outcome": "Offer", "quote": "Standard HR. Discuss 2-year bond, work location flexibility, and career goals.", "date": "2025-08", "role": "ASE", "rating": 1}
+    ],
+    "interview_stats": {"success_rate": "~30%", "avg_rounds": "3", "timeline_weeks": "4-8", "offer_rate": "~30%", "total_reviews": 2800},
+    "insider_tips": ["TCS NQT is the main filter — clear it with good aptitude scores", "Technical round is basic — Java/DBMS/OS fundamentals", "Communication skills matter — show clarity and confidence", "2-year service bond is standard — be prepared to discuss it", "Focus on aptitude prep alongside coding", "Mass recruiter — high acceptance rate compared to product companies"],
+    "dos_donts": {"do": ["Prepare aptitude thoroughly", "Know SQL queries well", "Brush up Java/C basics", "Be confident in communication", "Show willingness to learn and relocate"], "dont": ["Skip aptitude prep", "Be arrogant about your coding skills", "Refuse to discuss the service bond", "Ignore software engineering fundamentals", "Be inflexible about work location"]}
+  },
+  "infosys": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Library Management System", "desc": "Book catalog with member management, issue/return tracking, and fine calculation.", "tags": ["Java", "Spring Boot", "MySQL", "Thymeleaf"], "hours": 15, "complexity": "Medium", "category": "Full Stack"},
+        {"title": "Weather Dashboard App", "desc": "Real-time weather data with location-based forecasts and historical trend charts.", "tags": ["React", "OpenWeather API", "Chart.js"], "hours": 10, "complexity": "Medium", "category": "Frontend"}
+      ],
+      "must_have": ["Clean project with proper documentation", "Strong fundamentals in CS", "Logical reasoning ability"]
+    },
+    "resources": {
+      "dsa": [{"name": "GeeksforGeeks DSA Course", "url": "https://www.geeksforgeeks.org/learn-data-structures-and-algorithms-dsa-tutorial/", "desc": "Best free DSA resource", "cost": "Free", "rating": 5}],
+      "system_design": [],
+      "behavioral": [{"name": "Infosys Interview Prep", "url": "https://www.geeksforgeeks.org/infosys-interview-experience/", "desc": "Infosys interview experiences", "cost": "Free", "rating": 4}],
+      "platforms": [{"name": "InfyTQ Platform", "url": "https://infytq.infosys.com", "desc": "Infosys certification & hiring platform", "cost": "Free", "color": "#3B82F6"}]
+    },
+    "interview_reviews": [
+      {"round": "InfyTQ Online Test", "question": "Aptitude + basic coding in Python/Java", "difficulty": "Easy", "outcome": "Offer", "quote": "InfyTQ certification exam. Easy coding, aptitude, and logical reasoning. Good score = direct interview.", "date": "2025-10", "role": "SE", "rating": 2},
+      {"round": "Technical Interview", "question": "SQL joins + OOPS concepts + project discussion", "difficulty": "Easy", "outcome": "Offer", "quote": "Standard technical: OOP definitions, SQL queries, project walkthrough. Straightforward.", "date": "2025-09", "role": "SE", "rating": 2},
+      {"round": "HR Interview", "question": "Relocation flexibility? Gap year explanation?", "difficulty": "Easy", "outcome": "Offer", "quote": "Focus on flexibility, positive attitude, and career goals. Very friendly atmosphere.", "date": "2025-08", "role": "SE", "rating": 1}
+    ],
+    "interview_stats": {"success_rate": "~35%", "avg_rounds": "3", "timeline_weeks": "4-8", "offer_rate": "~35%", "total_reviews": 3200},
+    "insider_tips": ["InfyTQ certification gives you advantage in placement", "Power Programmer role pays 2x — aim for it if you're strong in coding", "Technical round is basic CS — OOP, DBMS, OS", "Communication skills and attitude weigh heavily", "Infosys values fresh graduates who show willingness to learn", "SP (Specialist Programmer) track for higher CTC"],
+    "dos_donts": {"do": ["Complete InfyTQ certification", "Know OOP and SQL basics well", "Show enthusiasm for learning", "Be flexible about work location", "Practice aptitude questions"], "dont": ["Skip the certification", "Over-prepare for complex DSA", "Be rigid about location preferences", "Ignore communication skills", "Underestimate the aptitude section"]}
+  },
+  "wipro": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Expense Tracker App", "desc": "Personal finance tracker with categories, monthly reports, and budget alerts.", "tags": ["React", "Node.js", "MongoDB", "Chart.js"], "hours": 15, "complexity": "Medium", "category": "Full Stack"},
+        {"title": "Quiz Application", "desc": "Online quiz platform with timer, scoring, leaderboard, and admin panel.","tags": ["Java", "Spring Boot", "MySQL", "Bootstrap"], "hours": 12, "complexity": "Medium", "category": "Full Stack"}
+      ],
+      "must_have": ["Any working project with documentation", "Basic programming skills", "Eagerness to learn"]
+    },
+    "resources": {
+      "dsa": [{"name": "GeeksforGeeks DSA Course", "url": "https://www.geeksforgeeks.org/learn-data-structures-and-algorithms-dsa-tutorial/", "desc": "Best free resource", "cost": "Free", "rating": 5}],
+      "system_design": [],
+      "behavioral": [{"name": "Wipro Interview Prep", "url": "https://www.geeksforgeeks.org/wipro-interview-experience/", "desc": "Wipro interview experiences", "cost": "Free", "rating": 4}],
+      "platforms": [{"name": "Wipro Elite Portal", "url": "https://elite.wipro.com", "desc": "Wipro's campus hiring platform", "cost": "Free", "color": "#3B82F6"}]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "Aptitude + verbal + basic coding", "difficulty": "Easy", "outcome": "Offer", "quote": "Standard aptitude test followed by 2 easy coding problems. Time management is key.", "date": "2025-10", "role": "Project Engineer", "rating": 2},
+      {"round": "Technical Interview", "question": "Basic Java/Python + DBMS + project discussion", "difficulty": "Easy", "outcome": "Offer", "quote": "Asked about OOP pillars, SQL joins, and project walkthrough. Very basic.", "date": "2025-09", "role": "Project Engineer", "rating": 2},
+      {"round": "HR Interview", "question": "Salary expectations, relocation, strengths/weaknesses", "difficulty": "Easy", "outcome": "Offer", "quote": "Standard HR discussion. Be positive and show willingness to work anywhere.", "date": "2025-08", "role": "Project Engineer", "rating": 1}
+    ],
+    "interview_stats": {"success_rate": "~40%", "avg_rounds": "3", "timeline_weeks": "4-8", "offer_rate": "~40%", "total_reviews": 2500},
+    "insider_tips": ["Wipro Elite/NLTH programs offer higher packages", "Aptitude + verbal is the main filter — practice mock tests", "Technical round is basic programming concepts", "Show eagerness to learn and adapt", "Wipro values teamwork and flexibility", "WILP (Work Integrated Learning Programme) is great for freshers"],
+    "dos_donts": {"do": ["Prepare aptitude and verbal reasoning", "Know basic programming concepts", "Be adaptable and flexible", "Show team player attitude", "Research Wipro's service offerings"], "dont": ["Over-prepare for hard DSA", "Be rigid about role preferences", "Ignore soft skills prep", "Be overconfident in technical round", "Forget to research Wipro"]}
+  }
+}

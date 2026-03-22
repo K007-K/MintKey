@@ -1,0 +1,213 @@
+{
+  "source": "Compiled from Grokking + AlgoMaster + NeetCode",
+  "patterns": [
+    {
+      "name": "Two Pointers",
+      "when_to_use": "Sorted arrays, finding pairs, palindromes, removing duplicates",
+      "template": "def two_pointers(arr):\n    left, right = 0, len(arr) - 1\n    while left < right:\n        # process arr[left] and arr[right]\n        if condition:\n            left += 1\n        else:\n            right -= 1",
+      "problems": [
+        "Two Sum II",
+        "3Sum",
+        "Container With Most Water",
+        "Trapping Rain Water",
+        "Valid Palindrome"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=-gjxg6Pln50"
+    },
+    {
+      "name": "Sliding Window",
+      "when_to_use": "Contiguous subarrays/substrings, finding max/min in window, distinct elements",
+      "template": "def sliding_window(arr, k):\n    window_start = 0\n    result = 0\n    for window_end in range(len(arr)):\n        # expand window\n        if window_end >= k - 1:\n            result = max(result, current)\n            # shrink window\n            window_start += 1",
+      "problems": [
+        "Longest Substring Without Repeating Characters",
+        "Minimum Window Substring",
+        "Longest Repeating Character Replacement",
+        "Fruit Into Baskets",
+        "Sliding Window Maximum"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=GcW4mgmgSbw"
+    },
+    {
+      "name": "Fast & Slow Pointers",
+      "when_to_use": "Linked list cycles, finding middle, palindrome linked lists",
+      "template": "def fast_slow(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n    return slow  # middle node",
+      "problems": [
+        "Linked List Cycle",
+        "Middle of Linked List",
+        "Palindrome Linked List",
+        "Happy Number",
+        "Find the Duplicate Number"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=gBTe7lFR3vc"
+    },
+    {
+      "name": "Merge Intervals",
+      "when_to_use": "Overlapping intervals, scheduling, finding gaps",
+      "template": "def merge_intervals(intervals):\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0]]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return merged",
+      "problems": [
+        "Merge Intervals",
+        "Insert Interval",
+        "Non-overlapping Intervals",
+        "Meeting Rooms II",
+        "Interval List Intersections"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=44H3cEC2fFM"
+    },
+    {
+      "name": "Cyclic Sort",
+      "when_to_use": "Arrays with numbers in range [1, n], finding missing/duplicate numbers",
+      "template": "def cyclic_sort(nums):\n    i = 0\n    while i < len(nums):\n        correct = nums[i] - 1\n        if nums[i] != nums[correct]:\n            nums[i], nums[correct] = nums[correct], nums[i]\n        else:\n            i += 1",
+      "problems": [
+        "Missing Number",
+        "Find All Numbers Disappeared",
+        "Find the Duplicate Number",
+        "First Missing Positive",
+        "Set Mismatch"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=JfinxytTYFQ"
+    },
+    {
+      "name": "In-place Linked List Reversal",
+      "when_to_use": "Reversing linked lists or portions of them",
+      "template": "def reverse(head):\n    prev, curr = None, head\n    while curr:\n        next_node = curr.next\n        curr.next = prev\n        prev = curr\n        curr = next_node\n    return prev",
+      "problems": [
+        "Reverse Linked List",
+        "Reverse Linked List II",
+        "Reverse Nodes in k-Group",
+        "Swap Nodes in Pairs",
+        "Rotate List"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=G0_I-ZF0S38"
+    },
+    {
+      "name": "BFS (Tree/Graph)",
+      "when_to_use": "Level-order traversal, shortest path in unweighted graphs, finding connected components",
+      "template": "from collections import deque\ndef bfs(root):\n    queue = deque([root])\n    while queue:\n        node = queue.popleft()\n        # process node\n        for neighbor in node.children:\n            queue.append(neighbor)",
+      "problems": [
+        "Binary Tree Level Order Traversal",
+        "Rotting Oranges",
+        "Word Ladder",
+        "Number of Islands",
+        "Shortest Path in Binary Matrix"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=HDE2Jn0-riM"
+    },
+    {
+      "name": "DFS (Tree/Graph)",
+      "when_to_use": "Exploring all paths, detecting cycles, topological sort, connected components",
+      "template": "def dfs(node, visited):\n    if node in visited:\n        return\n    visited.add(node)\n    # process node\n    for neighbor in node.neighbors:\n        dfs(neighbor, visited)",
+      "problems": [
+        "Number of Islands",
+        "Course Schedule",
+        "Clone Graph",
+        "Pacific Atlantic Water Flow",
+        "Surrounded Regions"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=PMMc4VsIacU"
+    },
+    {
+      "name": "Two Heaps",
+      "when_to_use": "Finding median in a stream, scheduling with priorities",
+      "template": "import heapq\nclass MedianFinder:\n    def __init__(self):\n        self.small = []  # max heap (negate)\n        self.large = []  # min heap\n    def addNum(self, num):\n        heapq.heappush(self.small, -num)\n        heapq.heappush(self.large, -heapq.heappop(self.small))\n        if len(self.large) > len(self.small):\n            heapq.heappush(self.small, -heapq.heappop(self.large))",
+      "problems": [
+        "Find Median from Data Stream",
+        "Sliding Window Median",
+        "IPO",
+        "Maximize Capital"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=itmhHWaHupI"
+    },
+    {
+      "name": "Subsets / Backtracking",
+      "when_to_use": "Generating all subsets, permutations, combinations, power set",
+      "template": "def backtrack(start, path, result):\n    result.append(path[:])\n    for i in range(start, len(nums)):\n        path.append(nums[i])\n        backtrack(i + 1, path, result)\n        path.pop()",
+      "problems": [
+        "Subsets",
+        "Subsets II",
+        "Permutations",
+        "Combination Sum",
+        "Palindrome Partitioning",
+        "N-Queens"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=REOH22Xwdkk"
+    },
+    {
+      "name": "Modified Binary Search",
+      "when_to_use": "Sorted/rotated arrays, finding boundaries, search space reduction",
+      "template": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1",
+      "problems": [
+        "Search in Rotated Sorted Array",
+        "Find Minimum in Rotated Sorted Array",
+        "Search a 2D Matrix",
+        "Koko Eating Bananas",
+        "Median of Two Sorted Arrays"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=W9QJ8HaRvJQ"
+    },
+    {
+      "name": "Top K Elements",
+      "when_to_use": "Finding K largest/smallest/most frequent elements",
+      "template": "import heapq\ndef top_k(nums, k):\n    return heapq.nlargest(k, nums)\n# Or use min-heap of size k for efficiency:\n    heap = []\n    for num in nums:\n        heapq.heappush(heap, num)\n        if len(heap) > k:\n            heapq.heappop(heap)",
+      "problems": [
+        "Kth Largest Element",
+        "Top K Frequent Elements",
+        "K Closest Points to Origin",
+        "Sort Characters by Frequency",
+        "Reorganize String"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=YPTqKIgVk-k"
+    },
+    {
+      "name": "K-way Merge",
+      "when_to_use": "Merging K sorted lists/arrays, finding smallest range",
+      "template": "import heapq\ndef merge_k(lists):\n    heap = []\n    for i, lst in enumerate(lists):\n        if lst:\n            heapq.heappush(heap, (lst[0], i, 0))\n    result = []\n    while heap:\n        val, list_idx, elem_idx = heapq.heappop(heap)\n        result.append(val)\n        if elem_idx + 1 < len(lists[list_idx]):\n            heapq.heappush(heap, (lists[list_idx][elem_idx+1], list_idx, elem_idx+1))",
+      "problems": [
+        "Merge K Sorted Lists",
+        "Kth Smallest Element in Sorted Matrix",
+        "Smallest Range Covering Elements",
+        "Find K Pairs with Smallest Sums"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=ptYUCjfNhJY"
+    },
+    {
+      "name": "0/1 Knapsack",
+      "when_to_use": "Subset selection with constraints, partition problems, bounded choices",
+      "template": "def knapsack(weights, values, capacity):\n    n = len(weights)\n    dp = [[0]*(capacity+1) for _ in range(n+1)]\n    for i in range(1, n+1):\n        for w in range(capacity+1):\n            dp[i][w] = dp[i-1][w]\n            if weights[i-1] <= w:\n                dp[i][w] = max(dp[i][w], dp[i-1][w-weights[i-1]] + values[i-1])\n    return dp[n][capacity]",
+      "problems": [
+        "Partition Equal Subset Sum",
+        "Target Sum",
+        "Last Stone Weight II",
+        "0/1 Knapsack",
+        "Ones and Zeroes"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=GqOQ9CPo6CE"
+    },
+    {
+      "name": "Topological Sort",
+      "when_to_use": "DAG ordering, dependency resolution, course scheduling",
+      "template": "from collections import deque\ndef topo_sort(graph, in_degree):\n    queue = deque([n for n in graph if in_degree[n] == 0])\n    order = []\n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        for neighbor in graph[node]:\n            in_degree[neighbor] -= 1\n            if in_degree[neighbor] == 0:\n                queue.append(neighbor)\n    return order if len(order) == len(graph) else []",
+      "problems": [
+        "Course Schedule",
+        "Course Schedule II",
+        "Alien Dictionary",
+        "Minimum Height Trees",
+        "Sequence Reconstruction"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=dis_c84ejhQ"
+    },
+    {
+      "name": "Monotonic Stack",
+      "when_to_use": "Next greater/smaller element, histogram problems, stock span",
+      "template": "def next_greater(nums):\n    result = [-1] * len(nums)\n    stack = []\n    for i in range(len(nums)):\n        while stack and nums[stack[-1]] < nums[i]:\n            result[stack.pop()] = nums[i]\n        stack.append(i)\n    return result",
+      "problems": [
+        "Next Greater Element",
+        "Daily Temperatures",
+        "Largest Rectangle in Histogram",
+        "Trapping Rain Water",
+        "Stock Span Problem",
+        "Sum of Subarray Minimums"
+      ],
+      "best_video": "https://www.youtube.com/watch?v=Dq_ObZwTY_Q"
+    }
+  ]
+}

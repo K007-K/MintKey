@@ -1,0 +1,278 @@
+{
+  "flipkart": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "E-commerce Search & Filter Engine", "desc": "Build faceted search with autocomplete, spell-correct, price range filters, and relevance ranking.", "tags": ["Java", "Elasticsearch", "React", "Redis"], "hours": 35, "complexity": "High", "category": "Full Stack"},
+        {"title": "Cart & Checkout Microservice", "desc": "Multi-seller cart with coupon engine, payment gateway integration, and order state machine.", "tags": ["Java", "Spring Boot", "Kafka", "PostgreSQL"], "hours": 40, "complexity": "Very High", "category": "Backend"},
+        {"title": "Machine Coding: Bowling Alley System", "desc": "Clean OOP design for a bowling game with scoring, multiple players, and extensibility for rule changes.", "tags": ["Java", "OOP", "SOLID", "Design Patterns"], "hours": 8, "complexity": "Medium", "category": "LLD"}
+      ],
+      "must_have": ["Machine coding practice is essential — Flipkart weighs this heavily", "SOLID principles and clean architecture", "E-commerce domain projects are strong signals"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Most popular DSA sheet in India — 450+ problems", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Flipkart Tagged", "url": "https://leetcode.com/company/flipkart", "desc": "200+ Flipkart-specific problems", "cost": "Premium", "rating": 4}
+      ],
+      "system_design": [
+        {"name": "Machine Coding Round Prep", "url": "https://workat.tech/machine-coding/practice", "desc": "Practice machine coding problems — critical for Flipkart", "cost": "Free", "rating": 5},
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Comprehensive SD guide", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [
+        {"name": "Flipkart Culture Guide", "url": "https://www.flipkartcareers.com", "desc": "Official careers page — understand Flipkart values", "cost": "Free", "rating": 3}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "HackerRank", "url": "https://hackerrank.com", "desc": "Flipkart OA platform", "cost": "Free", "color": "#10B981"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "Graph cycle detection + DP on strings", "difficulty": "Hard", "outcome": "Offer", "quote": "HackerRank OA, 90 min, 3 problems. Need to solve at least 2 fully. Medium-Hard difficulty.", "date": "2025-10", "role": "SDE-1", "rating": 4},
+      {"round": "Machine Coding", "question": "Design a parking lot system", "difficulty": "Medium", "outcome": "Offer", "quote": "2 hours to build a working system. They evaluate SOLID, design patterns, extensibility. Code review follows.", "date": "2025-09", "role": "SDE-1", "rating": 5},
+      {"round": "Technical Round (DSA)", "question": "Merge intervals + Topological sort", "difficulty": "Hard", "outcome": "Offer", "quote": "1 hard DSA problem. Must explain brute force first, then optimize. Dry-run expected.", "date": "2025-08", "role": "SDE-1", "rating": 4},
+      {"round": "Hiring Manager", "question": "Project discussion + behavioral", "difficulty": "Easy", "outcome": "Offer", "quote": "30 min project deep-dive + why Flipkart. Pretty relaxed — they want to see genuine interest.", "date": "2025-07", "role": "SDE-1", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~8%", "avg_rounds": "4", "timeline_weeks": "2-4", "offer_rate": "~8%", "total_reviews": 450},
+    "insider_tips": ["Machine coding round is THE differentiator — practice 10+ problems", "SOLID principles are non-negotiable — they review your code structure", "Flipkart uses Java/Kotlin heavily — familiarity helps", "OA is on HackerRank — practice there specifically", "Code readability > cleverness — write clean, well-named code"],
+    "dos_donts": {
+      "do": ["Practice machine coding problems extensively", "Follow SOLID and clean architecture", "Write modular, extensible code", "Dry-run your solution", "Show e-commerce domain understanding"],
+      "dont": ["Write monolithic code in machine coding", "Skip design patterns — they check for them", "Ignore code review feedback", "Write untestable code", "Rush through without explaining approach"]
+    }
+  },
+  "cred": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Payment Gateway SDK", "desc": "Build a payment processing SDK with retry logic, idempotency, and webhook notifications.", "tags": ["Kotlin", "Spring Boot", "Redis", "PostgreSQL"], "hours": 35, "complexity": "Very High", "category": "Backend"},
+        {"title": "Credit Score Analyzer", "desc": "Dashboard showing credit score breakdown, trend analysis, and personalized improvement suggestions.", "tags": ["React", "D3.js", "Python", "FastAPI"], "hours": 25, "complexity": "High", "category": "Full Stack"},
+        {"title": "Reward Points Engine", "desc": "Design a modular rewards system with earning rules, redemption, expiry, and tier management.", "tags": ["Java", "Spring Boot", "Redis", "Kafka"], "hours": 30, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["Clean architecture and SOLID principles are mandatory", "Fintech or payment domain experience is a huge plus", "CRED values design excellence — beautiful code matters"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Comprehensive DSA prep", "cost": "Free", "rating": 5},
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Compact but thorough problem set", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "Machine Coding Prep", "url": "https://workat.tech/machine-coding/practice", "desc": "CRED heavily weighs machine coding", "cost": "Free", "rating": 5},
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Foundation for SD rounds", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Coding Assignment", "question": "Build a modular CLI application with extensible command pattern", "difficulty": "Medium", "outcome": "Offer", "quote": "Take-home assignment. They evaluate code structure, patterns, and extensibility. No UI needed.", "date": "2025-10", "role": "SDE-1", "rating": 4},
+      {"round": "DSA + Puzzles", "question": "Implement LFU Cache", "difficulty": "Hard", "outcome": "Offer", "quote": "Medium DSA + puzzle. Coded on Google Docs. They focus on problem-solving approach.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Machine Coding", "question": "Design a caching system with eviction policies", "difficulty": "Hard", "outcome": "Offer", "quote": "Clean, modular code with design patterns. Code review was intense — they questioned every design decision.", "date": "2025-08", "role": "SDE-1", "rating": 5},
+      {"round": "System Design + Managerial", "question": "Design a payment analytics SDK", "difficulty": "Hard", "outcome": "Rejected", "quote": "HLD + LLD combined with managerial discussion. Cultural fit at CRED is about craftsmanship and excellence.", "date": "2025-07", "role": "SDE-2", "rating": 5}
+    ],
+    "interview_stats": {"success_rate": "~5%", "avg_rounds": "3-4", "timeline_weeks": "2-3", "offer_rate": "~5%", "total_reviews": 180},
+    "insider_tips": ["CRED values code craftsmanship above all — write beautiful, clean code", "Machine coding is THE most important round", "Know SOLID principles cold — they will grill you", "Design patterns like Strategy, Observer, Factory are commonly tested", "CRED's engineering bar is among the highest in India"],
+    "dos_donts": {
+      "do": ["Write production-quality, clean code", "Use design patterns appropriately", "Focus on extensibility and modularity", "Show fintech domain interest", "Test your code properly"],
+      "dont": ["Submit messy or unstructured code", "Skip SOLID principles in machine coding", "Ignore the take-home assignment quality", "Be overconfident — CRED's bar is high", "Write code without proper error handling"]
+    }
+  },
+  "razorpay": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "UPI Payment Simulator", "desc": "Build a UPI-like payment system with P2P transfers, merchant payments, and transaction reconciliation.", "tags": ["Java", "Spring Boot", "PostgreSQL", "Redis"], "hours": 35, "complexity": "Very High", "category": "Backend"},
+        {"title": "Invoice Generation Platform", "desc": "Automated invoice creation with templates, PDF export, GST computation, and email delivery.", "tags": ["Node.js", "React", "Puppeteer", "PostgreSQL"], "hours": 25, "complexity": "High", "category": "Full Stack"},
+        {"title": "Payment Dashboard Analytics", "desc": "Real-time dashboard showing transaction volumes, success rates, and settlement tracking.", "tags": ["React", "D3.js", "Node.js", "ClickHouse"], "hours": 20, "complexity": "Medium", "category": "Full Stack"}
+      ],
+      "must_have": ["Payment/fintech project is a major plus", "Understanding of transaction safety and idempotency", "API design skills are critical at Razorpay"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Most popular Indian DSA resource", "cost": "Free", "rating": 5},
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Well-structured problem set", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "Machine Coding Prep", "url": "https://workat.tech/machine-coding/practice", "desc": "Razorpay includes machine coding rounds", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "15 MCQs (OS/DBMS/OOP) + 3 coding problems", "difficulty": "Medium", "outcome": "Offer", "quote": "MCQs + story-based coding. The coding problems are wrapped in real-world scenarios. 90 min total.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "DSA Round", "question": "Find median in two sorted arrays", "difficulty": "Hard", "outcome": "Offer", "quote": "One hard problem with follow-ups. Must explain brute → optimal. Time complexity discussion mandatory.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Machine Coding", "question": "Design an in-memory database with transactions", "difficulty": "Hard", "outcome": "Offer", "quote": "2 hours to build working system. ACID properties tested. Clean code and extensibility matter most.", "date": "2025-08", "role": "SDE-1", "rating": 5}
+    ],
+    "interview_stats": {"success_rate": "~7%", "avg_rounds": "3", "timeline_weeks": "2-3", "offer_rate": "~7%", "total_reviews": 220},
+    "insider_tips": ["Razorpay OA includes MCQs on OS/DBMS — brush up on fundamentals", "Story-based coding problems are unique to Razorpay — read them carefully", "Machine coding is the deciding round — practice building full systems", "Know basics of payment systems — UPI flows, settlement cycles", "API design is a hot topic — know REST best practices"],
+    "dos_donts": {
+      "do": ["Review OS/DBMS fundamentals for MCQs", "Build clean machine coding solutions", "Understand payment system basics", "Practice story-based problem interpretation", "Show API design skills"],
+      "dont": ["Skip MCQ prep — it's a filter round", "Write unstructured machine coding solutions", "Ignore transaction safety in designs", "Rush through without reading story problems carefully", "Neglect error handling"]
+    }
+  },
+  "phonepe": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Multi-level Cache System", "desc": "Build an L1/L2 cache with configurable eviction policies, TTL, and write-through/write-back modes.", "tags": ["Java", "Redis", "Design Patterns"], "hours": 20, "complexity": "High", "category": "Backend"},
+        {"title": "UPI Transaction Processor", "desc": "Event-driven payment processor handling concurrent transactions with saga pattern for rollbacks.", "tags": ["Java", "Kafka", "PostgreSQL", "Docker"], "hours": 35, "complexity": "Very High", "category": "Backend"},
+        {"title": "Notification Service", "desc": "Multi-channel (SMS, email, push) notification system with templates, scheduling, and delivery tracking.", "tags": ["Java", "Spring Boot", "RabbitMQ", "Redis"], "hours": 25, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["Java/Kotlin proficiency is expected", "Payment or fintech domain knowledge helps", "Scalable backend design is the core criteria"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Best DSA resource for Indian companies", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "Machine Coding Prep", "url": "https://workat.tech/machine-coding/practice", "desc": "PhonePe tests machine coding for SDE-2+", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Coding Test", "question": "3-4 coding problems (easy to hard)", "difficulty": "Hard", "outcome": "Offer", "quote": "Standard OA with DSA focus. Need to solve at least 3/4. Time limit is tight.", "date": "2025-10", "role": "SDE-1", "rating": 4},
+      {"round": "Technical Interview (DSA)", "question": "Shortest path in weighted graph + String DP", "difficulty": "Hard", "outcome": "Offer", "quote": "One hard problem with implementation expected. Clean code, proper complexity analysis.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "HR Interview", "question": "Cultural fit + career goals", "difficulty": "Easy", "outcome": "Offer", "quote": "Standard HR round. They want to know why PhonePe and your long-term plans.", "date": "2025-08", "role": "SDE-1", "rating": 2}
+    ],
+    "interview_stats": {"success_rate": "~8%", "avg_rounds": "3-4", "timeline_weeks": "2-3", "offer_rate": "~8%", "total_reviews": 190},
+    "insider_tips": ["PhonePe is Java/Kotlin heavy — language familiarity helps", "DSA is the primary filter — solve 300+ LeetCode problems", "Machine coding for SDE-2+: practice building complete systems", "Know UPI architecture basics — NPCI, payment settlement flow", "They value scalable solutions — always discuss scale"],
+    "dos_donts": {
+      "do": ["Show Java/Kotlin proficiency", "Solve problems completely with tests", "Discuss scalability in designs", "Know UPI basics", "Write clear, documented code"],
+      "dont": ["Skip fundamental DSA topics", "Submit partial solutions in OA", "Ignore concurrent programming concepts", "Be unprepared about PhonePe's products", "Write code without error handling"]
+    }
+  },
+  "groww": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Stock Portfolio Tracker", "desc": "Real-time portfolio dashboard with P&L tracking, holdings analysis, and price alerts.", "tags": ["React", "WebSocket", "Node.js", "PostgreSQL"], "hours": 30, "complexity": "High", "category": "Full Stack"},
+        {"title": "Mutual Fund SIP Calculator", "desc": "Interactive SIP planner with goal-based projections, tax estimation, and comparison charts.", "tags": ["React", "D3.js", "TypeScript"], "hours": 15, "complexity": "Medium", "category": "Frontend"}
+      ],
+      "must_have": ["Fintech/stock market domain interest", "Frontend + backend skills", "Clean UI and UX sense"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Most popular DSA resource", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Foundation for SD prep", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Test", "question": "MCQs on time complexity + threading + 1 coding problem", "difficulty": "Medium", "outcome": "Offer", "quote": "Light OA. MCQs on fundamentals + one medium-level coding question. Not too hard.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "Technical Round (DSA)", "question": "Array manipulation + puzzle (weight balance)", "difficulty": "Medium", "outcome": "Offer", "quote": "They guide you if stuck. Relaxed atmosphere. Focus on approach > perfect solution.", "date": "2025-09", "role": "SDE-1", "rating": 3},
+      {"round": "Managerial Round", "question": "Project deep-dive + career aspirations", "difficulty": "Easy", "outcome": "Offer", "quote": "Discussion about your best project, tech choices, what you learned. Very conversational.", "date": "2025-08", "role": "SDE-1", "rating": 2}
+    ],
+    "interview_stats": {"success_rate": "~12%", "avg_rounds": "3", "timeline_weeks": "1-2", "offer_rate": "~12%", "total_reviews": 140},
+    "insider_tips": ["Groww's interview is more relaxed than other unicorns", "They value practical coding skills over competitive programming", "For web roles: know React, HTML/CSS, JavaScript deeply", "Investment domain knowledge is a plus but not required", "They have a good work-life balance — show you value that too"],
+    "dos_donts": {
+      "do": ["Show practical project skills", "Know your tech stack deeply", "Be honest about what you know/don't know", "Show interest in fintech/investments", "Be conversational in the HM round"],
+      "dont": ["Over-prepare for hard competitive problems", "Ignore frontend fundamentals for web roles", "Be fake about knowing stock markets", "Skip project preparation", "Underestimate the interview — it's still competitive"]
+    }
+  },
+  "swiggy": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Food Delivery Optimisation Engine", "desc": "Route optimization for delivery partners using graph algorithms, ETA prediction, and real-time tracking.", "tags": ["Python", "FastAPI", "Redis", "Maps API"], "hours": 35, "complexity": "Very High", "category": "Backend"},
+        {"title": "Restaurant Search & Discovery", "desc": "Location-based restaurant search with filters, ratings, cuisine categories, and menu display.", "tags": ["React", "Elasticsearch", "Node.js", "PostGIS"], "hours": 25, "complexity": "High", "category": "Full Stack"},
+        {"title": "Cart & Checkout System", "desc": "Multi-restaurant cart with coupon engine, slot-based delivery, and payment integration.", "tags": ["Java", "Spring Boot", "Redis", "PostgreSQL"], "hours": 30, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["Scalable backend experience", "Understanding of microservices is a plus", "Location-based systems or logistics projects stand out"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Comprehensive DSA", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD foundation", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "2-3 medium DSA: arrays, sliding window, HashMap", "difficulty": "Medium", "outcome": "Offer", "quote": "Standard OA. Focus on arrays and sliding window. SQL questions sometimes included.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "DSA Round", "question": "Cab booking system (LLD) + DP problem", "difficulty": "Hard", "outcome": "Offer", "quote": "Mix of LLD and DSA in one round. Design entities, APIs, handle concurrency.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Hiring Manager", "question": "Past projects + API design (versioning, idempotency)", "difficulty": "Medium", "outcome": "Offer", "quote": "HM grills on API design. Know versioning, security headers, idempotency keys.", "date": "2025-08", "role": "SDE-1", "rating": 4}
+    ],
+    "interview_stats": {"success_rate": "~10%", "avg_rounds": "3-4", "timeline_weeks": "2-3", "offer_rate": "~10%", "total_reviews": 210},
+    "insider_tips": ["Swiggy mixes LLD with DSA in same rounds — be versatile", "API design (versioning, idempotency) is a favourite HM topic", "Know microservices vs monolith trade-offs", "OA includes SQL sometimes — review basic queries", "Competitive compensation — one of the best in Indian startups"],
+    "dos_donts": {
+      "do": ["Practice LLD + DSA combined sessions", "Know API design best practices", "Understand microservices architecture", "Show interest in logistics/delivery domain", "Prepare project discussions thoroughly"],
+      "dont": ["Ignore SQL/database fundamentals", "Skip concurrency discussions in LLD", "Be unprepared about Swiggy's tech stack", "Write monolithic designs", "Ignore API versioning and security"]
+    }
+  },
+  "meesho": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Social Commerce Platform", "desc": "Product listing with social sharing, reseller management, and commission tracking.", "tags": ["React", "Node.js", "PostgreSQL", "Redis"], "hours": 30, "complexity": "High", "category": "Full Stack"},
+        {"title": "Order Management System", "desc": "Multi-vendor order processing with status tracking, returns, and refund automation.", "tags": ["Java", "Spring Boot", "Kafka", "PostgreSQL"], "hours": 25, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["E-commerce understanding", "Strong DSA fundamentals", "CS fundamentals (OS, DBMS, CN)"]
+    },
+    "resources": {
+      "dsa": [{"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Best DSA prep", "cost": "Free", "rating": 5}],
+      "system_design": [{"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD foundation", "cost": "Free", "rating": 5}],
+      "behavioral": [],
+      "platforms": [{"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "2-3 coding + MCQs on OS/CN/Java", "difficulty": "Medium", "outcome": "Offer", "quote": "Mix of coding + CS fundamentals MCQs. Medium difficulty. Need to clear both sections.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "Technical (DSA)", "question": "Bipartite Graph + Trie implementation", "difficulty": "Hard", "outcome": "Offer", "quote": "Graph and Trie problems. Must implement from scratch. Edge cases tested.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Machine Coding", "question": "Car Pooling System", "difficulty": "Medium", "outcome": "Offer", "quote": "Design classes, implement core logic. OOP principles graded heavily.", "date": "2025-08", "role": "SDE-1", "rating": 4}
+    ],
+    "interview_stats": {"success_rate": "~10%", "avg_rounds": "4", "timeline_weeks": "2-3", "offer_rate": "~10%", "total_reviews": 160},
+    "insider_tips": ["Meesho OA includes CS fundamentals MCQs — prep OS, DBMS, CN", "Machine coding round evaluates OOP — practice class design", "Social commerce domain knowledge helps but isn't mandatory", "They ask about graph algorithms frequently", "Strong DSA fundamentals are the primary filter"],
+    "dos_donts": {"do": ["Brush up CS fundamentals for MCQs", "Practice OOP design", "Know graphs and tries well", "Implement solutions from scratch", "Show interest in social commerce"], "dont": ["Skip OS/DBMS/CN prep", "Write procedural code in machine coding", "Ignore edge cases", "Be unprepared about Meesho's business model", "Neglect testing"]}
+  },
+  "zepto": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Delivery Allocation System", "desc": "Assign delivery partners to orders based on proximity, load, and estimated time with real-time updates.", "tags": ["Go", "Redis", "PostgreSQL", "Maps API"], "hours": 30, "complexity": "High", "category": "Backend"},
+        {"title": "Dark Store Inventory Manager", "desc": "Real-time inventory for micro-warehouses with stock alerts, auto-replenishment, and expiry tracking.", "tags": ["Node.js", "PostgreSQL", "Redis", "React"], "hours": 25, "complexity": "High", "category": "Full Stack"}
+      ],
+      "must_have": ["Backend scalability focus", "Real-time systems experience", "Database design skills"]
+    },
+    "resources": {
+      "dsa": [{"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Best DSA prep", "cost": "Free", "rating": 5}],
+      "system_design": [{"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD foundation", "cost": "Free", "rating": 5}],
+      "behavioral": [],
+      "platforms": [{"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA practice", "cost": "Free + Premium", "color": "#F59E0B"}]
+    },
+    "interview_reviews": [
+      {"round": "DSA Round", "question": "BST operations + Maximum Product Subarray", "difficulty": "Medium", "outcome": "Offer", "quote": "2 problems, easy-medium. They value speed and clean code over complex algos.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "Machine Coding/LLD", "question": "Design a delivery allocation system", "difficulty": "Hard", "outcome": "Offer", "quote": "Focus on DB schema, third-party integrations, error handling. Real-world engineering.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Hiring Manager", "question": "DB indexing, async problems, past experience", "difficulty": "Medium", "outcome": "Offer", "quote": "Deep dive on databases — indexing, sharding, query optimization. Very practical.", "date": "2025-08", "role": "SDE-1", "rating": 4}
+    ],
+    "interview_stats": {"success_rate": "~12%", "avg_rounds": "3", "timeline_weeks": "1-2", "offer_rate": "~12%", "total_reviews": 95},
+    "insider_tips": ["Zepto is fast-paced startup — show you can move quickly", "DB knowledge (indexing, sharding) is heavily tested", "Quick commerce domain knowledge is a plus", "They value practical engineering over algorithmic complexity", "Process is short — usually done in 1-2 weeks"],
+    "dos_donts": {"do": ["Know databases deeply — indexing, sharding, queries", "Show practical engineering skills", "Be fast and decisive", "Understand quick commerce logistics", "Write production-ready code"], "dont": ["Over-engineer solutions", "Ignore database fundamentals", "Be slow in decision-making", "Skip async/concurrent programming concepts", "Underestimate the LLD round"]}
+  },
+  "blinkit": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Rider Onboarding System", "desc": "Multi-step onboarding with document verification, background checks, and training module tracking.", "tags": ["React", "Node.js", "PostgreSQL", "S3"], "hours": 25, "complexity": "High", "category": "Full Stack"},
+        {"title": "Real-time Analytics Dashboard", "desc": "Live order metrics, delivery performance, and warehouse utilization with WebSocket updates.", "tags": ["React", "D3.js", "Node.js", "ClickHouse"], "hours": 20, "complexity": "Medium", "category": "Full Stack"}
+      ],
+      "must_have": ["Full-stack skills", "Database design knowledge", "Quick commerce understanding is a bonus"]
+    },
+    "resources": {
+      "dsa": [{"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Top DSA prep", "cost": "Free", "rating": 5}],
+      "system_design": [{"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "SD guide", "cost": "Free", "rating": 5}],
+      "behavioral": [],
+      "platforms": [{"name": "LeetCode", "url": "https://leetcode.com", "desc": "DSA", "cost": "Free + Premium", "color": "#F59E0B"}]
+    },
+    "interview_reviews": [
+      {"round": "DSA Round", "question": "House Robber variation + Graph traversal", "difficulty": "Medium", "outcome": "Offer", "quote": "Story-based DSA problems. Read carefully. Standard DP + graph underneath.", "date": "2025-10", "role": "SDE-1", "rating": 3},
+      {"round": "System Design", "question": "Design a rider onboarding system", "difficulty": "Hard", "outcome": "Offer", "quote": "SDE-2/3 interviewer. Discussed DB choices (SQL vs NoSQL), indexing, sharding, latency optimization.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Culture Fit", "question": "Previous experience + fast-paced work discussion", "difficulty": "Easy", "outcome": "Offer", "quote": "Blinkit is part of Zomato. Fast-paced culture. Show you thrive under pressure.", "date": "2025-08", "role": "SDE-1", "rating": 2}
+    ],
+    "interview_stats": {"success_rate": "~12%", "avg_rounds": "3", "timeline_weeks": "1-2", "offer_rate": "~12%", "total_reviews": 85},
+    "insider_tips": ["Blinkit (Zomato-owned) has a fast, 3-round process", "Story-based DSA problems — decode the DP/graph pattern from the story", "System Design focuses on practical architecture — SQL vs NoSQL, indexing", "They value speed — show you can deliver under pressure", "Short interview cycle — usually 1-2 weeks from first call to offer"],
+    "dos_donts": {"do": ["Read DSA problem stories carefully — hidden patterns", "Know SQL vs NoSQL trade-offs", "Show fast execution mindset", "Understand quick commerce logistics", "Be prepared for rapid decision-making"], "dont": ["Ignore the story context in DSA problems", "Skip database fundamentals", "Be slow or indecisive", "Overcomplicate system designs", "Ignore latency optimization"]}
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "essential_repos": [
+    {
+      "name": "TheAlgorithms",
+      "url": "https://github.com/TheAlgorithms",
+      "languages": [
+        "Python",
+        "Java",
+        "C++",
+        "JavaScript",
+        "Go",
+        "Rust",
+        "C#"
+      ],
+      "description": "Open source algorithm implementations in every language"
+    },
+    {
+      "name": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x",
+      "stars": "300k+",
+      "description": "Step-by-step guides to re-create technologies from scratch"
+    },
+    {
+      "name": "Coding Interview University",
+      "url": "https://github.com/jwasham/coding-interview-university",
+      "stars": "300k+",
+      "description": "Complete CS study plan for software engineering interviews"
+    },
+    {
+      "name": "System Design Primer",
+      "url": "https://github.com/donnemartin/system-design-primer",
+      "stars": "270k+",
+      "description": "Learn how to design large-scale systems"
+    },
+    {
+      "name": "Tech Interview Handbook",
+      "url": "https://github.com/yangshun/tech-interview-handbook",
+      "stars": "115k+",
+      "description": "Curated coding interview preparation materials"
+    },
+    {
+      "name": "JavaScript Algorithms",
+      "url": "https://github.com/trekhleb/javascript-algorithms",
+      "stars": "188k+",
+      "description": "Algorithms and data structures in JavaScript"
+    },
+    {
+      "name": "LeetCode Patterns",
+      "url": "https://github.com/seanprashad/leetcode-patterns",
+      "stars": "10k+",
+      "description": "LeetCode problems grouped by pattern"
+    },
+    {
+      "name": "Awesome LeetCode Resources",
+      "url": "https://github.com/ashishps1/awesome-leetcode-resources",
+      "stars": "5k+",
+      "description": "Curated LeetCode resources"
+    },
+    {
+      "name": "NeetCode",
+      "url": "https://github.com/neetcode-gh/leetcode",
+      "stars": "5k+",
+      "description": "NeetCode 150 solutions"
+    },
+    {
+      "name": "Blind 75",
+      "url": "https://github.com/neetcode-gh/leetcode",
+      "description": "Top 75 LeetCode questions for interviews"
+    },
+    {
+      "name": "Free Programming Books",
+      "url": "https://github.com/EbookFoundation/free-programming-books",
+      "stars": "330k+",
+      "description": "Freely available programming books"
+    },
+    {
+      "name": "Developer Roadmap",
+      "url": "https://github.com/kamranahmedse/developer-roadmap",
+      "stars": "290k+",
+      "description": "Community driven roadmaps for developers"
+    },
+    {
+      "name": "Awesome",
+      "url": "https://github.com/sindresorhus/awesome",
+      "stars": "320k+",
+      "description": "Curated lists of awesome resources"
+    },
+    {
+      "name": "Project Based Learning",
+      "url": "https://github.com/practical-tutorials/project-based-learning",
+      "stars": "190k+",
+      "description": "Programming tutorials for building applications"
+    },
+    {
+      "name": "Public APIs",
+      "url": "https://github.com/public-apis/public-apis",
+      "stars": "310k+",
+      "description": "Free APIs for projects and learning"
+    }
+  ]
+}

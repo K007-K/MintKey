@@ -1,0 +1,246 @@
+{
+  "google": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Real-time Collaborative Editor", "desc": "Build a Google Docs-like editor with OT/CRDT conflict resolution, WebSocket sync, and cursor presence.", "tags": ["React", "Node.js", "WebSocket", "CRDT"], "hours": 40, "complexity": "Very High", "category": "Full Stack"},
+        {"title": "Distributed Key-Value Store", "desc": "Implement consistent hashing, replication, and partition tolerance. Simulate network failures.", "tags": ["Go", "gRPC", "Docker", "Raft"], "hours": 50, "complexity": "Very High", "category": "Systems"},
+        {"title": "Search Autocomplete Engine", "desc": "Trie-based autocomplete with ranking, fuzzy matching, and sub-10ms response time at scale.", "tags": ["Python", "Redis", "Elasticsearch"], "hours": 25, "complexity": "High", "category": "Backend"},
+        {"title": "Video Streaming Pipeline", "desc": "Build a YouTube-like pipeline with adaptive bitrate, CDN caching, and HLS/DASH playback.", "tags": ["FFmpeg", "AWS S3", "CloudFront", "React"], "hours": 35, "complexity": "High", "category": "Full Stack"},
+        {"title": "MapReduce Framework", "desc": "Mini MapReduce with master-worker architecture, fault tolerance, and parallel execution.", "tags": ["Python", "Docker", "gRPC"], "hours": 30, "complexity": "Very High", "category": "Systems"}
+      ],
+      "must_have": ["At least 1 distributed systems project", "1 full-stack app with real users", "Clean GitHub with READMEs and docs"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Curated 150 problems covering all patterns — optimal for FAANG prep", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Google Tagged", "url": "https://leetcode.com/company/google", "desc": "600+ problems frequently asked at Google interviews", "cost": "Premium", "rating": 5},
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "450+ problems from basics to advanced with video explanations", "cost": "Free", "rating": 5},
+        {"name": "Blind 75", "url": "https://leetcode.com/discuss/general-discussion/460599/blind-75-leetcode-questions", "desc": "The classic 75 must-solve problems for any FAANG interview", "cost": "Free", "rating": 4}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Comprehensive GitHub repo — the bible of system design prep", "cost": "Free", "rating": 5},
+        {"name": "Grokking System Design", "url": "https://www.educative.io/courses/grokking-modern-system-design-interview-for-engineers-managers", "desc": "Structured course with interactive diagrams and real examples", "cost": "Paid", "rating": 5},
+        {"name": "ByteByteGo", "url": "https://bytebytego.com", "desc": "Alex Xu's visual system design guides — excellent for quick revision", "cost": "Paid", "rating": 4}
+      ],
+      "behavioral": [
+        {"name": "Google Googliness Guide", "url": "https://igotanoffer.com/blogs/tech/google-behavioral-interview", "desc": "Detailed prep for the 'Googliness' round — culture fit, collaboration", "cost": "Free", "rating": 4},
+        {"name": "STAR Method Guide", "url": "https://www.themuse.com/advice/star-interview-method", "desc": "Master the Situation-Task-Action-Result framework", "cost": "Free", "rating": 4}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA practice platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "InterviewBit", "url": "https://www.interviewbit.com", "desc": "Structured interview prep with company tracks", "cost": "Free", "color": "#10B981"},
+        {"name": "Pramp", "url": "https://www.pramp.com", "desc": "Free peer-to-peer mock interviews", "cost": "Free", "color": "#8B5CF6"},
+        {"name": "Codeforces", "url": "https://codeforces.com", "desc": "Competitive programming for speed and accuracy", "cost": "Free", "color": "#3B82F6"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "Find the minimum window substring containing all characters", "difficulty": "Hard", "outcome": "Offer", "quote": "90-min OA on Google's platform. Two problems — one medium sliding window, one hard DP. Had to pass all test cases.", "date": "2025-11", "role": "L3 SWE", "rating": 4},
+      {"round": "Technical Phone Screen", "question": "Design and implement an LRU Cache", "difficulty": "Medium", "outcome": "Offer", "quote": "45-min Google Doc coding. They wanted clean code with O(1) get/put. Asked about thread-safety as follow-up.", "date": "2025-10", "role": "L3 SWE", "rating": 4},
+      {"round": "Onsite - Coding Round 1", "question": "Longest Increasing Subsequence", "difficulty": "Hard", "outcome": "Offer", "quote": "Expected O(n log n) patience sorting approach. Started with DP O(n²), then optimized. Communication was key.", "date": "2025-09", "role": "L3 SWE", "rating": 5},
+      {"round": "Onsite - Coding Round 2", "question": "Number of Islands (BFS variation)", "difficulty": "Medium", "outcome": "Offer", "quote": "Graph traversal with a twist — had to handle diagonal connections and count distinct island shapes.", "date": "2025-08", "role": "L3 SWE", "rating": 4},
+      {"round": "System Design", "question": "Design Google Docs collaborative editing", "difficulty": "Hard", "outcome": "Rejected", "quote": "Needed deep knowledge of OT/CRDT for conflict resolution. They valued breadth — asked about auth, storage, CDN too.", "date": "2025-07", "role": "L4 SWE", "rating": 5},
+      {"round": "Googliness (Behavioral)", "question": "Tell me about a time you disagreed with your team", "difficulty": "Easy", "outcome": "Offer", "quote": "STAR format expected. They value intellectual humility and low-ego collaboration stories. Be genuine.", "date": "2025-06", "role": "L3 SWE", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~2%", "avg_rounds": "5-6", "timeline_weeks": "6-8", "offer_rate": "~2%", "total_reviews": 850},
+    "insider_tips": [
+      "Google codes in Google Docs — practice without IDE autocomplete",
+      "Always start with brute force, then optimize — they want to see your thinking process",
+      "Communication matters as much as correctness — explain while you code",
+      "DP and Graphs appear in 60%+ of coding rounds — master these first",
+      "For System Design, draw diagrams — use boxes, arrows, label everything",
+      "The 'Googliness' round is real — prepare 5-6 STAR stories about collaboration"
+    ],
+    "dos_donts": {
+      "do": ["Explain your thought process out loud", "Write clean, readable code with proper variable names", "Ask clarifying questions before diving in", "Discuss time/space complexity proactively", "Handle edge cases explicitly"],
+      "dont": ["Jump to code without discussing approach", "Use brute force without acknowledging better solutions exist", "Skip edge cases — null inputs, empty arrays, overflow", "Memorize solutions — interviewers can tell", "Panic if stuck — ask for a hint, it's okay"]
+    }
+  },
+  "amazon": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "E-commerce Marketplace Platform", "desc": "Build a full marketplace with cart, checkout, payments, order tracking, and seller dashboard.", "tags": ["Java", "Spring Boot", "React", "PostgreSQL"], "hours": 45, "complexity": "Very High", "category": "Full Stack"},
+        {"title": "Real-time Order Tracking System", "desc": "Live delivery tracking with WebSockets, geolocation updates, and ETA prediction using historical data.", "tags": ["Node.js", "Redis", "WebSocket", "Maps API"], "hours": 30, "complexity": "High", "category": "Backend"},
+        {"title": "Serverless Data Pipeline", "desc": "AWS Lambda + SQS/SNS event-driven pipeline processing millions of events with DLQ and monitoring.", "tags": ["AWS Lambda", "SQS", "DynamoDB", "CloudWatch"], "hours": 25, "complexity": "High", "category": "Cloud"},
+        {"title": "Inventory Management System", "desc": "Multi-warehouse inventory with real-time stock updates, low-stock alerts, and demand forecasting.", "tags": ["Python", "FastAPI", "PostgreSQL", "Redis"], "hours": 30, "complexity": "High", "category": "Backend"}
+      ],
+      "must_have": ["Strong project demonstrating 'Customer Obsession'", "Scalable backend with proper error handling", "AWS services experience is a strong signal"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Best structured problem set for FAANG", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Amazon Tagged", "url": "https://leetcode.com/company/amazon", "desc": "800+ problems asked at Amazon — focus on recent ones", "cost": "Premium", "rating": 5},
+        {"name": "Striver A2Z DSA Sheet", "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/", "desc": "Comprehensive DSA coverage with video solutions", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Gold standard for system design prep", "cost": "Free", "rating": 5},
+        {"name": "Grokking System Design", "url": "https://www.educative.io/courses/grokking-modern-system-design-interview-for-engineers-managers", "desc": "Interactive course with Amazon-relevant examples", "cost": "Paid", "rating": 5}
+      ],
+      "behavioral": [
+        {"name": "Amazon LP Prep Guide", "url": "https://igotanoffer.com/blogs/tech/amazon-leadership-principles", "desc": "Comprehensive guide to all 16 Leadership Principles with examples", "cost": "Free", "rating": 5},
+        {"name": "Day One Careers LP Blog", "url": "https://www.amazon.jobs/content/en/our-workplace/leadership-principles", "desc": "Official Amazon LP page — understand directly from the source", "cost": "Free", "rating": 5}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "HackerRank", "url": "https://hackerrank.com", "desc": "Amazon OA is often on HackerRank", "cost": "Free", "color": "#10B981"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "Find the optimal delivery route (variation of Traveling Salesman)", "difficulty": "Hard", "outcome": "Offer", "quote": "70-min OA with 2 coding + Work Simulation. The work sim tests LP alignment — Customer Obsession was key.", "date": "2025-11", "role": "SDE-1", "rating": 4},
+      {"round": "Technical Round 1 (DSA + LP)", "question": "Merge K Sorted Lists", "difficulty": "Hard", "outcome": "Offer", "quote": "Used min-heap approach. After coding, got 15 min of LP questions about 'Ownership' — had strong STAR stories ready.", "date": "2025-10", "role": "SDE-1", "rating": 4},
+      {"round": "Technical Round 2 (DSA + LP)", "question": "Design a LRU Cache with TTL", "difficulty": "Medium", "outcome": "Offer", "quote": "Standard LRU + expiry twist. LP focus was on 'Dive Deep' — they asked how I debugged a production issue.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "Bar Raiser Round", "question": "Behavioral deep-dive on Leadership Principles", "difficulty": "Medium", "outcome": "Rejected", "quote": "Pure behavioral — 45 min of 'tell me about a time...' questions. They drill 3-4 follow-ups per story. Weak stories = reject.", "date": "2025-08", "role": "SDE-1", "rating": 5},
+      {"round": "Hiring Manager Round", "question": "System Design: Design an order tracking system", "difficulty": "Medium", "outcome": "Offer", "quote": "Mix of LLD and project discussion. Focus on scale — Amazon processes millions of orders daily.", "date": "2025-07", "role": "SDE-1", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~3%", "avg_rounds": "4-5", "timeline_weeks": "3-5", "offer_rate": "~3%", "total_reviews": 1200},
+    "insider_tips": [
+      "Leadership Principles are EVERYTHING — prepare 2 STAR stories per LP",
+      "The Bar Raiser can reject you even if all tech rounds pass — take behavioral seriously",
+      "Amazon OA work simulation is LP-based — always pick the 'Customer Obsession' answer",
+      "For coding, they want working code — not pseudocode. Test with edge cases",
+      "System Design for SDE-1 is lighter — focus on LLD and API design",
+      "'Bias for Action' is key — show you take initiative without being asked"
+    ],
+    "dos_donts": {
+      "do": ["Prepare 2 STAR stories for EACH Leadership Principle", "Write compilable, working code", "Mention metrics and impact in behavioral answers", "Ask clarifying questions — shows 'Dive Deep'", "Think about scale — Amazon is massive"],
+      "dont": ["Give generic behavioral answers without specific examples", "Ignore the Work Simulation in OA — it's heavily weighted", "Skip testing your code", "Badmouth previous employers in LP stories", "Forget to mention customer impact in your stories"]
+    }
+  },
+  "meta": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Social Media Feed Engine", "desc": "Build a news feed with ranking algorithm, infinite scroll, real-time updates, and content moderation.", "tags": ["React", "GraphQL", "Node.js", "Redis"], "hours": 40, "complexity": "Very High", "category": "Full Stack"},
+        {"title": "Real-time Chat Application", "desc": "WhatsApp-like chat with E2E encryption, read receipts, typing indicators, and group messaging.", "tags": ["React", "WebSocket", "Node.js", "MongoDB"], "hours": 35, "complexity": "High", "category": "Full Stack"},
+        {"title": "Content Recommendation System", "desc": "ML-based recommendation engine using collaborative filtering and content-based approaches.", "tags": ["Python", "TensorFlow", "FastAPI", "Redis"], "hours": 30, "complexity": "High", "category": "ML/Backend"},
+        {"title": "Graph-based Social Network", "desc": "Friend suggestions using graph traversal, mutual friends algorithm, and degree-of-connection analysis.", "tags": ["Neo4j", "Python", "React", "D3.js"], "hours": 25, "complexity": "High", "category": "Full Stack"}
+      ],
+      "must_have": ["Product-oriented project with real users", "Strong frontend skills — Meta values UI/UX", "Graph/network-related project is a huge plus"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Best curated problem set for FAANG prep", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Meta Tagged", "url": "https://leetcode.com/company/facebook", "desc": "500+ problems frequently asked at Meta", "cost": "Premium", "rating": 5},
+        {"name": "Grind 75", "url": "https://www.techinterviewhandbook.org/grind75", "desc": "Customizable study plan — pick your timeline", "cost": "Free", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "Meta Engineering Blog", "url": "https://engineering.fb.com", "desc": "Official Meta engineering blog — understand how they build at scale", "cost": "Free", "rating": 5},
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Comprehensive system design guide", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [
+        {"name": "Meta Culture Guide", "url": "https://igotanoffer.com/blogs/tech/meta-behavioral-interview", "desc": "Deep prep guide for Meta behavioral round", "cost": "Free", "rating": 4}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "Pramp", "url": "https://www.pramp.com", "desc": "Mock interviews with peers", "cost": "Free", "color": "#8B5CF6"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Coding Round 1", "question": "Valid Parentheses with wildcards", "difficulty": "Medium", "outcome": "Offer", "quote": "45-min CoderPad. Two medium-level problems. Speed matters — need to solve both. Used HashMap and greedy approach.", "date": "2025-11", "role": "E4 SWE", "rating": 4},
+      {"round": "Coding Round 2", "question": "Binary Tree Right Side View + Random Pick with Weight", "difficulty": "Hard", "outcome": "Offer", "quote": "BFS level-order problem followed by prefix-sum binary search. They push for optimal solutions — O(n) or bust.", "date": "2025-10", "role": "E4 SWE", "rating": 5},
+      {"round": "System Design", "question": "Design Instagram News Feed", "difficulty": "Hard", "outcome": "Offer", "quote": "Focus on fan-out-on-write vs fan-out-on-read. Discussed caching strategy, CDN for images, and ranking algorithm.", "date": "2025-09", "role": "E4 SWE", "rating": 5},
+      {"round": "Behavioral", "question": "Tell me about a time you had to make a difficult technical decision", "difficulty": "Medium", "outcome": "Offer", "quote": "Meta values 'Move Fast' and 'Be Bold'. Show you can make decisions with incomplete info and iterate.", "date": "2025-08", "role": "E4 SWE", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~3%", "avg_rounds": "4-5", "timeline_weeks": "4-6", "offer_rate": "~3%", "total_reviews": 720},
+    "insider_tips": [
+      "Meta introduced AI-enabled coding rounds in 2025 — you can use AI assistance but must explain everything",
+      "Speed is critical — solve 2 problems in 45 min. Practice timed sessions",
+      "They love graph and tree problems — BFS/DFS variations appear very frequently",
+      "System Design focuses on Meta products — practice designing Feed, Messenger, Instagram",
+      "Behavioral round is shorter but important — 'Move Fast' and 'Be Bold' are key values",
+      "Clean code matters more than clever code — use clear variable names"
+    ],
+    "dos_donts": {
+      "do": ["Solve problems quickly — speed is tested", "Use HashMaps and optimal data structures", "Design systems around Meta's actual products for SD rounds", "Show product sense — understand why features exist", "Communicate clearly throughout"],
+      "dont": ["Take too long on brute force — jump to optimal faster", "Ignore follow-up questions", "Design systems without considering scale (billions of users)", "Skip edge cases in coding", "Be passive in behavioral — show ownership and initiative"]
+    }
+  },
+  "microsoft": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Cloud IDE / Code Editor", "desc": "Build a VS Code-like editor with syntax highlighting, file tree, terminal, and extension support.", "tags": ["TypeScript", "Electron", "Monaco Editor", "Node.js"], "hours": 45, "complexity": "Very High", "category": "Full Stack"},
+        {"title": "CI/CD Pipeline Tool", "desc": "Git-triggered build pipeline with parallel jobs, artifact caching, and deployment automation.", "tags": ["Go", "Docker", "GitHub API", "PostgreSQL"], "hours": 35, "complexity": "High", "category": "DevOps"},
+        {"title": "Task Management SaaS", "desc": "Trello/Azure Boards clone with drag-drop, real-time sync, and team collaboration features.", "tags": ["React", "TypeScript", "Node.js", "WebSocket"], "hours": 30, "complexity": "High", "category": "Full Stack"}
+      ],
+      "must_have": ["TypeScript/C# project preferred", "Clean architecture and testable code", "Developer tools or productivity-focused projects stand out"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Best structured problem set", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Microsoft Tagged", "url": "https://leetcode.com/company/microsoft", "desc": "400+ problems asked at Microsoft", "cost": "Premium", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Comprehensive SD guide", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [
+        {"name": "Growth Mindset Guide", "url": "https://igotanoffer.com/blogs/tech/microsoft-behavioral-interview", "desc": "Prepare for Microsoft's growth mindset culture", "cost": "Free", "rating": 4}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "Codility", "url": "https://codility.com", "desc": "Microsoft OA is often on Codility", "cost": "Free", "color": "#3B82F6"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Online Assessment", "question": "Two Sum variant + String manipulation", "difficulty": "Medium", "outcome": "Offer", "quote": "Codility 90-min OA, 3 problems. Medium difficulty but you need to solve 2/3 cleanly to advance.", "date": "2025-11", "role": "SDE-1", "rating": 3},
+      {"round": "Technical Round 1", "question": "BST operations — find incorrectly placed nodes", "difficulty": "Hard", "outcome": "Offer", "quote": "Tree-heavy round. They wanted clean recursive code with proper null checks. Dry-run was mandatory.", "date": "2025-10", "role": "SDE-1", "rating": 4},
+      {"round": "Technical Round 2", "question": "Modified Bipartite Graph problem", "difficulty": "Hard", "outcome": "Offer", "quote": "Graph coloring problem. Started with BFS approach, optimized with Union-Find. They valued the optimization journey.", "date": "2025-09", "role": "SDE-1", "rating": 4},
+      {"round": "AA (Hiring Manager) Round", "question": "Mix of behavioral + project deep-dive + easy coding", "difficulty": "Medium", "outcome": "Offer", "quote": "30 min project discussion, 15 min 'growth mindset' behavioral. They value learning from failures.", "date": "2025-08", "role": "SDE-1", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~5%", "avg_rounds": "4-5", "timeline_weeks": "3-5", "offer_rate": "~5%", "total_reviews": 680},
+    "insider_tips": [
+      "Microsoft values 'Growth Mindset' — show you love learning from mistakes",
+      "OA is on Codility — practice timed problems there specifically",
+      "Trees and Graphs are the most common topics — BST operations especially",
+      "They want executable code, not pseudocode — test your solution",
+      "The AA/HM round is lighter — but you must show cultural fit and enthusiasm",
+      "LLD is asked more than HLD for SDE-1 — practice class design"
+    ],
+    "dos_donts": {
+      "do": ["Write clean, testable code", "Show growth mindset — talk about what you learned", "Handle edge cases thoroughly", "Discuss multiple approaches before coding", "Be enthusiastic about Microsoft products"],
+      "dont": ["Write pseudocode — they want real, runnable code", "Skip dry-running your solution", "Ignore the project discussion prep", "Be arrogant — they value humility", "Forget to ask clarifying questions"]
+    }
+  },
+  "apple": {
+    "projects": {
+      "impressive_projects": [
+        {"title": "Privacy-Focused Analytics SDK", "desc": "Build an analytics tool that collects user behavior data while preserving differential privacy.", "tags": ["Swift", "Kotlin", "Python", "Cryptography"], "hours": 35, "complexity": "Very High", "category": "Systems"},
+        {"title": "High-Performance Image Processing", "desc": "Real-time image filters and transformations using Metal/GPU acceleration.", "tags": ["Swift", "Metal", "Core Image", "SIMD"], "hours": 30, "complexity": "High", "category": "iOS/Systems"},
+        {"title": "Cross-Platform Music Player", "desc": "Build a Spotify-like player with offline sync, queue management, and gapless playback.", "tags": ["Swift", "AVFoundation", "React Native"], "hours": 25, "complexity": "High", "category": "Mobile"}
+      ],
+      "must_have": ["iOS/macOS project is a strong signal", "Focus on performance and optimization", "Privacy-conscious design demonstrates Apple values"]
+    },
+    "resources": {
+      "dsa": [
+        {"name": "NeetCode 150", "url": "https://neetcode.io/practice", "desc": "Core problem set for FAANG", "cost": "Free", "rating": 5},
+        {"name": "LeetCode Apple Tagged", "url": "https://leetcode.com/company/apple", "desc": "300+ Apple-specific problems", "cost": "Premium", "rating": 5}
+      ],
+      "system_design": [
+        {"name": "System Design Primer", "url": "https://github.com/donnemartin/system-design-primer", "desc": "Comprehensive SD guide", "cost": "Free", "rating": 5}
+      ],
+      "behavioral": [
+        {"name": "Apple Culture Prep", "url": "https://igotanoffer.com/blogs/tech/apple-interview", "desc": "Guide to Apple's culture-focused interviews", "cost": "Free", "rating": 4}
+      ],
+      "platforms": [
+        {"name": "LeetCode", "url": "https://leetcode.com", "desc": "Primary DSA platform", "cost": "Free + Premium", "color": "#F59E0B"},
+        {"name": "CoderPad", "url": "https://coderpad.io", "desc": "Apple uses CoderPad for phone screens", "cost": "Free", "color": "#10B981"}
+      ]
+    },
+    "interview_reviews": [
+      {"round": "Technical Phone Screen", "question": "Merge Intervals + Trapping Rain Water", "difficulty": "Hard", "outcome": "Offer", "quote": "CoderPad 60-min, 2 problems. Clean, efficient code expected. They asked about memory management too.", "date": "2025-10", "role": "ICT2 SWE", "rating": 4},
+      {"round": "Onsite - Coding Round 1", "question": "LRU Cache with thread-safety", "difficulty": "Hard", "outcome": "Offer", "quote": "Classic LRU but with mutex/lock consideration. Apple cares deeply about performance and concurrency.", "date": "2025-09", "role": "ICT2 SWE", "rating": 5},
+      {"round": "Onsite - System Design", "question": "Design iCloud Photo Sync", "difficulty": "Hard", "outcome": "Rejected", "quote": "They wanted Apple-specific thinking — battery optimization, offline-first, conflict resolution for synced photos.", "date": "2025-08", "role": "ICT3 SWE", "rating": 5},
+      {"round": "Behavioral + Team Fit", "question": "Why Apple? How do you handle disagreements?", "difficulty": "Easy", "outcome": "Offer", "quote": "They care about genuine passion for Apple products. Basic STAR format but be authentic.", "date": "2025-07", "role": "ICT2 SWE", "rating": 3}
+    ],
+    "interview_stats": {"success_rate": "~2%", "avg_rounds": "5-6", "timeline_weeks": "4-8", "offer_rate": "~2%", "total_reviews": 380},
+    "insider_tips": [
+      "Apple is extremely secretive — interviewers won't tell you the team until after offer",
+      "They value performance and optimization — mention Big-O in every solution",
+      "iOS/Swift knowledge is a major plus even for backend roles",
+      "System Design questions often involve Apple products — iCloud, iMessage, Apple Music",
+      "Less than 2% acceptance rate — be thoroughly prepared",
+      "They look for deep passion for their products — use Apple products and know them well"
+    ],
+    "dos_donts": {
+      "do": ["Show genuine passion for Apple products", "Optimize for performance and memory", "Discuss threading and concurrency", "Write clean C++/Swift code", "Research the specific team's products"],
+      "dont": ["Apply without knowing Apple's product line", "Ignore memory management", "Write sloppy code — Apple values craft", "Skip optimization discussions", "Be generic about 'why Apple' — they can tell"]
+    }
+  }
+}

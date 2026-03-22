@@ -699,6 +699,25 @@ stored as static JSON or in DB
 
 ---
 
+## Frontend UI Workflow
+
+> **All new frontend pages follow this process:**
+
+```
+Step 1: Agent provides detailed UX Pilot AI prompt for the page
+Step 2: Karthik generates UI mockup using UX Pilot AI
+Step 3: Karthik shares the screenshot(s) with the agent
+Step 4: Agent builds the page matching the mockup exactly
+Step 5: Agent suggests refinements if needed
+Step 6: Iterate until approved
+```
+
+**For existing pages** being wired to backend (e.g., `/companies`): no new UI generation needed — just connect existing components to real API data.
+
+**For new pages** (e.g., `/match/[slug]`, `/practice`, `/aptitude`): agent will provide a detailed prompt describing layout, components, colors, and data shapes before any frontend code is written.
+
+---
+
 ## Part 6: Build Order — Sprint Plan (Revised)
 
 > **Sprint reorder rationale**: The core product loop is Dashboard → Company

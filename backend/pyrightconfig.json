@@ -1,0 +1,11 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.14",
+  "root": ".",
+  "include": ["app", "agents", "scrapers", "tasks", "nlp"],
+  "extraPaths": ["."],
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false
+}

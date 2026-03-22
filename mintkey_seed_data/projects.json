@@ -1,0 +1,993 @@
+{
+  "source": "MintKey Project Bank",
+  "total": 30,
+  "projects": [
+    {
+      "title": "Build Your Own wc Tool",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-wc",
+      "category": "CLI / Systems",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "C",
+        "Rust"
+      ],
+      "estimated_hours": 4,
+      "description": "Build a clone of the Unix wc command that counts lines, words, characters, and bytes in text files. Handles stdin and file arguments.",
+      "requirements": [
+        "Count lines, words, characters, bytes",
+        "Handle multiple file arguments",
+        "Support stdin input when no file given",
+        "Match wc output format exactly"
+      ],
+      "milestones": [
+        "Step 1: Count bytes in a file",
+        "Step 2: Add line and word counting",
+        "Step 3: Handle multiple files with totals",
+        "Step 4: Support stdin pipe input"
+      ],
+      "skills_learned": [
+        "File I/O",
+        "CLI argument parsing",
+        "Stream processing",
+        "Unix tool design"
+      ]
+    },
+    {
+      "title": "Build Your Own JSON Parser",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-json-parser",
+      "category": "Backend",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "Java",
+        "Go",
+        "JavaScript"
+      ],
+      "estimated_hours": 8,
+      "description": "Build a JSON parser from scratch. Tokenize input strings, parse them into native data structures, and handle all JSON types including nested objects and arrays.",
+      "requirements": [
+        "Tokenizer for JSON syntax",
+        "Recursive descent parser",
+        "Error handling for invalid JSON",
+        "Support nested objects and arrays"
+      ],
+      "milestones": [
+        "Step 1: Parse simple values (strings, numbers, booleans, null)",
+        "Step 2: Parse arrays",
+        "Step 3: Parse objects",
+        "Step 4: Handle nested structures and edge cases"
+      ],
+      "skills_learned": [
+        "Lexical analysis",
+        "Recursive parsing",
+        "String processing",
+        "Error handling"
+      ]
+    },
+    {
+      "title": "Build Your Own Compression Tool",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-huffman",
+      "category": "Systems",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "C++",
+        "Java",
+        "Rust"
+      ],
+      "estimated_hours": 12,
+      "description": "Implement Huffman coding for file compression and decompression. Build frequency tables, construct Huffman trees, and encode/decode binary data.",
+      "requirements": [
+        "Character frequency analysis",
+        "Huffman tree construction",
+        "Binary encoding and decoding",
+        "File compression with header metadata"
+      ],
+      "milestones": [
+        "Step 1: Build frequency table from input",
+        "Step 2: Construct Huffman tree",
+        "Step 3: Generate prefix codes and encode",
+        "Step 4: Write compressed file with header for decoding"
+      ],
+      "skills_learned": [
+        "Data structures (trees, heaps)",
+        "Bit manipulation",
+        "File I/O with binary data",
+        "Compression algorithms"
+      ]
+    },
+    {
+      "title": "Build Your Own cut Tool",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-cut",
+      "category": "CLI / Systems",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "C",
+        "Rust"
+      ],
+      "estimated_hours": 4,
+      "description": "Clone the Unix cut command. Extract sections from each line of files based on byte positions, character positions, or field delimiters.",
+      "requirements": [
+        "Support -f (fields), -d (delimiter), -b (bytes) flags",
+        "Handle tab as default delimiter",
+        "Process stdin and file arguments",
+        "Support comma-separated field ranges"
+      ],
+      "milestones": [
+        "Step 1: Extract tab-delimited fields",
+        "Step 2: Support custom delimiters",
+        "Step 3: Handle byte and character ranges",
+        "Step 4: Support multiple files and stdin"
+      ],
+      "skills_learned": [
+        "String splitting",
+        "CLI flag parsing",
+        "Unix philosophy",
+        "Stream processing"
+      ]
+    },
+    {
+      "title": "Build Your Own Load Balancer",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-load-balancer",
+      "category": "Backend / Networking",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "Java",
+        "Node.js"
+      ],
+      "estimated_hours": 15,
+      "description": "Build an HTTP load balancer that distributes incoming requests across multiple backend servers using round-robin algorithm with health checks.",
+      "requirements": [
+        "HTTP reverse proxy functionality",
+        "Round-robin request distribution",
+        "Backend health checking",
+        "Graceful handling of server failures"
+      ],
+      "milestones": [
+        "Step 1: Basic HTTP proxy to single backend",
+        "Step 2: Round-robin across multiple backends",
+        "Step 3: Add periodic health checks",
+        "Step 4: Remove unhealthy servers, re-add when recovered"
+      ],
+      "skills_learned": [
+        "HTTP protocol",
+        "Socket programming",
+        "Concurrency",
+        "Health monitoring patterns"
+      ]
+    },
+    {
+      "title": "Build a URL Shortener",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-url-shortener",
+      "category": "Full Stack",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "Node.js",
+        "Go",
+        "Java"
+      ],
+      "estimated_hours": 10,
+      "description": "Build a URL shortening service like bit.ly. Generate short codes, store mappings, handle redirects, and track click analytics.",
+      "requirements": [
+        "Generate unique short codes (base62 encoding)",
+        "Store URL mappings in database",
+        "HTTP 301/302 redirect handling",
+        "Click tracking with timestamps and referrers"
+      ],
+      "milestones": [
+        "Step 1: URL encoding and short code generation",
+        "Step 2: Database storage and retrieval",
+        "Step 3: HTTP redirect endpoint",
+        "Step 4: Analytics dashboard for click tracking"
+      ],
+      "skills_learned": [
+        "Hashing algorithms",
+        "Database design",
+        "REST API design",
+        "HTTP redirect mechanics"
+      ]
+    },
+    {
+      "title": "Build a Web Server",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-web-server",
+      "category": "Systems / Networking",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "C",
+        "Go",
+        "Rust"
+      ],
+      "estimated_hours": 12,
+      "description": "Build an HTTP/1.1 web server from scratch using raw sockets. Handle GET/POST requests, serve static files, and support concurrent connections.",
+      "requirements": [
+        "Parse HTTP request headers",
+        "Serve static files with correct MIME types",
+        "Handle concurrent connections (threading/async)",
+        "Support GET and POST methods"
+      ],
+      "milestones": [
+        "Step 1: Accept TCP connections and parse HTTP",
+        "Step 2: Serve static HTML files",
+        "Step 3: Handle different MIME types",
+        "Step 4: Add concurrency with threading"
+      ],
+      "skills_learned": [
+        "TCP/IP networking",
+        "HTTP protocol",
+        "Concurrency",
+        "File serving"
+      ]
+    },
+    {
+      "title": "Build a Git Clone",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-git",
+      "category": "Systems",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "Rust",
+        "C"
+      ],
+      "estimated_hours": 20,
+      "description": "Implement core Git operations: init, add, commit, log, and basic branching. Understand content-addressable storage, tree objects, and DAG history.",
+      "requirements": [
+        "Initialize .git directory structure",
+        "Hash objects with SHA-1 (blob, tree, commit)",
+        "Stage files and create commits",
+        "Display commit log history"
+      ],
+      "milestones": [
+        "Step 1: git init \u2014 create .git structure",
+        "Step 2: git hash-object and cat-file",
+        "Step 3: git add \u2014 staging area with tree objects",
+        "Step 4: git commit and git log"
+      ],
+      "skills_learned": [
+        "Content-addressable storage",
+        "SHA-1 hashing",
+        "DAG (directed acyclic graph)",
+        "File system operations"
+      ]
+    },
+    {
+      "title": "Build a Shell",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-shell",
+      "category": "Systems",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "C",
+        "Go",
+        "Rust"
+      ],
+      "estimated_hours": 10,
+      "description": "Build a Unix shell that can execute commands, handle pipes, implement builtins (cd, echo, exit), and manage processes.",
+      "requirements": [
+        "REPL loop with prompt",
+        "Execute external commands via fork/exec",
+        "Built-in commands: cd, echo, exit, pwd",
+        "Pipe operator support (|)"
+      ],
+      "milestones": [
+        "Step 1: Basic REPL with command execution",
+        "Step 2: Built-in commands",
+        "Step 3: Pipe support",
+        "Step 4: Input/output redirection"
+      ],
+      "skills_learned": [
+        "Process management",
+        "System calls",
+        "Pipe and I/O redirection",
+        "Command parsing"
+      ]
+    },
+    {
+      "title": "Build a Key-Value Database",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-database",
+      "category": "Systems / Backend",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "C++",
+        "Rust"
+      ],
+      "estimated_hours": 15,
+      "description": "Build a persistent key-value store with GET, SET, DELETE operations. Implement write-ahead logging and simple indexing for durability and performance.",
+      "requirements": [
+        "In-memory hash table for fast lookups",
+        "Persistent storage with write-ahead log",
+        "Support GET, SET, DELETE commands",
+        "Handle concurrent read/write access"
+      ],
+      "milestones": [
+        "Step 1: In-memory key-value store with CLI",
+        "Step 2: Persist data to disk (append-only log)",
+        "Step 3: Add compaction and indexing",
+        "Step 4: TCP server for remote access"
+      ],
+      "skills_learned": [
+        "Storage engines",
+        "Write-ahead logging",
+        "Serialization",
+        "Network protocols"
+      ]
+    },
+    {
+      "title": "Build a Regex Engine",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-regex-engine",
+      "category": "Computer Science",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "C",
+        "Java",
+        "JavaScript"
+      ],
+      "estimated_hours": 12,
+      "description": "Build a regular expression engine supporting basic patterns: literals, dot, star, plus, question mark, character classes, and anchors.",
+      "requirements": [
+        "Match literal characters",
+        "Support . (any char), * (zero+), + (one+), ? (zero/one)",
+        "Character classes [a-z] and negation [^a-z]",
+        "Anchors ^ and $"
+      ],
+      "milestones": [
+        "Step 1: Literal and dot matching",
+        "Step 2: Quantifiers (*, +, ?)",
+        "Step 3: Character classes",
+        "Step 4: Anchors and grouping"
+      ],
+      "skills_learned": [
+        "Finite automata (NFA/DFA)",
+        "Backtracking algorithms",
+        "Pattern matching",
+        "Compiler theory basics"
+      ]
+    },
+    {
+      "title": "Build a Text Editor",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-text-editor",
+      "category": "Systems",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "C",
+        "Rust",
+        "Python",
+        "Go"
+      ],
+      "estimated_hours": 20,
+      "description": "Build a terminal-based text editor like nano/vim. Handle raw terminal input, display text with syntax highlighting, and support file save/load.",
+      "requirements": [
+        "Raw terminal mode input handling",
+        "Text buffer with insert/delete operations",
+        "File open, edit, and save",
+        "Syntax highlighting for at least one language"
+      ],
+      "milestones": [
+        "Step 1: Raw terminal mode and cursor movement",
+        "Step 2: Text input and display",
+        "Step 3: File I/O (open and save)",
+        "Step 4: Search functionality and syntax highlighting"
+      ],
+      "skills_learned": [
+        "Terminal I/O",
+        "Buffer gap data structure",
+        "Raw input handling",
+        "Syntax highlighting"
+      ]
+    },
+    {
+      "title": "Build a CLI Task Manager",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-command-line-tool",
+      "category": "CLI",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "Node.js",
+        "Rust"
+      ],
+      "estimated_hours": 5,
+      "description": "Build a command-line task/todo manager. Add, list, complete, and delete tasks with persistent JSON storage. Support priorities and due dates.",
+      "requirements": [
+        "Add/list/complete/delete tasks via CLI",
+        "Persistent JSON file storage",
+        "Priority levels (high/medium/low)",
+        "Filter and sort by status, priority, date"
+      ],
+      "milestones": [
+        "Step 1: Add and list tasks",
+        "Step 2: Mark complete and delete",
+        "Step 3: Add priorities and due dates",
+        "Step 4: Filtering and colored output"
+      ],
+      "skills_learned": [
+        "CLI design",
+        "JSON file persistence",
+        "Argument parsing",
+        "Terminal formatting"
+      ]
+    },
+    {
+      "title": "Build a Discord/Telegram Bot",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-bot",
+      "category": "Backend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "Python",
+        "Node.js",
+        "Go"
+      ],
+      "estimated_hours": 6,
+      "description": "Build a chatbot for Discord or Telegram that responds to commands, fetches data from APIs, and provides useful utilities like weather, reminders, or polls.",
+      "requirements": [
+        "Connect to Discord/Telegram API",
+        "Handle slash commands or message triggers",
+        "Fetch data from external APIs",
+        "Send formatted responses with embeds/buttons"
+      ],
+      "milestones": [
+        "Step 1: Bot setup and basic ping-pong response",
+        "Step 2: Command handler with help menu",
+        "Step 3: External API integration (weather/quotes)",
+        "Step 4: Interactive features (polls/reminders)"
+      ],
+      "skills_learned": [
+        "API integration",
+        "Event-driven programming",
+        "Webhook handling",
+        "Bot deployment"
+      ]
+    },
+    {
+      "title": "Build a Real-time Chat App",
+      "source": "DevProjects",
+      "url": "https://www.codementor.io/projects/web",
+      "category": "Full Stack",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "React",
+        "Node.js",
+        "Socket.io",
+        "Python"
+      ],
+      "estimated_hours": 12,
+      "description": "Build a real-time chat application with rooms, user names, message history, and typing indicators using WebSockets.",
+      "requirements": [
+        "WebSocket connection for real-time messaging",
+        "Chat rooms with join/leave functionality",
+        "Message history persistence",
+        "Typing indicator and online user list"
+      ],
+      "milestones": [
+        "Step 1: WebSocket server and basic messaging",
+        "Step 2: Chat rooms with user management",
+        "Step 3: Message persistence with database",
+        "Step 4: Typing indicators and UI polish"
+      ],
+      "skills_learned": [
+        "WebSockets",
+        "Real-time communication",
+        "State management",
+        "Database design"
+      ]
+    },
+    {
+      "title": "Build an E-commerce Store",
+      "source": "DevProjects",
+      "url": "https://www.codementor.io/projects/web",
+      "category": "Full Stack",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "React",
+        "Next.js",
+        "Node.js",
+        "PostgreSQL"
+      ],
+      "estimated_hours": 25,
+      "description": "Build a full e-commerce store with product catalog, shopping cart, user auth, checkout flow, and order management.",
+      "requirements": [
+        "Product listing with categories and search",
+        "Shopping cart with add/remove/quantity",
+        "User authentication and profiles",
+        "Checkout process with order creation"
+      ],
+      "milestones": [
+        "Step 1: Product catalog with categories",
+        "Step 2: Shopping cart functionality",
+        "Step 3: User auth and profiles",
+        "Step 4: Checkout and order management"
+      ],
+      "skills_learned": [
+        "Full-stack development",
+        "Payment integration concepts",
+        "Session management",
+        "Database relationships"
+      ]
+    },
+    {
+      "title": "Build a Weather App",
+      "source": "DevProjects",
+      "url": "https://www.codementor.io/projects/web",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "React",
+        "Vue",
+        "JavaScript",
+        "HTML/CSS"
+      ],
+      "estimated_hours": 5,
+      "description": "Build a weather dashboard that fetches current weather and forecasts from OpenWeatherMap API. Display temperature, humidity, wind, and 5-day forecast.",
+      "requirements": [
+        "Fetch weather data from OpenWeatherMap API",
+        "Display current conditions with icons",
+        "5-day forecast view",
+        "City search with geolocation support"
+      ],
+      "milestones": [
+        "Step 1: API integration and display current weather",
+        "Step 2: Add weather icons and styling",
+        "Step 3: 5-day forecast view",
+        "Step 4: City search and geolocation"
+      ],
+      "skills_learned": [
+        "API consumption",
+        "Async/await",
+        "Responsive design",
+        "Data visualization"
+      ]
+    },
+    {
+      "title": "Build a Quiz App",
+      "source": "DevProjects",
+      "url": "https://www.codementor.io/projects/web",
+      "category": "Frontend / Full Stack",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "React",
+        "Vue",
+        "JavaScript",
+        "TypeScript"
+      ],
+      "estimated_hours": 6,
+      "description": "Build an interactive quiz application with timed questions, score tracking, category selection, and a results summary with correct/incorrect review.",
+      "requirements": [
+        "Question bank with multiple categories",
+        "Timer per question",
+        "Score tracking with streak bonus",
+        "Results page with answer review"
+      ],
+      "milestones": [
+        "Step 1: Display questions with options",
+        "Step 2: Score tracking and timer",
+        "Step 3: Category selection and difficulty levels",
+        "Step 4: Results page with explanations"
+      ],
+      "skills_learned": [
+        "State management",
+        "Timer implementation",
+        "Conditional rendering",
+        "Local storage"
+      ]
+    },
+    {
+      "title": "Build a Countdown Timer",
+      "source": "DevProjects",
+      "url": "https://www.codementor.io/projects/web",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React"
+      ],
+      "estimated_hours": 3,
+      "description": "Build a beautiful countdown timer to a target date with days, hours, minutes, seconds display. Add themes and event naming.",
+      "requirements": [
+        "Accurate countdown calculation",
+        "Animated flip/scroll digit display",
+        "Custom event naming and date picker",
+        "Share countdown via URL"
+      ],
+      "milestones": [
+        "Step 1: Basic countdown logic",
+        "Step 2: Animated digits display",
+        "Step 3: Custom events and date picker",
+        "Step 4: URL sharing and multiple timers"
+      ],
+      "skills_learned": [
+        "Date/time manipulation",
+        "CSS animations",
+        "setInterval management",
+        "URL parameters"
+      ]
+    },
+    {
+      "title": "Build a QR Code Component",
+      "source": "Frontend Mentor",
+      "url": "https://www.frontendmentor.io/challenges/qr-code-component-iux_sIO_H",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "React",
+        "Vue"
+      ],
+      "estimated_hours": 2,
+      "description": "Build a responsive QR code card component matching a provided design. Practice pixel-perfect implementation and responsive layout.",
+      "requirements": [
+        "Match provided design exactly",
+        "Responsive on mobile and desktop",
+        "Proper spacing and typography",
+        "Accessible HTML structure"
+      ],
+      "milestones": [
+        "Step 1: HTML structure",
+        "Step 2: CSS styling to match design",
+        "Step 3: Responsive adjustments",
+        "Step 4: Accessibility and final polish"
+      ],
+      "skills_learned": [
+        "CSS layout (flexbox/grid)",
+        "Responsive design",
+        "Design-to-code workflow",
+        "Pixel-perfect implementation"
+      ]
+    },
+    {
+      "title": "Build an Interactive Rating Component",
+      "source": "Frontend Mentor",
+      "url": "https://www.frontendmentor.io/challenges/interactive-rating-component-koxpeBUmI",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React"
+      ],
+      "estimated_hours": 3,
+      "description": "Build an interactive star/number rating component with selection state, thank-you screen, and smooth transitions between states.",
+      "requirements": [
+        "Clickable rating options (1-5)",
+        "Visual feedback on selection",
+        "Thank-you screen showing selected rating",
+        "Smooth transitions between states"
+      ],
+      "milestones": [
+        "Step 1: Rating selection UI",
+        "Step 2: Click handlers and state",
+        "Step 3: Thank-you screen",
+        "Step 4: Transitions and hover effects"
+      ],
+      "skills_learned": [
+        "DOM manipulation",
+        "State management",
+        "CSS transitions",
+        "Component design"
+      ]
+    },
+    {
+      "title": "Build an NFT Preview Card",
+      "source": "Frontend Mentor",
+      "url": "https://www.frontendmentor.io/challenges/nft-preview-card-component-SbdUL_w0U",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "HTML",
+        "CSS"
+      ],
+      "estimated_hours": 2,
+      "description": "Build a responsive NFT preview card with image overlay, pricing info, creator details, and hover effects matching a provided design.",
+      "requirements": [
+        "Card layout with image, title, price",
+        "Hover overlay on image",
+        "Creator info with avatar",
+        "Responsive design"
+      ],
+      "milestones": [
+        "Step 1: Card HTML structure",
+        "Step 2: Styling and layout",
+        "Step 3: Image hover overlay effect",
+        "Step 4: Responsive adjustments"
+      ],
+      "skills_learned": [
+        "CSS positioning",
+        "Hover effects",
+        "Image overlays",
+        "Card component design"
+      ]
+    },
+    {
+      "title": "Build a REST API",
+      "source": "Custom",
+      "url": "https://restfulapi.net/",
+      "category": "Backend",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "Node.js",
+        "Go",
+        "Java"
+      ],
+      "estimated_hours": 10,
+      "description": "Build a complete RESTful API for a blog platform with CRUD operations, authentication, pagination, filtering, and proper error handling.",
+      "requirements": [
+        "CRUD endpoints for posts, comments, users",
+        "JWT authentication middleware",
+        "Pagination and filtering query params",
+        "Proper HTTP status codes and error responses"
+      ],
+      "milestones": [
+        "Step 1: Basic CRUD for posts",
+        "Step 2: User auth with JWT",
+        "Step 3: Comments with foreign key relationships",
+        "Step 4: Pagination, filtering, and error handling"
+      ],
+      "skills_learned": [
+        "REST API design",
+        "Authentication/Authorization",
+        "Database ORM",
+        "Error handling patterns"
+      ]
+    },
+    {
+      "title": "Build a Full-Stack Todo App",
+      "source": "Custom",
+      "url": "https://todomvc.com/",
+      "category": "Full Stack",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "React",
+        "Node.js",
+        "PostgreSQL",
+        "TypeScript"
+      ],
+      "estimated_hours": 10,
+      "description": "Build a production-quality todo application with user auth, CRUD operations, drag-and-drop reordering, due dates, and categories.",
+      "requirements": [
+        "User registration and login",
+        "CRUD operations for todos",
+        "Categories/tags and filtering",
+        "Drag-and-drop reordering"
+      ],
+      "milestones": [
+        "Step 1: Backend API with auth",
+        "Step 2: Frontend with CRUD",
+        "Step 3: Categories and filtering",
+        "Step 4: Drag-and-drop and polish"
+      ],
+      "skills_learned": [
+        "Full-stack architecture",
+        "Auth flow",
+        "Drag-and-drop",
+        "State management"
+      ]
+    },
+    {
+      "title": "Build a Portfolio Website",
+      "source": "Custom",
+      "url": "https://pages.github.com/",
+      "category": "Frontend",
+      "difficulty": "Easy",
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React"
+      ],
+      "estimated_hours": 6,
+      "description": "Build a stunning developer portfolio with hero section, project showcase, skills visualization, contact form, and smooth scroll animations.",
+      "requirements": [
+        "Responsive hero section with introduction",
+        "Project cards with links and previews",
+        "Skills section with visual representation",
+        "Contact form with validation"
+      ],
+      "milestones": [
+        "Step 1: Hero and navigation",
+        "Step 2: Projects showcase section",
+        "Step 3: Skills and about section",
+        "Step 4: Contact form and deploy to GitHub Pages"
+      ],
+      "skills_learned": [
+        "Responsive design",
+        "CSS animations",
+        "Form validation",
+        "Static site deployment"
+      ]
+    },
+    {
+      "title": "Build a Rate Limiter",
+      "source": "CodingChallenges.fyi",
+      "url": "https://codingchallenges.fyi/challenges/challenge-rate-limiter",
+      "category": "Backend / Systems",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "Java",
+        "Node.js"
+      ],
+      "estimated_hours": 8,
+      "description": "Build a rate limiter supporting multiple algorithms: token bucket, sliding window, and fixed window. Integrate as middleware for an HTTP server.",
+      "requirements": [
+        "Token bucket algorithm implementation",
+        "Sliding window rate limiting",
+        "Per-user and per-endpoint limits",
+        "HTTP middleware integration"
+      ],
+      "milestones": [
+        "Step 1: Fixed window counter",
+        "Step 2: Token bucket algorithm",
+        "Step 3: Sliding window log",
+        "Step 4: HTTP middleware with configurable limits"
+      ],
+      "skills_learned": [
+        "Rate limiting algorithms",
+        "Middleware design",
+        "Concurrency",
+        "Redis integration"
+      ]
+    },
+    {
+      "title": "Build a Basic Search Engine",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-search-engine",
+      "category": "Systems / Backend",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "Go",
+        "Java",
+        "Rust"
+      ],
+      "estimated_hours": 20,
+      "description": "Build a text search engine with web crawling, inverted index, TF-IDF ranking, and a query interface. Understand how Google works at a fundamental level.",
+      "requirements": [
+        "Web crawler to fetch and parse pages",
+        "Inverted index construction",
+        "TF-IDF scoring for relevance ranking",
+        "Search query interface with ranked results"
+      ],
+      "milestones": [
+        "Step 1: Web crawler for HTML pages",
+        "Step 2: Text extraction and tokenization",
+        "Step 3: Inverted index and TF-IDF",
+        "Step 4: Query parser and ranked results"
+      ],
+      "skills_learned": [
+        "Information retrieval",
+        "Inverted index",
+        "TF-IDF algorithm",
+        "Web crawling"
+      ]
+    },
+    {
+      "title": "Build a Basic Blockchain",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-blockchain",
+      "category": "Systems / Crypto",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "JavaScript",
+        "Go",
+        "Rust"
+      ],
+      "estimated_hours": 15,
+      "description": "Build a simplified blockchain with blocks, hashing, proof-of-work, chain validation, and a simple peer-to-peer network for consensus.",
+      "requirements": [
+        "Block structure with hash chaining",
+        "SHA-256 proof-of-work mining",
+        "Chain validation and tamper detection",
+        "Simple REST API for interaction"
+      ],
+      "milestones": [
+        "Step 1: Block and chain data structures",
+        "Step 2: Proof-of-work mining",
+        "Step 3: Chain validation",
+        "Step 4: REST API and simple P2P sync"
+      ],
+      "skills_learned": [
+        "Cryptographic hashing",
+        "Distributed systems",
+        "Consensus algorithms",
+        "Data integrity"
+      ]
+    },
+    {
+      "title": "Build a Basic Neural Network",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-neural-network",
+      "category": "AI / ML",
+      "difficulty": "Hard",
+      "tech_stack": [
+        "Python",
+        "NumPy",
+        "C++",
+        "Rust"
+      ],
+      "estimated_hours": 15,
+      "description": "Build a neural network from scratch (no TensorFlow/PyTorch). Implement forward propagation, backpropagation, and gradient descent to classify handwritten digits.",
+      "requirements": [
+        "Matrix operations for forward pass",
+        "Activation functions (sigmoid, ReLU, softmax)",
+        "Backpropagation with gradient descent",
+        "Train on MNIST digit dataset"
+      ],
+      "milestones": [
+        "Step 1: Matrix math and activation functions",
+        "Step 2: Forward propagation",
+        "Step 3: Loss calculation and backpropagation",
+        "Step 4: Training loop and MNIST classification"
+      ],
+      "skills_learned": [
+        "Linear algebra",
+        "Calculus (chain rule)",
+        "Neural network theory",
+        "NumPy operations"
+      ]
+    },
+    {
+      "title": "Build a Template Engine",
+      "source": "Build Your Own X",
+      "url": "https://github.com/codecrafters-io/build-your-own-x#build-your-own-template-engine",
+      "category": "Backend",
+      "difficulty": "Medium",
+      "tech_stack": [
+        "Python",
+        "JavaScript",
+        "Go",
+        "Ruby"
+      ],
+      "estimated_hours": 8,
+      "description": "Build a template engine like Jinja2/Mustache. Support variable interpolation, conditionals, loops, and template inheritance.",
+      "requirements": [
+        "Variable interpolation {{ name }}",
+        "Conditional blocks {% if condition %}",
+        "Loop constructs {% for item in list %}",
+        "Template inheritance with blocks"
+      ],
+      "milestones": [
+        "Step 1: Variable substitution",
+        "Step 2: Conditional rendering",
+        "Step 3: Loop support",
+        "Step 4: Template inheritance and includes"
+      ],
+      "skills_learned": [
+        "Parsing",
+        "Abstract syntax trees",
+        "Template rendering",
+        "Code generation"
+      ]
+    }
+  ]
+}

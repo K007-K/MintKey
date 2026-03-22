@@ -1,0 +1,185 @@
+{
+  "source": "Hand-curated best YouTube resources per topic",
+  "categories": {
+    "DSA Complete Courses": [
+      {
+        "title": "Striver's A2Z DSA Course (Complete Playlist)",
+        "channel": "take U forward",
+        "url": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz",
+        "language": "C++/Java",
+        "duration": "200+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "NeetCode 150 (All Solutions Explained)",
+        "channel": "NeetCode",
+        "url": "https://www.youtube.com/playlist?list=PLot-Xpze53ldVwtstag2TL4HQhAnC8ATf",
+        "language": "Python",
+        "duration": "150 videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Abdul Bari \u2014 Algorithms (Complete Course)",
+        "channel": "Abdul Bari",
+        "url": "https://www.youtube.com/playlist?list=PLDN4rrl48XKpZkf03iYFl-O29szjTrs_O",
+        "language": "C++",
+        "duration": "80+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "MIT 6.006 \u2014 Introduction to Algorithms",
+        "channel": "MIT OpenCourseWare",
+        "url": "https://www.youtube.com/playlist?list=PLUl4u3cNGP63EdVPNLG3ToM6LaEUuStEY",
+        "language": "Python",
+        "duration": "34 lectures",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "William Fiset \u2014 Graph Theory Algorithms",
+        "channel": "William Fiset",
+        "url": "https://www.youtube.com/playlist?list=PLDV1Zeh2NRsDGO4--qE8yH72HFL1Km93P",
+        "language": "Java",
+        "duration": "40+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Kunal Kushwaha \u2014 DSA Bootcamp",
+        "channel": "Kunal Kushwaha",
+        "url": "https://www.youtube.com/playlist?list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ",
+        "language": "Java",
+        "duration": "60+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      }
+    ],
+    "Dynamic Programming": [
+      {
+        "title": "Striver DP Series (All 56 Problems)",
+        "channel": "take U forward",
+        "url": "https://www.youtube.com/playlist?list=PLgUwDviBIf0qUlt5H_kiKYaNSqJ81PMMY",
+        "language": "C++",
+        "duration": "56 videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "NeetCode \u2014 DP Patterns Explained",
+        "channel": "NeetCode",
+        "url": "https://www.youtube.com/watch?v=mBNrRy2_hVs",
+        "language": "Python",
+        "duration": "30 min",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Back To Back SWE \u2014 DP Deep Dive",
+        "channel": "Back To Back SWE",
+        "url": "https://www.youtube.com/playlist?list=PLiQ766zSC5jM2OKVr8sooOuGgZkvnOCTI",
+        "language": "Java",
+        "duration": "20+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      }
+    ],
+    "System Design": [
+      {
+        "title": "System Design Interview \u2014 Complete Guide",
+        "channel": "ByteByteGo",
+        "url": "https://www.youtube.com/watch?v=F-4WiNRBLOo",
+        "language": "N/A",
+        "duration": "45 min",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Gaurav Sen \u2014 System Design Playlist",
+        "channel": "Gaurav Sen",
+        "url": "https://www.youtube.com/playlist?list=PLMCXHnjXnTnvo6alSjVkgxV-VH6EPyvoX",
+        "language": "N/A",
+        "duration": "30+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "sudoCODE \u2014 System Design for Beginners",
+        "channel": "sudoCODE",
+        "url": "https://www.youtube.com/playlist?list=PLTCrU9sGyburBw9wNOHebv9SjlE4Elv5a",
+        "language": "N/A",
+        "duration": "15+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Tech Dummies \u2014 System Design in Hindi",
+        "channel": "Tech Dummies Narendra L",
+        "url": "https://www.youtube.com/playlist?list=PLkQkbY7JNJuBoTemzQfjym0p8ntFjJIzm",
+        "language": "Hindi",
+        "duration": "20+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      }
+    ],
+    "Web Development": [
+      {
+        "title": "Full Stack Open (React, Node, GraphQL)",
+        "channel": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=bMknfKXIFA8",
+        "language": "JavaScript",
+        "duration": "12 hrs",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Next.js 14 Full Course",
+        "channel": "Traversy Media",
+        "url": "https://www.youtube.com/watch?v=wm5gMKuwSYk",
+        "language": "TypeScript",
+        "duration": "8 hrs",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Fireship \u2014 100 Seconds Series",
+        "channel": "Fireship",
+        "url": "https://www.youtube.com/playlist?list=PL0vfts4VzfNiI1BsIK5u7LpPaIDKMJIDN",
+        "language": "Various",
+        "duration": "100+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      }
+    ],
+    "Competitive Programming": [
+      {
+        "title": "Errichto \u2014 Competitive Programming Lectures",
+        "channel": "Errichto",
+        "url": "https://www.youtube.com/playlist?list=PLl-gb0E4MII28GyqDEnXCoso8-H5C1yoF",
+        "language": "C++",
+        "duration": "20+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Colin Galen \u2014 Advanced Topics",
+        "channel": "Colin Galen",
+        "url": "https://www.youtube.com/c/ColinGalen/videos",
+        "language": "C++",
+        "duration": "50+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      }
+    ],
+    "Aptitude & Placement": [
+      {
+        "title": "CareerRide \u2014 Aptitude Preparation",
+        "channel": "CareerRide",
+        "url": "https://www.youtube.com/playlist?list=PLd3UqWTnYXOl4SZl_sZ1sYz5ZHpWt-6g4",
+        "language": "English",
+        "duration": "100+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Placement Preparation Full Course",
+        "channel": "Apna College",
+        "url": "https://www.youtube.com/playlist?list=PLfqMhTWNBTe0b2nM6JHVCnAkhQRGiZMSJ",
+        "language": "Hindi",
+        "duration": "50+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      },
+      {
+        "title": "Love Babbar DSA Sheet Solutions",
+        "channel": "Love Babbar",
+        "url": "https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA",
+        "language": "C++",
+        "duration": "60+ videos",
+        "rating": "\u2b50\u2b50\u2b50\u2b50"
+      }
+    ]
+  }
+}

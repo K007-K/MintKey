@@ -1,0 +1,2311 @@
+{
+  "source": "Compiled from LeetCode Top Tagged, GFG Company-Wise, Striver SDE Sheet",
+  "last_updated": "2026-03-19",
+  "companies": {
+    "Google": {
+      "interview_rounds": [
+        "Phone Screen (45 min)",
+        "Onsite x4-5 (45 min each)",
+        "Googleyness & Leadership"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Dynamic Programming",
+        "Graph",
+        "Tree",
+        "Binary Search",
+        "Greedy",
+        "Design"
+      ],
+      "difficulty_distribution": {
+        "Easy": "10%",
+        "Medium": "60%",
+        "Hard": "30%"
+      },
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Median of Two Sorted Arrays",
+          "difficulty": "Hard",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "Longest Substring Without Repeating Characters",
+          "difficulty": "Medium",
+          "topic": "Sliding Window"
+        },
+        {
+          "title": "Next Permutation",
+          "difficulty": "Medium",
+          "topic": "Array"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting, Intervals"
+        },
+        {
+          "title": "Word Break",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS/DFS"
+        },
+        {
+          "title": "Course Schedule",
+          "difficulty": "Medium",
+          "topic": "Graph, Topological Sort"
+        },
+        {
+          "title": "Serialize and Deserialize Binary Tree",
+          "difficulty": "Hard",
+          "topic": "Tree, Design"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design, Hash Table"
+        },
+        {
+          "title": "Minimum Window Substring",
+          "difficulty": "Hard",
+          "topic": "Sliding Window"
+        },
+        {
+          "title": "Word Ladder",
+          "difficulty": "Hard",
+          "topic": "BFS, Graph"
+        },
+        {
+          "title": "Trapping Rain Water",
+          "difficulty": "Hard",
+          "topic": "Stack, Two Pointers"
+        },
+        {
+          "title": "Maximum Product Subarray",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming"
+        },
+        {
+          "title": "Find Median from Data Stream",
+          "difficulty": "Hard",
+          "topic": "Heap"
+        },
+        {
+          "title": "Alien Dictionary",
+          "difficulty": "Hard",
+          "topic": "Graph, Topological Sort"
+        },
+        {
+          "title": "Decode String",
+          "difficulty": "Medium",
+          "topic": "Stack, Recursion"
+        },
+        {
+          "title": "Split Array Largest Sum",
+          "difficulty": "Hard",
+          "topic": "Binary Search, DP"
+        },
+        {
+          "title": "Longest Increasing Path in a Matrix",
+          "difficulty": "Hard",
+          "topic": "DFS, Memoization"
+        },
+        {
+          "title": "Snapshot Array",
+          "difficulty": "Medium",
+          "topic": "Design, Binary Search"
+        }
+      ]
+    },
+    "Amazon": {
+      "interview_rounds": [
+        "Online Assessment",
+        "Phone Screen",
+        "Onsite x4-5 (Leadership Principles focused)"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "BFS/DFS",
+        "Dynamic Programming",
+        "Design"
+      ],
+      "difficulty_distribution": {
+        "Easy": "15%",
+        "Medium": "55%",
+        "Hard": "30%"
+      },
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Add Two Numbers",
+          "difficulty": "Medium",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Longest Palindromic Substring",
+          "difficulty": "Medium",
+          "topic": "String, DP"
+        },
+        {
+          "title": "3Sum",
+          "difficulty": "Medium",
+          "topic": "Two Pointers"
+        },
+        {
+          "title": "Group Anagrams",
+          "difficulty": "Medium",
+          "topic": "Hash Table, String"
+        },
+        {
+          "title": "Merge Two Sorted Lists",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS/DFS"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Min Stack",
+          "difficulty": "Medium",
+          "topic": "Stack, Design"
+        },
+        {
+          "title": "Rotting Oranges",
+          "difficulty": "Medium",
+          "topic": "BFS"
+        },
+        {
+          "title": "Word Search",
+          "difficulty": "Medium",
+          "topic": "Backtracking"
+        },
+        {
+          "title": "Product of Array Except Self",
+          "difficulty": "Medium",
+          "topic": "Array"
+        },
+        {
+          "title": "K Closest Points to Origin",
+          "difficulty": "Medium",
+          "topic": "Heap"
+        },
+        {
+          "title": "Copy List with Random Pointer",
+          "difficulty": "Medium",
+          "topic": "Linked List, Hash Table"
+        },
+        {
+          "title": "Word Break",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Reorder Data in Log Files",
+          "difficulty": "Medium",
+          "topic": "String, Sorting"
+        },
+        {
+          "title": "Partition Labels",
+          "difficulty": "Medium",
+          "topic": "Greedy"
+        },
+        {
+          "title": "Subtree of Another Tree",
+          "difficulty": "Easy",
+          "topic": "Tree"
+        },
+        {
+          "title": "Meeting Rooms II",
+          "difficulty": "Medium",
+          "topic": "Intervals, Heap"
+        }
+      ]
+    },
+    "Meta (Facebook)": {
+      "interview_rounds": [
+        "Phone Screen (45 min)",
+        "Onsite x3 (2 Coding + 1 System Design)",
+        "Behavioral"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "Dynamic Programming",
+        "Binary Search"
+      ],
+      "difficulty_distribution": {
+        "Easy": "10%",
+        "Medium": "65%",
+        "Hard": "25%"
+      },
+      "top_problems": [
+        {
+          "title": "Valid Palindrome",
+          "difficulty": "Easy",
+          "topic": "Two Pointers, String"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        },
+        {
+          "title": "Binary Tree Right Side View",
+          "difficulty": "Medium",
+          "topic": "Tree, BFS"
+        },
+        {
+          "title": "Subarray Sum Equals K",
+          "difficulty": "Medium",
+          "topic": "Hash Table, Prefix Sum"
+        },
+        {
+          "title": "Lowest Common Ancestor of a Binary Tree",
+          "difficulty": "Medium",
+          "topic": "Tree, DFS"
+        },
+        {
+          "title": "Random Pick with Weight",
+          "difficulty": "Medium",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "Minimum Remove to Make Valid Parentheses",
+          "difficulty": "Medium",
+          "topic": "Stack, String"
+        },
+        {
+          "title": "Add Strings",
+          "difficulty": "Easy",
+          "topic": "String, Math"
+        },
+        {
+          "title": "Buildings With an Ocean View",
+          "difficulty": "Medium",
+          "topic": "Stack"
+        },
+        {
+          "title": "Vertical Order Traversal of Binary Tree",
+          "difficulty": "Hard",
+          "topic": "Tree, BFS"
+        },
+        {
+          "title": "Nested List Weight Sum",
+          "difficulty": "Medium",
+          "topic": "DFS, Recursion"
+        },
+        {
+          "title": "Diameter of Binary Tree",
+          "difficulty": "Easy",
+          "topic": "Tree, DFS"
+        },
+        {
+          "title": "Clone Graph",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS/DFS"
+        },
+        {
+          "title": "Move Zeroes",
+          "difficulty": "Easy",
+          "topic": "Array, Two Pointers"
+        },
+        {
+          "title": "Valid Word Abbreviation",
+          "difficulty": "Easy",
+          "topic": "String"
+        },
+        {
+          "title": "Range Sum of BST",
+          "difficulty": "Easy",
+          "topic": "Tree, DFS"
+        },
+        {
+          "title": "Simplify Path",
+          "difficulty": "Medium",
+          "topic": "Stack, String"
+        },
+        {
+          "title": "Custom Sort String",
+          "difficulty": "Medium",
+          "topic": "Hash Table, Sorting"
+        },
+        {
+          "title": "Dot Product of Two Sparse Vectors",
+          "difficulty": "Medium",
+          "topic": "Design, Hash Table"
+        },
+        {
+          "title": "Binary Tree Maximum Path Sum",
+          "difficulty": "Hard",
+          "topic": "Tree, DFS"
+        }
+      ]
+    },
+    "Microsoft": {
+      "interview_rounds": [
+        "Phone Screen",
+        "Onsite x4 (Coding + Design + Behavioral)"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "Dynamic Programming",
+        "Design"
+      ],
+      "difficulty_distribution": {
+        "Easy": "20%",
+        "Medium": "55%",
+        "Hard": "25%"
+      },
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Add Two Numbers",
+          "difficulty": "Medium",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Reverse Linked List",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Merge Two Sorted Lists",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "Longest Substring Without Repeating Characters",
+          "difficulty": "Medium",
+          "topic": "Sliding Window"
+        },
+        {
+          "title": "Binary Tree Level Order Traversal",
+          "difficulty": "Medium",
+          "topic": "Tree, BFS"
+        },
+        {
+          "title": "Set Matrix Zeroes",
+          "difficulty": "Medium",
+          "topic": "Array, Matrix"
+        },
+        {
+          "title": "Rotate Image",
+          "difficulty": "Medium",
+          "topic": "Array, Matrix"
+        },
+        {
+          "title": "Group Anagrams",
+          "difficulty": "Medium",
+          "topic": "Hash Table"
+        },
+        {
+          "title": "Spirally Traversing a Matrix",
+          "difficulty": "Medium",
+          "topic": "Matrix"
+        },
+        {
+          "title": "Course Schedule",
+          "difficulty": "Medium",
+          "topic": "Graph, Topological Sort"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Word Search",
+          "difficulty": "Medium",
+          "topic": "Backtracking"
+        },
+        {
+          "title": "Serialize and Deserialize Binary Tree",
+          "difficulty": "Hard",
+          "topic": "Tree"
+        },
+        {
+          "title": "Median of Two Sorted Arrays",
+          "difficulty": "Hard",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "Decode Ways",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Min Stack",
+          "difficulty": "Medium",
+          "topic": "Stack, Design"
+        },
+        {
+          "title": "Implement Trie",
+          "difficulty": "Medium",
+          "topic": "Trie, Design"
+        }
+      ]
+    },
+    "Apple": {
+      "interview_rounds": [
+        "Phone Screen",
+        "Onsite x4-6 (Coding + System Design + Domain)"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Trees",
+        "Linked Lists",
+        "Sorting",
+        "Dynamic Programming"
+      ],
+      "difficulty_distribution": {
+        "Easy": "20%",
+        "Medium": "55%",
+        "Hard": "25%"
+      },
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "3Sum",
+          "difficulty": "Medium",
+          "topic": "Two Pointers"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Merge Two Sorted Lists",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Maximum Subarray",
+          "difficulty": "Medium",
+          "topic": "DP, Array"
+        },
+        {
+          "title": "Letter Combinations of a Phone Number",
+          "difficulty": "Medium",
+          "topic": "Backtracking"
+        },
+        {
+          "title": "Longest Common Prefix",
+          "difficulty": "Easy",
+          "topic": "String"
+        },
+        {
+          "title": "Roman to Integer",
+          "difficulty": "Easy",
+          "topic": "String, Math"
+        },
+        {
+          "title": "Container With Most Water",
+          "difficulty": "Medium",
+          "topic": "Two Pointers"
+        },
+        {
+          "title": "Binary Tree Inorder Traversal",
+          "difficulty": "Easy",
+          "topic": "Tree"
+        },
+        {
+          "title": "Climbing Stairs",
+          "difficulty": "Easy",
+          "topic": "DP"
+        },
+        {
+          "title": "Palindrome Linked List",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Word Search",
+          "difficulty": "Medium",
+          "topic": "Backtracking, Matrix"
+        },
+        {
+          "title": "Top K Frequent Elements",
+          "difficulty": "Medium",
+          "topic": "Heap, Hash Table"
+        },
+        {
+          "title": "Linked List Cycle",
+          "difficulty": "Easy",
+          "topic": "Linked List, Two Pointers"
+        },
+        {
+          "title": "Search in Rotated Sorted Array",
+          "difficulty": "Medium",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "Number of 1 Bits",
+          "difficulty": "Easy",
+          "topic": "Bit Manipulation"
+        },
+        {
+          "title": "Reverse String",
+          "difficulty": "Easy",
+          "topic": "String, Two Pointers"
+        },
+        {
+          "title": "House Robber",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Kth Largest Element in Array",
+          "difficulty": "Medium",
+          "topic": "Heap"
+        }
+      ]
+    },
+    "Netflix": {
+      "interview_rounds": [
+        "Phone Screen",
+        "Onsite x3-4 (Coding + System Design + Culture)"
+      ],
+      "focus_areas": [
+        "System Design",
+        "Distributed Systems",
+        "Graph",
+        "DP",
+        "Design Patterns"
+      ],
+      "top_problems": [
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        },
+        {
+          "title": "Find Median from Data Stream",
+          "difficulty": "Hard",
+          "topic": "Heap"
+        },
+        {
+          "title": "Serialize and Deserialize Binary Tree",
+          "difficulty": "Hard",
+          "topic": "Tree"
+        },
+        {
+          "title": "Design Twitter",
+          "difficulty": "Medium",
+          "topic": "Design, Heap"
+        },
+        {
+          "title": "Min Stack",
+          "difficulty": "Medium",
+          "topic": "Stack, Design"
+        },
+        {
+          "title": "Implement Queue using Stacks",
+          "difficulty": "Easy",
+          "topic": "Stack, Queue"
+        },
+        {
+          "title": "Number of Connected Components",
+          "difficulty": "Medium",
+          "topic": "Graph, Union Find"
+        },
+        {
+          "title": "Word Search II",
+          "difficulty": "Hard",
+          "topic": "Trie, Backtracking"
+        },
+        {
+          "title": "Decode Ways",
+          "difficulty": "Medium",
+          "topic": "DP"
+        }
+      ]
+    },
+    "Uber": {
+      "interview_rounds": [
+        "Phone Screen",
+        "Onsite x4 (2 Coding + Design + Behavioral)"
+      ],
+      "focus_areas": [
+        "Graph",
+        "Trees",
+        "Arrays",
+        "Dynamic Programming",
+        "Geometry"
+      ],
+      "top_problems": [
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS/DFS"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        },
+        {
+          "title": "Course Schedule",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "Word Break",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Longest Consecutive Sequence",
+          "difficulty": "Medium",
+          "topic": "Hash Table"
+        },
+        {
+          "title": "Evaluate Division",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS"
+        },
+        {
+          "title": "Binary Tree Maximum Path Sum",
+          "difficulty": "Hard",
+          "topic": "Tree"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Combination Sum",
+          "difficulty": "Medium",
+          "topic": "Backtracking"
+        },
+        {
+          "title": "Cheapest Flights Within K Stops",
+          "difficulty": "Medium",
+          "topic": "Graph, BFS"
+        }
+      ]
+    },
+    "Bloomberg": {
+      "interview_rounds": [
+        "Phone Screen x2",
+        "Onsite x3 (Coding + Design)"
+      ],
+      "focus_areas": [
+        "Design",
+        "OOP",
+        "Trees",
+        "Stack",
+        "Queue",
+        "String"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Merge Two Sorted Lists",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Decode String",
+          "difficulty": "Medium",
+          "topic": "Stack"
+        },
+        {
+          "title": "Flatten Nested List Iterator",
+          "difficulty": "Medium",
+          "topic": "Stack, Design"
+        },
+        {
+          "title": "Design HashMap",
+          "difficulty": "Easy",
+          "topic": "Design, Hash Table"
+        },
+        {
+          "title": "Min Stack",
+          "difficulty": "Medium",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Goldman Sachs": {
+      "interview_rounds": [
+        "HackerRank OA",
+        "Phone Screen",
+        "Superday x4-5"
+      ],
+      "focus_areas": [
+        "Math",
+        "Arrays",
+        "String",
+        "Dynamic Programming",
+        "Design",
+        "SQL"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Longest Palindromic Substring",
+          "difficulty": "Medium",
+          "topic": "String, DP"
+        },
+        {
+          "title": "Roman to Integer",
+          "difficulty": "Easy",
+          "topic": "String"
+        },
+        {
+          "title": "Container With Most Water",
+          "difficulty": "Medium",
+          "topic": "Two Pointers"
+        },
+        {
+          "title": "3Sum",
+          "difficulty": "Medium",
+          "topic": "Two Pointers"
+        },
+        {
+          "title": "Trapping Rain Water",
+          "difficulty": "Hard",
+          "topic": "Stack, Two Pointers"
+        },
+        {
+          "title": "Group Anagrams",
+          "difficulty": "Medium",
+          "topic": "Hash Table"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        },
+        {
+          "title": "Jump Game",
+          "difficulty": "Medium",
+          "topic": "Greedy, DP"
+        },
+        {
+          "title": "Best Time to Buy and Sell Stock",
+          "difficulty": "Easy",
+          "topic": "Array, DP"
+        }
+      ]
+    },
+    "Adobe": {
+      "interview_rounds": [
+        "Online Coding Test",
+        "Technical x2-3",
+        "HR"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Trees",
+        "Linked Lists",
+        "DP",
+        "Graph"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Reverse Linked List",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Merge Two Sorted Lists",
+          "difficulty": "Easy",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Climbing Stairs",
+          "difficulty": "Easy",
+          "topic": "DP"
+        },
+        {
+          "title": "Best Time to Buy and Sell Stock",
+          "difficulty": "Easy",
+          "topic": "DP"
+        },
+        {
+          "title": "Validate BST",
+          "difficulty": "Medium",
+          "topic": "Tree"
+        },
+        {
+          "title": "LCA of Binary Tree",
+          "difficulty": "Medium",
+          "topic": "Tree"
+        },
+        {
+          "title": "Coin Change",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Longest Common Subsequence",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        }
+      ]
+    },
+    "Flipkart": {
+      "interview_rounds": [
+        "Online Coding (3 problems)",
+        "Machine Coding Round",
+        "Problem Solving x2",
+        "Hiring Manager"
+      ],
+      "focus_areas": [
+        "Arrays",
+        "Trees",
+        "Graph",
+        "DP",
+        "System Design"
+      ],
+      "top_problems": [
+        {
+          "title": "Trapping Rain Water",
+          "difficulty": "Hard",
+          "topic": "Stack, Two Pointers"
+        },
+        {
+          "title": "Median of Two Sorted Arrays",
+          "difficulty": "Hard",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge K Sorted Lists",
+          "difficulty": "Hard",
+          "topic": "Heap"
+        },
+        {
+          "title": "Binary Tree Maximum Path Sum",
+          "difficulty": "Hard",
+          "topic": "Tree"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "Word Break",
+          "difficulty": "Medium",
+          "topic": "DP"
+        },
+        {
+          "title": "Longest Consecutive Sequence",
+          "difficulty": "Medium",
+          "topic": "Hash Table"
+        },
+        {
+          "title": "Shortest Path in Binary Matrix",
+          "difficulty": "Medium",
+          "topic": "BFS"
+        },
+        {
+          "title": "Serialize and Deserialize Binary Tree",
+          "difficulty": "Hard",
+          "topic": "Tree"
+        }
+      ]
+    },
+    "TCS": {
+      "interview_rounds": [
+        "TCS NQT (National Qualifier Test)",
+        "Technical Interview",
+        "HR"
+      ],
+      "test_pattern": {
+        "Numerical Ability": 26,
+        "Verbal Ability": 24,
+        "Reasoning Ability": 30,
+        "Programming Logic": 10,
+        "Coding": 2
+      },
+      "focus_areas": [
+        "Basic Programming",
+        "Arrays",
+        "Strings",
+        "Sorting",
+        "Pattern Printing",
+        "Basic Math"
+      ],
+      "top_problems": [
+        {
+          "title": "Reverse a String",
+          "difficulty": "Easy",
+          "topic": "String"
+        },
+        {
+          "title": "Palindrome Check",
+          "difficulty": "Easy",
+          "topic": "String"
+        },
+        {
+          "title": "Fibonacci Series",
+          "difficulty": "Easy",
+          "topic": "Math, DP"
+        },
+        {
+          "title": "Factorial",
+          "difficulty": "Easy",
+          "topic": "Math, Recursion"
+        },
+        {
+          "title": "Prime Number Check",
+          "difficulty": "Easy",
+          "topic": "Math"
+        },
+        {
+          "title": "Sort an Array",
+          "difficulty": "Easy",
+          "topic": "Sorting"
+        },
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array, Hash Table"
+        },
+        {
+          "title": "Pattern Printing (Stars/Numbers)",
+          "difficulty": "Easy",
+          "topic": "Loops"
+        },
+        {
+          "title": "Armstrong Number",
+          "difficulty": "Easy",
+          "topic": "Math"
+        },
+        {
+          "title": "Second Largest Element",
+          "difficulty": "Easy",
+          "topic": "Array"
+        }
+      ]
+    },
+    "Infosys": {
+      "interview_rounds": [
+        "InfyTQ / HackWithInfy",
+        "Technical x1-2",
+        "HR"
+      ],
+      "test_pattern": {
+        "Quantitative Aptitude": 15,
+        "Logical Reasoning": 15,
+        "Verbal Ability": 20,
+        "Pseudocode": 5,
+        "Puzzle Solving": 5
+      },
+      "focus_areas": [
+        "Basic Programming",
+        "Pseudocode",
+        "Patterns",
+        "Arrays",
+        "Strings"
+      ],
+      "top_problems": [
+        {
+          "title": "Reverse a Number",
+          "difficulty": "Easy",
+          "topic": "Math"
+        },
+        {
+          "title": "Check Anagram",
+          "difficulty": "Easy",
+          "topic": "String, Hash Table"
+        },
+        {
+          "title": "Array Rotation",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Matrix Multiplication",
+          "difficulty": "Medium",
+          "topic": "Matrix"
+        },
+        {
+          "title": "Binary Search",
+          "difficulty": "Easy",
+          "topic": "Binary Search"
+        },
+        {
+          "title": "GCD / LCM",
+          "difficulty": "Easy",
+          "topic": "Math"
+        },
+        {
+          "title": "Star Pattern Problems",
+          "difficulty": "Easy",
+          "topic": "Loops"
+        },
+        {
+          "title": "Linked List Operations",
+          "difficulty": "Medium",
+          "topic": "Linked List"
+        },
+        {
+          "title": "Stack Implementation",
+          "difficulty": "Medium",
+          "topic": "Stack"
+        },
+        {
+          "title": "Queue Implementation",
+          "difficulty": "Medium",
+          "topic": "Queue"
+        }
+      ]
+    },
+    "Walmart": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Salesforce": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Oracle": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Atlassian": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Palantir": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Citadel": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "ByteDance": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "LinkedIn": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "PayPal": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Samsung": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Nvidia": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Cisco": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Intuit": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Snap": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Spotify": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Tesla": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "VMware": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Pinterest": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Airbnb": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "DoorDash": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Lyft": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Dropbox": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Zoho": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Wipro": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Accenture": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Paytm": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "PhonePe": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Swiggy": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Zomato": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "CRED": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Razorpay": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    },
+    "Juspay": {
+      "focus_areas": [
+        "Arrays",
+        "Strings",
+        "Trees",
+        "Graph",
+        "DP"
+      ],
+      "top_problems": [
+        {
+          "title": "Two Sum",
+          "difficulty": "Easy",
+          "topic": "Array"
+        },
+        {
+          "title": "Valid Parentheses",
+          "difficulty": "Easy",
+          "topic": "Stack"
+        },
+        {
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graph"
+        },
+        {
+          "title": "LRU Cache",
+          "difficulty": "Medium",
+          "topic": "Design"
+        },
+        {
+          "title": "Merge Intervals",
+          "difficulty": "Medium",
+          "topic": "Sorting"
+        }
+      ]
+    }
+  }
+}
