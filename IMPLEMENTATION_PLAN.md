@@ -2,11 +2,11 @@
 
 ### From Current State to Production
 
-> **Generated**: March 17, 2026 | **Revised**: March 18, 2026 (v3 — final review
-> fixes)\
+> **Generated**: March 17, 2026 | **Last Updated**: March 22, 2026 (v4 —
+> progress update)\
 > **Owner**: Karthik\
 > **Status**: Living document — updated as we build\
-> **Review Score**: 8.4 → 9.6 → **10/10** (all fixes applied)
+> **LLM Provider**: Open-source only via LiteLLM (Groq `llama-3.3-70b-versatile` / Ollama fallback) — never Anthropic or OpenAI
 
 ---
 
@@ -21,38 +21,51 @@
 | **Phase 3** | 8 LLM agents (GitHub Analyst, DSA Analyst, Resume Parser, Trend Watcher, Company Expert, Gap Finder, Roadmap Builder, Career Coach), Orchestrator, Tool executor (9 tools), WebSocket progress | ✅ Complete |
 | **Phase 4** | Weighted scoring algorithm (7 components), 15 company blueprints seeded, HelixDB skill graph (200+ nodes), Gap analysis + topological sort, Match score computation                            | ✅ Complete |
 
-### 🔶 What's Partially Done (Phase 5)
+### ✅ What's Fully Wired (Phase 5 Complete)
 
-| Page              | Status    | Details                                                                     |
-| ----------------- | --------- | --------------------------------------------------------------------------- |
-| `/dashboard`      | ✅ Wired  | Connected to backend, shows live data                                       |
-| `/profile`        | ✅ Wired  | Edit profile modal, platform usernames, avatar                              |
-| `/settings`       | ✅ Wired  | Theme, export PDF, clear cache, delete account all functional               |
-| `/companies`      | 🔶 Static | UI designed and built but data is **mock/static**, not connected to backend |
-| `/company/[slug]` | 🔶 Static | Company detail page exists but tabs show **hardcoded mock data**            |
-| `/onboarding`     | ✅ Exists | Multi-step wizard, functional                                               |
-| `/` (Landing)     | ✅ Exists | Landing page built                                                          |
+| Page              | Lines | Status    | Details                                                             |
+| ----------------- | ----- | --------- | ------------------------------------------------------------------- |
+| `/dashboard`      | 935   | ✅ Wired  | Connected to backend, shows live data                               |
+| `/profile`        | —     | ✅ Wired  | Edit profile modal, platform usernames, avatar                      |
+| `/settings`       | —     | ✅ Wired  | Theme, export PDF, clear cache, delete account all functional       |
+| `/onboarding`     | —     | ✅ Exists | Multi-step wizard, functional                                       |
+| `/` (Landing)     | —     | ✅ Exists | Landing page built                                                  |
+| `/practice`       | 470   | ✅ Wired  | 1134 problems seeded, filters, pagination, progress toggle          |
+| `/practice/[id]`  | 244   | ✅ Wired  | Problem detail, mark solved, back link (needs data enrichment)      |
+| `/dsa`            | 5     | ✅ Redirect | Redirects to `/practice`                                           |
 
-### 🔲 What Doesn't Exist Yet
+### 🔶 What's Built But Uses Static/Mock Data
 
-| Page            | Current State                  |
+| Page              | Lines | Status    | Details                                                             |
+| ----------------- | ----- | --------- | ------------------------------------------------------------------- |
+| `/companies`      | 381   | 🔶 Static | UI designed but data is mock, not wired to backend                  |
+| `/company/[slug]` | 1627  | 🔶 Static | Company detail page, tabs show hardcoded mock data                  |
+| `/match/[slug]`   | 800   | 🔶 Static | Match report UI built, uses mock data                               |
+| `/roadmap`        | 278   | 🔶 Static | Roadmap list page, uses mock data                                   |
+| `/roadmap/[slug]` | 786   | 🔶 Static | Company-specific roadmap, uses mock data                            |
+
+### 🔲 Placeholder Pages (< 70 lines, scaffold only)
+
+| Page              | Lines | Current State                                                         |
+| ----------------- | ----- | --------------------------------------------------------------------- |
+| `/coach`          | 55    | Static scaffold — hardcoded coach message + chat input (not wired)    |
+| `/simulate`       | 62    | Placeholder — basic slider UI skeleton                                |
+| `/trends`         | 58    | Placeholder — basic layout skeleton                                   |
+| `/skills`         | 48    | Placeholder — empty shell                                             |
+
+### 🔲 Pages Not Yet Created
+
+| Page            | Status                         |
 | --------------- | ------------------------------ |
-| `/roadmap`      | Empty placeholder page         |
-| `/dsa`          | Empty placeholder page         |
-| `/coach`        | Empty placeholder page         |
-| `/skills`       | No page exists                 |
-| `/trends`       | No page exists                 |
-| `/simulate`     | No page exists                 |
-| `/match/[slug]` | No page exists                 |
-| `/practice`     | **NEW** — not in original plan |
-| `/visualizer`   | **NEW** — not in original plan |
-| `/aptitude`     | **NEW** — not in original plan |
-| `/projects`     | **NEW** — not in original plan |
-| `/patterns`     | **NEW** — not in original plan |
-| `/cheatsheets`  | **NEW** — not in original plan |
-| `/resources`    | **NEW** — not in original plan |
+| `/visualizer`   | No page exists                 |
+| `/aptitude`     | No page exists                 |
+| `/projects`     | No page exists                 |
+| `/patterns`     | No page exists                 |
+| `/cheatsheets`  | No page exists                 |
+| `/resources`    | No page exists                 |
+| `/courses`      | No page exists                 |
 
-### Current Database Schema (8 Tables)
+### Current Database Schema (12 Tables)
 
 ```
 users                     → User profiles + platform usernames
@@ -63,9 +76,12 @@ user_target_companies     → Which companies user is targeting (max 5)
 user_skill_gaps           → Identified gaps per user per company
 user_roadmaps             → Generated week-by-week roadmap data
 analysis_results          → Full 8-agent analysis output storage
+user_dsa_progress         → DSA tracker progress per user
+external_problems          → 1134 seeded problems (NeetCode/Striver/CSES/Blind75)
+user_problem_progress     → Per-user problem solving status + timestamps
 ```
 
-### Current Backend Routers (9)
+### Current Backend Routers (12)
 
 ```
 auth.py          → GitHub OAuth login/callback
@@ -75,9 +91,29 @@ companies.py     → GET company blueprints list + detail
 scores.py        → POST compute match scores, GET scores
 analysis.py      → POST trigger analysis, GET status, WebSocket
 sync.py          → POST sync GitHub/LC/CC/HR
+practice.py      → Problem listing, filtering, progress tracking (6 endpoints) ✅ NEW
+dsa.py           → DSA tracker endpoints ✅ NEW
 roadmap.py       → Placeholder (empty)
 trends.py        → Placeholder (empty)
 ```
+
+### Current Agents (8 — all use LiteLLM with Groq)
+
+```
+github_analyst.py    → Agent 1: GitHub profile scoring (temp 0.2)
+dsa_analyst.py       → Agent 2: LeetCode/DSA analysis (temp 0.1)
+resume_parser.py     → Agent 3: Resume extraction (temp 0.0)
+trend_watcher.py     → Agent 4: Market trend intelligence
+company_expert.py    → Agent 5: Company blueprints
+gap_finder.py        → Agent 6: Skill gap analysis (HelixDB)
+roadmap_builder.py   → Agent 7: Week-by-week roadmap generation
+career_coach.py      → Agent 8: AI Career Coach (temp 0.8)
+orchestrator.py      → Master controller — runs all agents
+```
+
+> **LLM Provider**: All agents use `agents/core/litellm_client.py` singleton.
+> Default: `groq/llama-3.3-70b-versatile`. Fallback: `ollama/qwen2.5-coder:32b`.
+> Model read from `LLM_MODEL` env var. **Never Anthropic or OpenAI.**
 
 ### Current Sidebar Navigation
 
@@ -725,52 +761,56 @@ Step 6: Iterate until approved
 > we add learning features. "Nice-to-have" features (Visualizer, Patterns,
 > Cheatsheets) move to later sprints.
 
-### Sprint 1: Fix Companies + Match Report + Roadmap (1 week)
+### Sprint 1: Fix Companies + Match Report + Roadmap (1 week) — 🔶 IN PROGRESS
 
 **Goal**: Complete the core user journey end-to-end
 
-| Task                                                            | Type               | Files                                        |
-| --------------------------------------------------------------- | ------------------ | -------------------------------------------- |
-| Wire `/companies` to backend `company_blueprints` data          | Frontend           | `companies/page.tsx`                         |
-| Wire `/company/[slug]` tabs to JSONB fields                     | Frontend           | `company/[slug]/page.tsx`                    |
-| **Build `/match/[slug]`** — the core match score breakdown page | Frontend + Backend | `match/[slug]/page.tsx`, `routers/scores.py` |
-| Add `GET /api/scores/{slug}/history` endpoint                   | Backend            | `routers/scores.py`                          |
-| Add `GET /api/skills/gaps?company={slug}` endpoint              | Backend            | `routers/scores.py`                          |
-| Build `/roadmap` with `user_roadmaps` data                      | Frontend           | `roadmap/page.tsx`                           |
-| Build `/roadmap/[slug]` for company-specific roadmap            | Frontend           | `roadmap/[slug]/page.tsx`                    |
+| Task                                                            | Type               | Files                                        | Status |
+| --------------------------------------------------------------- | ------------------ | -------------------------------------------- | ------ |
+| Wire `/companies` to backend `company_blueprints` data          | Frontend           | `companies/page.tsx`                         | 🔶 UI built, not wired |
+| Wire `/company/[slug]` tabs to JSONB fields                     | Frontend           | `company/[slug]/page.tsx`                    | 🔶 UI built (1627 lines), mock data |
+| **Build `/match/[slug]`** — the core match score breakdown page | Frontend + Backend | `match/[slug]/page.tsx`, `routers/scores.py` | 🔶 UI built (800 lines), mock data |
+| Add `GET /api/scores/{slug}/history` endpoint                   | Backend            | `routers/scores.py`                          | ❌ |
+| Add `GET /api/skills/gaps?company={slug}` endpoint              | Backend            | `routers/scores.py`                          | ❌ |
+| Build `/roadmap` with `user_roadmaps` data                      | Frontend           | `roadmap/page.tsx`                           | 🔶 UI built (278 lines), mock data |
+| Build `/roadmap/[slug]` for company-specific roadmap            | Frontend           | `roadmap/[slug]/page.tsx`                    | 🔶 UI built (786 lines), mock data |
 
-> **Why `/match/[slug]` is Sprint 1**: Every company score bar in the dashboard,
-> every company card — they all point here. Without this page, the entire app
-> has a broken primary CTA.
+> **Sprint 1 status**: All frontend pages are BUILT with full UI but use
+> mock/static data. Backend wiring (API endpoints + data fetching) is the
+> remaining work. The core user journey UI exists end-to-end.
 
 ---
 
-### Sprint 2: Problem Database + DSA Practice (1.5 weeks)
+### Sprint 2: Problem Database + DSA Practice (1.5 weeks) — ✅ COMPLETE
 
 **Goal**: Import ~750-800 unique problems and build the practice page
 
-| Task                                                             | Type     | Files                                                     |
-| ---------------------------------------------------------------- | -------- | --------------------------------------------------------- |
-| Alembic migration: `external_problems` + `user_problem_progress` | DB       | `migrations/`                                             |
-| CSES importer (HuggingFace JSON)                                 | Backend  | `scrapers/cses_importer.py`                               |
-| NeetCode importer (GitHub repos)                                 | Backend  | `scrapers/neetcode_importer.py`                           |
-| Striver's importer (GitHub repos)                                | Backend  | `scrapers/striver_importer.py`                            |
-| **Deduplication logic** in seed script                           | Backend  | `scripts/seed_problems.py`                                |
-| Problems router: list, filter, progress                          | Backend  | `routers/practice.py`                                     |
-| Problems repository + service                                    | Backend  | `repositories/problems.py`, `services/problem_service.py` |
-| Build `/practice` page                                           | Frontend | `practice/page.tsx`                                       |
-| Build problem detail with "Solve ↗" redirect                     | Frontend | `practice/[id]/page.tsx`                                  |
+| Task                                                             | Type     | Files                                                     | Status |
+| ---------------------------------------------------------------- | -------- | --------------------------------------------------------- | ------ |
+| DB tables: `external_problems` + `user_problem_progress`         | DB       | Raw SQL (tables created directly)                         | ✅     |
+| All importers: CSES + NeetCode + Striver + Blind 75 combined     | Backend  | `scripts/seed_problems.py` (single unified script)        | ✅     |
+| **Deduplication logic** (ON CONFLICT on title)                   | Backend  | `scripts/seed_problems.py`                                | ✅     |
+| Problems router: list, filter, progress (6 endpoints)            | Backend  | `routers/practice.py` (209 lines)                         | ✅     |
+| Problems repository                                              | Backend  | `repositories/problems.py` (177 lines)                    | ✅     |
+| Build `/practice` page (filters, pagination, status toggle)      | Frontend | `practice/page.tsx` (470 lines)                           | ✅     |
+| Build `/practice/[id]` (detail, mark solved, back link)          | Frontend | `practice/[id]/page.tsx` (244 lines)                      | ✅     |
+| React Query hooks (6 hooks)                                      | Frontend | `lib/api.ts`                                              | ✅     |
+| DB seeded: **1134 unique problems** (exceeded 800 target)        | Data     | 5 sources deduped via SQLAlchemy ORM                      | ✅     |
+| `/dsa` → `/practice` redirect + sidebar updated                  | Frontend | `dsa/page.tsx`, `Sidebar.tsx`                             | ✅     |
 
-> **Problem count reality check**:
+> **Actual seeded count**: 1134 unique problems (more than 800 target due to
+> better deduplication logic). Sources: NeetCode 150, NeetCode All, Blind 75,
+> Striver A2Z, CSES.
 >
-> - CSES: ~300 unique problems
-> - NeetCode 150: 150 (all map to LeetCode)
-> - NeetCode 250: 250 (superset of 150)
-> - Blind 75: 75 (subset of NeetCode 150)
-> - Striver's A2Z: 455 (significant overlap with NeetCode on LC problems)
-> - After deduplication: **~750-800 unique problems**
-> - One problem tagged with ALL study plans it belongs to via
->   `study_plans TEXT[]`
+> **Remaining practice page gaps** (to be addressed in Sprint 2.5 or later):
+> - Problem descriptions/hints are all NULL (need enrichment script)
+> - Company tags not populated (need cross-reference with `company_wise_problems.json`)
+> - Pattern filter exists in backend params but not surfaced in frontend
+> - No solved status filter, no sorting by column
+> - `services/problem_service.py` not created (logic lives in repository)
+> - `POST /api/practice/explain/{id}` not built (needs Agent 9 + LiteLLM/Groq)
+> - Multi-language solution code tabs not implemented
+> - Streak/stagnation analytics not computed
 
 ---
 
@@ -901,28 +941,28 @@ DB needed — purely computational.
 
 ### What MintKey Becomes — Ordered by Sprint
 
-| Feature                                    | Sprint      | Source                                              |
-| ------------------------------------------ | ----------- | --------------------------------------------------- |
-| 📊 **Dashboard**                           | ✅ Done     | GitHub + LC + CC + HR sync                          |
-| 🏢 **Company Explorer**                    | 🔧 Sprint 1 | 15 company blueprints                               |
-| 🎯 **Match Score Report**                  | 🔧 Sprint 1 | Score breakdown + gap analysis                      |
-| 🗺️ **Personalized Roadmaps**               | 🔧 Sprint 1 | Agent 7 output                                      |
-| 📝 **DSA Practice** (~800 unique problems) | 🔨 Sprint 2 | CSES + NeetCode + Striver's (deduplicated)          |
-| 💬 **AI Coach**                            | 🔨 Sprint 3 | Agent 8 with full user context                      |
-| 📝 **Aptitude Engine**                     | 🔨 Sprint 4 | Pre-generated question bank (zero runtime LLM cost) |
-| 📚 **Course Catalog**                      | 🔨 Sprint 5 | FreeCodeCamp + Odin Project                         |
-| 📖 **Resource Hub**                        | 🔨 Sprint 5 | All 16 platforms                                    |
-| 🕸️ **Skill Graph**                         | 🔨 Sprint 6 | HelixDB + D3.js force graph                         |
-| 📈 **Market Trends**                       | 🔨 Sprint 6 | Agent 4 (Trend Watcher)                             |
-| 🎯 **Career Simulator**                    | 🔨 Sprint 6 | Custom                                              |
-| 🎬 **Algorithm Visualizer**                | 🔨 Sprint 7 | Custom D3.js (10 core first)                        |
-| 🧩 **DSA Patterns**                        | 🔨 Sprint 7 | RisingBrain + LLM                                   |
-| 🚀 **Project Challenges**                  | 🔨 Sprint 8 | CodingChallenges.fyi + Coders Section               |
-| 📋 **Cheat Sheets**                        | 🔨 Sprint 8 | Coders Section + LLM-generated                      |
-| 🤖 **AI Explanations**                     | 🔨 Sprint 8 | LLM Agent 9                                         |
-| 👤 **Profile**                             | ✅ Done     | —                                                   |
-| ⚙️ **Settings**                            | ✅ Done     | —                                                   |
-| 🔐 **Auth + Onboarding**                   | ✅ Done     | GitHub OAuth                                        |
+| Feature                                    | Sprint      | Source                                              | Status |
+| ------------------------------------------ | ----------- | --------------------------------------------------- | ------ |
+| 📊 **Dashboard**                           | ✅ Done     | GitHub + LC + CC + HR sync                          | ✅ Wired |
+| 🏢 **Company Explorer**                    | 🔧 Sprint 1 | 15 company blueprints                               | 🔶 UI built, mock data |
+| 🎯 **Match Score Report**                  | 🔧 Sprint 1 | Score breakdown + gap analysis                      | 🔶 UI built, mock data |
+| 🗺️ **Personalized Roadmaps**               | 🔧 Sprint 1 | Agent 7 output                                      | 🔶 UI built, mock data |
+| 📝 **DSA Practice** (~1134 unique problems) | 🔨 Sprint 2 | CSES + NeetCode + Striver's (deduplicated)          | ✅ Built + Seeded |
+| 💬 **AI Coach**                            | 🔨 Sprint 3 | Agent 8 with full user context (LiteLLM/Groq)       | 🔲 Placeholder |
+| 📝 **Aptitude Engine**                     | 🔨 Sprint 4 | Pre-generated question bank (zero runtime LLM cost) | 🔲 Not started |
+| 📚 **Course Catalog**                      | 🔨 Sprint 5 | FreeCodeCamp + Odin Project                         | 🔲 Not started |
+| 📖 **Resource Hub**                        | 🔨 Sprint 5 | All 16 platforms                                    | 🔲 Not started |
+| 🕸️ **Skill Graph**                         | 🔨 Sprint 6 | HelixDB + D3.js force graph                         | 🔲 Placeholder |
+| 📈 **Market Trends**                       | 🔨 Sprint 6 | Agent 4 (via LiteLLM/Groq)                          | 🔲 Placeholder |
+| 🎯 **Career Simulator**                    | 🔨 Sprint 6 | Custom                                              | 🔲 Placeholder |
+| 🎬 **Algorithm Visualizer**                | 🔨 Sprint 7 | Custom D3.js (10 core first)                        | 🔲 Not started |
+| 🧩 **DSA Patterns**                        | 🔨 Sprint 7 | RisingBrain + LLM (Groq)                            | 🔲 Not started |
+| 🚀 **Project Challenges**                  | 🔨 Sprint 8 | CodingChallenges.fyi + Coders Section               | 🔲 Not started |
+| 📋 **Cheat Sheets**                        | 🔨 Sprint 8 | Coders Section + LLM-generated (Groq)               | 🔲 Not started |
+| 🤖 **AI Explanations**                     | 🔨 Sprint 8 | Agent 9 via LiteLLM/Groq                            | 🔲 Not started |
+| 👤 **Profile**                             | ✅ Done     | —                                                   | ✅ Wired |
+| ⚙️ **Settings**                            | ✅ Done     | —                                                   | ✅ Wired |
+| 🔐 **Auth + Onboarding**                   | ✅ Done     | GitHub OAuth                                        | ✅ Wired |
 
 ### Redirect Destinations
 
