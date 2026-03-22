@@ -115,19 +115,71 @@ orchestrator.py      → Master controller — runs all agents
 > Default: `groq/llama-3.3-70b-versatile`. Fallback: `ollama/qwen2.5-coder:32b`.
 > Model read from `LLM_MODEL` env var. **Never Anthropic or OpenAI.**
 
-### Current Sidebar Navigation
+### Current Sidebar Navigation (actual code)
 
 ```
 PLATFORM:
-  Dashboard, Companies, My Roadmap, DSA Tracker, Skill Graph
+  Dashboard         → ✅ Wired
+  Companies         → 🔶 UI built, mock data
+  My Roadmap        → 🔶 UI built, mock data
+  DSA Practice      → ✅ Wired (1134 problems)
+  Skill Graph       → 🔲 Placeholder (48 lines)
 
 INTELLIGENCE:
-  Market Trends, Career Simulator, AI Coach [BETA]
+  Market Trends     → 🔲 Placeholder (58 lines)
+  Career Simulator  → 🔲 Placeholder (62 lines)
+  AI Coach [BETA]   → 🔲 Placeholder (55 lines)
 
 BOTTOM:
-  Profile & Integrations, Settings
-  [Sync Now button]
+  Profile           → ✅ Wired
+  Settings          → ✅ Wired
 ```
+
+### Frontend Page Ownership
+
+| Page | Lines | Designed By | Status | Notes |
+|------|-------|-------------|--------|-------|
+| `/` (Landing) | ✅ | Karthik | ✅ Done | — |
+| `(auth)/login` | ✅ | Karthik | ✅ Done | — |
+| `/onboarding` | ✅ | Karthik | ✅ Done | — |
+| `/dashboard` | 935 | Karthik | ✅ Wired | — |
+| `/companies` | 381 | Karthik | 🔶 Mock | Sprint 1 wiring |
+| `/company/[slug]` | 1627 | Karthik | 🔶 Mock | Sprint 1 wiring |
+| `/match/[slug]` | 800 | Karthik | 🔶 Mock | ⚠️ Needs redesign to match updated spec |
+| `/roadmap/[slug]` | 786 | Karthik | 🔶 Mock | ⚠️ Needs redesign to match updated spec |
+| `/practice` | 470 | Karthik | ✅ Wired | ⚠️ Needs redesign to match updated spec |
+| `/profile` | ✅ | Karthik | ✅ Wired | — |
+| `/settings` | ✅ | Karthik | ✅ Wired | — |
+| `/roadmap` | 278 | Agent | 🔶 Mock | List page, needs design |
+| `/practice/[id]` | 244 | Agent | ✅ Wired | Needs enriched data |
+| `/coach` | 55 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
+| `/simulate` | 62 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
+| `/trends` | 58 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
+| `/skills` | 48 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
+| `/dsa` | 5 | Agent | ✅ Redirect | Redirects to /practice |
+
+> **3 pages need redesign**: `/match/[slug]`, `/roadmap/[slug]`, `/practice`
+> — Karthik to generate updated UX Pilot mockups before agent rebuilds them.
+
+### Strategic Decisions (from cross-check against all 3 spec docs)
+
+| Product Spec Feature | Decision | Rationale |
+|---------------------|----------|----------|
+| Module 10: Smart Recommendations | **Fold into AI Coach** | Coach page will surface stack pivots, company suggestions, timing alerts. No separate page. |
+| Module 8.3: Smart Notifications | **Defer to v2** | Coach "first load" message replaces push notifications for now. |
+| Module 3.2: Project Maturity Score | **Surface on Dashboard** | Agent 1 already computes it — add one stat card to dashboard. |
+| Module 9: Full Career Trajectory | **Keep as simple what-if** | Students need placement first. 5-year arc simulation is overkill for MVP. |
+| Module 3.3: Burnout Detection | **Simple activity alert** | "Activity dropped 60% this week" in stats is enough. No ML model. |
+| Module 3.3: Night Owl pattern | **Cut** | Gimmick — nobody changes study time because an app says so. |
+| `jobs_spider.py` Scrapy scraper | **Cut** | LinkedIn/Indeed block scrapers. Use curated `skill_taxonomy.json` data instead. |
+| 3 PG tables (skills, skill_deps, user_skills) | **Cut** | HelixDB handles this. No PostgreSQL fallback — fail gracefully instead. |
+| Peer Benchmarking | **Defer to v2** | Needs thousands of users to be meaningful. |
+| Algorithm Visualizer (28 algos) | **Reduce to 5 core** | Nice-to-have, not a differentiator. NeetCode videos do this better. |
+
+> **LLM Provider Note**: The `DevPath_AI_MultiAgent_Architecture.docx` uses
+> Anthropic/Claude API throughout — this is for reference architecture only.
+> All agents in our codebase use **LiteLLM with Groq** (`llama-3.3-70b-versatile`).
+> The agentic loop pattern is identical — only the API client differs.
 
 ---
 
@@ -149,35 +201,40 @@ BOTTOM:
 | **Patterns library**   | None planned           | DSA patterns reference (from RisingBrain)             |
 | **Cheat sheets**       | None planned           | Built-in quick reference cards                        |
 
-### Sidebar Navigation — Updated
+### Sidebar Navigation — Updated (future target)
 
 ```
-PLATFORM (existing):
+PLATFORM:
   Dashboard           → ✅ Done
-  Companies           → 🔧 Needs backend wiring
-  My Roadmap           → 🔧 Needs full build
+  Companies           → 🔧 Needs backend wiring (Sprint 1)
+  My Roadmap          → 🔧 Needs backend wiring + redesign (Sprint 1)
 
-LEARN (NEW section):
-  DSA Practice         → 🔨 Problems from CSES + NeetCode/Striver lists
-  Visualizer           → 🔨 Algorithm animations (AlgoMaster-style)
-  Patterns             → 🔨 DSA patterns library (Two Pointers, etc.)
-  Courses              → 🔨 FCC + TOP course catalog → redirect
-  Projects             → 🔨 Build-your-own challenges
+LEARN:
+  DSA Practice        → ✅ Wired — needs redesign + enrichment
+  Aptitude            → 🔨 NEW (Sprint 4)
+  Courses             → 🔨 NEW (Sprint 5)
+  Projects            → 🔨 NEW (Sprint 8)
+  [Visualizer]        → 🔨 NEW (Sprint 7) — reduced to 5 core algos
+  [Patterns]          → 🔨 NEW (Sprint 7)
 
-PREPARE (renamed from Intelligence):
-  Aptitude             → 🔨 LLM quiz engine (replaces IndiaBix)
-  Skill Graph          → 🔨 D3.js force graph from HelixDB
-  AI Coach [BETA]      → 🔧 Needs full build
+PREPARE:
+  Skill Graph         → 🔨 Placeholder → build (Sprint 6)
+  AI Coach [BETA]     → 🔨 Placeholder → build (Sprint 3)
+                        (folds in Module 10 recommendations)
 
 BOTTOM:
-  Resources            → 🔨 Curated links to all 16 platforms
-  Profile              → ✅ Done
-  Settings             → ✅ Done
+  Resources           → 🔨 NEW (Sprint 5)
+  [Cheatsheets]       → 🔨 NEW (Sprint 8)
+  Profile             → ✅ Done
+  Settings            → ✅ Done
 ```
 
+> **Removed from sidebar**: Market Trends (data from Coach instead),
+> Career Simulator (deprioritized, accessible via direct URL).
+> **Total sidebar items**: 14 (currently 10, adding 4 as built).
+>
 > **Note**: The old `/dsa` (DSA Tracker) route is **replaced** by `/practice`
-> (DSA Practice). `/dsa` will redirect to `/practice`. Similarly, the old
-> `Career Simulator` sidebar item now lives at `/simulate`.
+> (DSA Practice). `/dsa` redirects to `/practice`.
 
 ---
 
