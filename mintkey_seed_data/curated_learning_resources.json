@@ -1,0 +1,802 @@
+{
+  "metadata": {
+    "description": "Curated learning resources organized by topic for DevPath AI platform",
+    "generated": "2026-03-24",
+    "usage": "Seed data for /resources, /courses, /practice, /patterns pages",
+    "note": "URLs are organized by DSA topic. Each topic has problems (for /practice), tutorials (for /resources), and playlists (for /courses).",
+    "total_urls": 601
+  },
+  "reference_sheets": [
+    {
+      "url": "https://docs.google.com/spreadsheets/d/1spv5ZP7x1cZcFZXz2Fo_DAaM5jnlJDxWSziZ5ctUb2A/edit#gid=0",
+      "type": "spreadsheet"
+    },
+    {
+      "url": "https://docs.google.com/spreadsheets/d/1spv5ZP7x1cZcFZXz2Fo_DAaM5jnlJDxWSziZ5ctUb2A/edit#gid=1079816901",
+      "type": "spreadsheet"
+    }
+  ],
+  "aptitude_and_puzzles": [
+    {
+      "url": "https://www.codingninjas.com/codestudio/guided-paths/top-150-interview-puzzles",
+      "source": "CodingNinjas",
+      "type": "course"
+    },
+    {
+      "url": "https://www.codingninjas.com/codestudio/guided-paths/aptitude-preparation",
+      "source": "CodingNinjas",
+      "type": "course"
+    }
+  ],
+  "cs_fundamentals": {
+    "operating_systems": [
+      {
+        "url": "https://www.scaler.com/topics/operating-system/",
+        "source": "Scaler"
+      }
+    ],
+    "dbms": [
+      {
+        "url": "https://www.scaler.com/topics/dbms/",
+        "source": "Scaler"
+      }
+    ],
+    "computer_networks": [
+      {
+        "url": "https://www.scaler.com/topics/computer-network/",
+        "source": "Scaler"
+      }
+    ],
+    "sql": [
+      {
+        "url": "https://www.scaler.com/topics/sql/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://leetcode.com/problemset/database/",
+        "source": "LeetCode"
+      }
+    ]
+  },
+  "languages": {
+    "java": [
+      {
+        "url": "https://www.scaler.com/topics/java/",
+        "source": "Scaler",
+        "type": "tutorial"
+      },
+      {
+        "url": "https://www.hackerrank.com/contests/module-1-java-dsa-class-challenges/challenges",
+        "source": "HackerRank"
+      },
+      {
+        "url": "https://codingbat.com/java",
+        "source": "CodingBat"
+      }
+    ],
+    "cpp_stl": [
+      {
+        "url": "https://www.scaler.com/topics/cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/the-c-standard-template-library-stl/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.scaler.com/topics/cpp/templates-in-cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.scaler.com/topics/cpp/generic-programming-in-cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/iterators-c-stl/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/c-magicians-stl-algorithms/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/sorting-a-vector-in-c/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.scaler.com/topics/cpp/pair-in-cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/tuples-in-c/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.programiz.com/cpp-programming/stl-containers",
+        "source": "Programiz"
+      },
+      {
+        "url": "https://www.scaler.com/topics/cpp/strings-in-cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/tokenizing-a-string-cpp/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.scaler.com/topics/unordered_map-cpp/",
+        "source": "Scaler"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/how-to-create-an-unordered_map-of-user-defined-class-in-cpp/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.programiz.com/cpp-programming/functors",
+        "source": "Programiz"
+      },
+      {
+        "url": "https://www.programiz.com/cpp-programming/priority-queue",
+        "source": "Programiz"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/stl-priority-queue-for-structure-or-class/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/difference-between-set-multiset-unordered_set-unordered_multiset-in-cpp/",
+        "source": "GFG"
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/c-bitset-and-its-application/",
+        "source": "GFG"
+      }
+    ]
+  },
+  "video_playlists": [
+    {
+      "url": "https://www.youtube.com/playlist?list=PLDzeHZWIZsTr3nwuTegHLa2qlI81QweYG",
+      "source": "YouTube"
+    },
+    {
+      "url": "https://www.youtube.com/playlist?list=PLDzeHZWIZsTpukecmA2p5rhHM14bl2dHU",
+      "source": "YouTube"
+    },
+    {
+      "url": "https://www.youtube.com/playlist?list=PLxCzCOWd7aiGFBD2-2joCpWOLUrDLvVV_",
+      "source": "YouTube"
+    },
+    {
+      "url": "https://www.youtube.com/playlist?list=PLTAWODwDBzMzMuMW-NrA5-icKFZYqNC8S",
+      "source": "YouTube"
+    }
+  ],
+  "dsa_topics": {
+    "java_basics": [
+      "https://practice.geeksforgeeks.org/problems/java-hello-world4004/1",
+      "https://practice.geeksforgeeks.org/problems/the-new-line-java/1",
+      "https://practice.geeksforgeeks.org/problems/learn-to-comment-java/1",
+      "https://practice.geeksforgeeks.org/problems/data-types-java/1",
+      "https://practice.geeksforgeeks.org/problems/java-basic-data-types0041/1",
+      "https://practice.geeksforgeeks.org/problems/nextline-and-next/1",
+      "https://practice.geeksforgeeks.org/problems/java-strings-set-15112/1",
+      "https://practice.geeksforgeeks.org/problems/java-if-else-decision-making0924/1",
+      "https://practice.geeksforgeeks.org/problems/vowel-or-not0831/1",
+      "https://practice.geeksforgeeks.org/problems/change-the-string3541/1",
+      "https://practice.geeksforgeeks.org/problems/even-odd/1",
+      "https://practice.geeksforgeeks.org/problems/java-switch-case-statement3529/1",
+      "https://practice.geeksforgeeks.org/problems/java-loops-set-11726/1",
+      "https://www.programiz.com/java-programming/examples/swap-two-numbers"
+    ],
+    "recursion_basics": [
+      "https://practice.geeksforgeeks.org/problems/print-1-to-n-without-using-loops-1587115620/1",
+      "https://practice.geeksforgeeks.org/problems/print-n-to-1-without-loop/1",
+      "https://practice.geeksforgeeks.org/problems/sum-of-first-n-terms5843/1",
+      "https://practice.geeksforgeeks.org/problems/sum-of-ap-series4512/1",
+      "https://practice.geeksforgeeks.org/problems/sum-of-gp2120/1",
+      "https://practice.geeksforgeeks.org/problems/factorial5739/1",
+      "https://leetcode.com/problems/powx-n/description/",
+      "https://practice.geeksforgeeks.org/problems/power-of-2-1587115620/1",
+      "https://leetcode.com/problems/fibonacci-number/description/",
+      "https://leetcode.com/problems/n-th-tribonacci-number/description/"
+    ],
+    "number_manipulation": [
+      "https://www.hackerrank.com/challenges/fizzbuzz/problem",
+      "https://practice.geeksforgeeks.org/problems/count-digits5716/1",
+      "https://leetcode.com/problems/reverse-integer/",
+      "https://leetcode.com/problems/a-number-after-a-double-reversal/",
+      "https://leetcode.com/problems/subtract-the-product-and-sum-of-digits-of-an-integer/",
+      "https://leetcode.com/problems/self-dividing-numbers/",
+      "https://practice.geeksforgeeks.org/problems/armstrong-numbers2727/1",
+      "https://leetcode.com/problems/nim-game/",
+      "https://leetcode.com/problems/divisor-game/",
+      "https://leetcode.com/problems/add-digits/",
+      "https://leetcode.com/problems/bulb-switcher/",
+      "https://leetcode.com/problems/count-of-matches-in-tournament/",
+      "https://leetcode.com/problems/count-odd-numbers-in-an-interval-range/",
+      "https://leetcode.com/problems/water-bottles/",
+      "https://leetcode.com/problems/count-square-sum-triples/",
+      "https://leetcode.com/problems/factorial-trailing-zeroes/",
+      "https://leetcode.com/problems/ugly-number/"
+    ],
+    "pattern_printing": [
+      "https://takeuforward.org/strivers-a2z-dsa-course/must-do-pattern-problems-before-starting-dsa/",
+      "https://practice.geeksforgeeks.org/problems/pattern-printing1347/1",
+      "https://www.codingninjas.com/codestudio/problems/give-me-triangle_893275",
+      "https://www.codingninjas.com/codestudio/problems/diamond-of-stars_893297",
+      "https://www.codingninjas.com/codestudio/problems/number-x_893302",
+      "https://www.codingninjas.com/codestudio/problems_number-pattern_893191",
+      "https://www.codingninjas.com/codestudio/problems/mirror-image-of-triangle_893344"
+    ],
+    "time_complexity": [
+      "https://www.scaler.com/topics/analysis-of-algorithm/",
+      "https://www.scaler.com/topics/data-structures/time-complexity-in-data-structure/",
+      "https://www.scaler.com/topics/data-structures/masters-theorem/",
+      "https://www.scaler.com/topics/data-structures/space-complexity-in-data-structure/",
+      "https://www.interviewbit.com/courses/programming/time-complexity/",
+      "https://takeuforward.org/interviews/tcs-nqt-coding-sheet-tcs-coding-questions/"
+    ],
+    "arrays_and_strings": [
+      "https://www.scaler.com/topics/data-structures/array-data-structure/",
+      "https://www.scaler.com/topics/java/array-in-java/",
+      "https://www.scaler.com/topics/data-structures/string-in-data-structure/",
+      "https://www.scaler.com/topics/java/string-in-java/",
+      "https://www.scaler.com/topics/java/string-pool-in-java/",
+      "https://practice.geeksforgeeks.org/problems/reverse-an-array/0",
+      "https://leetcode.com/problems/rotate-array/",
+      "https://leetcode.com/problems/reverse-string/",
+      "https://leetcode.com/problems/reverse-string-ii/",
+      "https://leetcode.com/problems/reverse-words-in-a-string/",
+      "https://leetcode.com/problems/reverse-words-in-a-string-iii/",
+      "https://leetcode.com/problems/reverse-vowels-of-a-string/",
+      "https://leetcode.com/problems/valid-palindrome/",
+      "https://leetcode.com/problems/palindrome-number/",
+      "https://leetcode.com/problems/valid-palindrome-ii/",
+      "https://leetcode.com/problems/string-to-integer-atoi/",
+      "https://leetcode.com/problems/valid-number/",
+      "https://leetcode.com/problems/excel-sheet-column-title/",
+      "https://leetcode.com/problems/excel-sheet-column-number/",
+      "https://practice.geeksforgeeks.org/problems/search-an-element-in-an-array-1587115621/1",
+      "https://leetcode.com/problems/maximum-product-of-two-elements-in-an-array/",
+      "https://leetcode.com/problems/valid-mountain-array/",
+      "https://leetcode.com/problems/check-if-array-is-sorted-and-rotated/",
+      "https://leetcode.com/problems/number-of-good-pairs/",
+      "https://leetcode.com/problems/running-sum-of-1d-array/",
+      "https://leetcode.com/problems/find-the-highest-altitude/",
+      "https://practice.geeksforgeeks.org/problems/leaders-in-an-array-1587115620/1",
+      "https://leetcode.com/problems/find-pivot-index/",
+      "https://leetcode.com/problems/product-of-array-except-self/",
+      "https://leetcode.com/problems/range-sum-query-immutable/",
+      "https://leetcode.com/problems/range-sum-query-2d-immutable/",
+      "https://leetcode.com/problems/majority-element/",
+      "https://leetcode.com/problems/majority-element-ii/",
+      "https://leetcode.com/problems/missing-number/",
+      "https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/",
+      "https://leetcode.com/problems/first-missing-positive/",
+      "https://leetcode.com/problems/find-the-duplicate-number/",
+      "https://leetcode.com/problems/set-mismatch/",
+      "https://leetcode.com/problems/is-subsequence/",
+      "https://leetcode.com/problems/valid-anagram/",
+      "https://leetcode.com/problems/find-all-anagrams-in-a-string/",
+      "https://leetcode.com/problems/group-anagrams/",
+      "https://leetcode.com/problems/isomorphic-strings/",
+      "https://leetcode.com/problems/word-pattern/",
+      "https://leetcode.com/problems/first-unique-character-in-a-string/",
+      "https://leetcode.com/problems/string-compression/",
+      "https://leetcode.com/problems/zigzag-conversion/",
+      "https://leetcode.com/problems/maximum-swap/",
+      "https://leetcode.com/problems/sum-of-beauty-of-all-substrings/",
+      "https://leetcode.com/problems/plus-one/",
+      "https://leetcode.com/problems/add-strings/",
+      "https://leetcode.com/problems/multiply-strings/"
+    ],
+    "2d_arrays_matrices": [
+      "https://leetcode.com/problems/convert-1d-array-into-2d-array/",
+      "https://leetcode.com/problems/reshape-the-matrix/",
+      "https://leetcode.com/problems/transpose-matrix/",
+      "https://leetcode.com/problems/rotate-image/",
+      "https://leetcode.com/problems/diagonal-traverse/",
+      "https://leetcode.com/problems/sort-the-matrix-diagonally/",
+      "https://leetcode.com/problems/matrix-diagonal-sum/",
+      "https://leetcode.com/problems/toeplitz-matrix/",
+      "https://leetcode.com/problems/set-matrix-zeroes/",
+      "https://leetcode.com/problems/game-of-life/",
+      "https://leetcode.com/problems/spiral-matrix/",
+      "https://leetcode.com/problems/spiral-matrix-ii/",
+      "https://leetcode.com/problems/spiral-matrix-iii/"
+    ],
+    "recursion_and_backtracking": [
+      "https://www.scaler.com/topics/recursion-in-java/",
+      "https://www.scaler.com/topics/data-structures/backtracking-algorithm/",
+      "https://practice.geeksforgeeks.org/problems/tower-of-hanoi-1587115621/1",
+      "https://leetcode.com/problems/powx-n/",
+      "https://leetcode.com/problems/subsets/",
+      "https://leetcode.com/problems/subsets-ii/",
+      "https://leetcode.com/problems/letter-tile-possibilities/",
+      "https://leetcode.com/problems/matchsticks-to-square/",
+      "https://leetcode.com/problems/beautiful-arrangement/",
+      "https://practice.geeksforgeeks.org/problems/rat-in-a-maze-problem/1",
+      "https://leetcode.com/problems/unique-paths-iii/",
+      "https://leetcode.com/problems/path-with-maximum-gold/",
+      "https://leetcode.com/problems/combinations/",
+      "https://leetcode.com/problems/permutations/",
+      "https://leetcode.com/problems/permutations-ii/",
+      "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
+      "https://leetcode.com/problems/letter-case-permutation/",
+      "https://leetcode.com/problems/n-queens/",
+      "https://leetcode.com/problems/n-queens-ii/",
+      "https://leetcode.com/problems/combination-sum/",
+      "https://leetcode.com/problems/combination-sum-ii/",
+      "https://leetcode.com/problems/combination-sum-iii/",
+      "https://leetcode.com/problems/word-search/",
+      "https://leetcode.com/problems/sudoku-solver/",
+      "https://leetcode.com/problems/generate-parentheses/",
+      "https://leetcode.com/problems/restore-ip-addresses/",
+      "https://leetcode.com/problems/integer-to-roman/",
+      "https://leetcode.com/problems/roman-to-integer/",
+      "https://leetcode.com/problems/expression-add-operators/",
+      "https://leetcode.com/problems/different-ways-to-add-parentheses/"
+    ],
+    "number_theory": [
+      "https://leetcode.com/problems/find-greatest-common-divisor-of-array/",
+      "https://practice.geeksforgeeks.org/problems/lcm-and-gcd4516/1",
+      "https://leetcode.com/problems/x-of-a-kind-in-a-deck-of-cards/",
+      "https://leetcode.com/problems/simplified-fractions/",
+      "https://practice.geeksforgeeks.org/problems/prime-number2314/1",
+      "https://leetcode.com/problems/the-kth-factor-of-n/",
+      "https://leetcode.com/problems/count-primes/",
+      "https://leetcode.com/problems/perfect-number/",
+      "https://leetcode.com/problems/ugly-number-ii/",
+      "https://leetcode.com/problems/super-ugly-number/",
+      "https://leetcode.com/problems/nth-magical-number/",
+      "https://leetcode.com/problems/ugly-number-iii/"
+    ],
+    "sorting": [
+      "https://www.programiz.com/dsa/sorting-algorithm",
+      "https://www.scaler.com/topics/data-structures/sorting-algorithms/",
+      "https://leetcode.com/problems/sort-an-array/",
+      "https://practice.geeksforgeeks.org/problems/bubble-sort/1",
+      "https://practice.geeksforgeeks.org/problems/insertion-sort/1",
+      "https://practice.geeksforgeeks.org/problems/selection-sort/1",
+      "https://leetcode.com/problems/merge-sorted-array/",
+      "https://leetcode.com/problems/intersection-of-two-arrays/",
+      "https://leetcode.com/problems/intersection-of-two-arrays-ii/",
+      "https://leetcode.com/problems/squares-of-a-sorted-array/",
+      "https://leetcode.com/problems/sort-colors/",
+      "https://leetcode.com/problems/move-zeroes/",
+      "https://leetcode.com/problems/sort-array-by-parity/",
+      "https://practice.geeksforgeeks.org/problems/wave-array-1587115621/1",
+      "https://practice.geeksforgeeks.org/problems/merge-sort/1",
+      "https://practice.geeksforgeeks.org/problems/quick-sort/1",
+      "https://leetcode.com/problems/sort-array-by-increasing-frequency/",
+      "https://leetcode.com/problems/sort-characters-by-frequency/",
+      "https://leetcode.com/problems/top-k-frequent-elements/",
+      "https://leetcode.com/problems/top-k-frequent-words/",
+      "https://practice.geeksforgeeks.org/problems/inversion-of-array-1587115620/1",
+      "https://leetcode.com/problems/reverse-pairs/",
+      "https://leetcode.com/problems/count-of-smaller-numbers-after-self/"
+    ],
+    "binary_search": [
+      "https://www.scaler.com/topics/data-structures/binary-search-algorithm/",
+      "https://leetcode.com/problems/binary-search/",
+      "https://leetcode.com/problems/first-bad-version/",
+      "https://leetcode.com/problems/guess-number-higher-or-lower/",
+      "https://leetcode.com/problems/search-insert-position/",
+      "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
+      "https://leetcode.com/problems/find-k-closest-elements/",
+      "https://leetcode.com/problems/sqrtx/",
+      "https://leetcode.com/problems/valid-perfect-square/",
+      "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
+      "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+      "https://leetcode.com/problems/search-in-rotated-sorted-array-ii/",
+      "https://leetcode.com/problems/peak-index-in-a-mountain-array/",
+      "https://leetcode.com/problems/find-peak-element/",
+      "https://leetcode.com/problems/search-a-2d-matrix/",
+      "https://leetcode.com/problems/search-a-2d-matrix-ii/",
+      "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+      "https://leetcode.com/problems/split-array-largest-sum/",
+      "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
+      "https://leetcode.com/problems/koko-eating-bananas/",
+      "https://leetcode.com/problems/find-the-smallest-divisor-given-a-threshold/",
+      "https://leetcode.com/problems/magnetic-force-between-two-balls/",
+      "https://leetcode.com/problems/single-element-in-a-sorted-array/",
+      "https://leetcode.com/problems/kth-missing-positive-number/"
+    ],
+    "linked_lists": [
+      "https://leetcode.com/problems/design-linked-list/",
+      "https://www.scaler.com/topics/data-structures/singly-linked-list/",
+      "https://www.scaler.com/topics/data-structures/doubly-linked-list/",
+      "https://leetcode.com/problems/remove-linked-list-elements/",
+      "https://leetcode.com/problems/remove-duplicates-from-sorted-list/",
+      "https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/",
+      "https://leetcode.com/problems/middle-of-the-linked-list/",
+      "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+      "https://leetcode.com/problems/intersection-of-two-linked-lists/",
+      "https://leetcode.com/problems/linked-list-cycle/",
+      "https://leetcode.com/problems/linked-list-cycle-ii/",
+      "https://leetcode.com/problems/reverse-linked-list/",
+      "https://leetcode.com/problems/reverse-linked-list-ii/",
+      "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+      "https://leetcode.com/problems/swap-nodes-in-pairs/",
+      "https://leetcode.com/problems/palindrome-linked-list/",
+      "https://leetcode.com/problems/merge-two-sorted-lists/",
+      "https://leetcode.com/problems/merge-k-sorted-lists/",
+      "https://leetcode.com/problems/sort-list/",
+      "https://leetcode.com/problems/reorder-list/",
+      "https://leetcode.com/problems/odd-even-linked-list/",
+      "https://leetcode.com/problems/rotate-list/",
+      "https://leetcode.com/problems/copy-list-with-random-pointer/",
+      "https://leetcode.com/problems/add-two-numbers/",
+      "https://leetcode.com/problems/add-two-numbers-ii/",
+      "https://leetcode.com/problems/lru-cache/",
+      "https://leetcode.com/problems/lfu-cache/",
+      "https://leetcode.com/problems/insert-delete-getrandom-o1/"
+    ],
+    "stacks_and_queues": [
+      "https://www.scaler.com/topics/data-structures/stacks-in-data-structure/",
+      "https://www.scaler.com/topics/data-structures/queue-in-data-structure/",
+      "https://leetcode.com/problems/implement-stack-using-queues/",
+      "https://leetcode.com/problems/implement-queue-using-stacks/",
+      "https://leetcode.com/problems/min-stack/",
+      "https://leetcode.com/problems/validate-stack-sequences/",
+      "https://leetcode.com/problems/valid-parentheses/",
+      "https://leetcode.com/problems/valid-parenthesis-string/",
+      "https://leetcode.com/problems/longest-valid-parentheses/",
+      "https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/",
+      "https://leetcode.com/problems/decode-string/",
+      "https://leetcode.com/problems/basic-calculator/",
+      "https://leetcode.com/problems/basic-calculator-ii/",
+      "https://leetcode.com/problems/evaluate-reverse-polish-notation/",
+      "https://practice.geeksforgeeks.org/problems/next-larger-element-1587115620/1",
+      "https://leetcode.com/problems/next-greater-element-ii/",
+      "https://leetcode.com/problems/daily-temperatures/",
+      "https://leetcode.com/problems/online-stock-span/",
+      "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+      "https://leetcode.com/problems/132-pattern/",
+      "https://leetcode.com/problems/sum-of-subarray-minimums/",
+      "https://leetcode.com/problems/maximal-rectangle/",
+      "https://leetcode.com/problems/remove-k-digits/",
+      "https://leetcode.com/problems/asteroid-collision/",
+      "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/",
+      "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/",
+      "https://leetcode.com/problems/number-of-recent-calls/",
+      "https://leetcode.com/problems/design-circular-queue/",
+      "https://leetcode.com/problems/design-circular-deque/",
+      "https://leetcode.com/problems/maximum-frequency-stack/"
+    ],
+    "hashing": [
+      "https://www.scaler.com/topics/data-structures/hashing-in-data-structure/",
+      "https://leetcode.com/problems/design-hashmap/",
+      "https://leetcode.com/problems/design-hashset/",
+      "https://leetcode.com/problems/contains-duplicate/",
+      "https://leetcode.com/problems/contains-duplicate-ii/",
+      "https://leetcode.com/problems/subarray-sum-equals-k/",
+      "https://leetcode.com/problems/contiguous-array/",
+      "https://leetcode.com/problems/longest-consecutive-sequence/",
+      "https://leetcode.com/problems/check-if-array-pairs-are-divisible-by-k/",
+      "https://leetcode.com/problems/fraction-to-recurring-decimal/",
+      "https://leetcode.com/problems/hand-of-straights/",
+      "https://leetcode.com/problems/brick-wall/"
+    ],
+    "heaps_priority_queues": [
+      "https://www.scaler.com/topics/data-structures/heap-data-structure/",
+      "https://www.scaler.com/topics/data-structures/priority-queue-in-data-structure/",
+      "https://practice.geeksforgeeks.org/problems/heap-sort/1",
+      "https://leetcode.com/problems/k-closest-points-to-origin/",
+      "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+      "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
+      "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/",
+      "https://leetcode.com/problems/find-k-pairs-with-smallest-sums/",
+      "https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/",
+      "https://leetcode.com/problems/find-median-from-data-stream/",
+      "https://leetcode.com/problems/sliding-window-median/"
+    ],
+    "two_pointers_sliding_window": [
+      "https://www.geeksforgeeks.org/two-pointers-technique/",
+      "https://www.geeksforgeeks.org/window-sliding-technique/",
+      "https://leetcode.com/problems/two-sum/",
+      "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+      "https://leetcode.com/problems/3sum/",
+      "https://leetcode.com/problems/3sum-closest/",
+      "https://leetcode.com/problems/4sum/",
+      "https://leetcode.com/problems/trapping-rain-water/",
+      "https://leetcode.com/problems/container-with-most-water/",
+      "https://leetcode.com/problems/remove-duplicates-from-sorted-array/",
+      "https://leetcode.com/problems/happy-number/",
+      "https://leetcode.com/problems/shortest-unsorted-continuous-subarray/",
+      "https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/",
+      "https://leetcode.com/problems/sliding-window-maximum/",
+      "https://leetcode.com/problems/permutation-in-string/",
+      "https://leetcode.com/problems/fruit-into-baskets/",
+      "https://leetcode.com/problems/minimum-size-subarray-sum/",
+      "https://leetcode.com/problems/subarray-product-less-than-k/",
+      "https://leetcode.com/problems/max-consecutive-ones-iii/",
+      "https://leetcode.com/problems/minimum-window-substring/",
+      "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+      "https://leetcode.com/problems/longest-repeating-character-replacement/",
+      "https://leetcode.com/problems/subarrays-with-k-different-integers/",
+      "https://leetcode.com/problems/boats-to-save-people/",
+      "https://leetcode.com/problems/valid-triangle-number/"
+    ],
+    "trees_binary_trees": [
+      "https://www.programiz.com/dsa/trees",
+      "https://leetcode.com/problems/binary-tree-preorder-traversal/",
+      "https://leetcode.com/problems/binary-tree-inorder-traversal/",
+      "https://leetcode.com/problems/binary-tree-postorder-traversal/",
+      "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+      "https://leetcode.com/problems/minimum-depth-of-binary-tree/",
+      "https://leetcode.com/problems/balanced-binary-tree/",
+      "https://leetcode.com/problems/diameter-of-binary-tree/",
+      "https://leetcode.com/problems/binary-tree-paths/",
+      "https://leetcode.com/problems/sum-root-to-leaf-numbers/",
+      "https://leetcode.com/problems/flatten-binary-tree-to-linked-list/",
+      "https://leetcode.com/problems/count-good-nodes-in-binary-tree/",
+      "https://leetcode.com/problems/path-sum/",
+      "https://leetcode.com/problems/path-sum-ii/",
+      "https://leetcode.com/problems/path-sum-iii/",
+      "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
+      "https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/",
+      "https://leetcode.com/problems/merge-two-binary-trees/",
+      "https://leetcode.com/problems/same-tree/",
+      "https://leetcode.com/problems/symmetric-tree/",
+      "https://leetcode.com/problems/invert-binary-tree/",
+      "https://leetcode.com/problems/subtree-of-another-tree/",
+      "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+      "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/",
+      "https://leetcode.com/problems/binary-tree-right-side-view/",
+      "https://leetcode.com/problems/maximum-width-of-binary-tree/",
+      "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
+      "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
+      "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/",
+      "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/",
+      "https://leetcode.com/problems/binary-tree-cameras/",
+      "https://leetcode.com/problems/distribute-coins-in-binary-tree/",
+      "https://leetcode.com/problems/house-robber-iii/",
+      "https://leetcode.com/problems/sum-of-distances-in-tree/"
+    ],
+    "binary_search_trees": [
+      "https://www.scaler.com/topics/data-structures/binary-search-tree/",
+      "https://leetcode.com/problems/insert-into-a-binary-search-tree/",
+      "https://leetcode.com/problems/delete-node-in-a-bst/",
+      "https://leetcode.com/problems/search-in-a-binary-search-tree/",
+      "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+      "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
+      "https://leetcode.com/problems/validate-binary-search-tree/",
+      "https://leetcode.com/problems/recover-binary-search-tree/",
+      "https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/",
+      "https://leetcode.com/problems/construct-binary-search-tree-from-preorder-traversal/",
+      "https://leetcode.com/problems/convert-sorted-list-to-binary-search-tree/",
+      "https://leetcode.com/problems/balance-a-binary-search-tree/",
+      "https://leetcode.com/problems/binary-search-tree-iterator/",
+      "https://leetcode.com/problems/serialize-and-deserialize-bst/",
+      "https://leetcode.com/problems/range-sum-of-bst/",
+      "https://leetcode.com/problems/trim-a-binary-search-tree/",
+      "https://leetcode.com/problems/two-sum-iv-input-is-a-bst/",
+      "https://leetcode.com/problems/unique-binary-search-trees/",
+      "https://leetcode.com/problems/unique-binary-search-trees-ii/"
+    ],
+    "dynamic_programming": [
+      "https://www.scaler.com/topics/data-structures/dynamic-programming/",
+      "https://leetcode.com/problems/climbing-stairs/",
+      "https://leetcode.com/problems/min-cost-climbing-stairs/",
+      "https://leetcode.com/problems/jump-game/",
+      "https://leetcode.com/problems/jump-game-ii/",
+      "https://leetcode.com/problems/house-robber/",
+      "https://leetcode.com/problems/house-robber-ii/",
+      "https://leetcode.com/problems/decode-ways/",
+      "https://leetcode.com/problems/coin-change/",
+      "https://leetcode.com/problems/coin-change-2/",
+      "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+      "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
+      "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/",
+      "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/",
+      "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+      "https://leetcode.com/problems/partition-equal-subset-sum/",
+      "https://leetcode.com/problems/target-sum/",
+      "https://leetcode.com/problems/minimum-path-sum/",
+      "https://leetcode.com/problems/triangle/",
+      "https://leetcode.com/problems/unique-paths/",
+      "https://leetcode.com/problems/unique-paths-ii/",
+      "https://leetcode.com/problems/maximal-square/",
+      "https://leetcode.com/problems/longest-increasing-subsequence/",
+      "https://leetcode.com/problems/longest-common-subsequence/",
+      "https://leetcode.com/problems/edit-distance/",
+      "https://leetcode.com/problems/wildcard-matching/",
+      "https://leetcode.com/problems/regular-expression-matching/",
+      "https://leetcode.com/problems/longest-palindromic-subsequence/",
+      "https://leetcode.com/problems/longest-palindromic-substring/",
+      "https://leetcode.com/problems/palindrome-partitioning/",
+      "https://leetcode.com/problems/palindrome-partitioning-ii/",
+      "https://leetcode.com/problems/word-break/",
+      "https://leetcode.com/problems/word-break-ii/",
+      "https://leetcode.com/problems/maximum-subarray/",
+      "https://leetcode.com/problems/maximum-product-subarray/",
+      "https://leetcode.com/problems/russian-doll-envelopes/",
+      "https://leetcode.com/problems/interleaving-string/",
+      "https://leetcode.com/problems/distinct-subsequences/",
+      "https://leetcode.com/problems/shortest-common-supersequence/",
+      "https://leetcode.com/problems/burst-balloons/",
+      "https://leetcode.com/problems/minimum-cost-to-cut-a-stick/",
+      "https://leetcode.com/problems/predict-the-winner/",
+      "https://leetcode.com/problems/super-egg-drop/",
+      "https://leetcode.com/problems/cherry-pickup/",
+      "https://leetcode.com/problems/cherry-pickup-ii/",
+      "https://leetcode.com/problems/knight-probability-in-chessboard/",
+      "https://leetcode.com/problems/dungeon-game/",
+      "https://leetcode.com/problems/maximum-profit-in-job-scheduling/",
+      "https://leetcode.com/problems/minimum-cost-for-tickets/"
+    ],
+    "greedy": [
+      "https://www.programiz.com/dsa/greedy-algorithm",
+      "https://practice.geeksforgeeks.org/problems/job-sequencing-problem-1587115620/1",
+      "https://leetcode.com/problems/merge-intervals/",
+      "https://leetcode.com/problems/insert-interval/",
+      "https://leetcode.com/problems/non-overlapping-intervals/",
+      "https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/",
+      "https://practice.geeksforgeeks.org/problems/minimum-platforms-1587115620/1",
+      "https://leetcode.com/problems/task-scheduler/",
+      "https://leetcode.com/problems/partition-labels/",
+      "https://leetcode.com/problems/gas-station/",
+      "https://leetcode.com/problems/candy/",
+      "https://leetcode.com/problems/next-permutation/",
+      "https://leetcode.com/problems/largest-number/",
+      "https://leetcode.com/problems/assign-cookies/",
+      "https://leetcode.com/problems/lemonade-change/",
+      "https://leetcode.com/problems/car-fleet/",
+      "https://leetcode.com/problems/queue-reconstruction-by-height/",
+      "https://leetcode.com/problems/two-city-scheduling/",
+      "https://leetcode.com/problems/ipo/",
+      "https://leetcode.com/problems/advantage-shuffle/",
+      "https://leetcode.com/problems/reorganize-string/"
+    ],
+    "graphs": [
+      "https://www.scaler.com/topics/data-structures/graph-in-data-structure/",
+      "https://practice.geeksforgeeks.org/problems/depth-first-traversal-for-a-graph/1",
+      "https://practice.geeksforgeeks.org/problems/bfs-traversal-of-graph/1",
+      "https://leetcode.com/problems/find-if-path-exists-in-graph/",
+      "https://leetcode.com/problems/all-paths-from-source-to-target/",
+      "https://leetcode.com/problems/clone-graph/",
+      "https://leetcode.com/problems/pacific-atlantic-water-flow/",
+      "https://leetcode.com/problems/surrounded-regions/",
+      "https://leetcode.com/problems/number-of-provinces/",
+      "https://leetcode.com/problems/number-of-islands/",
+      "https://leetcode.com/problems/max-area-of-island/",
+      "https://leetcode.com/problems/flood-fill/",
+      "https://leetcode.com/problems/rotting-oranges/",
+      "https://leetcode.com/problems/word-ladder/",
+      "https://leetcode.com/problems/01-matrix/",
+      "https://leetcode.com/problems/shortest-path-in-binary-matrix/",
+      "https://leetcode.com/problems/shortest-bridge/",
+      "https://leetcode.com/problems/course-schedule/",
+      "https://leetcode.com/problems/course-schedule-ii/",
+      "https://practice.geeksforgeeks.org/problems/topological-sort/1",
+      "https://leetcode.com/problems/is-graph-bipartite/",
+      "https://leetcode.com/problems/possible-bipartition/",
+      "https://practice.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1",
+      "https://practice.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1",
+      "https://leetcode.com/problems/network-delay-time/",
+      "https://leetcode.com/problems/path-with-minimum-effort/",
+      "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+      "https://leetcode.com/problems/longest-increasing-path-in-a-matrix/",
+      "https://leetcode.com/problems/snakes-and-ladders/",
+      "https://leetcode.com/problems/swim-in-rising-water/",
+      "https://leetcode.com/problems/making-a-large-island/",
+      "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+      "https://leetcode.com/problems/critical-connections-in-a-network/",
+      "https://leetcode.com/problems/redundant-connection/",
+      "https://leetcode.com/problems/accounts-merge/",
+      "https://leetcode.com/problems/evaluate-division/",
+      "https://leetcode.com/problems/reconstruct-itinerary/"
+    ],
+    "tries": [
+      "https://www.scaler.com/topics/data-structures/trie-data-structure/",
+      "https://leetcode.com/problems/implement-trie-prefix-tree/",
+      "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
+      "https://leetcode.com/problems/map-sum-pairs/",
+      "https://leetcode.com/problems/longest-common-prefix/",
+      "https://leetcode.com/problems/longest-word-in-dictionary/",
+      "https://leetcode.com/problems/search-suggestions-system/",
+      "https://leetcode.com/problems/word-search-ii/",
+      "https://leetcode.com/problems/replace-words/",
+      "https://leetcode.com/problems/palindrome-pairs/",
+      "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/"
+    ],
+    "bit_manipulation": [
+      "https://www.scaler.com/topics/data-structures/bit-masking/",
+      "https://leetcode.com/problems/number-complement/",
+      "https://leetcode.com/problems/number-of-1-bits/",
+      "https://leetcode.com/problems/counting-bits/",
+      "https://leetcode.com/problems/hamming-distance/",
+      "https://leetcode.com/problems/reverse-bits/",
+      "https://leetcode.com/problems/power-of-two/",
+      "https://leetcode.com/problems/power-of-three/",
+      "https://leetcode.com/problems/power-of-four/",
+      "https://leetcode.com/problems/gray-code/",
+      "https://leetcode.com/problems/single-number/",
+      "https://leetcode.com/problems/single-number-ii/",
+      "https://leetcode.com/problems/single-number-iii/",
+      "https://leetcode.com/problems/bitwise-and-of-numbers-range/",
+      "https://leetcode.com/problems/divide-two-integers/",
+      "https://leetcode.com/problems/sum-of-two-integers/",
+      "https://leetcode.com/problems/utf-8-validation/"
+    ],
+    "geometry": [
+      "https://cp-algorithms.com/geometry/basic-geometry.html",
+      "https://leetcode.com/problems/rectangle-overlap/",
+      "https://leetcode.com/problems/largest-perimeter-triangle/",
+      "https://leetcode.com/problems/check-if-it-is-a-straight-line/",
+      "https://leetcode.com/problems/valid-square/",
+      "https://leetcode.com/problems/rectangle-area/",
+      "https://leetcode.com/problems/max-points-on-a-line/",
+      "https://leetcode.com/problems/erect-the-fence/"
+    ],
+    "string_algorithms": [
+      "https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
+      "https://leetcode.com/problems/longest-happy-prefix/",
+      "https://leetcode.com/problems/repeated-substring-pattern/",
+      "https://leetcode.com/problems/repeated-string-match/",
+      "https://leetcode.com/problems/shortest-palindrome/",
+      "https://leetcode.com/problems/repeated-dna-sequences/",
+      "https://www.scaler.com/topics/data-structures/kmp-algorithm/",
+      "https://www.scaler.com/topics/data-structures/z-algorithm/",
+      "https://www.scaler.com/topics/data-structures/suffix-tree/",
+      "https://cp-algorithms.com/string/string-hashing.html"
+    ],
+    "advanced_data_structures": [
+      "https://cp-algorithms.com/data_structures/segment_tree.html",
+      "https://www.scaler.com/topics/data-structures/segment-trees-in-data-structure/",
+      "https://cp-algorithms.com/data_structures/fenwick.html",
+      "https://www.scaler.com/topics/data-structures/fenwick-tree/",
+      "https://cp-algorithms.com/data_structures/sparse-table.html",
+      "https://cp-algorithms.com/data_structures/sqrt_decomposition.html",
+      "https://leetcode.com/problems/range-sum-query-mutable/",
+      "https://www.programiz.com/dsa/avl-tree",
+      "https://www.programiz.com/dsa/b-tree",
+      "https://www.programiz.com/dsa/red-black-tree"
+    ],
+    "game_theory": [
+      "https://www.topcoder.com/thrive/articles/Algorithm%20Games",
+      "https://www.geeksforgeeks.org/game-theory/",
+      "https://cp-algorithms.com/game_theory/sprague-grundy-nim.html",
+      "https://leetcode.com/problems/stone-game-vi/",
+      "https://leetcode.com/problems/maximum-number-of-coins-you-can-get/",
+      "https://leetcode.com/problems/remove-colored-pieces-if-both-neighbors-are-the-same-color/"
+    ],
+    "competitive_programming": [
+      "https://cses.fi/book/book.pdf",
+      "https://cses.fi/problemset/list/",
+      "https://cp-algorithms.com/",
+      "http://oeis.org/",
+      "https://www.scaler.com/topics/data-structures/combinatorics/"
+    ],
+    "system_design": [
+      "https://github.com/donnemartin/system-design-primer",
+      "https://www.geeksforgeeks.org/system-design-tutorial/",
+      "https://www.codingninjas.com/codestudio/guided-paths/system-design",
+      "https://workat.tech/system-design",
+      "https://www.interviewbit.com/problems/design-cache/",
+      "https://www.interviewbit.com/problems/sharding-a-database/",
+      "https://www.interviewbit.com/problems/design-url-shortener/",
+      "https://www.interviewbit.com/problems/design-search-typeahead/",
+      "https://www.interviewbit.com/problems/design-messenger/",
+      "https://www.interviewbit.com/problems/design-twitter/"
+    ],
+    "ood_design_patterns": [
+      "https://www.scaler.com/topics/design-patterns/",
+      "https://java-design-patterns.com/principles/",
+      "https://www.baeldung.com/solid-principles",
+      "https://www.tutorialspoint.com/design_pattern/index.htm",
+      "https://leetcode.com/problems/design-parking-system/",
+      "https://leetcode.com/problems/design-twitter/",
+      "https://leetcode.com/problems/design-browser-history/",
+      "https://leetcode.com/problems/lru-cache/",
+      "https://leetcode.com/problems/all-oone-data-structure/",
+      "https://leetcode.com/problems/flatten-nested-list-iterator/",
+      "https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8",
+      "https://workat.tech/machine-coding/practice/splitwise-problem-0kp2yneec2q2",
+      "https://workat.tech/machine-coding/practice/design-chess-validator-to77d8oqpx2h",
+      "https://workat.tech/machine-coding/practice/snake-and-ladder-problem-zgtac9lxwntg",
+      "https://workat.tech/machine-coding/practice/design-tic-tac-toe-smyfi9x064ry"
+    ]
+  }
+}
