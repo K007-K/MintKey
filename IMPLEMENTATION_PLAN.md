@@ -2,8 +2,8 @@
 
 ### From Current State to Production
 
-> **Generated**: March 17, 2026 | **Last Updated**: March 22, 2026 (v4 —
-> progress update)\
+> **Generated**: March 17, 2026 | **Last Updated**: March 25, 2026 (v5 —
+> honest audit update)\
 > **Owner**: Karthik\
 > **Status**: Living document — updated as we build\
 > **LLM Provider**: Open-source only via LiteLLM (Groq `llama-3.3-70b-versatile` / Ollama fallback) — never Anthropic or OpenAI
@@ -12,27 +12,27 @@
 
 ## Part 1: Where We Are Today
 
-### ✅ What's Done (Phase 1–4)
+### What's Done (Phase 1–4) — Audit-Verified Status
 
-| Phase       | What                                                                                                                                                                                           | Status      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| **Phase 1** | Backend skeleton: FastAPI, 7 routers, 3 middleware, SQLAlchemy ORM (8 tables), Alembic migrations, LiteLLM client, Pydantic schemas, Docker Compose, GitHub OAuth                              | ✅ Complete |
-| **Phase 2** | GitHub REST scraper, LeetCode GraphQL scraper, CodeChef scraper, HackerRank scraper, Resume PDF parser, Skill taxonomy (150+), Celery + Redis task queue                                       | ✅ Complete |
-| **Phase 3** | 8 LLM agents (GitHub Analyst, DSA Analyst, Resume Parser, Trend Watcher, Company Expert, Gap Finder, Roadmap Builder, Career Coach), Orchestrator, Tool executor (9 tools), WebSocket progress | ✅ Complete |
-| **Phase 4** | Weighted scoring algorithm (7 components), 15 company blueprints seeded, HelixDB skill graph (200+ nodes), Gap analysis + topological sort, Match score computation                            | ✅ Complete |
+| Phase       | What                                                                                                                                                                                           | Status      | Audit Reality |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------- |
+| **Phase 1** | Backend skeleton: FastAPI, 12 routers, 3 middleware, SQLAlchemy ORM (11 tables), Alembic migrations, LiteLLM client, Pydantic schemas, Docker Compose, GitHub OAuth                            | ⚠️ 85% | Code exists. 2 of 12 routers (`roadmap.py`, `trends.py`) are empty stubs |
+| **Phase 2** | GitHub REST scraper, LeetCode GraphQL scraper, CodeChef scraper, HackerRank scraper, Resume PDF parser, Skill taxonomy (150+), Celery + Redis task queue                                       | ⚠️ 70% | Code written, **0% integration-tested** with real user accounts |
+| **Phase 3** | 8 LLM agents (72-98 lines each), Orchestrator, Tool executor (9 tools), WebSocket progress, agentic loop                                                                                      | ⚠️ 70% | Code written, **never triggered from UI end-to-end** |
+| **Phase 4** | Weighted scoring algorithm (7 components), 15 company blueprints, HelixDB skill graph (200+ nodes), Gap analysis + topological sort, Match score computation                                   | ⚠️ 65% | Algorithm implemented, **never run with real agent data**. HelixDB seed status unknown |
 
-### ✅ What's Fully Wired (Phase 5 Complete)
+### Frontend Pages — Audit-Verified Status
 
-| Page              | Lines | Status    | Details                                                             |
+| Page              | Lines | Status    | Audit Reality                                                       |
 | ----------------- | ----- | --------- | ------------------------------------------------------------------- |
-| `/dashboard`      | 935   | ✅ Wired  | Connected to backend, shows live data                               |
-| `/profile`        | —     | ✅ Wired  | Edit profile modal, platform usernames, avatar                      |
-| `/settings`       | —     | ✅ Wired  | Theme, export PDF, clear cache, delete account all functional       |
-| `/onboarding`     | —     | ✅ Exists | Multi-step wizard, functional                                       |
-| `/` (Landing)     | —     | ✅ Exists | Landing page built                                                  |
-| `/practice`       | 470   | ✅ Wired  | 1134 problems seeded, filters, pagination, progress toggle          |
-| `/practice/[id]`  | 244   | ✅ Wired  | Problem detail, mark solved, back link (needs data enrichment)      |
-| `/dsa`            | 5     | ✅ Redirect | Redirects to `/practice`                                           |
+| `/dashboard`      | 935   | ⚠️ 50%   | Wired to backend, but shows **empty/zero data** — no analysis has ever run, so DB is empty |
+| `/profile`        | —     | ✅ 100%   | Edit profile modal, platform usernames, avatar — **genuinely complete** |
+| `/settings`       | —     | ✅ 100%   | Export PDF, clear cache, delete account — **genuinely complete**     |
+| `/onboarding`     | —     | ⚠️ 80%   | Multi-step wizard exists, **unverified** if data saves correctly    |
+| `/` (Landing)     | —     | ✅ 100%   | Landing page — **genuinely complete**                               |
+| `/practice`       | 470   | ⚠️ 60%   | 1134 problems, basic filters work — **12 features missing** (see below) |
+| `/practice/[id]`  | 244   | ⚠️ 40%   | Page renders, but **all content NULL** in DB (desc, hints, solutions never enriched) |
+| `/dsa`            | 5     | ✅ 100%   | Redirects to `/practice` — **genuinely complete**                   |
 
 ### 🔶 What's Built But Uses Static/Mock Data
 
@@ -115,14 +115,14 @@ orchestrator.py      → Master controller — runs all agents
 > Default: `groq/llama-3.3-70b-versatile`. Fallback: `ollama/qwen2.5-coder:32b`.
 > Model read from `LLM_MODEL` env var. **Never Anthropic or OpenAI.**
 
-### Current Sidebar Navigation (actual code)
+### Current Sidebar Navigation (audit-verified)
 
 ```
 PLATFORM:
-  Dashboard         → ✅ Wired
+  Dashboard         → ⚠️ Wired but shows empty data (no pipeline run yet)
   Companies         → 🔶 UI built, mock data
   My Roadmap        → 🔶 UI built, mock data
-  DSA Practice      → ✅ Wired (1134 problems)
+  DSA Practice      → ⚠️ Partially wired (works, 12 features missing)
   Skill Graph       → 🔲 Placeholder (48 lines)
 
 INTELLIGENCE:
@@ -131,35 +131,64 @@ INTELLIGENCE:
   AI Coach [BETA]   → 🔲 Placeholder (55 lines)
 
 BOTTOM:
-  Profile           → ✅ Wired
-  Settings          → ✅ Wired
+  Profile           → ✅ Complete
+  Settings          → ✅ Complete
 ```
 
-### Frontend Page Ownership
+### Frontend Page Ownership (Audit-Verified)
 
-| Page | Lines | Designed By | Status | Notes |
-|------|-------|-------------|--------|-------|
-| `/` (Landing) | ✅ | Karthik | ✅ Done | — |
-| `(auth)/login` | ✅ | Karthik | ✅ Done | — |
-| `/onboarding` | ✅ | Karthik | ✅ Done | — |
-| `/dashboard` | 935 | Karthik | ✅ Wired | — |
+| Page | Lines | Designed By | Audit Status | Notes |
+|------|-------|-------------|-------------|-------|
+| `/` (Landing) | — | Karthik | ✅ 100% Done | — |
+| `(auth)/login` | — | Karthik | ✅ 100% Done | — |
+| `/onboarding` | — | Karthik | ⚠️ 80% | Exists, needs e2e verification |
+| `/dashboard` | 935 | Karthik | ⚠️ 50% | Wired to backend but shows empty data (pipeline never run) |
 | `/companies` | 381 | Karthik | 🔶 Mock | Sprint 1 wiring |
 | `/company/[slug]` | 1627 | Karthik | 🔶 Mock | Sprint 1 wiring |
-| `/match/[slug]` | 800 | Karthik | 🔶 Mock | ⚠️ Needs redesign to match updated spec |
-| `/roadmap/[slug]` | 786 | Karthik | 🔶 Mock | ⚠️ Needs redesign to match updated spec |
-| `/practice` | 470 | Karthik | ✅ Wired | ⚠️ Needs redesign to match updated spec |
-| `/profile` | ✅ | Karthik | ✅ Wired | — |
-| `/settings` | ✅ | Karthik | ✅ Wired | — |
+| `/match/[slug]` | 800 | Karthik | 🔶 Mock | ⚠️ Needs redesign + wiring |
+| `/roadmap/[slug]` | 786 | Karthik | 🔶 Mock | ⚠️ Needs redesign + wiring |
+| `/practice` | 470 | Karthik | ⚠️ 60% | Works, but 12 features missing (see below) |
+| `/profile` | — | Karthik | ✅ 100% Done | — |
+| `/settings` | — | Karthik | ✅ 100% Done | — |
 | `/roadmap` | 278 | Agent | 🔶 Mock | List page, needs design |
-| `/practice/[id]` | 244 | Agent | ✅ Wired | Needs enriched data |
+| `/practice/[id]` | 244 | Agent | ⚠️ 40% | Page renders but all content fields NULL in DB |
 | `/coach` | 55 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
 | `/simulate` | 62 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
 | `/trends` | 58 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
 | `/skills` | 48 | Agent | 🔲 Placeholder | Needs UX Pilot mockup |
-| `/dsa` | 5 | Agent | ✅ Redirect | Redirects to /practice |
+| `/dsa` | 5 | Agent | ✅ 100% Done | Redirects to /practice |
 
 > **3 pages need redesign**: `/match/[slug]`, `/roadmap/[slug]`, `/practice`
 > — Karthik to generate updated UX Pilot mockups before agent rebuilds them.
+
+### `/practice` Page — 12 Missing Features
+
+| # | Feature | Impact | Effort |
+|---|---------|--------|--------|
+| 1 | No topic/tag filter (Arrays, DP, Trees, etc.) | 🔴 High | Small |
+| 2 | No company tag filter (Google, Amazon problems) | 🔴 High | Small |
+| 3 | No "Show solved/unsolved only" toggle | 🟡 Medium | Small |
+| 4 | Study plan progress bars stuck at 0% (no per-plan solved count) | 🟡 Medium | Medium |
+| 5 | Problem detail page empty (desc, hints, solution all NULL in DB) | 🔴 High | Large |
+| 6 | No clickable problem titles → `/practice/[id]` | 🟡 Medium | Tiny |
+| 7 | No sorting (by difficulty, #, or solved status) | 🟡 Medium | Small |
+| 8 | No pattern/category filter (Sliding Window, Two Pointers) | 🟡 Medium | Small |
+| 9 | Subtitle says "~800 problems" but there are 1134 | 🟢 Low | Tiny |
+| 10 | No bookmark/save feature | 🟢 Low | Medium |
+| 11 | No notes per problem (schema supports, no UI) | 🟢 Low | Medium |
+| 12 | No dark mode (`dark:` classes missing) | 🟢 Low | Medium |
+
+### Critical Pipeline Gap
+
+> ⚠️ **The end-to-end analysis pipeline has never been triggered:**
+> ```
+> User clicks "Analyze" → Orchestrator → 8 Agents → Scoring → DB → Dashboard
+> ```
+> Every piece exists individually (agents ✅, scoring ✅, DB tables ✅, dashboard ✅),
+> but **they have never been connected and executed together**. This is why the
+> dashboard shows zeros and the match pages have no real data.
+>
+> **Overall honest completion: ~45-50%** (not the ~70% the previous ✅ marks suggested)
 
 ### Strategic Decisions (from cross-check against all 3 spec docs)
 
