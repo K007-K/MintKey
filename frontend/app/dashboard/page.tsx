@@ -8,7 +8,7 @@ import { useDashboardSummary, useMatchScores, useCurrentUser, useTriggerAnalysis
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp, Zap, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 /* ─── Dashboard Page ─── */
@@ -162,23 +162,42 @@ export default function DashboardPage() {
     );
   }, [user, displayScores, triggerAnalysis]);
 
+  const isAnalyzing = analysisStep !== "idle" && analysisStep !== "complete" && analysisStep !== "error";
+
   return (
     <DashboardLayout
       title={`${greeting}, ${userName}`}
       subtitle="Let's get you ready for that dream role."
+      headerAction={
+        <button
+          onClick={handleTriggerAnalysis}
+          disabled={isAnalyzing}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all active:scale-[0.97] ${
+            isAnalyzing
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md shadow-teal-200/50 hover:shadow-lg hover:from-teal-500 hover:to-cyan-500"
+          }`}
+        >
+          {isAnalyzing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : hasAnalysis ? (
+            <RefreshCw className="h-4 w-4" />
+          ) : (
+            <Zap className="h-4 w-4" />
+          )}
+          {isAnalyzing ? "Analyzing..." : hasAnalysis ? "Re-analyze" : "Analyze Now"}
+        </button>
+      }
     >
-      <div className="space-y-5">
+      {/* ─── Full-screen Analysis Overlay ─── */}
+      <AnalysisOverlay
+        step={analysisStep}
+        error={analysisError}
+        onRetry={handleTriggerAnalysis}
+        onDismiss={() => { setAnalysisStep("idle"); setAnalysisError(null); }}
+      />
 
-        {/* ─── Analysis Banner (shows when no analysis run or running) ─── */}
-        {(analysisStep !== "idle" || !hasAnalysis) && (
-          <AnalysisBanner
-            step={analysisStep}
-            error={analysisError}
-            onTrigger={handleTriggerAnalysis}
-            onDismiss={() => { setAnalysisStep("idle"); setAnalysisError(null); }}
-            hasAnalysis={hasAnalysis}
-          />
-        )}
+      <div className="space-y-5">
 
         {/* ─── Row 1: Four Stat Cards ─── */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -504,136 +523,184 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-/* ─── Analysis Banner ─── */
+/* ─── Analysis Overlay — Premium Loading Animation ─── */
 
-const ANALYSIS_STEPS = [
-  { key: "triggering", label: "Initializing", icon: Zap },
-  { key: "running", label: "AI Agents Analyzing", icon: Sparkles },
-  { key: "scoring", label: "Computing Scores", icon: ArrowUpRight },
-  { key: "complete", label: "Complete!", icon: CheckCircle2 },
+const AGENT_LIST = [
+  { key: "agent1", label: "GitHub Intelligence", emoji: "🔍" },
+  { key: "agent2", label: "DSA Performance", emoji: "⚡" },
+  { key: "agent3", label: "Resume Parser", emoji: "📄" },
+  { key: "agent4", label: "Market Trends", emoji: "📈" },
+  { key: "agent5", label: "Company Blueprint", emoji: "🏢" },
+  { key: "agent6", label: "Skill Gap Finder", emoji: "🎯" },
+  { key: "agent7", label: "Roadmap Builder", emoji: "🗺️" },
+  { key: "agent8", label: "Career Coach", emoji: "🤖" },
 ];
 
-function AnalysisBanner({ step, error, onTrigger, onDismiss, hasAnalysis }: {
+function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
   step: "idle" | "triggering" | "running" | "scoring" | "complete" | "error";
   error: string | null;
-  onTrigger: () => void;
+  onRetry: () => void;
   onDismiss: () => void;
-  hasAnalysis: boolean;
 }) {
-  // CTA state — haven't run analysis yet
-  if (step === "idle" && !hasAnalysis) {
-    return (
-      <div className="relative overflow-hidden rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-5">
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-teal-100/30" />
-        <div className="absolute -right-2 -bottom-6 h-20 w-20 rounded-full bg-cyan-100/40" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-200/60">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-gray-900">Run Your AI Analysis</h3>
-              <p className="mt-0.5 text-sm text-gray-500">
-                8 AI agents will analyze your GitHub, LeetCode & compute company match scores
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onTrigger}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-teal-200/50 hover:shadow-lg hover:shadow-teal-200/60 hover:from-teal-500 hover:to-cyan-500 transition-all active:scale-[0.98]"
-          >
-            <Zap className="h-4 w-4" />
-            Analyze Now
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [activeAgent, setActiveAgent] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const isVisible = step !== "idle";
 
-  // Error state
-  if (step === "error") {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-red-700">Analysis Failed</p>
-              <p className="text-xs text-red-500 mt-0.5">{error || "Something went wrong"}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onTrigger} className="rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 transition-colors">Retry</button>
-            <button onClick={onDismiss} className="rounded-lg px-2 py-1.5 text-xs text-red-400 hover:text-red-600 transition-colors"><X className="h-4 w-4" /></button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Cycle through agents during running state
+  useEffect(() => {
+    if (step !== "running") return;
+    const interval = setInterval(() => {
+      setActiveAgent(prev => (prev + 1) % AGENT_LIST.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [step]);
 
-  // Complete state
-  if (step === "complete") {
-    return (
-      <div className="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-emerald-700">Analysis Complete!</p>
-              <p className="text-xs text-emerald-500 mt-0.5">Scores updated — check your company matches below</p>
-            </div>
-          </div>
-          <button onClick={onDismiss} className="rounded-lg px-2 py-1.5 text-xs text-emerald-400 hover:text-emerald-600 transition-colors"><X className="h-4 w-4" /></button>
-        </div>
-      </div>
-    );
-  }
+  // Elapsed timer
+  useEffect(() => {
+    if (step === "idle") { setElapsedSec(0); return; }
+    const interval = setInterval(() => setElapsedSec(prev => prev + 1), 1000);
+    return () => clearInterval(interval);
+  }, [step]);
 
-  // Progress state (triggering / running / scoring)
-  const activeIndex = ANALYSIS_STEPS.findIndex(s => s.key === step);
+  // Auto-dismiss complete state after 3s
+  useEffect(() => {
+    if (step === "complete") {
+      const timer = setTimeout(onDismiss, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, onDismiss]);
+
+  if (!isVisible) return null;
+
+  const phaseLabel = step === "triggering" ? "Initializing Pipeline..."
+    : step === "running" ? "AI Agents Analyzing..."
+    : step === "scoring" ? "Computing Match Scores..."
+    : step === "complete" ? "Analysis Complete!"
+    : "Analysis Failed";
 
   return (
-    <div className="rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50/80 via-white to-cyan-50/80 p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
-        <div>
-          <p className="text-sm font-semibold text-gray-900">Analysis in Progress</p>
-          <p className="text-xs text-gray-400 mt-0.5">This takes 15-30 seconds...</p>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
+      isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+    }`}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
+
+      {/* Card */}
+      <div className={`relative w-full max-w-lg mx-4 rounded-2xl bg-white shadow-2xl shadow-black/20 overflow-hidden transition-all duration-500 ${
+        isVisible ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+      }`}
+      >
+        {/* Animated gradient top bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400" style={{
+          backgroundSize: "200% 100%",
+          animation: step === "complete" ? "none" : "shimmer 2s ease-in-out infinite",
+        }} />
+
+        <div className="p-8">
+          {/* Error state */}
+          {step === "error" ? (
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 mb-4">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Analysis Failed</h2>
+              <p className="mt-1 text-sm text-gray-500">{error || "Something went wrong. Please try again."}</p>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button onClick={onRetry} className="rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">Retry Analysis</button>
+                <button onClick={onDismiss} className="rounded-lg border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Dismiss</button>
+              </div>
+            </div>
+          ) : step === "complete" ? (
+            /* Complete state */
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 mb-4" style={{ animation: "scaleIn 0.5s ease-out" }}>
+                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Analysis Complete!</h2>
+              <p className="mt-1 text-sm text-gray-500">Your scores have been updated. Dashboard will refresh momentarily.</p>
+              <p className="mt-3 text-xs text-gray-400">Completed in {elapsedSec}s</p>
+            </div>
+          ) : (
+            /* Loading state */
+            <>
+              {/* Orbital animation */}
+              <div className="relative mx-auto h-32 w-32 mb-6">
+                {/* Outer ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-gray-100" />
+                {/* Spinning ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-teal-500 border-r-teal-300" style={{ animation: "spin 1.5s linear infinite" }} />
+                {/* Inner pulse */}
+                <div className="absolute inset-3 rounded-full border border-gray-50" />
+                <div className="absolute inset-3 rounded-full border border-transparent border-b-cyan-400 border-l-cyan-300" style={{ animation: "spin 2s linear infinite reverse" }} />
+                {/* Center icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-200/50" style={{ animation: "pulse 2s ease-in-out infinite" }}>
+                    <Sparkles className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+                {/* Orbiting dots */}
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="absolute inset-0" style={{ animation: `spin ${3 + i}s linear infinite`, animationDelay: `${i * 0.5}s` }}>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-teal-400" style={{ opacity: 0.6 + i * 0.15 }} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Phase label */}
+              <div className="text-center mb-6">
+                <h2 className="text-lg font-bold text-gray-900">{phaseLabel}</h2>
+                <p className="mt-1 text-sm text-gray-400">{elapsedSec}s elapsed</p>
+              </div>
+
+              {/* Agent status list */}
+              {step === "running" && (
+                <div className="grid grid-cols-2 gap-2">
+                  {AGENT_LIST.map((agent, idx) => {
+                    const isDone = idx < activeAgent;
+                    const isActive = idx === activeAgent;
+                    return (
+                      <div key={agent.key} className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all duration-300 ${
+                        isActive ? "bg-teal-50 text-teal-700 font-semibold shadow-sm" :
+                        isDone ? "bg-gray-50 text-gray-400" :
+                        "text-gray-300"
+                      }`}>
+                        <span className="text-sm">{agent.emoji}</span>
+                        <span className="truncate">{agent.label}</span>
+                        {isDone && <CheckCircle2 className="ml-auto h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />}
+                        {isActive && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-teal-500 flex-shrink-0" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Progress bar */}
+              <div className="mt-5">
+                <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-400 transition-all duration-700 ease-out"
+                    style={{
+                      width: step === "triggering" ? "15%" : step === "running" ? `${20 + (activeAgent / AGENT_LIST.length) * 60}%` : "90%",
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-      {/* Step indicator */}
-      <div className="flex items-center gap-2">
-        {ANALYSIS_STEPS.map((s, idx) => {
-          const Icon = s.icon;
-          const isActive = idx === activeIndex;
-          const isDone = idx < activeIndex;
-          return (
-            <div key={s.key} className="flex items-center gap-2 flex-1">
-              <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all w-full ${
-                isActive ? "bg-teal-100 text-teal-700 shadow-sm" :
-                isDone ? "bg-emerald-50 text-emerald-600" :
-                "bg-gray-50 text-gray-400"
-              }`}>
-                {isDone ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                ) : isActive ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Icon className="h-3.5 w-3.5" />
-                )}
-                <span className="truncate">{s.label}</span>
-              </div>
-              {idx < ANALYSIS_STEPS.length - 1 && (
-                <div className={`w-4 h-px flex-shrink-0 ${isDone ? "bg-emerald-300" : "bg-gray-200"}`} />
-              )}
-            </div>
-          );
-        })}
-      </div>
+
+      {/* Keyframe styles */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes scaleIn {
+          0% { transform: scale(0.5); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
