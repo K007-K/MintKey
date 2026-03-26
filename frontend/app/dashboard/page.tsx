@@ -604,7 +604,13 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
   useEffect(() => {
     if (step !== "running") return;
     const interval = setInterval(() => {
-      setActiveAgent(prev => (prev + 1) % AGENT_LIST.length);
+      setActiveAgent(prev => {
+        if (prev >= AGENT_LIST.length - 1) {
+          clearInterval(interval);
+          return AGENT_LIST.length; // all done — no active agent, all show checkmarks
+        }
+        return prev + 1;
+      });
     }, 700);
     return () => clearInterval(interval);
   }, [step]);
