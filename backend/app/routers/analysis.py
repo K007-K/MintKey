@@ -99,18 +99,37 @@ async def trigger_analysis(
             try:
                 from app.core.database import async_session_factory
                 from app.models.db import AnalysisResult
+                from datetime import datetime
+
+                result_dict = result.model_dump()
 
                 async with async_session_factory() as session:
                     analysis = AnalysisResult(
                         user_id=current_user.id,
-                        analysis_type="full",
-                        result_data=result.model_dump(),
                         status="completed",
+                        merged_analysis=result_dict,
+                        agent_outputs={
+                            "github_analysis": result_dict.get("github_analysis"),
+                            "dsa_analysis": result_dict.get("dsa_analysis"),
+                            "resume_data": result_dict.get("resume_data"),
+                            "trend_data": result_dict.get("trend_data"),
+                            "company_blueprints": result_dict.get("company_blueprints"),
+                            "gap_analysis": result_dict.get("gap_analysis"),
+                            "roadmaps": result_dict.get("roadmaps"),
+                        },
+                        coaching_message=(
+                            result_dict.get("coaching", {}).get("coaching_message", "")
+                            if result_dict.get("coaching") else None
+                        ),
+                        completed_at=datetime.utcnow(),
                     )
                     session.add(analysis)
                     await session.commit()
+                    logger.info(f"Analysis saved to DB for user {current_user.id}")
             except Exception as e:
                 logger.error(f"Failed to save analysis: {e}")
+                import traceback
+                traceback.print_exc()
 
         except Exception as e:
             logger.error(f"Analysis failed: {e}")
