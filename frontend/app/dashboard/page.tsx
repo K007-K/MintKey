@@ -605,7 +605,7 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
     if (step !== "running") return;
     const interval = setInterval(() => {
       setActiveAgent(prev => (prev + 1) % AGENT_LIST.length);
-    }, 2000);
+    }, 700);
     return () => clearInterval(interval);
   }, [step]);
 
