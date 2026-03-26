@@ -15,19 +15,30 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
 
+def _deduplicate_scores(match_scores: list) -> list:
+    """Keep only the latest score per company_slug (most recent computed_at)."""
+    seen: dict[str, object] = {}
+    for s in match_scores:
+        slug = s.company_slug
+        if slug not in seen or s.computed_at > seen[slug].computed_at:
+            seen[slug] = s
+    return list(seen.values())
+
+
 async def _build_company_scores(match_scores: list, current_user, db) -> list[dict]:
     """
     Build company scores for the dashboard response.
-    State B: real match scores from analysis.
+    State B: real match scores from analysis (deduplicated).
     State A: target companies with null scores (pre-analysis placeholders).
     """
     if match_scores:
+        deduped = _deduplicate_scores(match_scores)
         return [
             {
                 "company_slug": s.company_slug,
                 "overall_score": round(s.overall_score),
             }
-            for s in match_scores
+            for s in deduped
         ]
 
     # State A — query target companies explicitly (avoid lazy-load in async)
@@ -447,8 +458,10 @@ async def get_dashboard_summary(
     has_analysis = False
     if match_scores:
         has_analysis = True
+        # Use only latest score per company for readiness average
+        deduped = _deduplicate_scores(match_scores)
         readiness = round(
-            sum(s.overall_score for s in match_scores) / len(match_scores)
+            sum(s.overall_score for s in deduped) / len(deduped)
         )
         if readiness >= 80:
             readiness_badge = "Excellent"

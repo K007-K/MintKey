@@ -1,7 +1,7 @@
 // Main dashboard — wired to real scraped platform data
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useDashboardSummary, useMatchScores, useCurrentUser, useTriggerAnalysis, useAnalysisStatus, useComputeScores, queryClient } from "@/lib/api";
@@ -40,10 +40,9 @@ export default function DashboardPage() {
   const priorityActions = (d?.priority_actions as Array<Record<string, string>>) || [];
   const trendData = (d?.trend_data as Array<Record<string, unknown>>) || null;
 
-  // Match scores for company bars
+  // Match scores for company bars — single source of truth (deduplicated from useMatchScores)
   const scores = Array.isArray(matchScores) ? matchScores : [];
-  const companyScores = (d?.company_scores as Array<Record<string, unknown>>) || [];
-  const displayScores = scores.length > 0 ? scores : companyScores;
+  const displayScores = scores;
 
   // Chart: only show real trend data, no fake placeholder
   const chartData = trendData && trendData.length > 0 ? trendData : null;
@@ -90,6 +89,8 @@ export default function DashboardPage() {
   const [analysisTaskId, setAnalysisTaskId] = useState<string | null>(null);
   const [analysisStep, setAnalysisStep] = useState<"idle" | "triggering" | "running" | "scoring" | "complete" | "error">("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const isTriggering = useRef(false); // #4: double-click guard
+  const pollFailCount = useRef(0); // #5: polling error counter
 
   const triggerAnalysis = useTriggerAnalysis();
   const computeScores = useComputeScores();
@@ -98,32 +99,62 @@ export default function DashboardPage() {
   const user = currentUser as Record<string, unknown> | undefined;
   const hasAnalysis = readiness.value != null;
 
+  // Use refs to avoid stale closures in effects (#6)
+  const displayScoresRef = useRef(displayScores);
+  displayScoresRef.current = displayScores;
+  const computeScoresRef = useRef(computeScores);
+  computeScoresRef.current = computeScores;
+
+  // #12: cleanup polling on unmount
+  useEffect(() => {
+    return () => { setAnalysisTaskId(null); };
+  }, []);
+
   // Handle analysis completion → auto-compute scores
   useEffect(() => {
     const statusObj = analysisStatusData as Record<string, unknown> | undefined;
     if (!statusObj) return;
 
+    // #5: Track polling failures — break infinite loop
+    if (!statusObj.status || statusObj.status === undefined) {
+      pollFailCount.current += 1;
+      if (pollFailCount.current >= 5) {
+        setAnalysisStep("error");
+        setAnalysisError("Lost connection to analysis. Please try again.");
+        setAnalysisTaskId(null);
+        pollFailCount.current = 0;
+      }
+      return;
+    }
+    pollFailCount.current = 0; // reset on valid response
+
     if (statusObj.status === "complete" && analysisStep === "running") {
       setAnalysisStep("scoring");
-      // Auto-compute scores for target companies
-      const targetCompanies = (displayScores.length > 0
-        ? displayScores.map((s: Record<string, unknown>) => s.company_slug as string)
-        : ["google", "amazon", "microsoft"]
+      // Target companies from user profile, fallback to defaults (#11)
+      const userTargets = (user?.target_companies as string[]);
+      const currentScores = displayScoresRef.current;
+      const targetCompanies = (
+        userTargets && userTargets.length > 0 ? userTargets
+        : currentScores.length > 0
+          ? currentScores.map((s: Record<string, unknown>) => s.company_slug as string)
+          : ["google", "amazon", "microsoft"]
       );
 
-      computeScores.mutate(
+      computeScoresRef.current.mutate(
         { target_companies: targetCompanies },
         {
           onSuccess: () => {
             setAnalysisStep("complete");
             setAnalysisTaskId(null);
-            // Refresh all dashboard data
-            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-            queryClient.invalidateQueries({ queryKey: ["scores"] });
+            isTriggering.current = false;
+            // #8: Force immediate refetch (not just invalidate)
+            queryClient.refetchQueries({ queryKey: ["dashboard"] });
+            queryClient.refetchQueries({ queryKey: ["scores"] });
           },
           onError: (err) => {
             setAnalysisStep("error");
             setAnalysisError(`Score computation failed: ${(err as Error).message}`);
+            isTriggering.current = false;
           },
         }
       );
@@ -133,20 +164,34 @@ export default function DashboardPage() {
       setAnalysisStep("error");
       setAnalysisError((statusObj.error as string) || "Analysis failed");
       setAnalysisTaskId(null);
+      isTriggering.current = false;
     }
-  }, [analysisStatusData, analysisStep]);
+  }, [analysisStatusData, analysisStep, user]);
 
   const handleTriggerAnalysis = useCallback(() => {
+    // #4: Prevent double-click race condition
+    if (isTriggering.current) return;
+    isTriggering.current = true;
+    pollFailCount.current = 0;
+
     setAnalysisStep("triggering");
     setAnalysisError(null);
+
+    // #11: Target companies from user profile first
+    const userTargets = (user?.target_companies as string[]);
+    const currentScores = displayScoresRef.current;
+    const targetCompanies = (
+      userTargets && userTargets.length > 0 ? userTargets
+      : currentScores.length > 0
+        ? currentScores.map((s: Record<string, unknown>) => s.company_slug as string)
+        : ["google", "amazon", "microsoft"]
+    );
 
     triggerAnalysis.mutate(
       {
         github_username: (user?.github_username as string) || undefined,
         leetcode_username: (user?.leetcode_username as string) || undefined,
-        target_companies: displayScores.length > 0
-          ? displayScores.map((s: Record<string, unknown>) => s.company_slug as string)
-          : ["google", "amazon", "microsoft"],
+        target_companies: targetCompanies,
       },
       {
         onSuccess: (data) => {
@@ -157,10 +202,11 @@ export default function DashboardPage() {
         onError: (err) => {
           setAnalysisStep("error");
           setAnalysisError(`Trigger failed: ${(err as Error).message}`);
+          isTriggering.current = false;
         },
       }
     );
-  }, [user, displayScores, triggerAnalysis]);
+  }, [user, triggerAnalysis]);
 
   const isAnalyzing = analysisStep !== "idle" && analysisStep !== "complete" && analysisStep !== "error";
 
@@ -571,10 +617,10 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
     return () => clearInterval(interval);
   }, [step]);
 
-  // Auto-dismiss complete state after 3s
+  // Auto-dismiss complete state after 5s (#7: increased from 3s)
   useEffect(() => {
     if (step === "complete") {
-      const timer = setTimeout(onDismiss, 3000);
+      const timer = setTimeout(onDismiss, 5000);
       return () => clearTimeout(timer);
     }
   }, [step, onDismiss]);
@@ -689,7 +735,7 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-400 transition-all duration-700 ease-out"
                     style={{
-                      width: step === "triggering" ? "15%" : step === "running" ? `${20 + (activeAgent / AGENT_LIST.length) * 60}%` : "90%",
+                      width: step === "triggering" ? "15%" : step === "running" ? `${20 + (activeAgent / AGENT_LIST.length) * 60}%` : "100%",
                     }}
                   />
                 </div>
