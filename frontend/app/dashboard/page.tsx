@@ -626,7 +626,7 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
   // Auto-dismiss complete state after 5s (#7: increased from 3s)
   useEffect(() => {
     if (step === "complete") {
-      const timer = setTimeout(onDismiss, 5000);
+      const timer = setTimeout(onDismiss, 3000);
       return () => clearTimeout(timer);
     }
   }, [step, onDismiss]);
