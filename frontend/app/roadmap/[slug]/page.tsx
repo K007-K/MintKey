@@ -1,7 +1,7 @@
 // Roadmap page — AI-powered preparation dashboard
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
@@ -16,13 +16,13 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { useCompany } from "@/lib/api";
+import { useCompany, useRoadmapData } from "@/lib/api";
 
 /* ═══ Types for roadmap data ═══ */
 type RoadmapPageData = {
   company: { slug: string; name: string; role: string };
   currentScore: number; targetScore: number; weeksTotal: number; weeksCompleted: number;
-  progressPercent: number; streak: number; lastSolved: string; problemsThisWeek: number;
+  currentWeek: number; progressPercent: number; streak: number; lastSolved: string; problemsThisWeek: number;
   phases: { id: number; name: string; weeks: string; status: "complete" | "active" | "locked"; progress: number }[];
   weeks: {
     number: number; theme: string; hoursPerDay: number; progressPercent: number;
@@ -262,6 +262,7 @@ function buildRoadmapData(company: Record<string, any> | null, slug: string): Ro
     targetScore: 85,
     weeksTotal: totalWeeks,
     weeksCompleted: 0,
+    currentWeek: 1,
     progressPercent: 0,
     streak: 0,
     lastSolved: "Not started",
@@ -303,11 +304,70 @@ function skillBarColor(p: number) { return p >= 70 ? "#10B981" : p >= 50 ? "#F59
    ═══════════════════════════════════════════════════════ */
 export default function RoadmapPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: rawCompany, isLoading } = useCompany(slug || "");
+  const { data: rawCompany, isLoading: companyLoading } = useCompany(slug || "");
+  const { data: rawRoadmap, isLoading: roadmapLoading } = useRoadmapData(slug || "");
 
-  // Build roadmap from company API data
+  const isLoading = companyLoading || roadmapLoading;
+
+  // Prefer real Agent 7 roadmap data from backend; fall back to client-side construction
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = buildRoadmapData(rawCompany as Record<string, any> | null, slug || "");
+  const data = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const base = buildRoadmapData(rawCompany as Record<string, any> | null, slug || "");
+
+    // If we have real Agent 7 data from DB, overlay it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rm = rawRoadmap as Record<string, any> | null;
+    if (rm && rm.weeks_data && Array.isArray(rm.weeks_data) && rm.weeks_data.length > 0) {
+      base.weeksTotal = rm.total_weeks || rm.weeks_data.length;
+      base.weeksCompleted = 0;
+      base.currentWeek = rm.current_week || 1;
+      base.progressPercent = Math.round(rm.progress_pct || 0);
+
+      // Map Agent 7 weeks into the page format
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      base.weeks = rm.weeks_data.map((w: any, i: number) => {
+        const tasks = w.tasks || [];
+        return {
+          number: w.week_number || i + 1,
+          theme: w.theme || `Week ${i + 1}`,
+          hoursPerDay: rm.hours_per_day || 4,
+          progressPercent: 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          dsaProblems: tasks.filter((t: any) => t.category === "dsa").map((t: any, j: number) => ({
+            id: j + 1,
+            name: t.task || "DSA Practice",
+            count: w.dsa_problems || 5,
+            difficulty: "Medium",
+            status: "upcoming" as const,
+          })),
+          dailyPlan: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => ({
+            day,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            task: tasks.find((t: any) => t.task)?.task || "Study",
+            isToday: false,
+          })),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          resources: tasks.filter((t: any) => t.resource_url).map((t: any) => ({
+            type: (t.resource_url?.includes("youtube") ? "video" : "link") as "video" | "link" | "doc",
+            name: t.task || "Resource",
+            url: t.resource_url || "#",
+          })).slice(0, 3),
+          projectTask: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            name: tasks.find((t: any) => t.category === "project")?.task || "Project work",
+            impact: 3,
+            effort: "Medium",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            hours: tasks.find((t: any) => t.category === "project")?.estimated_hours || 4,
+          },
+          milestone: w.milestone || `Complete Week ${i + 1}`,
+        };
+      });
+    }
+
+    return base;
+  }, [rawCompany, rawRoadmap, slug]);
 
   const companyName = data.company.name;
   const companyRole = data.company.role;

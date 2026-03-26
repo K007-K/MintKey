@@ -438,3 +438,57 @@ export function useUpdateProblemProgress() {
     },
   });
 }
+
+// --- Roadmap API Hooks ---
+
+// List all roadmaps for the current user
+export function useRoadmapList() {
+  return useQuery({
+    queryKey: ["roadmaps"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/roadmap/");
+      return data.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Get roadmap for a specific company
+export function useRoadmapData(companySlug: string) {
+  return useQuery({
+    queryKey: ["roadmaps", companySlug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}`
+      );
+      return data.data;
+    },
+    enabled: !!companySlug,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Update roadmap progress
+export function useUpdateRoadmapProgress() {
+  return useMutation({
+    mutationFn: async ({
+      companySlug,
+      currentWeek,
+      progressPct,
+    }: {
+      companySlug: string;
+      currentWeek: number;
+      progressPct: number;
+    }) => {
+      const { data } = await api.patch<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/progress`,
+        { current_week: currentWeek, progress_pct: progressPct }
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+    },
+  });
+}
+

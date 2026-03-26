@@ -164,6 +164,30 @@ async def trigger_analysis(
                 import traceback
                 traceback.print_exc()
 
+            # Save roadmaps to user_roadmaps table
+            try:
+                roadmaps_data = result_dict.get("roadmaps", {})
+                if roadmaps_data:
+                    from app.repositories.roadmaps import RoadmapRepository
+
+                    async with async_session_factory() as session:
+                        repo = RoadmapRepository(session)
+                        for company_slug, rm in roadmaps_data.items():
+                            weeks = rm.get("weeks", [])
+                            await repo.upsert(
+                                user_id=current_user.id,
+                                company_slug=company_slug,
+                                total_weeks=rm.get("total_weeks", len(weeks)),
+                                hours_per_day=int(rm.get("hours_per_day", 4)),
+                                weeks_data=weeks,
+                            )
+                        await session.commit()
+                        logger.info(f"Saved {len(roadmaps_data)} roadmap(s) to user_roadmaps")
+            except Exception as e:
+                logger.error(f"Failed to save roadmaps: {e}")
+                import traceback
+                traceback.print_exc()
+
         except Exception as e:
             logger.error(f"Analysis failed: {e}")
             try:
