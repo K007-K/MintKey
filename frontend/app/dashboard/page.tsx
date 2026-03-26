@@ -297,14 +297,14 @@ export default function DashboardPage() {
               </div>
             ) : displayScores.length > 0 ? (
               <div className="space-y-4">
-                {displayScores.slice(0, 5).map((s: Record<string, unknown>) => {
+                {displayScores.slice(0, 5).map((s: Record<string, unknown>, idx: number) => {
                   const slug = (s.company_slug as string) || "";
                   const rawScore = s.overall_score;
                   const isPending = rawScore === null || rawScore === undefined;
                   const score = isPending ? 0 : Math.round(rawScore as number);
                   const color = score >= 80 ? "#16a34a" : score >= 60 ? "#2563eb" : "#1e293b";
                   return (
-                    <Link key={slug} href={`/company/${slug}`} className="block group">
+                    <Link key={`${slug}-${idx}`} href={`/company/${slug}`} className="block group">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2.5">
                           <CompanyLogo name={slug} />
