@@ -249,8 +249,8 @@ class ScoringEngine:
 
         return {
             "company": company_slug,
-            "overall_score": round(total, 1),
-            "component_scores": scores,
+            "overall_score": round(total),
+            "component_scores": {k: round(v) for k, v in scores.items()},
             "weights": weights,
             "grade": self._score_to_grade(total),
             "readiness": self._score_to_readiness(total),
