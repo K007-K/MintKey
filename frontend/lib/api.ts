@@ -125,6 +125,39 @@ export function useTriggerAnalysis() {
   });
 }
 
+// Poll analysis status (enabled only when taskId is set)
+export function useAnalysisStatus(taskId: string | null) {
+  return useQuery({
+    queryKey: ["analysis", "status", taskId],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/analysis/status/${taskId}`
+      );
+      return data.data;
+    },
+    enabled: !!taskId,
+    refetchInterval: (query) => {
+      const status = (query?.state?.data as Record<string, unknown>)?.status;
+      if (status === "complete" || status === "failed") return false;
+      return 2000; // Poll every 2s while running
+    },
+    staleTime: 0,
+  });
+}
+
+// Compute match scores after analysis
+export function useComputeScores() {
+  return useMutation({
+    mutationFn: async (payload: { target_companies: string[] }) => {
+      const { data } = await api.post<APIResponse>(
+        "/api/v1/scores/compute",
+        payload
+      );
+      return data.data;
+    },
+  });
+}
+
 // --- Company Hooks ---
 
 // List all companies

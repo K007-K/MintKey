@@ -1,14 +1,14 @@
 // Main dashboard — wired to real scraped platform data
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
-import { useDashboardSummary, useMatchScores, useCurrentUser } from "@/lib/api";
+import { useDashboardSummary, useMatchScores, useCurrentUser, useTriggerAnalysis, useAnalysisStatus, useComputeScores, queryClient } from "@/lib/api";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 /* ─── Dashboard Page ─── */
@@ -86,12 +86,99 @@ export default function DashboardPage() {
     ? recentActivity.length
     : (activityPlatformCounts[activityFilter] || 0);
 
+  // --- Analysis trigger state ---
+  const [analysisTaskId, setAnalysisTaskId] = useState<string | null>(null);
+  const [analysisStep, setAnalysisStep] = useState<"idle" | "triggering" | "running" | "scoring" | "complete" | "error">("idle");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  const triggerAnalysis = useTriggerAnalysis();
+  const computeScores = useComputeScores();
+  const { data: analysisStatusData } = useAnalysisStatus(analysisTaskId);
+
+  const user = currentUser as Record<string, unknown> | undefined;
+  const hasAnalysis = readiness.value != null;
+
+  // Handle analysis completion → auto-compute scores
+  useEffect(() => {
+    const statusObj = analysisStatusData as Record<string, unknown> | undefined;
+    if (!statusObj) return;
+
+    if (statusObj.status === "complete" && analysisStep === "running") {
+      setAnalysisStep("scoring");
+      // Auto-compute scores for target companies
+      const targetCompanies = (displayScores.length > 0
+        ? displayScores.map((s: Record<string, unknown>) => s.company_slug as string)
+        : ["google", "amazon", "microsoft"]
+      );
+
+      computeScores.mutate(
+        { target_companies: targetCompanies },
+        {
+          onSuccess: () => {
+            setAnalysisStep("complete");
+            setAnalysisTaskId(null);
+            // Refresh all dashboard data
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["scores"] });
+          },
+          onError: (err) => {
+            setAnalysisStep("error");
+            setAnalysisError(`Score computation failed: ${(err as Error).message}`);
+          },
+        }
+      );
+    }
+
+    if (statusObj.status === "failed") {
+      setAnalysisStep("error");
+      setAnalysisError((statusObj.error as string) || "Analysis failed");
+      setAnalysisTaskId(null);
+    }
+  }, [analysisStatusData, analysisStep]);
+
+  const handleTriggerAnalysis = useCallback(() => {
+    setAnalysisStep("triggering");
+    setAnalysisError(null);
+
+    triggerAnalysis.mutate(
+      {
+        github_username: (user?.github_username as string) || undefined,
+        leetcode_username: (user?.leetcode_username as string) || undefined,
+        target_companies: displayScores.length > 0
+          ? displayScores.map((s: Record<string, unknown>) => s.company_slug as string)
+          : ["google", "amazon", "microsoft"],
+      },
+      {
+        onSuccess: (data) => {
+          const taskId = (data as Record<string, unknown>)?.task_id as string;
+          setAnalysisTaskId(taskId);
+          setAnalysisStep("running");
+        },
+        onError: (err) => {
+          setAnalysisStep("error");
+          setAnalysisError(`Trigger failed: ${(err as Error).message}`);
+        },
+      }
+    );
+  }, [user, displayScores, triggerAnalysis]);
+
   return (
     <DashboardLayout
       title={`${greeting}, ${userName}`}
       subtitle="Let's get you ready for that dream role."
     >
       <div className="space-y-5">
+
+        {/* ─── Analysis Banner (shows when no analysis run or running) ─── */}
+        {(analysisStep !== "idle" || !hasAnalysis) && (
+          <AnalysisBanner
+            step={analysisStep}
+            error={analysisError}
+            onTrigger={handleTriggerAnalysis}
+            onDismiss={() => { setAnalysisStep("idle"); setAnalysisError(null); }}
+            hasAnalysis={hasAnalysis}
+          />
+        )}
 
         {/* ─── Row 1: Four Stat Cards ─── */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -417,7 +504,139 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-/* ─── Action Item (clickable) ─── */
+/* ─── Analysis Banner ─── */
+
+const ANALYSIS_STEPS = [
+  { key: "triggering", label: "Initializing", icon: Zap },
+  { key: "running", label: "AI Agents Analyzing", icon: Sparkles },
+  { key: "scoring", label: "Computing Scores", icon: ArrowUpRight },
+  { key: "complete", label: "Complete!", icon: CheckCircle2 },
+];
+
+function AnalysisBanner({ step, error, onTrigger, onDismiss, hasAnalysis }: {
+  step: "idle" | "triggering" | "running" | "scoring" | "complete" | "error";
+  error: string | null;
+  onTrigger: () => void;
+  onDismiss: () => void;
+  hasAnalysis: boolean;
+}) {
+  // CTA state — haven't run analysis yet
+  if (step === "idle" && !hasAnalysis) {
+    return (
+      <div className="relative overflow-hidden rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-5">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-teal-100/30" />
+        <div className="absolute -right-2 -bottom-6 h-20 w-20 rounded-full bg-cyan-100/40" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-200/60">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900">Run Your AI Analysis</h3>
+              <p className="mt-0.5 text-sm text-gray-500">
+                8 AI agents will analyze your GitHub, LeetCode & compute company match scores
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onTrigger}
+            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-teal-200/50 hover:shadow-lg hover:shadow-teal-200/60 hover:from-teal-500 hover:to-cyan-500 transition-all active:scale-[0.98]"
+          >
+            <Zap className="h-4 w-4" />
+            Analyze Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (step === "error") {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-700">Analysis Failed</p>
+              <p className="text-xs text-red-500 mt-0.5">{error || "Something went wrong"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={onTrigger} className="rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 transition-colors">Retry</button>
+            <button onClick={onDismiss} className="rounded-lg px-2 py-1.5 text-xs text-red-400 hover:text-red-600 transition-colors"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Complete state
+  if (step === "complete") {
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-emerald-700">Analysis Complete!</p>
+              <p className="text-xs text-emerald-500 mt-0.5">Scores updated — check your company matches below</p>
+            </div>
+          </div>
+          <button onClick={onDismiss} className="rounded-lg px-2 py-1.5 text-xs text-emerald-400 hover:text-emerald-600 transition-colors"><X className="h-4 w-4" /></button>
+        </div>
+      </div>
+    );
+  }
+
+  // Progress state (triggering / running / scoring)
+  const activeIndex = ANALYSIS_STEPS.findIndex(s => s.key === step);
+
+  return (
+    <div className="rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50/80 via-white to-cyan-50/80 p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
+        <div>
+          <p className="text-sm font-semibold text-gray-900">Analysis in Progress</p>
+          <p className="text-xs text-gray-400 mt-0.5">This takes 15-30 seconds...</p>
+        </div>
+      </div>
+      {/* Step indicator */}
+      <div className="flex items-center gap-2">
+        {ANALYSIS_STEPS.map((s, idx) => {
+          const Icon = s.icon;
+          const isActive = idx === activeIndex;
+          const isDone = idx < activeIndex;
+          return (
+            <div key={s.key} className="flex items-center gap-2 flex-1">
+              <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all w-full ${
+                isActive ? "bg-teal-100 text-teal-700 shadow-sm" :
+                isDone ? "bg-emerald-50 text-emerald-600" :
+                "bg-gray-50 text-gray-400"
+              }`}>
+                {isDone ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                ) : isActive ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Icon className="h-3.5 w-3.5" />
+                )}
+                <span className="truncate">{s.label}</span>
+              </div>
+              {idx < ANALYSIS_STEPS.length - 1 && (
+                <div className={`w-4 h-px flex-shrink-0 ${isDone ? "bg-emerald-300" : "bg-gray-200"}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function ActionItem({ action }: { action: Record<string, string> }) {
   const inner = (
