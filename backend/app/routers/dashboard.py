@@ -437,7 +437,7 @@ async def get_dashboard_summary(
         select(CompanyMatchScore)
         .where(CompanyMatchScore.user_id == current_user.id)
         .order_by(desc(CompanyMatchScore.computed_at))
-        .limit(5)
+        .limit(30)  # Enough for ~8 analysis runs × 3 companies
     )
     match_scores = score_result.scalars().all()
 
@@ -685,12 +685,32 @@ async def get_dashboard_summary(
         priority_actions = actions[:3]
 
     # --- Readiness Trend ---
+    # Group scores by analysis run (same computed_at within ~30s = same run)
     trend_data = []
     if match_scores:
-        for i, s in enumerate(reversed(match_scores[:8])):
+        # Group by run: scores computed within 30s of each other are one run
+        runs: list[list[float]] = []
+        current_run: list[float] = []
+        last_time = None
+        # Sort oldest first for chronological ordering
+        sorted_scores = sorted(match_scores, key=lambda s: s.computed_at)
+        for s in sorted_scores:
+            if last_time and (s.computed_at - last_time).total_seconds() > 30:
+                if current_run:
+                    runs.append(current_run)
+                current_run = []
+            current_run.append(s.overall_score)
+            last_time = s.computed_at
+        if current_run:
+            runs.append(current_run)
+
+        # Take up to 8 most recent runs, create one trend point per run
+        recent_runs = runs[-8:]
+        for i, run_scores in enumerate(recent_runs):
+            avg = round(sum(run_scores) / len(run_scores))
             trend_data.append({
-                "week": f"Week {i + 1}",
-                "score": round(s.overall_score),
+                "week": f"Run {i + 1}" if len(recent_runs) > 1 else "Current",
+                "score": avg,
             })
 
     # State A: no trend data at all (frontend shows empty state)

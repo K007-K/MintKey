@@ -546,6 +546,14 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
   const [elapsedSec, setElapsedSec] = useState(0);
   const isVisible = step !== "idle";
 
+  // Reset state when a NEW analysis starts (step goes to "triggering")
+  useEffect(() => {
+    if (step === "triggering") {
+      setActiveAgent(0);
+      setElapsedSec(0);
+    }
+  }, [step]);
+
   // Cycle through agents during running state
   useEffect(() => {
     if (step !== "running") return;
@@ -555,9 +563,10 @@ function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
     return () => clearInterval(interval);
   }, [step]);
 
-  // Elapsed timer
+  // Elapsed timer — only ticks during triggering/running/scoring, freezes on complete/error
   useEffect(() => {
     if (step === "idle") { setElapsedSec(0); return; }
+    if (step === "complete" || step === "error") return; // freeze timer
     const interval = setInterval(() => setElapsedSec(prev => prev + 1), 1000);
     return () => clearInterval(interval);
   }, [step]);
