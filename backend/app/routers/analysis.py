@@ -59,12 +59,45 @@ async def trigger_analysis(
         from agents.orchestrator import MintKeyOrchestrator
         from agents.core.models import UserAnalysisRequest
 
+        # Load the user's linked data from DB for fallback values
+        from app.core.database import async_session_factory
+        from app.models.db import User as UserModel
+        from sqlalchemy import select
+
+        db_github = payload.github_username
+        db_leetcode = payload.leetcode_username
+        db_resume_text = payload.resume_text
+        db_cgpa = None
+
+        try:
+            async with async_session_factory() as session:
+                result = await session.execute(
+                    select(UserModel).where(UserModel.id == current_user.id)
+                )
+                db_user = result.scalar_one_or_none()
+                if db_user:
+                    db_github = db_github or db_user.github_username
+                    db_leetcode = db_leetcode or db_user.leetcode_username
+                    db_cgpa = db_user.cgpa
+
+                    # Extract resume text from parsed data if not provided
+                    if not db_resume_text and db_user.resume_parsed_data:
+                        parsed = db_user.resume_parsed_data
+                        if isinstance(parsed, dict):
+                            db_resume_text = parsed.get("raw_text") or parsed.get("text") or json.dumps(parsed)
+                        elif isinstance(parsed, str):
+                            db_resume_text = parsed
+
+                    logger.info(f"[Analysis] Loaded user data: github={db_github}, leetcode={db_leetcode}, resume={'YES' if db_resume_text else 'NO'}, cgpa={db_cgpa}")
+        except Exception as e:
+            logger.error(f"[Analysis] Failed to load user data from DB: {e}")
+
         orchestrator = MintKeyOrchestrator()
         request = UserAnalysisRequest(
             user_id=str(current_user.id),
-            github_username=payload.github_username,
-            leetcode_username=payload.leetcode_username,
-            resume_text=payload.resume_text,
+            github_username=db_github,
+            leetcode_username=db_leetcode,
+            resume_text=db_resume_text,
             target_companies=payload.target_companies,
             months_available=payload.months_available,
             hours_per_day=payload.hours_per_day,
