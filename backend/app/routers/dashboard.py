@@ -15,19 +15,30 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
 
+def _deduplicate_scores(match_scores: list) -> list:
+    """Keep only the latest score per company_slug (most recent computed_at)."""
+    seen: dict[str, object] = {}
+    for s in match_scores:
+        slug = s.company_slug
+        if slug not in seen or s.computed_at > seen[slug].computed_at:
+            seen[slug] = s
+    return list(seen.values())
+
+
 async def _build_company_scores(match_scores: list, current_user, db) -> list[dict]:
     """
     Build company scores for the dashboard response.
-    State B: real match scores from analysis.
+    State B: real match scores from analysis (deduplicated).
     State A: target companies with null scores (pre-analysis placeholders).
     """
     if match_scores:
+        deduped = _deduplicate_scores(match_scores)
         return [
             {
                 "company_slug": s.company_slug,
                 "overall_score": round(s.overall_score),
             }
-            for s in match_scores
+            for s in deduped
         ]
 
     # State A — query target companies explicitly (avoid lazy-load in async)
@@ -437,7 +448,7 @@ async def get_dashboard_summary(
         select(CompanyMatchScore)
         .where(CompanyMatchScore.user_id == current_user.id)
         .order_by(desc(CompanyMatchScore.computed_at))
-        .limit(5)
+        .limit(30)  # Enough for ~8 analysis runs × 3 companies
     )
     match_scores = score_result.scalars().all()
 
@@ -447,8 +458,10 @@ async def get_dashboard_summary(
     has_analysis = False
     if match_scores:
         has_analysis = True
+        # Use only latest score per company for readiness average
+        deduped = _deduplicate_scores(match_scores)
         readiness = round(
-            sum(s.overall_score for s in match_scores) / len(match_scores)
+            sum(s.overall_score for s in deduped) / len(deduped)
         )
         if readiness >= 80:
             readiness_badge = "Excellent"
@@ -685,12 +698,32 @@ async def get_dashboard_summary(
         priority_actions = actions[:3]
 
     # --- Readiness Trend ---
+    # Group scores by analysis run (same computed_at within ~30s = same run)
     trend_data = []
     if match_scores:
-        for i, s in enumerate(reversed(match_scores[:8])):
+        # Group by run: scores computed within 30s of each other are one run
+        runs: list[list[float]] = []
+        current_run: list[float] = []
+        last_time = None
+        # Sort oldest first for chronological ordering
+        sorted_scores = sorted(match_scores, key=lambda s: s.computed_at)
+        for s in sorted_scores:
+            if last_time and (s.computed_at - last_time).total_seconds() > 30:
+                if current_run:
+                    runs.append(current_run)
+                current_run = []
+            current_run.append(s.overall_score)
+            last_time = s.computed_at
+        if current_run:
+            runs.append(current_run)
+
+        # Take up to 8 most recent runs, create one trend point per run
+        recent_runs = runs[-8:]
+        for i, run_scores in enumerate(recent_runs):
+            avg = round(sum(run_scores) / len(run_scores))
             trend_data.append({
-                "week": f"Week {i + 1}",
-                "score": round(s.overall_score),
+                "week": f"Run {i + 1}" if len(recent_runs) > 1 else "Current",
+                "score": avg,
             })
 
     # State A: no trend data at all (frontend shows empty state)

@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   useQuery,
   useMutation,
+  useQueryClient,
   QueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
@@ -80,19 +81,6 @@ export function useMatchScores() {
   });
 }
 
-// Score history for trend chart
-export function useScoreHistory(companySlug: string) {
-  return useQuery({
-    queryKey: ["scores", "history", companySlug],
-    queryFn: async () => {
-      const { data } = await api.get<APIResponse>(
-        `/api/v1/scores/history/${companySlug}`
-      );
-      return data.data;
-    },
-    enabled: !!companySlug,
-  });
-}
 
 // Skill gaps for a specific company
 export function useSkillGaps(companySlug: string) {
@@ -118,6 +106,39 @@ export function useTriggerAnalysis() {
     }) => {
       const { data } = await api.post<APIResponse>(
         "/api/v1/analysis/trigger",
+        payload
+      );
+      return data.data;
+    },
+  });
+}
+
+// Poll analysis status (enabled only when taskId is set)
+export function useAnalysisStatus(taskId: string | null) {
+  return useQuery({
+    queryKey: ["analysis", "status", taskId],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/analysis/status/${taskId}`
+      );
+      return data.data;
+    },
+    enabled: !!taskId,
+    refetchInterval: (query) => {
+      const status = (query?.state?.data as Record<string, unknown>)?.status;
+      if (status === "complete" || status === "failed") return false;
+      return 2000; // Poll every 2s while running
+    },
+    staleTime: 0,
+  });
+}
+
+// Compute match scores after analysis
+export function useComputeScores() {
+  return useMutation({
+    mutationFn: async (payload: { target_companies: string[] }) => {
+      const { data } = await api.post<APIResponse>(
+        "/api/v1/scores/compute",
         payload
       );
       return data.data;
@@ -236,8 +257,8 @@ export function useSyncGithub() {
   });
 }
 
-// Trigger LeetCode sync (direct mode)
-export function useSyncLeetCode() {
+// Trigger LeetCode sync (direct mode — from dashboard)
+export function useSyncLeetCodeDirect() {
   return useMutation({
     mutationFn: async (leetcode_username: string) => {
       const { data } = await api.post<APIResponse>("/api/v1/sync/leetcode/direct", {
@@ -402,6 +423,175 @@ export function useUpdateProblemProgress() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["practice"] });
+    },
+  });
+}
+
+// --- Roadmap API Hooks ---
+
+// List all roadmaps for the current user
+export function useRoadmapList() {
+  return useQuery({
+    queryKey: ["roadmaps"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/roadmap/");
+      return data.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Get roadmap for a specific company
+export function useRoadmapData(companySlug: string) {
+  return useQuery({
+    queryKey: ["roadmaps", companySlug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}`
+      );
+      return data.data;
+    },
+    enabled: !!companySlug,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Update roadmap progress
+export function useUpdateRoadmapProgress() {
+  return useMutation({
+    mutationFn: async ({
+      companySlug,
+      currentWeek,
+      progressPct,
+    }: {
+      companySlug: string;
+      currentWeek: number;
+      progressPct: number;
+    }) => {
+      const { data } = await api.patch<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/progress`,
+        { current_week: currentWeek, progress_pct: progressPct }
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+    },
+  });
+}
+
+// Update a kanban task status (triggers score recalculation)
+export function useUpdateTask() {
+  return useMutation({
+    mutationFn: async ({
+      companySlug,
+      taskId,
+      status,
+      lcCountDone,
+    }: {
+      companySlug: string;
+      taskId: string;
+      status: string;
+      lcCountDone?: number;
+    }) => {
+      const { data } = await api.patch<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/tasks/${taskId}`,
+        { status, lc_count_done: lcCountDone }
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+    },
+  });
+}
+
+// Get score history for the trend chart
+export function useScoreHistory(companySlug: string) {
+  return useQuery({
+    queryKey: ["score-history", companySlug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/score-history`
+      );
+      return data.data;
+    },
+    enabled: !!companySlug,
+    staleTime: 60 * 1000,
+  });
+}
+
+// Trigger LeetCode sync for a roadmap
+export function useSyncLeetCode() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/sync/leetcode`
+      );
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}
+
+// Trigger GitHub sync for a roadmap
+export function useSyncGitHub() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/sync/github`
+      );
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}
+
+// Export roadmap as JSON download
+export function useExportRoadmap() {
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/export`
+      );
+      // Trigger browser download
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${companySlug}-roadmap-export.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return data.data;
+    },
+  });
+}
+
+// Regenerate roadmap via Agent 7 (Groq LLM)
+export function useRegenerateRoadmap() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/regenerate`
+      );
+      if (!data.success) throw new Error(data.error || "Regeneration failed");
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      // Invalidate roadmap data to force refetch with new AI-generated content
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
     },
   });
 }

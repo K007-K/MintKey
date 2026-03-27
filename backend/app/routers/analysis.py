@@ -59,12 +59,45 @@ async def trigger_analysis(
         from agents.orchestrator import MintKeyOrchestrator
         from agents.core.models import UserAnalysisRequest
 
+        # Load the user's linked data from DB for fallback values
+        from app.core.database import async_session_factory
+        from app.models.db import User as UserModel
+        from sqlalchemy import select
+
+        db_github = payload.github_username
+        db_leetcode = payload.leetcode_username
+        db_resume_text = payload.resume_text
+        db_cgpa = None
+
+        try:
+            async with async_session_factory() as session:
+                result = await session.execute(
+                    select(UserModel).where(UserModel.id == current_user.id)
+                )
+                db_user = result.scalar_one_or_none()
+                if db_user:
+                    db_github = db_github or db_user.github_username
+                    db_leetcode = db_leetcode or db_user.leetcode_username
+                    db_cgpa = db_user.cgpa
+
+                    # Extract resume text from parsed data if not provided
+                    if not db_resume_text and db_user.resume_parsed_data:
+                        parsed = db_user.resume_parsed_data
+                        if isinstance(parsed, dict):
+                            db_resume_text = parsed.get("raw_text") or parsed.get("text") or json.dumps(parsed)
+                        elif isinstance(parsed, str):
+                            db_resume_text = parsed
+
+                    logger.info(f"[Analysis] Loaded user data: github={db_github}, leetcode={db_leetcode}, resume={'YES' if db_resume_text else 'NO'}, cgpa={db_cgpa}")
+        except Exception as e:
+            logger.error(f"[Analysis] Failed to load user data from DB: {e}")
+
         orchestrator = MintKeyOrchestrator()
         request = UserAnalysisRequest(
             user_id=str(current_user.id),
-            github_username=payload.github_username,
-            leetcode_username=payload.leetcode_username,
-            resume_text=payload.resume_text,
+            github_username=db_github,
+            leetcode_username=db_leetcode,
+            resume_text=db_resume_text,
             target_companies=payload.target_companies,
             months_available=payload.months_available,
             hours_per_day=payload.hours_per_day,
@@ -99,18 +132,73 @@ async def trigger_analysis(
             try:
                 from app.core.database import async_session_factory
                 from app.models.db import AnalysisResult
+                from datetime import datetime
+
+                result_dict = result.model_dump()
 
                 async with async_session_factory() as session:
                     analysis = AnalysisResult(
                         user_id=current_user.id,
-                        analysis_type="full",
-                        result_data=result.model_dump(),
                         status="completed",
+                        merged_analysis=result_dict,
+                        agent_outputs={
+                            "github_analysis": result_dict.get("github_analysis"),
+                            "dsa_analysis": result_dict.get("dsa_analysis"),
+                            "resume_data": result_dict.get("resume_data"),
+                            "trend_data": result_dict.get("trend_data"),
+                            "company_blueprints": result_dict.get("company_blueprints"),
+                            "gap_analysis": result_dict.get("gap_analysis"),
+                            "roadmaps": result_dict.get("roadmaps"),
+                        },
+                        coaching_message=(
+                            result_dict.get("coaching", {}).get("coaching_message", "")
+                            if result_dict.get("coaching") else None
+                        ),
+                        completed_at=datetime.utcnow(),
                     )
                     session.add(analysis)
                     await session.commit()
+                    logger.info(f"Analysis saved to DB for user {current_user.id}")
             except Exception as e:
                 logger.error(f"Failed to save analysis: {e}")
+                import traceback
+                traceback.print_exc()
+
+            # Save roadmaps + phases + tasks + skills to DB (Sprint 2C)
+            try:
+                roadmaps_data = result_dict.get("roadmaps", {})
+                if roadmaps_data:
+                    from app.repositories.roadmaps import RoadmapRepository
+
+                    async with async_session_factory() as session:
+                        repo = RoadmapRepository(session)
+                        for company_slug, rm in roadmaps_data.items():
+                            weeks = rm.get("weeks", [])
+                            roadmap = await repo.upsert(
+                                user_id=current_user.id,
+                                company_slug=company_slug,
+                                total_weeks=rm.get("total_weeks", len(weeks)),
+                                hours_per_day=int(rm.get("hours_per_day", 4)),
+                                weeks_data=weeks,
+                                target_level=rm.get("target_level"),
+                            )
+
+                            # Persist phases, kanban tasks, skill progress, initial snapshot
+                            phases = rm.get("phases", [])
+                            kanban_tasks = rm.get("kanban_tasks", [])
+                            await repo.persist_roadmap_details(
+                                roadmap=roadmap,
+                                phases_data=phases,
+                                kanban_tasks_data=kanban_tasks,
+                                weeks_data=weeks,
+                            )
+
+                        await session.commit()
+                        logger.info(f"Saved {len(roadmaps_data)} roadmap(s) with phases/tasks/skills to DB")
+            except Exception as e:
+                logger.error(f"Failed to save roadmaps: {e}")
+                import traceback
+                traceback.print_exc()
 
         except Exception as e:
             logger.error(f"Analysis failed: {e}")

@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import (
     Column, String, Float, Integer, Boolean, DateTime, Text,
-    ForeignKey, Enum as SAEnum
+    ForeignKey, Enum as SAEnum, UniqueConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -70,6 +70,7 @@ class User(Base):
     analyses = relationship("AnalysisResult", back_populates="user", cascade="all, delete-orphan")
     dsa_progress = relationship("UserDSAProgress", back_populates="user", cascade="all, delete-orphan")
     problem_progress = relationship("UserProblemProgress", back_populates="user", cascade="all, delete-orphan")
+    lc_submissions = relationship("LcSubmission", back_populates="user", cascade="all, delete-orphan")
 
 
 class PlatformScore(Base):
@@ -180,10 +181,127 @@ class UserRoadmap(Base):
     progress_pct = Column(Float, default=0.0)
     current_week = Column(Integer, default=1)
 
+    # New columns (Sprint 2A — Gaps #5, #10, #11, #7)
+    target_level = Column(String(50), nullable=True)       # "L3 SWE" — subtitle display
+    streak_days = Column(Integer, default=0)                 # Consecutive LC solve days
+    last_solved_at = Column(DateTime, nullable=True)         # Last LC solve timestamp
+    problems_this_week = Column(Integer, default=0)          # Weekly problem count
+    last_synced_at = Column(DateTime, nullable=True)         # "Last synced: X mins ago"
+    generation_hash = Column(String(64), nullable=True)      # SHA256 cache key for AI gen
+
     generated_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="roadmaps")
+    phases = relationship("RoadmapPhase", back_populates="roadmap", cascade="all, delete-orphan")
+    tasks = relationship("RoadmapTask", back_populates="roadmap", cascade="all, delete-orphan")
+    score_snapshots = relationship("ScoreSnapshot", back_populates="roadmap", cascade="all, delete-orphan")
+    skill_progress = relationship("SkillProgress", back_populates="roadmap", cascade="all, delete-orphan")
+
+
+class RoadmapPhase(Base):
+    """Phase tracking for a roadmap (4 phases per roadmap)."""
+    __tablename__ = "roadmap_phases"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    phase_number = Column(Integer, nullable=False)       # 1, 2, 3, 4
+    title = Column(String(255), nullable=False)           # "DSA Foundation"
+    week_start = Column(Integer, nullable=False)          # 1
+    week_end = Column(Integer, nullable=False)            # 5
+    status = Column(String(20), default="locked")         # locked | unlocked | done
+    progress = Column(Float, default=0.0)                 # 0–100
+    unlock_condition = Column(JSONB, nullable=True)       # { type: "always_unlocked" }
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    roadmap = relationship("UserRoadmap", back_populates="phases")
+
+
+class RoadmapTask(Base):
+    """Kanban board tasks for a roadmap (TODO/IN_PROGRESS/DONE)."""
+    __tablename__ = "roadmap_tasks"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    type = Column(String(50), nullable=False)             # dsa | project | system_design | stack | experience | consistency
+    title = Column(String(255), nullable=False)           # "Master Arrays Strings"
+    difficulty = Column(String(20), nullable=True)        # hard | medium | easy
+    estimated_weeks = Column(Integer, nullable=True)
+    score_impact = Column(Integer, nullable=True)         # +8, +7, etc.
+    status = Column(String(20), default="todo")           # todo | in_progress | done
+
+    # DSA-specific fields
+    lc_tag = Column(String(100), nullable=True)           # "array" — maps to LeetCode tag
+    lc_count_required = Column(Integer, nullable=True)
+    lc_count_done = Column(Integer, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    roadmap = relationship("UserRoadmap", back_populates="tasks")
+
+
+class ScoreSnapshot(Base):
+    """Time-series score data for the Match Score Over Time chart."""
+    __tablename__ = "score_snapshots"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    week_number = Column(Integer, nullable=False)
+    score = Column(Float, nullable=False)
+    projected_score = Column(Float, nullable=True)
+    recorded_at = Column(DateTime, default=datetime.utcnow)
+
+    roadmap = relationship("UserRoadmap", back_populates="score_snapshots")
+
+
+class SkillProgress(Base):
+    """Per-topic DSA progress (solved vs required)."""
+    __tablename__ = "skill_progress"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    topic = Column(String(100), nullable=False)           # "Arrays Strings"
+    lc_tag = Column(String(100), nullable=False)          # "array"
+    solved = Column(Integer, default=0)
+    required = Column(Integer, nullable=False)
+    progress = Column(Float, default=0.0)                 # solved / required * 100
+
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    roadmap = relationship("UserRoadmap", back_populates="skill_progress")
+
+    __table_args__ = (
+        UniqueConstraint('roadmap_id', 'topic', name='uq_roadmap_skill_topic'),
+    )
+
+
+class LcSubmission(Base):
+    """Raw synced LeetCode submission data."""
+    __tablename__ = "lc_submissions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    lc_problem_id = Column(String(20), nullable=False)    # LeetCode problem ID
+    title_slug = Column(String(255), nullable=False)       # "two-sum"
+    title = Column(String(255), nullable=False)            # "Two Sum"
+    difficulty = Column(String(10), nullable=False)        # Easy | Medium | Hard
+    tags = Column(ARRAY(Text), nullable=True)              # ["array", "hash-table"]
+    solved_at = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="lc_submissions")
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'lc_problem_id', name='uq_user_lc_problem'),
+        Index('ix_lc_sub_user_solved', 'user_id', 'solved_at'),
+    )
 
 
 class AnalysisResult(Base):

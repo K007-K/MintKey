@@ -68,6 +68,12 @@ class MintKeyOrchestrator:
         else:
             logger.error(f"[Orchestrator] Agent 5 failed: {phase1_results[4]}")
 
+        # =============================================
+        # FALLBACK: Enrich zero-score outputs with raw scraped data
+        # LLM JSON parsing can fail — use deterministic scoring as safety net
+        # =============================================
+        await self._enrich_with_raw_data(request, result)
+
         # Log phase 1 completion
         failures = [i+1 for i, r in enumerate(phase1_results) if isinstance(r, Exception)]
         if failures:
@@ -237,3 +243,147 @@ class MintKeyOrchestrator:
             skills.update(result.resume_data.extracted_skills)
 
         return list(skills)
+
+    async def _enrich_with_raw_data(
+        self, request: UserAnalysisRequest, result: CompleteAnalysis
+    ) -> None:
+        """
+        Safety net: if LLM agents returned zero-score defaults,
+        enrich with deterministic scores computed from raw scraped data.
+        This ensures the scoring engine always has real numbers.
+        """
+        # --- Enrich DSA (Agent 2) ---
+        if result.dsa_analysis and result.dsa_analysis.total_solved == 0 and request.leetcode_username:
+            try:
+                from scrapers.leetcode_scraper import LeetCodeScraper
+                scraper = LeetCodeScraper()
+                lc = await scraper.fetch_full_stats(request.leetcode_username)
+                summary = lc.get("summary", {})
+                total = summary.get("total_solved", 0)
+
+                if total > 0:
+                    easy = summary.get("easy", 0)
+                    medium = summary.get("medium", 0)
+                    hard = summary.get("hard", 0)
+
+                    # Deterministic DSA score (same thresholds as scoring.py)
+                    if total >= 400:
+                        depth = 90
+                    elif total >= 300:
+                        depth = 75
+                    elif total >= 200:
+                        depth = 60
+                    elif total >= 100:
+                        depth = 45
+                    elif total >= 50:
+                        depth = 35
+                    else:
+                        depth = max(total * 0.5, 5)
+
+                    # Bonus for difficulty balance
+                    if hard >= 10:
+                        depth = min(depth + 5, 100)
+                    if medium >= total * 0.4:
+                        depth = min(depth + 3, 100)
+
+                    # Build topic map from scraper data
+                    topics = {}
+                    for t in lc.get("topic_breakdown", []):
+                        tag = t.get("tag", "")
+                        solved = t.get("solved", 0)
+                        if solved >= 15:
+                            topics[tag] = "strong"
+                        elif solved >= 5:
+                            topics[tag] = "medium"
+                        else:
+                            topics[tag] = "weak"
+
+                    result.dsa_analysis.total_solved = total
+                    result.dsa_analysis.dsa_depth_score = round(depth, 1)
+                    result.dsa_analysis.difficulty_distribution = {
+                        "Easy": easy, "Medium": medium, "Hard": hard
+                    }
+                    result.dsa_analysis.easy_reliance_flag = (
+                        easy / total > 0.6 if total > 0 else False
+                    )
+                    result.dsa_analysis.topic_weakness_map = topics
+
+                    logger.info(
+                        f"[Orchestrator] Enriched DSA: total={total}, depth={depth}"
+                    )
+            except Exception as e:
+                logger.error(f"[Orchestrator] DSA enrichment failed: {e}")
+
+        # --- Enrich GitHub (Agent 1) ---
+        if result.github_analysis and result.github_analysis.project_depth_score == 0 and request.github_username:
+            try:
+                from scrapers.github_scraper import GitHubScraper
+                gh = GitHubScraper()
+                repos = await gh.fetch_repos(request.github_username)
+                original_repos = [r for r in repos if not r.get("fork", False)]
+
+                if original_repos:
+                    # Count languages
+                    langs = {}
+                    tech_stack = set()
+                    for repo in original_repos:
+                        lang = repo.get("language")
+                        if lang:
+                            langs[lang] = langs.get(lang, 0) + 1
+                            tech_stack.add(lang)
+
+                    # Compute project depth score
+                    repo_count = len(original_repos)
+                    lang_diversity = len(langs)
+                    has_readme = sum(
+                        1 for r in original_repos
+                        if r.get("description") and len(r.get("description", "")) > 20
+                    )
+                    total_stars = sum(r.get("stargazers_count", 0) for r in original_repos)
+
+                    # Score based on portfolio strength
+                    depth = 20  # Baseline for having a GitHub
+                    depth += min(repo_count * 4, 30)  # Up to 30 for repo count
+                    depth += min(lang_diversity * 5, 20)  # Up to 20 for lang diversity
+                    depth += min(has_readme * 3, 15)  # Up to 15 for descriptions
+                    depth += min(total_stars * 2, 15)  # Up to 15 for stars
+                    depth = min(depth, 100)
+
+                    # Maturity index
+                    maturity = 20
+                    maturity += min(repo_count * 3, 25)
+                    maturity += min(lang_diversity * 5, 25)
+                    maturity += min(total_stars * 3, 30)
+                    maturity = min(maturity, 100)
+
+                    # Language distribution
+                    total_lang = sum(langs.values())
+                    lang_dist = {
+                        k: round(v / total_lang * 100, 1)
+                        for k, v in sorted(langs.items(), key=lambda x: -x[1])
+                    }
+
+                    # Top projects
+                    top = sorted(original_repos, key=lambda r: r.get("stargazers_count", 0), reverse=True)[:5]
+                    top_projects = [
+                        {
+                            "name": r.get("name"),
+                            "language": r.get("language"),
+                            "description": r.get("description", ""),
+                            "stars": r.get("stargazers_count", 0),
+                        }
+                        for r in top
+                    ]
+
+                    result.github_analysis.project_depth_score = depth
+                    result.github_analysis.engineering_maturity_index = maturity
+                    result.github_analysis.language_distribution = lang_dist
+                    result.github_analysis.technology_stack = list(tech_stack)
+                    result.github_analysis.top_projects = top_projects
+
+                    logger.info(
+                        f"[Orchestrator] Enriched GitHub: depth={depth}, "
+                        f"maturity={maturity}, repos={repo_count}, langs={list(tech_stack)}"
+                    )
+            except Exception as e:
+                logger.error(f"[Orchestrator] GitHub enrichment failed: {e}")

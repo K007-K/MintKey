@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePreferencesStore } from "@/lib/store";
-import { useCurrentUser, useSyncGithub, useSyncLeetCode, useSyncCodeChef, useSyncHackerRank } from "@/lib/api";
+import { useCurrentUser, useSyncGithub, useSyncLeetCodeDirect, useSyncCodeChef, useSyncHackerRank } from "@/lib/api";
 import { useToast } from "@/lib/useToast";
 
 /**
@@ -35,7 +35,7 @@ export function useAutoSync() {
   } = usePreferencesStore();
 
   const syncGithub = useSyncGithub();
-  const syncLeetCode = useSyncLeetCode();
+  const syncLeetCode = useSyncLeetCodeDirect();
   const syncCodeChef = useSyncCodeChef();
   const syncHackerRank = useSyncHackerRank();
 

@@ -108,10 +108,12 @@ export default function DashboardLayout({
   children,
   title,
   subtitle,
+  headerAction,
 }: {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
+  headerAction?: React.ReactNode;
 }) {
   const { isOpen, toggle } = useSidebarStore();
   const { lastSyncedAt, syncInProgress } = usePreferencesStore();
@@ -167,6 +169,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
+            {headerAction}
             {/* Sync indicator — real timestamp (deferred to avoid SSR mismatch) */}
             <div className="hidden items-center gap-1.5 text-xs text-text-muted sm:flex">
               {!mounted ? (

@@ -1,14 +1,14 @@
 // Main dashboard — wired to real scraped platform data
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
-import { useDashboardSummary, useMatchScores, useCurrentUser } from "@/lib/api";
+import { useDashboardSummary, useMatchScores, useCurrentUser, useTriggerAnalysis, useAnalysisStatus, useComputeScores, queryClient } from "@/lib/api";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
-import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp, Zap, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 /* ─── Dashboard Page ─── */
@@ -40,10 +40,9 @@ export default function DashboardPage() {
   const priorityActions = (d?.priority_actions as Array<Record<string, string>>) || [];
   const trendData = (d?.trend_data as Array<Record<string, unknown>>) || null;
 
-  // Match scores for company bars
+  // Match scores for company bars — single source of truth (deduplicated from useMatchScores)
   const scores = Array.isArray(matchScores) ? matchScores : [];
-  const companyScores = (d?.company_scores as Array<Record<string, unknown>>) || [];
-  const displayScores = scores.length > 0 ? scores : companyScores;
+  const displayScores = scores;
 
   // Chart: only show real trend data, no fake placeholder
   const chartData = trendData && trendData.length > 0 ? trendData : null;
@@ -86,11 +85,164 @@ export default function DashboardPage() {
     ? recentActivity.length
     : (activityPlatformCounts[activityFilter] || 0);
 
+  // --- Analysis trigger state ---
+  const [analysisTaskId, setAnalysisTaskId] = useState<string | null>(null);
+  const [analysisStep, setAnalysisStep] = useState<"idle" | "triggering" | "running" | "scoring" | "complete" | "error">("idle");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const isTriggering = useRef(false); // #4: double-click guard
+  const pollFailCount = useRef(0); // #5: polling error counter
+
+  const triggerAnalysis = useTriggerAnalysis();
+  const computeScores = useComputeScores();
+  const { data: analysisStatusData } = useAnalysisStatus(analysisTaskId);
+
+  const user = currentUser as Record<string, unknown> | undefined;
+  const hasAnalysis = readiness.value != null;
+
+  // Use refs to avoid stale closures in effects (#6)
+  const displayScoresRef = useRef(displayScores);
+  displayScoresRef.current = displayScores;
+  const computeScoresRef = useRef(computeScores);
+  computeScoresRef.current = computeScores;
+
+  // #12: cleanup polling on unmount
+  useEffect(() => {
+    return () => { setAnalysisTaskId(null); };
+  }, []);
+
+  // Handle analysis completion → auto-compute scores
+  useEffect(() => {
+    const statusObj = analysisStatusData as Record<string, unknown> | undefined;
+    if (!statusObj) return;
+
+    // #5: Track polling failures — break infinite loop
+    if (!statusObj.status || statusObj.status === undefined) {
+      pollFailCount.current += 1;
+      if (pollFailCount.current >= 5) {
+        setAnalysisStep("error");
+        setAnalysisError("Lost connection to analysis. Please try again.");
+        setAnalysisTaskId(null);
+        pollFailCount.current = 0;
+      }
+      return;
+    }
+    pollFailCount.current = 0; // reset on valid response
+
+    if (statusObj.status === "complete" && analysisStep === "running") {
+      setAnalysisStep("scoring");
+      // Target companies from user profile, fallback to defaults (#11)
+      const userTargets = (user?.target_companies as string[]);
+      const currentScores = displayScoresRef.current;
+      const targetCompanies = (
+        userTargets && userTargets.length > 0 ? userTargets
+        : currentScores.length > 0
+          ? currentScores.map((s: Record<string, unknown>) => s.company_slug as string)
+          : ["google", "amazon", "microsoft"]
+      );
+
+      computeScoresRef.current.mutate(
+        { target_companies: targetCompanies },
+        {
+          onSuccess: () => {
+            setAnalysisStep("complete");
+            setAnalysisTaskId(null);
+            isTriggering.current = false;
+            // #8: Force immediate refetch (not just invalidate)
+            queryClient.refetchQueries({ queryKey: ["dashboard"] });
+            queryClient.refetchQueries({ queryKey: ["scores"] });
+          },
+          onError: (err) => {
+            setAnalysisStep("error");
+            setAnalysisError(`Score computation failed: ${(err as Error).message}`);
+            isTriggering.current = false;
+          },
+        }
+      );
+    }
+
+    if (statusObj.status === "failed") {
+      setAnalysisStep("error");
+      setAnalysisError((statusObj.error as string) || "Analysis failed");
+      setAnalysisTaskId(null);
+      isTriggering.current = false;
+    }
+  }, [analysisStatusData, analysisStep, user]);
+
+  const handleTriggerAnalysis = useCallback(() => {
+    // #4: Prevent double-click race condition
+    if (isTriggering.current) return;
+    isTriggering.current = true;
+    pollFailCount.current = 0;
+
+    setAnalysisStep("triggering");
+    setAnalysisError(null);
+
+    // #11: Target companies from user profile first
+    const userTargets = (user?.target_companies as string[]);
+    const currentScores = displayScoresRef.current;
+    const targetCompanies = (
+      userTargets && userTargets.length > 0 ? userTargets
+      : currentScores.length > 0
+        ? currentScores.map((s: Record<string, unknown>) => s.company_slug as string)
+        : ["google", "amazon", "microsoft"]
+    );
+
+    triggerAnalysis.mutate(
+      {
+        github_username: (user?.github_username as string) || undefined,
+        leetcode_username: (user?.leetcode_username as string) || undefined,
+        target_companies: targetCompanies,
+      },
+      {
+        onSuccess: (data) => {
+          const taskId = (data as Record<string, unknown>)?.task_id as string;
+          setAnalysisTaskId(taskId);
+          setAnalysisStep("running");
+        },
+        onError: (err) => {
+          setAnalysisStep("error");
+          setAnalysisError(`Trigger failed: ${(err as Error).message}`);
+          isTriggering.current = false;
+        },
+      }
+    );
+  }, [user, triggerAnalysis]);
+
+  const isAnalyzing = analysisStep !== "idle" && analysisStep !== "complete" && analysisStep !== "error";
+
   return (
     <DashboardLayout
       title={`${greeting}, ${userName}`}
       subtitle="Let's get you ready for that dream role."
+      headerAction={
+        <button
+          onClick={handleTriggerAnalysis}
+          disabled={isAnalyzing}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all active:scale-[0.97] ${
+            isAnalyzing
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md shadow-teal-200/50 hover:shadow-lg hover:from-teal-500 hover:to-cyan-500"
+          }`}
+        >
+          {isAnalyzing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : hasAnalysis ? (
+            <RefreshCw className="h-4 w-4" />
+          ) : (
+            <Zap className="h-4 w-4" />
+          )}
+          {isAnalyzing ? "Analyzing..." : hasAnalysis ? "Re-analyze" : "Analyze Now"}
+        </button>
+      }
     >
+      {/* ─── Full-screen Analysis Overlay ─── */}
+      <AnalysisOverlay
+        step={analysisStep}
+        error={analysisError}
+        onRetry={handleTriggerAnalysis}
+        onDismiss={() => { setAnalysisStep("idle"); setAnalysisError(null); }}
+      />
+
       <div className="space-y-5">
 
         {/* ─── Row 1: Four Stat Cards ─── */}
@@ -191,14 +343,14 @@ export default function DashboardPage() {
               </div>
             ) : displayScores.length > 0 ? (
               <div className="space-y-4">
-                {displayScores.slice(0, 5).map((s: Record<string, unknown>) => {
+                {displayScores.slice(0, 5).map((s: Record<string, unknown>, idx: number) => {
                   const slug = (s.company_slug as string) || "";
                   const rawScore = s.overall_score;
                   const isPending = rawScore === null || rawScore === undefined;
                   const score = isPending ? 0 : Math.round(rawScore as number);
                   const color = score >= 80 ? "#16a34a" : score >= 60 ? "#2563eb" : "#1e293b";
                   return (
-                    <Link key={slug} href={`/company/${slug}`} className="block group">
+                    <Link key={`${slug}-${idx}`} href={`/company/${slug}`} className="block group">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2.5">
                           <CompanyLogo name={slug} />
@@ -417,7 +569,202 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-/* ─── Action Item (clickable) ─── */
+/* ─── Analysis Overlay — Premium Loading Animation ─── */
+
+const AGENT_LIST = [
+  { key: "agent1", label: "GitHub Intelligence", emoji: "🔍" },
+  { key: "agent2", label: "DSA Performance", emoji: "⚡" },
+  { key: "agent3", label: "Resume Parser", emoji: "📄" },
+  { key: "agent4", label: "Market Trends", emoji: "📈" },
+  { key: "agent5", label: "Company Blueprint", emoji: "🏢" },
+  { key: "agent6", label: "Skill Gap Finder", emoji: "🎯" },
+  { key: "agent7", label: "Roadmap Builder", emoji: "🗺️" },
+  { key: "agent8", label: "Career Coach", emoji: "🤖" },
+];
+
+function AnalysisOverlay({ step, error, onRetry, onDismiss }: {
+  step: "idle" | "triggering" | "running" | "scoring" | "complete" | "error";
+  error: string | null;
+  onRetry: () => void;
+  onDismiss: () => void;
+}) {
+  const [activeAgent, setActiveAgent] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const isVisible = step !== "idle";
+
+  // Reset state when a NEW analysis starts (step goes to "triggering")
+  useEffect(() => {
+    if (step === "triggering") {
+      setActiveAgent(0);
+      setElapsedSec(0);
+    }
+  }, [step]);
+
+  // Cycle through agents during running state
+  useEffect(() => {
+    if (step !== "running") return;
+    const interval = setInterval(() => {
+      setActiveAgent(prev => {
+        if (prev >= AGENT_LIST.length - 1) {
+          clearInterval(interval);
+          return AGENT_LIST.length; // all done — no active agent, all show checkmarks
+        }
+        return prev + 1;
+      });
+    }, 700);
+    return () => clearInterval(interval);
+  }, [step]);
+
+  // Elapsed timer — only ticks during triggering/running/scoring, freezes on complete/error
+  useEffect(() => {
+    if (step === "idle") { setElapsedSec(0); return; }
+    if (step === "complete" || step === "error") return; // freeze timer
+    const interval = setInterval(() => setElapsedSec(prev => prev + 1), 1000);
+    return () => clearInterval(interval);
+  }, [step]);
+
+  // Auto-dismiss complete state after 5s (#7: increased from 3s)
+  useEffect(() => {
+    if (step === "complete") {
+      const timer = setTimeout(onDismiss, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, onDismiss]);
+
+  if (!isVisible) return null;
+
+  const phaseLabel = step === "triggering" ? "Initializing Pipeline..."
+    : step === "running" ? "AI Agents Analyzing..."
+    : step === "scoring" ? "Computing Match Scores..."
+    : step === "complete" ? "Analysis Complete!"
+    : "Analysis Failed";
+
+  return (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
+      isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+    }`}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
+
+      {/* Card */}
+      <div className={`relative w-full max-w-lg mx-4 rounded-2xl bg-white shadow-2xl shadow-black/20 overflow-hidden transition-all duration-500 ${
+        isVisible ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+      }`}
+      >
+        {/* Animated gradient top bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400" style={{
+          backgroundSize: "200% 100%",
+          animation: step === "complete" ? "none" : "shimmer 2s ease-in-out infinite",
+        }} />
+
+        <div className="p-8">
+          {/* Error state */}
+          {step === "error" ? (
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 mb-4">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Analysis Failed</h2>
+              <p className="mt-1 text-sm text-gray-500">{error || "Something went wrong. Please try again."}</p>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button onClick={onRetry} className="rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">Retry Analysis</button>
+                <button onClick={onDismiss} className="rounded-lg border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Dismiss</button>
+              </div>
+            </div>
+          ) : step === "complete" ? (
+            /* Complete state */
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 mb-4" style={{ animation: "scaleIn 0.5s ease-out" }}>
+                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Analysis Complete!</h2>
+              <p className="mt-1 text-sm text-gray-500">Your scores have been updated. Dashboard will refresh momentarily.</p>
+              <p className="mt-3 text-xs text-gray-400">Completed in {elapsedSec}s</p>
+            </div>
+          ) : (
+            /* Loading state */
+            <>
+              {/* Orbital animation */}
+              <div className="relative mx-auto h-32 w-32 mb-6">
+                {/* Outer ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-gray-100" />
+                {/* Spinning ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-teal-500 border-r-teal-300" style={{ animation: "spin 1.5s linear infinite" }} />
+                {/* Inner pulse */}
+                <div className="absolute inset-3 rounded-full border border-gray-50" />
+                <div className="absolute inset-3 rounded-full border border-transparent border-b-cyan-400 border-l-cyan-300" style={{ animation: "spin 2s linear infinite reverse" }} />
+                {/* Center icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-200/50" style={{ animation: "pulse 2s ease-in-out infinite" }}>
+                    <Sparkles className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+                {/* Orbiting dots */}
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="absolute inset-0" style={{ animation: `spin ${3 + i}s linear infinite`, animationDelay: `${i * 0.5}s` }}>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-teal-400" style={{ opacity: 0.6 + i * 0.15 }} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Phase label */}
+              <div className="text-center mb-6">
+                <h2 className="text-lg font-bold text-gray-900">{phaseLabel}</h2>
+                <p className="mt-1 text-sm text-gray-400">{elapsedSec}s elapsed</p>
+              </div>
+
+              {/* Agent status list */}
+              {step === "running" && (
+                <div className="grid grid-cols-2 gap-2">
+                  {AGENT_LIST.map((agent, idx) => {
+                    const isDone = idx < activeAgent;
+                    const isActive = idx === activeAgent;
+                    return (
+                      <div key={agent.key} className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all duration-300 ${
+                        isActive ? "bg-teal-50 text-teal-700 font-semibold shadow-sm" :
+                        isDone ? "bg-gray-50 text-gray-400" :
+                        "text-gray-300"
+                      }`}>
+                        <span className="text-sm">{agent.emoji}</span>
+                        <span className="truncate">{agent.label}</span>
+                        {isDone && <CheckCircle2 className="ml-auto h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />}
+                        {isActive && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-teal-500 flex-shrink-0" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Progress bar */}
+              <div className="mt-5">
+                <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-400 transition-all duration-700 ease-out"
+                    style={{
+                      width: step === "triggering" ? "15%" : step === "running" ? `${20 + (activeAgent / AGENT_LIST.length) * 60}%` : "100%",
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Keyframe styles */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes scaleIn {
+          0% { transform: scale(0.5); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 function ActionItem({ action }: { action: Record<string, string> }) {
   const inner = (

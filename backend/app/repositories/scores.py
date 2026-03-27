@@ -13,13 +13,37 @@ class ScoreRepository:
         self.db = db
 
     async def get_match_scores(self, user_id: UUID) -> list[CompanyMatchScore]:
-        """Get latest match scores for all target companies."""
+        """Get latest match scores for all target companies (one per company, most recent)."""
+        from sqlalchemy import text
+
+        # Use DISTINCT ON to get only the latest score per company
         result = await self.db.execute(
-            select(CompanyMatchScore)
-            .where(CompanyMatchScore.user_id == user_id)
-            .order_by(desc(CompanyMatchScore.computed_at))
+            text("""
+                SELECT DISTINCT ON (company_slug) *
+                FROM company_match_scores
+                WHERE user_id = :uid
+                ORDER BY company_slug, computed_at DESC
+            """),
+            {"uid": str(user_id)},
         )
-        return list(result.scalars().all())
+        rows = result.fetchall()
+
+        # Map raw rows back to ORM objects
+        scores = []
+        for row in rows:
+            score = CompanyMatchScore(
+                id=row.id,
+                user_id=row.user_id,
+                company_slug=row.company_slug,
+                overall_score=row.overall_score,
+                breakdown=row.breakdown,
+                status_label=row.status_label,
+                weeks_away=row.weeks_away,
+                computed_at=row.computed_at,
+            )
+            scores.append(score)
+
+        return scores
 
     async def get_match_score_history(self, user_id: UUID, company_slug: str, limit: int = 8) -> list[CompanyMatchScore]:
         """Get match score time-series for trend charts."""

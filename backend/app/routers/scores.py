@@ -67,13 +67,16 @@ async def compute_match_scores(
     # Fetch latest analysis
     result = await db.execute(
         select(AnalysisResult)
-        .where(AnalysisResult.user_id == current_user.id)
-        .order_by(desc(AnalysisResult.created_at))
+        .where(
+            AnalysisResult.user_id == current_user.id,
+            AnalysisResult.status == "completed",
+        )
+        .order_by(desc(AnalysisResult.completed_at))
         .limit(1)
     )
     latest = result.scalar_one_or_none()
 
-    if not latest or not latest.result_data:
+    if not latest or not latest.merged_analysis:
         return APIResponse(
             success=False,
             data=None,
@@ -83,7 +86,7 @@ async def compute_match_scores(
     # Build agent models from stored data
     from agents.core.models import GitHubAnalysis, DSAAnalysis, ResumeData, CompanyBlueprintModel
 
-    analysis_data = latest.result_data
+    analysis_data = latest.merged_analysis
     github = GitHubAnalysis(**analysis_data.get("github_analysis", {})) if analysis_data.get("github_analysis") else None
     dsa = DSAAnalysis(**analysis_data.get("dsa_analysis", {})) if analysis_data.get("dsa_analysis") else None
     resume = ResumeData(**analysis_data.get("resume_data", {})) if analysis_data.get("resume_data") else None
