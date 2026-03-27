@@ -17,6 +17,7 @@ from app.repositories.roadmaps import RoadmapRepository
 from app.services.scoring import get_score_status, recalculate_score
 from app.services.leetcode_sync import sync_leetcode_for_roadmap
 from app.services.github_sync import sync_github_for_roadmap
+from app.services.phase_unlock import evaluate_phase_progress
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,7 @@ async def get_phases(
                     "week_start": p.week_start,
                     "week_end": p.week_end,
                     "status": p.status,
+                    "progress": p.progress,
                     "unlock_condition": p.unlock_condition,
                 }
                 for p in result.scalars().all()
@@ -281,12 +283,16 @@ async def update_task(
             # Recalculate score after task update
             new_score = await recalculate_score(session, rm.id)
 
+            # Evaluate phase unlock
+            phase_stats = await evaluate_phase_progress(session, rm.id)
+
             await session.commit()
             return APIResponse(success=True, data={
                 "task_id": str(task.id),
                 "status": task.status,
                 "new_score": new_score,
                 "score_status": get_score_status(new_score),
+                "phase_updates": phase_stats,
             })
     except Exception as e:
         logger.error(f"Failed to update task: {e}")
