@@ -847,23 +847,24 @@ Step 6: Iterate until approved
 > we add learning features. "Nice-to-have" features (Visualizer, Patterns,
 > Cheatsheets) move to later sprints.
 
-### Sprint 1: Fix Companies + Match Report + Roadmap (1 week) — 🔶 IN PROGRESS
+### Sprint 1: Fix Companies + Match Report + Roadmap (1 week) — ✅ COMPLETE
 
 **Goal**: Complete the core user journey end-to-end
 
 | Task                                                            | Type               | Files                                        | Status |
 | --------------------------------------------------------------- | ------------------ | -------------------------------------------- | ------ |
-| Wire `/companies` to backend `company_blueprints` data          | Frontend           | `companies/page.tsx`                         | 🔶 UI built, not wired |
-| Wire `/company/[slug]` tabs to JSONB fields                     | Frontend           | `company/[slug]/page.tsx`                    | 🔶 UI built (1627 lines), mock data |
-| **Build `/match/[slug]`** — the core match score breakdown page | Frontend + Backend | `match/[slug]/page.tsx`, `routers/scores.py` | 🔶 UI built (800 lines), mock data |
-| Add `GET /api/scores/{slug}/history` endpoint                   | Backend            | `routers/scores.py`                          | ❌ |
-| Add `GET /api/skills/gaps?company={slug}` endpoint              | Backend            | `routers/scores.py`                          | ❌ |
-| Build `/roadmap` with `user_roadmaps` data                      | Frontend           | `roadmap/page.tsx`                           | 🔶 UI built (278 lines), mock data |
-| Build `/roadmap/[slug]` for company-specific roadmap            | Frontend           | `roadmap/[slug]/page.tsx`                    | 🔶 UI built (786 lines), mock data |
+| Wire `/companies` to backend `company_blueprints` data          | Frontend           | `companies/page.tsx`                         | ✅ |
+| Wire `/company/[slug]` tabs to JSONB fields                     | Frontend           | `company/[slug]/page.tsx`                    | ✅ |
+| **Build `/match/[slug]`** — the core match score breakdown page | Frontend + Backend | `match/[slug]/page.tsx`, `routers/scores.py` | ✅ Wired to real scores, gaps, history |
+| Add `GET /api/scores/{slug}/history` endpoint                   | Backend            | `routers/scores.py`                          | ✅ |
+| Add `GET /api/skills/gaps?company={slug}` endpoint              | Backend            | `routers/scores.py`                          | ✅ |
+| Build `/roadmap` with `user_roadmaps` data                      | Frontend           | `roadmap/page.tsx`                           | ✅ Wired to DB |
+| Build `/roadmap/[slug]` for company-specific roadmap            | Frontend           | `roadmap/[slug]/page.tsx`                    | ✅ Agent 7 live via Groq LLM |
 
-> **Sprint 1 status**: All frontend pages are BUILT with full UI but use
-> mock/static data. Backend wiring (API endpoints + data fetching) is the
-> remaining work. The core user journey UI exists end-to-end.
+> **Sprint 1 complete (March 27, 2026)**: All core journey pages wired to real
+> backend data. Agent 7 (Roadmap Builder) calls Groq/LLaMA 3.3 70B via LiteLLM.
+> Scoring engine, phase unlock, week auto-advance, LeetCode sync, GitHub sync,
+> and export all functioning.
 
 ---
 
@@ -1030,9 +1031,9 @@ DB needed — purely computational.
 | Feature                                    | Sprint      | Source                                              | Status |
 | ------------------------------------------ | ----------- | --------------------------------------------------- | ------ |
 | 📊 **Dashboard**                           | ✅ Done     | GitHub + LC + CC + HR sync                          | ✅ Wired |
-| 🏢 **Company Explorer**                    | 🔧 Sprint 1 | 15 company blueprints                               | 🔶 UI built, mock data |
-| 🎯 **Match Score Report**                  | 🔧 Sprint 1 | Score breakdown + gap analysis                      | 🔶 UI built, mock data |
-| 🗺️ **Personalized Roadmaps**               | 🔧 Sprint 1 | Agent 7 output                                      | 🔶 UI built, mock data |
+| 🏢 **Company Explorer**                    | ✅ Sprint 1 | 15 company blueprints                               | ✅ Wired to DB |
+| 🎯 **Match Score Report**                  | ✅ Sprint 1 | Score breakdown + gap analysis                      | ✅ Wired to real scores |
+| 🗺️ **Personalized Roadmaps**               | ✅ Sprint 1 | Agent 7 output                                      | ✅ Agent 7 live (Groq LLM) |
 | 📝 **DSA Practice** (~1134 unique problems) | 🔨 Sprint 2 | CSES + NeetCode + Striver's (deduplicated)          | ✅ Built + Seeded |
 | 💬 **AI Coach**                            | 🔨 Sprint 3 | Agent 8 with full user context (LiteLLM/Groq)       | 🔲 Placeholder |
 | 📝 **Aptitude Engine**                     | 🔨 Sprint 4 | Pre-generated question bank (zero runtime LLM cost) | 🔲 Not started |
