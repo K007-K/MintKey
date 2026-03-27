@@ -257,8 +257,8 @@ export function useSyncGithub() {
   });
 }
 
-// Trigger LeetCode sync (direct mode)
-export function useSyncLeetCode() {
+// Trigger LeetCode sync (direct mode — from dashboard)
+export function useSyncLeetCodeDirect() {
   return useMutation({
     mutationFn: async (leetcode_username: string) => {
       const { data } = await api.post<APIResponse>("/api/v1/sync/leetcode/direct", {
@@ -553,6 +553,26 @@ export function useSyncGitHub() {
       queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
       queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
       queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}
+
+// Export roadmap as JSON download
+export function useExportRoadmap() {
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/export`
+      );
+      // Trigger browser download
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${companySlug}-roadmap-export.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return data.data;
     },
   });
 }

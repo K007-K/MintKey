@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useSidebarStore, usePreferencesStore } from "@/lib/store";
 import { useToast } from "@/lib/useToast";
-import { useCurrentUser, useSyncGithub, useSyncLeetCode, useSyncCodeChef, useSyncHackerRank, queryClient } from "@/lib/api";
+import { useCurrentUser, useSyncGithub, useSyncLeetCodeDirect, useSyncCodeChef, useSyncHackerRank, queryClient } from "@/lib/api";
 import { MintKeyLogoMark, MintKeyLogo } from "@/components/ui/MintKeyLogo";
 import {
   LayoutDashboard,
@@ -111,7 +111,7 @@ export default function Sidebar() {
   const { data: session } = useSession();
   const { data: userData } = useCurrentUser();
   const syncGithub = useSyncGithub();
-  const syncLeetCode = useSyncLeetCode();
+  const syncLeetCode = useSyncLeetCodeDirect();
   const syncCodeChef = useSyncCodeChef();
   const syncHackerRank = useSyncHackerRank();
 

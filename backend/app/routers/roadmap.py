@@ -1,5 +1,6 @@
 # Roadmap endpoints — enriched with phases, tasks, skills, score history
 import logging
+from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -18,6 +19,7 @@ from app.services.scoring import get_score_status, recalculate_score
 from app.services.leetcode_sync import sync_leetcode_for_roadmap
 from app.services.github_sync import sync_github_for_roadmap
 from app.services.phase_unlock import evaluate_phase_progress
+from app.services.week_advance import auto_advance_week
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +75,10 @@ async def get_roadmap(
             rm = await repo.get_by_company(current_user.id, company_slug)
             if not rm:
                 return APIResponse(success=True, data=None)
+
+            # Auto-advance current_week based on elapsed time
+            await auto_advance_week(session, rm)
+            await session.commit()
 
             # Fetch phases
             phases_result = await session.execute(
@@ -442,3 +448,95 @@ async def sync_github(
     except Exception as e:
         logger.error(f"GitHub sync failed: {e}")
         return APIResponse(success=False, data=None, error=str(e))
+
+
+@router.get("/{company_slug}/export", response_model=APIResponse)
+async def export_roadmap(
+    company_slug: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Export the full roadmap as structured JSON for download."""
+    try:
+        async with async_session_factory() as session:
+            repo = RoadmapRepository(session)
+            rm = await repo.get_by_company(current_user.id, company_slug)
+            if not rm:
+                return APIResponse(success=False, data=None, error="Roadmap not found")
+
+            # Fetch all related data
+            phases_result = await session.execute(
+                select(RoadmapPhase)
+                .where(RoadmapPhase.roadmap_id == rm.id)
+                .order_by(RoadmapPhase.phase_number)
+            )
+            tasks_result = await session.execute(
+                select(RoadmapTask).where(RoadmapTask.roadmap_id == rm.id)
+            )
+            skills_result = await session.execute(
+                select(SkillProgress).where(SkillProgress.roadmap_id == rm.id)
+            )
+
+            export_data = {
+                "meta": {
+                    "company_slug": rm.company_slug,
+                    "total_weeks": rm.total_weeks,
+                    "hours_per_day": rm.hours_per_day,
+                    "current_week": rm.current_week,
+                    "progress_pct": rm.progress_pct,
+                    "streak_days": rm.streak_days,
+                    "generated_at": rm.generated_at.isoformat() if rm.generated_at else None,
+                    "exported_at": datetime.utcnow().isoformat(),
+                },
+                "phases": [
+                    {
+                        "phase_number": p.phase_number,
+                        "title": p.title,
+                        "week_start": p.week_start,
+                        "week_end": p.week_end,
+                        "status": p.status,
+                        "progress": p.progress,
+                    }
+                    for p in phases_result.scalars().all()
+                ],
+                "weeks_data": rm.weeks_data,
+                "tasks": [
+                    {
+                        "type": t.type,
+                        "title": t.title,
+                        "difficulty": t.difficulty,
+                        "status": t.status,
+                        "lc_tag": t.lc_tag,
+                        "lc_count_required": t.lc_count_required,
+                        "lc_count_done": t.lc_count_done,
+                    }
+                    for t in tasks_result.scalars().all()
+                ],
+                "skill_progress": [
+                    {
+                        "topic": s.topic,
+                        "lc_tag": s.lc_tag,
+                        "solved": s.solved,
+                        "required": s.required,
+                        "progress": s.progress,
+                    }
+                    for s in skills_result.scalars().all()
+                ],
+            }
+            return APIResponse(success=True, data=export_data)
+    except Exception as e:
+        logger.error(f"Export failed: {e}")
+        return APIResponse(success=False, data=None, error=str(e))
+
+
+@router.post("/{company_slug}/regenerate", response_model=APIResponse)
+async def regenerate_roadmap(
+    company_slug: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Regenerate roadmap via the AI agent pipeline (stub — will be wired to Agent 7)."""
+    # TODO: Wire to orchestrator.py → Agent 7 (roadmap_builder) when ready
+    return APIResponse(
+        success=False,
+        data=None,
+        error="Roadmap regeneration will be available once the AI agent pipeline is connected. Use the analysis flow to generate a new roadmap.",
+    )
