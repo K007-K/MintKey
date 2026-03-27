@@ -118,9 +118,12 @@ async def run_agent_loop(
 
             continue  # Loop back for next LLM call
 
-        # Unexpected finish_reason
+        # Unexpected finish_reason (e.g. 'length' — truncated)
         logger.warning(f"[{agent_name}] Unexpected finish: {finish_reason}")
-        return message.content or json.dumps({"error": "Unexpected response"})
+        content = message.content or ""
+        if content:
+            return content  # Return truncated content — caller should handle parse errors
+        return json.dumps({"error": "Unexpected response"})
 
     # Exhausted iterations
     logger.warning(f"[{agent_name}] Max iterations ({MAX_ITERATIONS}) reached")

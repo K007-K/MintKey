@@ -576,3 +576,22 @@ export function useExportRoadmap() {
     },
   });
 }
+
+// Regenerate roadmap via Agent 7 (Groq LLM)
+export function useRegenerateRoadmap() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/regenerate`
+      );
+      if (!data.success) throw new Error(data.error || "Regeneration failed");
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      // Invalidate roadmap data to force refetch with new AI-generated content
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}

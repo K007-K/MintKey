@@ -133,7 +133,7 @@ Return your roadmap as a JSON object."""
         tools=RESOURCE_TOOLS,
         tool_executor=execute_tool,
         temperature=0.7,
-        max_tokens=4000,
+        max_tokens=8000,
         agent_name="Roadmap Builder",
     )
 

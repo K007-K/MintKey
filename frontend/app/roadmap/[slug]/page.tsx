@@ -16,7 +16,7 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeetCode, useSyncGitHub, useExportRoadmap } from "@/lib/api";
+import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeetCode, useSyncGitHub, useExportRoadmap, useRegenerateRoadmap } from "@/lib/api";
 
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -56,6 +56,7 @@ export default function RoadmapPage() {
   const syncLC = useSyncLeetCode();
   const syncGH = useSyncGitHub();
   const exportRM = useExportRoadmap();
+  const regenerate = useRegenerateRoadmap();
 
   const isLoading = companyLoading || roadmapLoading;
 
@@ -261,8 +262,8 @@ export default function RoadmapPage() {
             <button onClick={() => syncGH.mutate(slug || "")} disabled={syncGH.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
               <RefreshCw className={`h-4 w-4 ${syncGH.isPending ? "animate-spin" : ""}`} /> {syncGH.isPending ? "Syncing..." : "Sync GitHub"}
             </button>
-            <button onClick={() => alert('Roadmap regeneration will be available once the AI agent pipeline is connected.')} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
-              <RefreshCw className="h-4 w-4" /> Regenerate
+            <button onClick={() => regenerate.mutate(slug || "")} disabled={regenerate.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
+              <RefreshCw className={`h-4 w-4 ${regenerate.isPending ? "animate-spin" : ""}`} /> {regenerate.isPending ? "Generating..." : "Regenerate"}
             </button>
             <button onClick={() => exportRM.mutate(slug || "")} disabled={exportRM.isPending} className="flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors disabled:opacity-50">
               <Download className="h-4 w-4" /> {exportRM.isPending ? "Exporting..." : "Export Plan"}

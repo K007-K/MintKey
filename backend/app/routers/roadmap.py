@@ -533,10 +533,113 @@ async def regenerate_roadmap(
     company_slug: str,
     current_user: User = Depends(get_current_user),
 ):
-    """Regenerate roadmap via the AI agent pipeline (stub — will be wired to Agent 7)."""
-    # TODO: Wire to orchestrator.py → Agent 7 (roadmap_builder) when ready
-    return APIResponse(
-        success=False,
-        data=None,
-        error="Roadmap regeneration will be available once the AI agent pipeline is connected. Use the analysis flow to generate a new roadmap.",
-    )
+    """Regenerate roadmap via Agent 7 (Roadmap Builder) — calls Groq LLM."""
+    async with async_session_factory() as session:
+        # 1. Fetch the company blueprint
+        from app.models.db import CompanyBlueprint
+        bp_result = await session.execute(
+            select(CompanyBlueprint).where(CompanyBlueprint.slug == company_slug)
+        )
+        blueprint_row = bp_result.scalar_one_or_none()
+
+        if not blueprint_row:
+            return APIResponse(success=False, data=None, error=f"No company blueprint found for '{company_slug}'")
+
+        company_blueprint = {
+            "company_name": blueprint_row.name,
+            "company_slug": blueprint_row.slug,
+            "dsa_topics": (blueprint_row.dsa_requirements or {}).get("focus_topics", []),
+            "required_stack": blueprint_row.tech_stack or [],
+            "required_skills": blueprint_row.tech_stack or [],
+            "interview_format": blueprint_row.interview_format or {},
+            "resources": {},
+        }
+
+        # 2. Build gap analysis from current skill progress
+        from app.models.db import SkillProgress
+        existing_rm = await session.execute(
+            select(UserRoadmap).where(
+                UserRoadmap.user_id == current_user.id,
+                UserRoadmap.company_slug == company_slug,
+            )
+        )
+        old_roadmap = existing_rm.scalar_one_or_none()
+        gap_analysis = {"blocking_gaps": [], "important_gaps": []}
+        dsa_analysis = {"topic_weakness_map": {}, "recommendations": []}
+
+        if old_roadmap:
+            skills_result = await session.execute(
+                select(SkillProgress).where(SkillProgress.roadmap_id == old_roadmap.id)
+            )
+            skills = skills_result.scalars().all()
+            for sk in skills:
+                if sk.progress < 30:
+                    gap_analysis["blocking_gaps"].append({
+                        "skill": sk.topic, "current": sk.solved, "required": sk.required,
+                    })
+                elif sk.progress < 70:
+                    gap_analysis["important_gaps"].append({
+                        "skill": sk.topic, "current": sk.solved, "required": sk.required,
+                    })
+                dsa_analysis["topic_weakness_map"][sk.topic] = {
+                    "solved": sk.solved, "required": sk.required, "progress": sk.progress,
+                }
+
+    # 3. Call Agent 7 (roadmap_builder) — this actually hits Groq LLM
+    try:
+        from agents.roadmap_builder import run_roadmap_builder
+        logger.info(f"[Regenerate] Calling Agent 7 for {company_slug}...")
+
+        roadmap_output = await run_roadmap_builder(
+            gap_analysis=gap_analysis,
+            dsa_analysis=dsa_analysis,
+            company_blueprint=company_blueprint,
+            months_available=6,
+            hours_per_day=4.0,
+        )
+
+        logger.info(f"[Regenerate] Agent 7 returned {len(roadmap_output.weeks)} weeks for {company_slug}")
+    except Exception as e:
+        logger.error(f"[Regenerate] Agent 7 failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return APIResponse(success=False, data=None, error=f"Roadmap generation failed: {str(e)}")
+
+    # 4. Save the new roadmap to DB
+    try:
+        from app.repositories.roadmaps import RoadmapRepository
+
+        rm_dict = roadmap_output.model_dump()
+        weeks = rm_dict.get("weeks", [])
+
+        async with async_session_factory() as session:
+            repo = RoadmapRepository(session)
+            roadmap = await repo.upsert(
+                user_id=current_user.id,
+                company_slug=company_slug,
+                total_weeks=rm_dict.get("total_weeks", len(weeks)),
+                hours_per_day=int(rm_dict.get("hours_per_day", 4)),
+                weeks_data=weeks,
+                target_level=rm_dict.get("target_level"),
+            )
+
+            await repo.persist_roadmap_details(
+                roadmap=roadmap,
+                phases_data=rm_dict.get("phases", []),
+                kanban_tasks_data=rm_dict.get("kanban_tasks", []),
+                weeks_data=weeks,
+            )
+
+            await session.commit()
+            logger.info(f"[Regenerate] Saved new roadmap for {company_slug}")
+
+        return APIResponse(
+            success=True,
+            data={"message": f"Roadmap regenerated for {company_slug}", "total_weeks": len(weeks)},
+        )
+    except Exception as e:
+        logger.error(f"[Regenerate] Failed to save roadmap: {e}")
+        import traceback
+        traceback.print_exc()
+        return APIResponse(success=False, data=None, error=f"Failed to save roadmap: {str(e)}")
+
