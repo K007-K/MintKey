@@ -16,7 +16,7 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeetCode } from "@/lib/api";
+import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeetCode, useSyncGitHub } from "@/lib/api";
 
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -54,6 +54,7 @@ export default function RoadmapPage() {
   const { data: scoreHistory } = useScoreHistory(slug || "");
   const updateTask = useUpdateTask();
   const syncLC = useSyncLeetCode();
+  const syncGH = useSyncGitHub();
 
   const isLoading = companyLoading || roadmapLoading;
 
@@ -254,6 +255,9 @@ export default function RoadmapPage() {
           <div className="flex gap-2">
             <button onClick={() => syncLC.mutate(slug || "")} disabled={syncLC.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
               <RefreshCw className={`h-4 w-4 ${syncLC.isPending ? "animate-spin" : ""}`} /> {syncLC.isPending ? "Syncing..." : "Sync LeetCode"}
+            </button>
+            <button onClick={() => syncGH.mutate(slug || "")} disabled={syncGH.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
+              <RefreshCw className={`h-4 w-4 ${syncGH.isPending ? "animate-spin" : ""}`} /> {syncGH.isPending ? "Syncing..." : "Sync GitHub"}
             </button>
             <button onClick={() => alert('Roadmap regeneration will be available once the AI agent pipeline is connected.')} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
               <RefreshCw className="h-4 w-4" /> Regenerate

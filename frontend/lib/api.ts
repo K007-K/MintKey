@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   useQuery,
   useMutation,
+  useQueryClient,
   QueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
@@ -527,6 +528,24 @@ export function useSyncLeetCode() {
     mutationFn: async (companySlug: string) => {
       const { data } = await api.post<APIResponse>(
         `/api/v1/roadmap/${companySlug}/sync/leetcode`
+      );
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}
+
+// Trigger GitHub sync for a roadmap
+export function useSyncGitHub() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/sync/github`
       );
       return data.data;
     },

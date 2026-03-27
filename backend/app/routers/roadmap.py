@@ -16,6 +16,7 @@ from app.models.schemas import APIResponse
 from app.repositories.roadmaps import RoadmapRepository
 from app.services.scoring import get_score_status, recalculate_score
 from app.services.leetcode_sync import sync_leetcode_for_roadmap
+from app.services.github_sync import sync_github_for_roadmap
 
 logger = logging.getLogger(__name__)
 
@@ -409,4 +410,29 @@ async def sync_leetcode(
             return APIResponse(success=True, data=sync_result)
     except Exception as e:
         logger.error(f"LeetCode sync failed: {e}")
+        return APIResponse(success=False, data=None, error=str(e))
+
+
+@router.post("/{company_slug}/sync/github", response_model=APIResponse)
+async def sync_github(
+    company_slug: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Trigger a GitHub sync for a specific roadmap."""
+    try:
+        async with async_session_factory() as session:
+            result = await session.execute(
+                select(UserRoadmap).where(
+                    UserRoadmap.user_id == current_user.id,
+                    UserRoadmap.company_slug == company_slug,
+                )
+            )
+            rm = result.scalar_one_or_none()
+            if not rm:
+                return APIResponse(success=False, data=None, error="Roadmap not found")
+
+            sync_result = await sync_github_for_roadmap(session, current_user, rm)
+            return APIResponse(success=True, data=sync_result)
+    except Exception as e:
+        logger.error(f"GitHub sync failed: {e}")
         return APIResponse(success=False, data=None, error=str(e))
