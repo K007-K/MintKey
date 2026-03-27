@@ -520,3 +520,20 @@ export function useScoreHistory(companySlug: string) {
   });
 }
 
+// Trigger LeetCode sync for a roadmap
+export function useSyncLeetCode() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (companySlug: string) => {
+      const { data } = await api.post<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/sync/leetcode`
+      );
+      return data.data;
+    },
+    onSuccess: (_data, companySlug) => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
+    },
+  });
+}

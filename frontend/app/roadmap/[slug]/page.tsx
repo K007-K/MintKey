@@ -16,7 +16,7 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory } from "@/lib/api";
+import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeetCode } from "@/lib/api";
 
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -53,6 +53,7 @@ export default function RoadmapPage() {
   const { data: rawRoadmap, isLoading: roadmapLoading } = useRoadmapData(slug || "");
   const { data: scoreHistory } = useScoreHistory(slug || "");
   const updateTask = useUpdateTask();
+  const syncLC = useSyncLeetCode();
 
   const isLoading = companyLoading || roadmapLoading;
 
@@ -248,11 +249,14 @@ export default function RoadmapPage() {
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#111827]">My {companyName} Roadmap</h1>
-            <p className="text-sm text-[#6B7280]">{companyRole} · {weeksTotal} week plan</p>
+            <p className="text-sm text-[#6B7280]">{companyRole} · {weeksTotal} week plan{rm?.last_synced_at ? ` · Last synced: ${new Date(rm.last_synced_at).toLocaleString()}` : ""}</p>
           </div>
           <div className="flex gap-2">
+            <button onClick={() => syncLC.mutate(slug || "")} disabled={syncLC.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
+              <RefreshCw className={`h-4 w-4 ${syncLC.isPending ? "animate-spin" : ""}`} /> {syncLC.isPending ? "Syncing..." : "Sync LeetCode"}
+            </button>
             <button onClick={() => alert('Roadmap regeneration will be available once the AI agent pipeline is connected.')} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
-              <RefreshCw className="h-4 w-4" /> Regenerate Roadmap
+              <RefreshCw className="h-4 w-4" /> Regenerate
             </button>
             <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">
               <Download className="h-4 w-4" /> Export Plan
