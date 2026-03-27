@@ -80,19 +80,6 @@ export function useMatchScores() {
   });
 }
 
-// Score history for trend chart
-export function useScoreHistory(companySlug: string) {
-  return useQuery({
-    queryKey: ["scores", "history", companySlug],
-    queryFn: async () => {
-      const { data } = await api.get<APIResponse>(
-        `/api/v1/scores/history/${companySlug}`
-      );
-      return data.data;
-    },
-    enabled: !!companySlug,
-  });
-}
 
 // Skill gaps for a specific company
 export function useSkillGaps(companySlug: string) {
@@ -489,6 +476,47 @@ export function useUpdateRoadmapProgress() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
     },
+  });
+}
+
+// Update a kanban task status (triggers score recalculation)
+export function useUpdateTask() {
+  return useMutation({
+    mutationFn: async ({
+      companySlug,
+      taskId,
+      status,
+      lcCountDone,
+    }: {
+      companySlug: string;
+      taskId: string;
+      status: string;
+      lcCountDone?: number;
+    }) => {
+      const { data } = await api.patch<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/tasks/${taskId}`,
+        { status, lc_count_done: lcCountDone }
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+    },
+  });
+}
+
+// Get score history for the trend chart
+export function useScoreHistory(companySlug: string) {
+  return useQuery({
+    queryKey: ["score-history", companySlug],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        `/api/v1/roadmap/${companySlug}/score-history`
+      );
+      return data.data;
+    },
+    enabled: !!companySlug,
+    staleTime: 60 * 1000,
   });
 }
 
