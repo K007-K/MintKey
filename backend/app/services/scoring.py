@@ -1,14 +1,49 @@
 # Weighted scoring algorithm — company-specific weight distributions
 import logging
+from uuid import UUID
+from datetime import datetime
 from typing import Optional
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from agents.core.models import (
     GitHubAnalysis,
     DSAAnalysis,
     ResumeData,
     CompanyBlueprintModel,
 )
+from app.models.db import (
+    UserRoadmap, RoadmapTask, SkillProgress,
+    ScoreSnapshot, CompanyMatchScore, CompanyBlueprint,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def get_score_status(score: float) -> str:
+    """Derive human-readable status label from score (Gap #14)."""
+    if score >= 85:
+        return "Ready"
+    if score >= 65:
+        return "Almost Ready"
+    if score >= 40:
+        return "Getting There"
+    return "Needs Work"
+
+
+def compute_projected_score(
+    current_score: float,
+    target_score: float,
+    current_week: int,
+    total_weeks: int,
+) -> float:
+    """Linear interpolation for projected score line on chart (Gap #17)."""
+    if total_weeks <= 0:
+        return current_score
+    progress_ratio = min(current_week / total_weeks, 1.0)
+    projected = current_score + (target_score - current_score) * progress_ratio
+    return round(projected, 1)
+
 
 # Company-specific weight distributions (must sum to 100)
 COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
@@ -475,3 +510,139 @@ class ScoringEngine:
                 platform_dsa_progress=platform_dsa_progress,
             )
         return results
+
+
+# --- DB-backed recalculate_score (Sprint 2D) ---
+
+async def recalculate_score(
+    session: AsyncSession,
+    roadmap_id: UUID,
+) -> float:
+    """
+    Recalculate match score from DB tables (skill_progress, roadmap_tasks).
+
+    Uses roadmap's company weights and records score snapshots for the chart.
+    """
+    # 1. Get roadmap
+    roadmap = await session.get(UserRoadmap, roadmap_id)
+    if not roadmap:
+        logger.error(f"Roadmap {roadmap_id} not found for score recalculation")
+        return 0.0
+
+    # 2. Get company blueprint for weights
+    blueprint_result = await session.execute(
+        select(CompanyBlueprint).where(CompanyBlueprint.slug == roadmap.company_slug)
+    )
+    blueprint = blueprint_result.scalar_one_or_none()
+
+    # Default weights
+    weights = {
+        "dsa": 35,
+        "projects": 20,
+        "system_design": 15,
+        "stack": 10,
+        "experience": 10,
+        "consistency": 10,
+    }
+    target_score = 85.0
+
+    if blueprint and blueprint.scoring_weights:
+        sw = blueprint.scoring_weights
+        if isinstance(sw, dict):
+            weights.update({k: v for k, v in sw.items() if k in weights})
+            target_score = sw.get("target", 85.0)
+
+    total_weight = sum(weights.values())
+
+    # 3. DSA component from skill_progress
+    skill_result = await session.execute(
+        select(SkillProgress).where(SkillProgress.roadmap_id == roadmap_id)
+    )
+    skills = list(skill_result.scalars().all())
+
+    dsa_score = 0.0
+    if skills:
+        total_solved = sum(s.solved for s in skills)
+        total_required = sum(s.required for s in skills)
+        if total_required > 0:
+            dsa_score = min((total_solved / total_required) * 100, 100)
+
+    # 4. Task-type components from roadmap_tasks
+    task_result = await session.execute(
+        select(RoadmapTask).where(RoadmapTask.roadmap_id == roadmap_id)
+    )
+    tasks = list(task_result.scalars().all())
+
+    task_scores = {}
+    for task_type in ["project", "system_design", "stack", "experience"]:
+        typed_tasks = [t for t in tasks if t.type == task_type]
+        if typed_tasks:
+            done_count = sum(1 for t in typed_tasks if t.status == "done")
+            task_scores[task_type] = (done_count / len(typed_tasks)) * 100
+        else:
+            task_scores[task_type] = 0.0
+
+    # 5. Consistency component
+    consistency_score = 0.0
+    if roadmap.streak_days and roadmap.streak_days > 0:
+        expected_days = min(roadmap.current_week * 5, 90)
+        if expected_days > 0:
+            consistency_score = min((roadmap.streak_days / expected_days) * 100, 100)
+
+    # 6. Weighted sum
+    score = (
+        dsa_score * (weights["dsa"] / total_weight)
+        + task_scores.get("project", 0) * (weights["projects"] / total_weight)
+        + task_scores.get("system_design", 0) * (weights["system_design"] / total_weight)
+        + task_scores.get("stack", 0) * (weights["stack"] / total_weight)
+        + task_scores.get("experience", 0) * (weights["experience"] / total_weight)
+        + consistency_score * (weights["consistency"] / total_weight)
+    )
+    score = round(score, 1)
+
+    # 7. Update roadmap progress
+    total_required_all = len(tasks) + sum(s.required for s in skills)
+    done_tasks = sum(1 for t in tasks if t.status == "done") + sum(s.solved for s in skills)
+    progress = (done_tasks / total_required_all * 100) if total_required_all > 0 else 0.0
+    roadmap.progress_pct = round(progress, 1)
+
+    # 8. Update company_match_scores
+    match_result = await session.execute(
+        select(CompanyMatchScore).where(
+            CompanyMatchScore.user_id == roadmap.user_id,
+            CompanyMatchScore.company_slug == roadmap.company_slug,
+        )
+    )
+    match_score_row = match_result.scalar_one_or_none()
+    if match_score_row:
+        old_score = match_score_row.overall_score or 0.0
+        match_score_row.overall_score = score
+        match_score_row.score_breakdown = {
+            "dsa": round(dsa_score, 1),
+            "projects": round(task_scores.get("project", 0), 1),
+            "system_design": round(task_scores.get("system_design", 0), 1),
+            "stack": round(task_scores.get("stack", 0), 1),
+            "experience": round(task_scores.get("experience", 0), 1),
+            "consistency": round(consistency_score, 1),
+        }
+
+        # 9. Record score snapshot if changed significantly (≥0.1%)
+        if abs(score - old_score) >= 0.1:
+            projected = compute_projected_score(
+                score, target_score, roadmap.current_week, roadmap.total_weeks
+            )
+            snapshot = ScoreSnapshot(
+                roadmap_id=roadmap_id,
+                week_number=roadmap.current_week,
+                score=score,
+                projected_score=projected,
+                recorded_at=datetime.utcnow(),
+            )
+            session.add(snapshot)
+
+    await session.flush()
+    logger.info(
+        f"Score recalculated for roadmap {roadmap_id}: {score}% "
+        f"(DSA={dsa_score:.0f}%, consistency={consistency_score:.0f}%)"
+    )
+    return score
