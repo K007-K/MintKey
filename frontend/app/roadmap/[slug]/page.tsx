@@ -87,8 +87,8 @@ export default function RoadmapPage() {
         id: p.phase_number,
         name: p.title,
         weeks: `${p.week_start}-${p.week_end}`,
-        status: p.status as "complete" | "active" | "locked",
-        progress: p.status === "complete" ? 100 : p.status === "active" ? Math.round(progressPercent) : 0,
+        status: p.status === "done" ? "complete" : p.status === "unlocked" ? "active" : "locked",
+        progress: p.progress ?? 0,
       }));
     }
     return [
@@ -114,12 +114,13 @@ export default function RoadmapPage() {
           theme: w.theme || `Week ${i + 1}`,
           hoursPerDay: rm.hours_per_day || 4,
           progressPercent: 0,
-          dsaProblems: dsaTask.topic ? [{
-            id: 1, name: dsaTask.topic, count: dsaTask.count || 5,
-            difficulty: dsaTask.difficulty || "Medium", status: "upcoming" as const,
+          dsaProblems: dsaTask.label ? [{
+            id: 1, name: dsaTask.label, count: dsaTask.count || 5,
+            difficulty: dsaTask.difficulty || "Medium", status: dsaTask.status || "upcoming" as const,
+            countDone: dsaTask.count_done || 0, lcTag: dsaTask.lc_tag || "",
           }] : [],
           dailyPlan: DAYS.map((day) => ({
-            day, task: daily[day] || "Study", isToday: false,
+            day, task: daily[day.toLowerCase()] || "Study", isToday: false,
           })),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           resources: resources.map((r: any) => ({
