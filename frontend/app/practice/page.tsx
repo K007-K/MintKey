@@ -176,10 +176,11 @@ export default function PracticePage() {
   const getStatus = (problemId: string) => progressMap.get(problemId) || "unsolved";
 
   /* ── Handlers ──────────────────────────────────── */
+  // P3: Triple-state toggle: unsolved → attempted → solved → unsolved
   const handleToggleSolved = (problemId: string) => {
     const current = getStatus(problemId);
-    const next = current === "solved" ? "unsolved" : "solved";
-    updateProgress.mutate({ problemId, status: next });
+    const next = current === "unsolved" ? "attempted" : current === "attempted" ? "solved" : "unsolved";
+    updateProgress.mutate({ problemId, status: next as "solved" | "attempted" | "unsolved" });
   };
 
   return (
@@ -211,9 +212,28 @@ export default function PracticePage() {
                     </div>
                     <div className="h-1.5 rounded-full bg-[#F3F4F6] overflow-hidden">
                       <div
-                        className="h-full rounded-full transition-all"
+                        className="h-full rounded-full transition-all duration-500"
                         style={{
-                          width: isActive ? "100%" : "0%",
+                          width: (() => {
+                            // P2: Calculate actual solved count for this plan
+                            if (plan.total === 0) return "0%";
+                            let solvedInPlan = 0;
+                            if (Array.isArray(progressData)) {
+                              const solvedIds = new Set(
+                                (progressData as ProgressRecord[])
+                                  .filter(p => p.status === "solved")
+                                  .map(p => p.problem_id)
+                              );
+                              // Count how many problems in this plan are solved
+                              problems.forEach(prob => {
+                                if (prob.study_plans?.includes(plan.plan) && solvedIds.has(prob.id)) {
+                                  solvedInPlan++;
+                                }
+                              });
+                            }
+                            const pct = Math.round((solvedInPlan / plan.total) * 100);
+                            return `${Math.min(100, pct)}%`;
+                          })(),
                           backgroundColor: isActive ? "#14B8A6" : "#3B82F6",
                         }}
                       />

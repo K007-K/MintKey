@@ -1,7 +1,7 @@
 // Roadmap page — backend-driven preparation dashboard
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
@@ -100,6 +100,10 @@ export default function RoadmapPage() {
     ];
   }, [rm?.phases, progressPercent]);
 
+  // Local state for per-week completion tracking (project done per week)
+  const [projectDoneMap, setProjectDoneMap] = useState<Record<number, boolean>>({});
+  const [dsaStatusOverrides, setDsaStatusOverrides] = useState<Record<string, string>>({});
+
   // Weeks — from weeks_data JSONB
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const weeks = useMemo(() => {
@@ -110,15 +114,24 @@ export default function RoadmapPage() {
         const dsaTask = w.dsa_task || {};
         const projectTask = w.project_task || {};
         const resources = w.resources || [];
+        const weekNum = w.week_number || i + 1;
+        const dsaKey = `w${weekNum}-dsa-1`;
+        const dsaStatus = dsaStatusOverrides[dsaKey] || dsaTask.status || "upcoming";
+        const dsaCount = dsaTask.count || 5;
+        const dsaCountDone = dsaTask.count_done || 0;
+        const dsaProgress = dsaCount > 0 ? dsaCountDone / dsaCount : 0;
+        const projDone = projectDoneMap[weekNum] ?? false;
+        // R5: Week progress = dsaProgress * 0.7 + projectProgress * 0.3
+        const weekProgress = Math.round((dsaProgress * 0.7 + (projDone ? 1 : 0) * 0.3) * 100);
         return {
-          number: w.week_number || i + 1,
+          number: weekNum,
           theme: w.theme || `Week ${i + 1}`,
           hoursPerDay: rm.hours_per_day || 4,
-          progressPercent: 0,
+          progressPercent: dsaStatus === "done" ? Math.max(weekProgress, 70) : weekProgress,
           dsaProblems: dsaTask.label ? [{
-            id: 1, name: dsaTask.label, count: dsaTask.count || 5,
-            difficulty: dsaTask.difficulty || "Medium", status: dsaTask.status || "upcoming" as const,
-            countDone: dsaTask.count_done || 0, lcTag: dsaTask.lc_tag || "",
+            id: 1, name: dsaTask.label, count: dsaCount,
+            difficulty: dsaTask.difficulty || "Medium", status: dsaStatus as "upcoming" | "in_progress" | "done" | "today",
+            countDone: dsaCountDone, lcTag: dsaTask.lc_tag || "",
           }] : [],
           dailyPlan: DAYS.map((day) => ({
             day, task: daily[day.toLowerCase()] || "Study", isToday: false,
@@ -131,13 +144,14 @@ export default function RoadmapPage() {
           projectTask: {
             name: projectTask.title || "Project work", impact: projectTask.score_impact || 3,
             effort: projectTask.effort || "Medium", hours: projectTask.hours || 4,
+            done: projDone,
           },
           milestone: w.milestone || `Complete Week ${i + 1}`,
         };
       });
     }
-    return [{ number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0, dsaProblems: [], dailyPlan: [], resources: [], projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0 }, milestone: "Loading..." }];
-  }, [rm?.weeks_data, rm?.hours_per_day]);
+    return [{ number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0, dsaProblems: [], dailyPlan: [], resources: [], projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0, done: false }, milestone: "Loading..." }];
+  }, [rm?.weeks_data, rm?.hours_per_day, projectDoneMap, dsaStatusOverrides]);
 
   // Kanban tasks — from backend
   const kanbanTasks = useMemo(() => {
@@ -200,10 +214,25 @@ export default function RoadmapPage() {
       .slice(0, 6);
   }, [company?.scoring_weights]);
 
-  // Handle task status change
+  // Handle task status change (Task Board)
   const handleTaskStatusChange = (taskId: string, newStatus: string) => {
     updateTask.mutate({ companySlug: slug || "", taskId, status: newStatus });
   };
+
+  // R1: Toggle DSA task status: upcoming → in_progress → done → upcoming
+  const handleDsaToggle = useCallback((weekNum: number, dsaId: number) => {
+    const key = `w${weekNum}-dsa-${dsaId}`;
+    setDsaStatusOverrides(prev => {
+      const current = prev[key] || "upcoming";
+      const next = current === "upcoming" ? "in_progress" : current === "in_progress" ? "done" : "upcoming";
+      return { ...prev, [key]: next };
+    });
+  }, []);
+
+  // R3: Toggle project task done/undone per week
+  const handleProjectToggle = useCallback((weekNum: number) => {
+    setProjectDoneMap(prev => ({ ...prev, [weekNum]: !prev[weekNum] }));
+  }, []);
 
   const [activeWeek, setActiveWeek] = useState(1);
   const [simSelected, setSimSelected] = useState<boolean[]>(scoreSimulator.map(() => false));
@@ -381,24 +410,28 @@ export default function RoadmapPage() {
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">DSA Problems</p>
             <div className="space-y-2 mb-6">
               {currentWeekData.dsaProblems.map((p) => (
-                <div key={p.id} className={`rounded-lg p-4 flex items-center gap-3 ${
-                  p.status === "done" ? "bg-emerald-50 border border-emerald-100" :
-                  p.status === "today" ? "bg-amber-50 border border-amber-300" :
-                  "bg-white border border-[#E5E7EB]"
+                <button
+                  key={p.id}
+                  onClick={() => handleDsaToggle(currentWeekData.number, p.id)}
+                  className={`w-full text-left rounded-lg p-4 flex items-center gap-3 transition-all duration-200 cursor-pointer hover:shadow-sm ${
+                  p.status === "done" ? "bg-emerald-50 border border-emerald-200" :
+                  p.status === "in_progress" ? "bg-amber-50 border border-amber-300" :
+                  "bg-white border border-[#E5E7EB] hover:border-emerald-300"
                 }`}>
-                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${
-                    p.status === "done" ? "bg-emerald-500" : p.status === "today" ? "border-2 border-amber-400" : "border-2 border-gray-300"
+                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                    p.status === "done" ? "bg-emerald-500" : p.status === "in_progress" ? "bg-amber-400" : "border-2 border-gray-300 hover:border-emerald-400"
                   }`}>
                     {p.status === "done" && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                    {p.status === "in_progress" && <Clock className="h-3 w-3 text-white" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium ${p.status === "done" ? "line-through text-gray-400" : "text-[#111827]"}`}>{p.name}</p>
-                    <p className="text-xs text-[#9CA3AF]">{p.count} {p.difficulty} problems</p>
+                    <p className="text-xs text-[#9CA3AF]">{p.countDone}/{p.count} {p.difficulty} problems</p>
                   </div>
                   {p.status === "done" && <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">Done ✓</span>}
-                  {p.status === "today" && <span className="bg-amber-500 text-white text-xs font-bold rounded-full px-2 py-0.5">TODAY</span>}
-                  {p.status === "upcoming" && <span className="text-xs text-[#9CA3AF]">Upcoming</span>}
-                </div>
+                  {p.status === "in_progress" && <span className="bg-amber-500 text-white text-xs font-bold rounded-full px-2 py-0.5 animate-pulse">In Progress</span>}
+                  {p.status === "upcoming" && <span className="text-xs text-[#9CA3AF]">Click to start</span>}
+                </button>
               ))}
             </div>
 
@@ -434,23 +467,46 @@ export default function RoadmapPage() {
 
             {/* PROJECT TASK */}
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Project Task</p>
-            <div className="border border-[#E5E7EB] rounded-lg p-4 mb-6">
+            <button
+              onClick={() => handleProjectToggle(currentWeekData.number)}
+              className={`w-full text-left border rounded-lg p-4 mb-6 transition-all duration-200 cursor-pointer hover:shadow-sm ${
+                currentWeekData.projectTask.done
+                  ? "bg-emerald-50 border-emerald-200"
+                  : "border-[#E5E7EB] hover:border-emerald-300"
+              }`}
+            >
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded border-2 border-gray-300 shrink-0 mt-0.5" />
+                <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  currentWeekData.projectTask.done
+                    ? "bg-emerald-500"
+                    : "border-2 border-gray-300 hover:border-emerald-400"
+                }`}>
+                  {currentWeekData.projectTask.done && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-[#111827]">{currentWeekData.projectTask.name} <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5 ml-1">+{currentWeekData.projectTask.impact}%</span></p>
+                  <p className={`text-sm font-medium ${
+                    currentWeekData.projectTask.done ? "line-through text-gray-400" : "text-[#111827]"
+                  }`}>{currentWeekData.projectTask.name} <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5 ml-1">+{currentWeekData.projectTask.impact}%</span></p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="bg-amber-100 text-amber-700 text-xs rounded-full px-2 py-0.5">{currentWeekData.projectTask.effort}</span>
                     <span className="text-xs text-[#9CA3AF]">· {currentWeekData.projectTask.hours} hrs</span>
+                    {currentWeekData.projectTask.done && <span className="text-xs font-bold text-emerald-600">✓ Complete</span>}
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
 
             {/* MILESTONE */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center gap-3">
-              <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
-              <p className="text-sm font-medium text-[#374151]">{currentWeekData.milestone} 🔒</p>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
+                <p className="text-sm font-medium text-[#374151]">{currentWeekData.milestone}</p>
+              </div>
+              {currentWeekData.progressPercent >= 70 ? (
+                <span className="bg-emerald-500 text-white text-xs font-bold rounded-full px-3 py-1">🎉 Week Complete!</span>
+              ) : (
+                <span className="text-xs text-[#9CA3AF]">{currentWeekData.progressPercent}% — complete tasks to unlock</span>
+              )}
             </div>
           </div>
         </div>
@@ -620,7 +676,7 @@ export default function RoadmapPage() {
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
               <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week</h3>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: 0 }))} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                <BarChart data={weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsaProblems.reduce((sum: number, p: { countDone: number }) => sum + (p.countDone || 0), 0) }))} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                   <XAxis dataKey="week" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
                   <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />

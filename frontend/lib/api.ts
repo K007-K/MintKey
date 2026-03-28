@@ -421,7 +421,50 @@ export function useUpdateProblemProgress() {
       );
       return data.data;
     },
-    onSuccess: () => {
+    // Optimistic update: instantly reflect status change in the UI
+    onMutate: async ({ problemId, status }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["practice", "progress"] });
+      await queryClient.cancelQueries({ queryKey: ["practice", "stats"] });
+      // Snapshot current data for rollback
+      const prevProgress = queryClient.getQueryData(["practice", "progress"]);
+      const prevStats = queryClient.getQueryData(["practice", "stats"]);
+      // Optimistically update progress cache
+      queryClient.setQueryData(["practice", "progress"], (old: unknown) => {
+        if (!Array.isArray(old)) return old;
+        const existing = old.find((p: { problem_id: string }) => p.problem_id === problemId);
+        if (existing) {
+          return old.map((p: { problem_id: string }) =>
+            p.problem_id === problemId ? { ...p, status } : p
+          );
+        }
+        return [...old, { problem_id: problemId, status, solved_at: status === "solved" ? new Date().toISOString() : null, attempts_count: 1 }];
+      });
+      // Optimistically update stats cache
+      queryClient.setQueryData(["practice", "stats"], (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        const prev = old as { total_solved: number; total_attempted: number };
+        const prevProgressArr = Array.isArray(prevProgress) ? prevProgress : [];
+        const existingEntry = prevProgressArr.find((p: { problem_id: string }) => p.problem_id === problemId);
+        const oldStatus = existingEntry?.status || "unsolved";
+        let solved = prev.total_solved;
+        let attempted = prev.total_attempted;
+        // Remove old status count
+        if (oldStatus === "solved") solved--;
+        if (oldStatus === "attempted") attempted--;
+        // Add new status count
+        if (status === "solved") solved++;
+        if (status === "attempted") attempted++;
+        return { ...prev, total_solved: Math.max(0, solved), total_attempted: Math.max(0, attempted) };
+      });
+      return { prevProgress, prevStats };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback on error
+      if (context?.prevProgress) queryClient.setQueryData(["practice", "progress"], context.prevProgress);
+      if (context?.prevStats) queryClient.setQueryData(["practice", "stats"], context.prevStats);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["practice"] });
     },
   });
@@ -500,8 +543,31 @@ export function useUpdateTask() {
       );
       return data.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["roadmaps"] });
+    // Optimistic update: instantly move task between kanban columns
+    onMutate: async ({ companySlug, taskId, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["roadmaps", companySlug] });
+      const prevRoadmap = queryClient.getQueryData(["roadmaps", companySlug]);
+      queryClient.setQueryData(["roadmaps", companySlug], (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        const roadmap = old as Record<string, unknown>;
+        if (!Array.isArray(roadmap.kanban_tasks)) return old;
+        return {
+          ...roadmap,
+          kanban_tasks: roadmap.kanban_tasks.map((t: { id: string }) =>
+            t.id === taskId ? { ...t, status } : t
+          ),
+        };
+      });
+      return { prevRoadmap, companySlug };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prevRoadmap) {
+        queryClient.setQueryData(["roadmaps", context.companySlug], context.prevRoadmap);
+      }
+    },
+    onSettled: (_data, _err, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["roadmaps", vars.companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["score-history", vars.companySlug] });
     },
   });
 }
