@@ -26,14 +26,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401 — clear stale token + trigger NextAuth session refresh
+// On 401 — attempt token refresh before giving up
+let isRefreshing = false;
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("mintkey_token");
-      // Trigger NextAuth to refresh the session (which re-runs JWT callback)
-      try { await fetch("/api/auth/session"); } catch {}
+    if (error.response?.status === 401 && typeof window !== "undefined" && !isRefreshing) {
+      isRefreshing = true;
+      try {
+        // Try to get a fresh session from NextAuth (server-side refresh)
+        const sessionRes = await fetch("/api/auth/session");
+        if (sessionRes.ok) {
+          const session = await sessionRes.json();
+          const backendToken = session?.backendToken;
+          if (backendToken) {
+            localStorage.setItem("mintkey_token", backendToken);
+            // Retry the original request with the new token
+            error.config.headers.Authorization = `Bearer ${backendToken}`;
+            isRefreshing = false;
+            return api.request(error.config);
+          }
+        }
+        // Session refresh didn't yield a token — clear stale one
+        localStorage.removeItem("mintkey_token");
+      } catch {
+        // Network error during refresh — don't delete token, might be temporary
+      } finally {
+        isRefreshing = false;
+      }
     }
     return Promise.reject(error);
   }
