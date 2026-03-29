@@ -30,8 +30,8 @@
 | `/settings`       | —     | ✅ 100%   | Export PDF, clear cache, delete account — **genuinely complete**     |
 | `/onboarding`     | —     | ⚠️ 80%   | Multi-step wizard exists, **unverified** if data saves correctly    |
 | `/` (Landing)     | —     | ✅ 100%   | Landing page — **genuinely complete**                               |
-| `/practice`       | 470   | ⚠️ 60%   | 1134 problems, basic filters work — **12 features missing** (see below) |
-| `/practice/[id]`  | 244   | ⚠️ 40%   | Page renders, but **all content NULL** in DB (desc, hints, solutions never enriched) |
+| `/practice`       | 687   | ✅ 95%   | 1134 problems, all filters (source/difficulty/status/tag), sorting, pagination, status toggle — **data enriched** |
+| `/practice/[id]`  | 420   | ✅ 90%   | Pattern strategy card, Quick Info, Learning Resources, Similar Problems, status toggle — **fully redesigned** |
 | `/dsa`            | 5     | ✅ 100%   | Redirects to `/practice` — **genuinely complete**                   |
 
 ### 🔶 What's Built But Uses Static/Mock Data
@@ -879,25 +879,28 @@ Step 6: Iterate until approved
 | **Deduplication logic** (ON CONFLICT on title)                   | Backend  | `scripts/seed_problems.py`                                | ✅     |
 | Problems router: list, filter, progress (6 endpoints)            | Backend  | `routers/practice.py` (209 lines)                         | ✅     |
 | Problems repository                                              | Backend  | `repositories/problems.py` (177 lines)                    | ✅     |
-| Build `/practice` page (filters, pagination, status toggle)      | Frontend | `practice/page.tsx` (470 lines)                           | ✅     |
-| Build `/practice/[id]` (detail, mark solved, back link)          | Frontend | `practice/[id]/page.tsx` (244 lines)                      | ✅     |
+| Build `/practice` page (filters, pagination, status toggle)      | Frontend | `practice/page.tsx` (687 lines)                           | ✅     |
+| Build `/practice/[id]` (detail, mark solved, back link)          | Frontend | `practice/[id]/page.tsx` (420 lines)                      | ✅     |
 | React Query hooks (6 hooks)                                      | Frontend | `lib/api.ts`                                              | ✅     |
 | DB seeded: **1134 unique problems** (exceeded 800 target)        | Data     | 5 sources deduped via SQLAlchemy ORM                      | ✅     |
 | `/dsa` → `/practice` redirect + sidebar updated                  | Frontend | `dsa/page.tsx`, `Sidebar.tsx`                             | ✅     |
+| **Data enrichment script** (difficulty, URL, pattern)            | Backend  | `scripts/enrich_problems.py`                              | ✅     |
+| **Status/tag/topic filters + column sorting**                    | Frontend | `practice/page.tsx`                                       | ✅     |
+| **Pattern strategy card + Learning Resources + Similar Problems**| Frontend | `practice/[id]/page.tsx`                                  | ✅     |
+| **Auth 401 fix** (interceptor token refresh)                     | Frontend | `lib/api.ts`                                              | ✅     |
 
 > **Actual seeded count**: 1134 unique problems (more than 800 target due to
 > better deduplication logic). Sources: NeetCode 150, NeetCode All, Blind 75,
 > Striver A2Z, CSES.
 >
-> **Remaining practice page gaps** (to be addressed in Sprint 2.5 or later):
-> - Problem descriptions/hints are all NULL (need enrichment script)
-> - Company tags not populated (need cross-reference with `company_wise_problems.json`)
-> - Pattern filter exists in backend params but not surfaced in frontend
-> - No solved status filter, no sorting by column
-> - `services/problem_service.py` not created (logic lives in repository)
-> - `POST /api/practice/explain/{id}` not built (needs Agent 9 + LiteLLM/Groq)
+> **Data enrichment (March 29, 2026)**: All 1134 problems now have difficulty,
+> URLs, and patterns. 1042 records updated by `scripts/enrich_problems.py`.
+>
+> **Remaining nice-to-haves** (lower priority):
+> - `POST /api/practice/explain/{id}` not built (needs Agent 9 + LiteLLM/Groq — Sprint 8)
 > - Multi-language solution code tabs not implemented
 > - Streak/stagnation analytics not computed
+> - Company tags not populated (need cross-reference with `company_wise_problems.json`)
 
 ---
 
