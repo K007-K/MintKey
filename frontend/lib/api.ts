@@ -404,12 +404,35 @@ export function useStudyPlans() {
   });
 }
 
-// Fetch user practice stats (auth required)
-export function usePracticeStats() {
+// Fetch user practice stats, optionally scoped to a study plan (auth required)
+export function usePracticeStats(plan?: string | null) {
   return useQuery({
-    queryKey: ["practice", "stats"],
+    queryKey: ["practice", "stats", plan || "all"],
     queryFn: async () => {
-      const { data } = await api.get<APIResponse>("/api/v1/practice/stats");
+      const params = plan ? `?plan=${plan}` : "";
+      const { data } = await api.get<APIResponse>(`/api/v1/practice/stats${params}`);
+      return data.data;
+    },
+  });
+}
+
+// Fetch per-plan solved counts for sidebar (auth required)
+export function usePlanSolvedCounts() {
+  return useQuery({
+    queryKey: ["practice", "plan-stats"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/practice/plan-stats");
+      return data.data;
+    },
+  });
+}
+
+// Fetch user's solve streak (auth required)
+export function useStreak() {
+  return useQuery({
+    queryKey: ["practice", "streak"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>("/api/v1/practice/streak");
       return data.data;
     },
   });

@@ -454,7 +454,7 @@ export default function RoadmapPage() {
             {/* RESOURCES */}
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Resources</p>
             <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
-              {currentWeekData.resources.map((r) => (
+              {currentWeekData.resources.map((r: { name: string; url: string; type: string }) => (
                 <a key={r.name} href={r.url} className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB] transition-colors">
                   <div className="flex items-center gap-3">
                     <ResourceIcon type={r.type} />
@@ -587,7 +587,7 @@ export default function RoadmapPage() {
                 <span className="bg-gray-100 text-gray-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.todo.length}</span>
               </div>
               <div className="space-y-3">
-                {kanbanTasks.todo.map((t) => (
+                {kanbanTasks.todo.map((t: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }) => (
                   <div key={t.title} className="relative rounded-xl border border-[#E5E7EB] p-4 bg-white">
                     <span className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{t.impact}%</span>
                     <div className="flex items-center gap-2 mb-2">
@@ -595,7 +595,7 @@ export default function RoadmapPage() {
                       <span className="text-xs text-[#9CA3AF]">{t.duration}</span>
                     </div>
                     <p className="text-sm font-semibold text-[#111827]">{t.title}</p>
-                    <button onClick={() => handleTaskStatusChange(t.id, "in_progress")} className="text-sm font-medium text-[#10B981] mt-2 hover:underline">Start →</button>
+                    <button onClick={() => t.id && handleTaskStatusChange(t.id, "in_progress")} className="text-sm font-medium text-[#10B981] mt-2 hover:underline">Start →</button>
                   </div>
                 ))}
               </div>
@@ -608,7 +608,7 @@ export default function RoadmapPage() {
                 <span className="bg-emerald-100 text-emerald-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.inProgress.length}</span>
               </div>
               <div className="space-y-3">
-                {kanbanTasks.inProgress.map((t) => (
+                {kanbanTasks.inProgress.map((t: { title: string; impact: number; progress: number }) => (
                   <div key={t.title} className="relative rounded-xl border-2 border-emerald-400 p-4 bg-white">
                     <span className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{t.impact}%</span>
                     <p className="text-sm font-semibold text-[#111827] mb-2">{t.title}</p>
@@ -630,7 +630,7 @@ export default function RoadmapPage() {
                 <span className="bg-emerald-100 text-emerald-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.done.length}</span>
               </div>
               <div className="space-y-2">
-                {kanbanTasks.done.map((t) => (
+                {kanbanTasks.done.map((t: string) => (
                   <div key={t} className="rounded-xl border border-[#E5E7EB] p-3.5 bg-emerald-50 flex items-center justify-between">
                     <span className="text-sm text-[#6B7280]">{t}</span>
                     <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
@@ -713,7 +713,7 @@ export default function RoadmapPage() {
             <span className="text-sm text-[#9CA3AF]">Sorted by impact</span>
           </div>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {kanbanTasks.todo.slice(0, 3).map((a, i) => (
+            {kanbanTasks.todo.slice(0, 3).map((a: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }, i: number) => (
               <div key={a.title} className="relative rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors">
                 <span className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{a.impact}%</span>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg[ACTION_COLORS[i % ACTION_COLORS.length]]}`}>
@@ -723,7 +723,7 @@ export default function RoadmapPage() {
                 <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{a.difficulty} · {a.duration}</p>
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#F3F4F6]">
                   <span className="text-xs text-[#9CA3AF] flex items-center gap-1"><Clock className="h-3 w-3" /> {a.duration}</span>
-                  <button onClick={() => handleTaskStatusChange(a.id, "in_progress")} className="text-sm font-medium text-[#10B981] hover:underline">Start →</button>
+                  <button onClick={() => a.id && handleTaskStatusChange(a.id, "in_progress")} className="text-sm font-medium text-[#10B981] hover:underline">Start →</button>
                 </div>
               </div>
             ))}

@@ -133,44 +133,127 @@ class ProblemsRepository:
 
         return progress
 
-    async def get_user_stats(self, user_id: UUID) -> dict:
-        """Get aggregated problem-solving stats for a user."""
-        # Total solved
-        solved_q = select(func.count(UserProblemProgress.id)).where(
-            and_(
-                UserProblemProgress.user_id == user_id,
-                UserProblemProgress.status == "solved",
-            )
-        )
-        solved_count = (await self.db.execute(solved_q)).scalar() or 0
+    async def get_user_stats(self, user_id: UUID, plan: Optional[str] = None) -> dict:
+        """Get aggregated problem-solving stats, optionally scoped to a study plan."""
+        base_filter = [UserProblemProgress.user_id == user_id]
 
-        # Total attempted
-        attempted_q = select(func.count(UserProblemProgress.id)).where(
-            and_(
-                UserProblemProgress.user_id == user_id,
-                UserProblemProgress.status == "attempted",
+        # When plan is set, only count problems that belong to that plan
+        if plan:
+            solved_q = (
+                select(func.count(UserProblemProgress.id))
+                .join(ExternalProblem, UserProblemProgress.problem_id == ExternalProblem.id)
+                .where(
+                    and_(
+                        *base_filter,
+                        UserProblemProgress.status == "solved",
+                        ExternalProblem.study_plans.any(plan),
+                    )
+                )
             )
-        )
+            attempted_q = (
+                select(func.count(UserProblemProgress.id))
+                .join(ExternalProblem, UserProblemProgress.problem_id == ExternalProblem.id)
+                .where(
+                    and_(
+                        *base_filter,
+                        UserProblemProgress.status == "attempted",
+                        ExternalProblem.study_plans.any(plan),
+                    )
+                )
+            )
+            total_in_plan = await self.count_problems(study_plan=plan)
+        else:
+            solved_q = select(func.count(UserProblemProgress.id)).where(
+                and_(*base_filter, UserProblemProgress.status == "solved")
+            )
+            attempted_q = select(func.count(UserProblemProgress.id)).where(
+                and_(*base_filter, UserProblemProgress.status == "attempted")
+            )
+            total_in_plan = None
+
+        solved_count = (await self.db.execute(solved_q)).scalar() or 0
         attempted_count = (await self.db.execute(attempted_q)).scalar() or 0
 
-        # By difficulty
+        # By difficulty (always global for the difficulty breakdown)
         by_difficulty = {}
         for diff in ["Easy", "Medium", "Hard"]:
+            diff_filters = [
+                *base_filter,
+                UserProblemProgress.status == "solved",
+                ExternalProblem.difficulty == diff,
+            ]
+            if plan:
+                diff_filters.append(ExternalProblem.study_plans.any(plan))
             diff_q = (
+                select(func.count(UserProblemProgress.id))
+                .join(ExternalProblem, UserProblemProgress.problem_id == ExternalProblem.id)
+                .where(and_(*diff_filters))
+            )
+            by_difficulty[diff.lower()] = (await self.db.execute(diff_q)).scalar() or 0
+
+        result = {
+            "total_solved": solved_count,
+            "total_attempted": attempted_count,
+            "by_difficulty": by_difficulty,
+        }
+        if total_in_plan is not None:
+            result["total_in_plan"] = total_in_plan
+        return result
+
+    async def get_plan_solved_counts(self, user_id: UUID) -> dict:
+        """Get solved counts for each study plan — used by the sidebar."""
+        plans = ["neetcode_150", "neetcode_all", "blind_75", "striver_a2z", "cses"]
+        counts = {}
+        for plan in plans:
+            q = (
                 select(func.count(UserProblemProgress.id))
                 .join(ExternalProblem, UserProblemProgress.problem_id == ExternalProblem.id)
                 .where(
                     and_(
                         UserProblemProgress.user_id == user_id,
                         UserProblemProgress.status == "solved",
-                        ExternalProblem.difficulty == diff,
+                        ExternalProblem.study_plans.any(plan),
                     )
                 )
             )
-            by_difficulty[diff.lower()] = (await self.db.execute(diff_q)).scalar() or 0
+            counts[plan] = (await self.db.execute(q)).scalar() or 0
+        return counts
+
+    async def get_user_streak(self, user_id: UUID) -> dict:
+        """Get consecutive-day solve streak for a user."""
+        from sqlalchemy import cast, Date, distinct
+        q = (
+            select(distinct(cast(UserProblemProgress.solved_at, Date)))
+            .where(
+                and_(
+                    UserProblemProgress.user_id == user_id,
+                    UserProblemProgress.status == "solved",
+                    UserProblemProgress.solved_at.isnot(None),
+                )
+            )
+            .order_by(cast(UserProblemProgress.solved_at, Date).desc())
+        )
+        result = await self.db.execute(q)
+        dates = [row[0] for row in result.fetchall()]
+
+        if not dates:
+            return {"current_streak": 0, "active_today": False, "total_solve_days": 0}
+
+        from datetime import date as dt_date, timedelta
+        today = dt_date.today()
+        active_today = dates[0] == today
+        streak = 0
+        check_date = today if active_today else today - timedelta(days=1)
+
+        for d in dates:
+            if d == check_date:
+                streak += 1
+                check_date -= timedelta(days=1)
+            elif d < check_date:
+                break
 
         return {
-            "total_solved": solved_count,
-            "total_attempted": attempted_count,
-            "by_difficulty": by_difficulty,
+            "current_streak": streak,
+            "active_today": active_today,
+            "total_solve_days": len(dates),
         }

@@ -195,14 +195,46 @@ async def update_problem_progress(
 
 @router.get("/stats", response_model=APIResponse)
 async def get_practice_stats(
+    plan: Optional[str] = Query(None, description="Scope stats to a study plan: neetcode_150, blind_75, etc."),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get aggregated problem-solving stats."""
+    """Get aggregated problem-solving stats, optionally scoped to a study plan."""
     try:
         repo = ProblemsRepository(db)
-        stats = await repo.get_user_stats(current_user.id)
+        stats = await repo.get_user_stats(current_user.id, plan=plan)
         return APIResponse(success=True, data=stats)
     except Exception as e:
         logger.error(f"Failed to get stats: {e}")
         return APIResponse(success=False, data=None, error="Failed to fetch stats")
+
+
+@router.get("/plan-stats", response_model=APIResponse)
+async def get_plan_solved_counts(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get solved counts for each study plan — used by sidebar progress bars."""
+    try:
+        repo = ProblemsRepository(db)
+        counts = await repo.get_plan_solved_counts(current_user.id)
+        return APIResponse(success=True, data=counts)
+    except Exception as e:
+        logger.error(f"Failed to get plan stats: {e}")
+        return APIResponse(success=False, data=None, error="Failed to fetch plan stats")
+
+
+@router.get("/streak", response_model=APIResponse)
+async def get_user_streak(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get the user's consecutive-day solve streak."""
+    try:
+        repo = ProblemsRepository(db)
+        streak = await repo.get_user_streak(current_user.id)
+        return APIResponse(success=True, data=streak)
+    except Exception as e:
+        logger.error(f"Failed to get streak: {e}")
+        return APIResponse(success=False, data=None, error="Failed to fetch streak")
+

@@ -176,8 +176,9 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
 
   // Find similar problems (same primary tag, different problem)
   const similarProblems = useMemo(() => {
-    if (!relatedData?.problems || !primaryTag) return [];
-    return (relatedData.problems as APIProblem[])
+    const rd = relatedData as { problems?: APIProblem[] } | undefined;
+    if (!rd?.problems || !primaryTag) return [];
+    return (rd.problems as APIProblem[])
       .filter((p) => p.id !== id && p.tags?.some((t: string) => t.toLowerCase() === primaryTag.toLowerCase()))
       .slice(0, 5);
   }, [relatedData, id, primaryTag]);
