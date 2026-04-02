@@ -152,7 +152,6 @@ LEETCODE_ENRICHMENT: dict[str, tuple[int | None, str, str]] = {
     "time-based-key-value-store": (981, "Medium", "https://leetcode.com/problems/time-based-key-value-store/"),
     "reorder-list": (143, "Medium", "https://leetcode.com/problems/reorder-list/"),
     "copy-list-with-random-pointer": (138, "Medium", "https://leetcode.com/problems/copy-list-with-random-pointer/"),
-    "add-two-numbers": (2, "Medium", "https://leetcode.com/problems/add-two-numbers/"),
     "find-the-duplicate-number": (287, "Medium", "https://leetcode.com/problems/find-the-duplicate-number/"),
     "design-twitter": (355, "Medium", "https://leetcode.com/problems/design-twitter/"),
     "hand-of-straights": (846, "Medium", "https://leetcode.com/problems/hand-of-straights/"),

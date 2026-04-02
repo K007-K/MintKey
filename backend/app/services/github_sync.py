@@ -1,7 +1,6 @@
 # GitHub sync service — pulls repo data and updates skill_progress + activity tracking
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

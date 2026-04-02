@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 
-from sqlalchemy import select, func, case, and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db import UserRoadmap, RoadmapPhase, RoadmapTask
@@ -48,8 +48,6 @@ async def evaluate_phase_progress(session: AsyncSession, roadmap_id) -> dict:
     )
     all_tasks = tasks_result.scalars().all()
 
-    # Build week → tasks mapping from weeks_data
-    weeks_data = roadmap.weeks_data or []
     total_tasks_count = len(all_tasks)
     done_tasks_count = sum(1 for t in all_tasks if t.status == "done")
 

@@ -142,7 +142,7 @@ Return your roadmap as a JSON object."""
         output = RoadmapOutput(**data)
         if output.weeks and len(output.weeks) > 0:
             return output
-        logger.warning(f"[Roadmap Builder] LLM returned empty weeks, using template fallback")
+        logger.warning("[Roadmap Builder] LLM returned empty weeks, using template fallback")
     except Exception as e:
         logger.error(f"[Roadmap Builder] Failed to parse output: {e}")
 
