@@ -261,26 +261,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   // Quick stats
   const targetScore = 85;
   const gapToClose = Math.max(0, targetScore - matchScore);
-  const problemsToSolve = totalRequired;
-
-  // Generate projected score history: show current + projected improvement
-  const generatedHistory: MatchReportData["scoreHistory"] = [];
-  if (hasRealScores) {
-    const now = new Date();
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    // Current month as "Your Score", next months as projected growth
-    const monthlyGain = Math.max(0.5, (targetScore - matchScore) / (weeksAway || 8) * 4.3);
-    for (let i = 0; i < 12; i++) {
-      const monthDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const label = monthNames[monthDate.getMonth()];
-      if (i === 0) {
-        generatedHistory.push({ month: label, score: matchScore, projected: matchScore, target: targetScore });
-      } else {
-        const projectedScore = Math.min(100, Math.round(matchScore + monthlyGain * i));
-        generatedHistory.push({ month: label, score: null, projected: projectedScore, target: targetScore });
-      }
-    }
-  }
+  const problemsToSolve = Math.max(0, totalRequired - userTotalSolved);
 
   return {
     name: companyName,
@@ -296,7 +277,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     radarData,
     dsaAnalysis,
     topActions,
-    scoreHistory: generatedHistory,
+    scoreHistory: [],
     targetScoreLine: targetScore,
     whyScore: {
       strong: strongAreas.length > 0 ? strongAreas : ["Run analysis to see your strengths"],
@@ -412,7 +393,7 @@ export default function MatchReportPage() {
       rawPlatformStats
     );
 
-    // Build score history from real data if available, otherwise keep generated projections
+    // Build score history from real analysis runs only
     if (rawHistory && Array.isArray(rawHistory) && rawHistory.length > 0) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       report.scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h: { overall_score: number; computed_at: string }, i: number) => ({
@@ -797,42 +778,59 @@ export default function MatchReportPage() {
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-semibold text-[#111827]">Score Improvement Over Time</h3>
-            <div className="flex gap-1.5">
-              {(["1M", "3M", "6M", "1Y"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setTimeFilter(f)}
-                  className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
-                    timeFilter === f ? "bg-[#10B981] text-white" : "border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB]"
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
+            {data.scoreHistory.length > 1 && (
+              <div className="flex gap-1.5">
+                {(["1M", "3M", "6M", "1Y"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setTimeFilter(f)}
+                    className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+                      timeFilter === f ? "bg-[#10B981] text-white" : "border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB]"
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={filteredHistory} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-              <XAxis dataKey="month" tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
-              <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
-              <Line
-                type="monotone" dataKey="target" name={`Target (${data.targetScoreLine}%)`}
-                stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls
-              />
-              <Line
-                type="monotone" dataKey="score" name="Your Score"
-                stroke="#10B981" strokeWidth={2} dot={{ r: 4, fill: "#10B981" }} connectNulls
-              />
-              <Line
-                type="monotone" dataKey="projected" name="Projected"
-                stroke="#9CA3AF" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 3, fill: "#9CA3AF" }} connectNulls
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {data.scoreHistory.length >= 2 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={filteredHistory} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <XAxis dataKey="month" tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
+                <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
+                <Line
+                  type="monotone" dataKey="target" name={`Target (${data.targetScoreLine}%)`}
+                  stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls
+                />
+                <Line
+                  type="monotone" dataKey="score" name="Your Score"
+                  stroke="#10B981" strokeWidth={2} dot={{ r: 5, fill: "#10B981", stroke: "#fff", strokeWidth: 2 }} connectNulls
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-14 h-14 rounded-full bg-[#ECFDF5] flex items-center justify-center mb-4">
+                <TrendingUp className="h-6 w-6 text-[#10B981]" />
+              </div>
+              {data.scoreHistory.length === 1 ? (
+                <>
+                  <p className="text-sm font-semibold text-[#111827] mb-1">First analysis complete — {data.matchScore}%</p>
+                  <p className="text-xs text-[#6B7280] max-w-sm">Run another analysis after improving your skills to see how your score changes over time.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-[#111827] mb-1">No score history yet</p>
+                  <p className="text-xs text-[#6B7280] max-w-sm">Run your first analysis to start tracking your progress over time.</p>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
       </div>
