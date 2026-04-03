@@ -43,14 +43,32 @@ type MatchReportData = {
 };
 
 /* ─── Weight key → display label / icon mapping ─── */
+// Keys match backend scoring_weights DB columns AND scoring engine component_scores
 const WEIGHT_MAP: Record<string, { label: string; icon: string; tooltip: string; targetPct: number }> = {
   dsa_score:            { label: "DSA",          icon: "code",        tooltip: "Data structures & algorithms proficiency",       targetPct: 90 },
+  dsa:                  { label: "DSA",          icon: "code",        tooltip: "Data structures & algorithms proficiency",       targetPct: 90 },
   project_score:        { label: "Projects",     icon: "layers",      tooltip: "Quality and depth of portfolio projects",        targetPct: 85 },
+  projects:             { label: "Projects",     icon: "layers",      tooltip: "Quality and depth of portfolio projects",        targetPct: 85 },
   system_design_score:  { label: "System Design",icon: "settings",    tooltip: "System design knowledge and practical experience",targetPct: 85 },
   stack_alignment:      { label: "Tech Stack",   icon: "settings",    tooltip: "Alignment of your tech stack with company needs", targetPct: 85 },
+  stack:                { label: "Tech Stack",   icon: "settings",    tooltip: "Alignment of your tech stack with company needs", targetPct: 85 },
   academic_score:       { label: "Academics",    icon: "graduation",  tooltip: "Academic background and GPA alignment",          targetPct: 80 },
+  academic:             { label: "Academics",    icon: "graduation",  tooltip: "Academic background and GPA alignment",          targetPct: 80 },
   internship_score:     { label: "Internships",  icon: "briefcase",   tooltip: "Relevant work experience quality",               targetPct: 85 },
+  internship:           { label: "Internships",  icon: "briefcase",   tooltip: "Relevant work experience quality",               targetPct: 85 },
   consistency_index:    { label: "Consistency",  icon: "trending-up", tooltip: "Regular problem-solving and code commits",       targetPct: 90 },
+  consistency:          { label: "Consistency",  icon: "trending-up", tooltip: "Regular problem-solving and code commits",       targetPct: 90 },
+};
+
+/* Map from long key to short backend key for componentScores lookup */
+const KEY_TO_BACKEND: Record<string, string> = {
+  dsa_score: "dsa", dsa: "dsa",
+  project_score: "projects", projects: "projects",
+  system_design_score: "system_design",
+  stack_alignment: "stack", stack: "stack",
+  academic_score: "academic", academic: "academic",
+  internship_score: "internship", internship: "internship",
+  consistency_index: "consistency", consistency: "consistency",
 };
 
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
@@ -95,7 +113,8 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
       weeksAway = match.weeks_away ?? Math.max(2, Math.round((85 - matchScore) / 3));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const bd = (match.breakdown as any) || {};
-      componentScores = bd.component_scores || {};
+      // Backend may store flat dict ({dsa: 50, stack: 68}) or nested ({component_scores: {...}})
+      componentScores = bd.component_scores || bd;
     }
   }
 
@@ -104,7 +123,8 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   const breakdown = weightEntries.map(([key, weightVal]) => {
     const w = WEIGHT_MAP[key];
     const weight = Number(weightVal) || 0;
-    const userScore = hasRealScores ? Math.round(componentScores[key] || 0) : 0;
+    const backendKey = KEY_TO_BACKEND[key] || key;
+    const userScore = hasRealScores ? Math.round(componentScores[backendKey] || componentScores[key] || 0) : 0;
     // Target proportional to how important this component is
     const target = w.targetPct;
     return {
