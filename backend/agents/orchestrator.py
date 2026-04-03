@@ -38,31 +38,33 @@ class MintKeyOrchestrator:
         )
 
         # =============================================
-        # PHASE 1: Parallel — Agents 1, 2, 3, 4, 5
-        # Run in two batches to avoid Groq rate limits
+        # PHASE 1: Sequential with small delays (Groq free tier = 12K TPM)
+        # Running agents one-by-one avoids rate limit exhaustion
         # =============================================
         if progress_callback:
-            await progress_callback("phase1_start", "Starting Phase 1: Parallel agent analysis")
+            await progress_callback("phase1_start", "Starting Phase 1: Agent analysis")
 
-        # Batch 1: Agents 1, 2, 3
-        batch1_results = await asyncio.gather(
+        # Run each agent sequentially with short cooldown between calls
+        agent_results = []
+        agent_runners = [
             self._run_agent_1(request, progress_callback),
             self._run_agent_2(request, progress_callback),
             self._run_agent_3(request, progress_callback),
-            return_exceptions=True,
-        )
-
-        # Pause between batches to respect Groq TPM limits (12K tokens/min for 70b)
-        await asyncio.sleep(8)
-
-        # Batch 2: Agents 4, 5
-        batch2_results = await asyncio.gather(
             self._run_agent_4(request, progress_callback),
             self._run_agent_5(request, progress_callback),
-            return_exceptions=True,
-        )
+        ]
 
-        phase1_results = list(batch1_results) + list(batch2_results)
+        for i, coro in enumerate(agent_runners):
+            try:
+                r = await coro
+                agent_results.append(r)
+            except Exception as e:
+                logger.error(f"[Orchestrator] Agent {i+1} failed: {e}")
+                agent_results.append(e)
+            if i < len(agent_runners) - 1:
+                await asyncio.sleep(2)  # 2s between agents to spread TPM usage
+
+        phase1_results = agent_results
 
         # Assign results (default to empty on failure)
         result.github_analysis = phase1_results[0] if not isinstance(phase1_results[0], Exception) else GitHubAnalysis()
@@ -145,8 +147,8 @@ class MintKeyOrchestrator:
                 except Exception as e:
                     logger.error(f"Failed to enrich blueprint for {company_slug}: {e}")
 
-        # Longer pause before Phase 2 — let TPM window reset
-        await asyncio.sleep(15)
+        # Short pause before Phase 2 — agents are already sequential so TPM is spread
+        await asyncio.sleep(3)
 
         # Agent 6: Gap Finder (needs Agents 1, 2, 5)
         try:
