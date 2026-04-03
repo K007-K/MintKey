@@ -64,12 +64,14 @@ async def call_llm(
                 # Non-rate-limit error — don't retry
                 break
 
-    # All retries exhausted — try Ollama fallback
-    logger.warning(f"Primary LLM ({target_model}) failed after {MAX_RETRIES} attempts: {last_error}. Trying fallback...")
+    # All retries exhausted — try Groq 8b-instant fallback (higher rate limits: 131K TPM, 550K TPD)
+    fallback_model = "groq/llama-3.1-8b-instant"
+    logger.warning(f"Primary LLM ({target_model}) failed after {MAX_RETRIES} attempts: {last_error}. Trying fallback ({fallback_model})...")
     try:
-        kwargs["model"] = "ollama/qwen2.5-coder:32b"
+        kwargs["model"] = fallback_model
         response = await litellm.acompletion(**kwargs)
+        logger.info(f"Fallback LLM ({fallback_model}) succeeded")
         return response
     except Exception as fallback_err:
-        logger.error(f"Fallback LLM also failed: {fallback_err}")
+        logger.error(f"Fallback LLM ({fallback_model}) also failed: {fallback_err}")
         raise last_error  # Raise original error
