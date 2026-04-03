@@ -157,7 +157,7 @@ class UserSkillGap(Base):
     company_slug = Column(String(100), nullable=True)
 
     skill_name = Column(String(100), nullable=False)
-    priority = Column(SAEnum(GapPriority, values_callable=lambda x: [e.value for e in x]), nullable=False)
+    priority = Column(SAEnum(GapPriority, values_callable=lambda x: [e.value for e in x], create_type=False), nullable=False)
     current_level = Column(Float, nullable=True)
     required_level = Column(Float, nullable=True)
     dependency_chain = Column(JSONB, nullable=True)
