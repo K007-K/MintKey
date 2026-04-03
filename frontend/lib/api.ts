@@ -125,6 +125,19 @@ export function useSkillGaps(companySlug: string) {
   });
 }
 
+// Platform stats (LeetCode solved counts, GitHub data)
+export function usePlatformStats() {
+  return useQuery({
+    queryKey: ["scores", "platform-stats"],
+    queryFn: async () => {
+      const { data } = await api.get<APIResponse>(
+        "/api/v1/scores/platform-stats"
+      );
+      return data.data;
+    },
+  });
+}
+
 // Trigger analysis
 export function useTriggerAnalysis() {
   return useMutation({

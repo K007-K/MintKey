@@ -18,7 +18,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer
 } from "recharts";
-import { useMatchScores, useScoreHistory, useSkillGaps, useCompany } from "@/lib/api";
+import { useMatchScores, useScoreHistory, useSkillGaps, useCompany, usePlatformStats } from "@/lib/api";
 
 /* ─── Types ─── */
 type MatchReportData = {
@@ -50,6 +50,7 @@ const WEIGHT_MAP: Record<string, { label: string; icon: string; tooltip: string;
   project_score:        { label: "Projects",     icon: "layers",      tooltip: "Quality and depth of portfolio projects",        targetPct: 85 },
   projects:             { label: "Projects",     icon: "layers",      tooltip: "Quality and depth of portfolio projects",        targetPct: 85 },
   system_design_score:  { label: "System Design",icon: "settings",    tooltip: "System design knowledge and practical experience",targetPct: 85 },
+  system_design:        { label: "System Design",icon: "settings",    tooltip: "System design knowledge and practical experience",targetPct: 85 },
   stack_alignment:      { label: "Tech Stack",   icon: "settings",    tooltip: "Alignment of your tech stack with company needs", targetPct: 85 },
   stack:                { label: "Tech Stack",   icon: "settings",    tooltip: "Alignment of your tech stack with company needs", targetPct: 85 },
   academic_score:       { label: "Academics",    icon: "graduation",  tooltip: "Academic background and GPA alignment",          targetPct: 80 },
@@ -64,7 +65,7 @@ const WEIGHT_MAP: Record<string, { label: string; icon: string; tooltip: string;
 const KEY_TO_BACKEND: Record<string, string> = {
   dsa_score: "dsa", dsa: "dsa",
   project_score: "projects", projects: "projects",
-  system_design_score: "system_design",
+  system_design_score: "system_design", system_design: "system_design",
   stack_alignment: "stack", stack: "stack",
   academic_score: "academic", academic: "academic",
   internship_score: "internship", internship: "internship",
@@ -75,7 +76,7 @@ const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 
 /* ─── Build match report from real company data ─── */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildMatchReport(company: Record<string, any> | null, userScores: any[] | null, slug: string): MatchReportData {
+function buildMatchReport(company: Record<string, any> | null, userScores: any[] | null, slug: string, platformStats?: any): MatchReportData {
   // Company data
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hiring = (company?.hiring_data || {}) as any;
@@ -153,6 +154,15 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   // Radar data from breakdown
   const radarData = breakdown.map((b) => ({ axis: b.component, user: b.yourScore, target: b.target }));
 
+  // Real LeetCode data from platform stats
+  const lc = platformStats?.leetcode || {};
+  const userTotalSolved = lc.total_solved || 0;
+  const userDiffDist = lc.difficulty_distribution || {};
+  const userEasySolved = userDiffDist.Easy || userDiffDist.easy || 0;
+  const userMediumSolved = userDiffDist.Medium || userDiffDist.medium || 0;
+  const userHardSolved = userDiffDist.Hard || userDiffDist.hard || 0;
+  const topicWeakness: Record<string, string> = lc.topic_weakness_map || {};
+
   // DSA Analysis: build from dsa_requirements topic_targets
   const topicTargets = dsa.topic_targets || {};
   const topics = Object.entries(topicTargets).map(([key, val]) => {
@@ -160,7 +170,9 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     const t = val as any;
     const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
     const required = t.recommended || t.minimum || 30;
-    const solved = 0; // No user progress data yet
+    // Look up user's actual proficiency from topic weakness map
+    const strength = topicWeakness[label] || topicWeakness[key] || "";
+    const solved = strength === "strong" ? Math.round(required * 0.9) : strength === "medium" ? Math.round(required * 0.5) : strength === "weak" ? Math.round(required * 0.2) : 0;
     return { name: label, solved, required, gap: solved - required };
   }).sort((a, b) => a.gap - b.gap).slice(0, 8);
 
@@ -173,10 +185,10 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   const hardReq = Math.round(totalRequired * hardPct / 100);
 
   const dsaAnalysis = {
-    total: { solved: 0, required: totalRequired },
-    easy: { solved: 0, required: easyReq },
-    medium: { solved: 0, required: medReq },
-    hard: { solved: 0, required: hardReq },
+    total: { solved: userTotalSolved, required: totalRequired },
+    easy: { solved: userEasySolved, required: easyReq },
+    medium: { solved: userMediumSolved, required: medReq },
+    hard: { solved: userHardSolved, required: hardReq },
     topics,
   };
 
@@ -356,13 +368,15 @@ export default function MatchReportPage() {
   const { data: rawHistory } = useScoreHistory(slug || "");
   const { data: rawGaps } = useSkillGaps(slug || "");
   const { data: rawCompany } = useCompany(slug || "");
+  const { data: rawPlatformStats } = usePlatformStats();
 
   // Build page data from company API + user scores
   const data = useMemo((): MatchReportData => {
     const report = buildMatchReport(
       rawCompany as Record<string, unknown> | null,
       rawScores as unknown[] | null,
-      slug || ""
+      slug || "",
+      rawPlatformStats
     );
 
     // Build score history from real data or leave empty
@@ -376,7 +390,7 @@ export default function MatchReportPage() {
     }
 
     return report;
-  }, [slug, rawScores, rawHistory, rawGaps, rawCompany]);
+  }, [slug, rawScores, rawHistory, rawGaps, rawCompany, rawPlatformStats]);
 
   const [timeFilter, setTimeFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");
   const [activeScenario, setActiveScenario] = useState<number | null>(null);

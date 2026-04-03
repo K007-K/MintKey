@@ -348,6 +348,12 @@ async def trigger_analysis(
                         academic_score = min((resume.get("cgpa", 0) or 0) / 10 * 100, 100)
                         internship_score = min((resume.get("internship_count", 0) or 0) * 33, 100)
                         consistency_score = min(dsa.get("total_solved", 0) / 3, 100)
+                        # System design: proxy from engineering maturity + project complexity
+                        sys_design_score = min(
+                            (gh.get("engineering_maturity_index", 0) * 0.6
+                             + gh.get("project_depth_score", 0) * 0.4),
+                            100,
+                        )
 
                         breakdown = {
                             "dsa": round(dsa_score, 1),
@@ -356,6 +362,7 @@ async def trigger_analysis(
                             "academic": round(academic_score, 1),
                             "internship": round(internship_score, 1),
                             "consistency": round(consistency_score, 1),
+                            "system_design": round(sys_design_score, 1),
                         }
 
                         # Weighted overall score

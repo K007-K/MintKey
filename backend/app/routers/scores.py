@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User, UserSkillGap
+from app.models.db import User, UserSkillGap, PlatformScore
 from app.models.schemas import APIResponse, MatchScoreResponse
 from app.repositories.scores import ScoreRepository
 
@@ -159,3 +159,56 @@ async def get_skill_gaps(
     except Exception as e:
         logger.error(f"Failed to get skill gaps for {company_slug}: {e}")
         return APIResponse(success=False, data=[], error="Failed to fetch skill gaps")
+
+
+@router.get("/platform-stats", response_model=APIResponse)
+async def get_platform_stats(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get user's platform breakdown stats (LeetCode solved counts, GitHub data)."""
+    try:
+        result = await db.execute(
+            select(PlatformScore)
+            .where(PlatformScore.user_id == current_user.id)
+            .order_by(PlatformScore.synced_at.desc())
+        )
+        rows = result.scalars().all()
+
+        # Deduplicate by platform (keep latest)
+        seen = {}
+        for row in rows:
+            if row.platform not in seen:
+                seen[row.platform] = row
+
+        leetcode = seen.get("leetcode")
+        github = seen.get("github")
+
+        lc_breakdown = leetcode.breakdown if leetcode else {}
+        gh_breakdown = github.breakdown if github else {}
+
+        data = {
+            "leetcode": {
+                "total_solved": lc_breakdown.get("total_solved", 0),
+                "difficulty_distribution": lc_breakdown.get("difficulty_distribution", {}),
+                "topic_weakness_map": lc_breakdown.get("topic_weakness_map", {}),
+                "dsa_depth_score": lc_breakdown.get("dsa_depth_score", 0),
+                "easy_reliance_flag": lc_breakdown.get("easy_reliance_flag", False),
+            },
+            "github": {
+                "project_depth_score": gh_breakdown.get("project_depth_score", 0),
+                "engineering_maturity_index": gh_breakdown.get("engineering_maturity_index", 0),
+                "language_distribution": gh_breakdown.get("language_distribution", {}),
+                "technology_stack": gh_breakdown.get("technology_stack", []),
+            },
+        }
+
+        return APIResponse(success=True, data=data)
+    except Exception as e:
+        logger.error(f"Failed to get platform stats: {e}")
+        return APIResponse(
+            success=False,
+            data={"leetcode": {}, "github": {}},
+            error="Failed to fetch platform stats",
+        )
+
