@@ -103,6 +103,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let componentScores: Record<string, number> = {};
   let hasRealScores = false;
+  let computedAt: string | null = null;
 
   if (userScores && Array.isArray(userScores)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,6 +117,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
       const bd = (match.breakdown as any) || {};
       // Backend may store flat dict ({dsa: 50, stack: 68}) or nested ({component_scores: {...}})
       componentScores = bd.component_scores || bd;
+      computedAt = match.computed_at || null;
     }
   }
 
@@ -272,7 +274,18 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     targetScore,
     gapToClose,
     problemsToSolve,
-    lastUpdated: hasRealScores ? "Just now" : "Not analyzed yet",
+    lastUpdated: (() => {
+      if (!hasRealScores) return "Not analyzed yet";
+      if (!computedAt) return "Just now";
+      const diff = Date.now() - new Date(computedAt).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return "Just now";
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      return `${days}d ago`;
+    })(),
     breakdown,
     radarData,
     dsaAnalysis,
