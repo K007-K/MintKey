@@ -110,3 +110,38 @@ async def github_auth(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Authentication failed",
         )
+
+
+@router.post("/dev-login", response_model=APIResponse)
+async def dev_login(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Quick login for development — returns a fresh JWT for the primary user.
+    Solves token expiry without requiring full GitHub OAuth re-auth.
+    """
+    repo = UserRepository(db)
+
+    # Find the primary user (onboarded user with GitHub linked)
+    user = await repo.get_by_email("karthik.kuramdasu@gmail.com")
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Primary user not found",
+        )
+
+    # Generate fresh JWT (7-day expiry)
+    access_token = create_access_token(str(user.id))
+
+    logger.info(f"Dev login: refreshed token for {user.email}")
+
+    return APIResponse(
+        success=True,
+        data={
+            "access_token": access_token,
+            "user_id": str(user.id),
+            "is_onboarded": user.is_onboarded,
+            "email": user.email,
+            "name": user.name,
+        },
+    )

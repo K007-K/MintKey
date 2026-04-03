@@ -1,5 +1,5 @@
 # Pydantic models for agent input/output — structured data flowing between agents
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from enum import Enum
 
@@ -105,6 +105,15 @@ class SkillGap(BaseModel):
     required_level: str = "intermediate"
     dependency_chain: list[str] = Field(default_factory=list)
     estimated_hours: int = 0
+
+    @field_validator("current_level", "required_level", mode="before")
+    @classmethod
+    def coerce_level_to_string(cls, v: object) -> str:
+        """LLMs sometimes return int (0-5) instead of string level names."""
+        if isinstance(v, (int, float)):
+            level_map = {0: "none", 1: "beginner", 2: "basic", 3: "intermediate", 4: "advanced", 5: "expert"}
+            return level_map.get(int(v), str(v))
+        return str(v) if v is not None else "none"
 
 
 class GapAnalysis(BaseModel):

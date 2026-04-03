@@ -39,24 +39,27 @@ async def run_gap_finder(
     user_message = f"""Analyze skill gaps for company: {company_name}
 
 User's current skills: {json.dumps(user_skills)}
-Required skills: {json.dumps(required_skills)}
+Required skills for {company_name}: {json.dumps(required_skills)}
 
 Instructions:
-1. Identify which required skills the user is missing
-2. Use the skill graph tool to find prerequisite chains for missing skills
+1. Compare the user's skills against the required skills
+2. Identify which required skills the user is missing or weak in
 3. Categorize gaps as BLOCKING, IMPORTANT, or NICE_TO_HAVE
-4. Estimate hours needed for each gap
-5. Provide prioritized recommendations
+4. For current_level and required_level, use string values: "none", "beginner", "basic", "intermediate", "advanced", "expert"
+5. Estimate hours needed for each gap
+6. Provide prioritized recommendations
 
-Return your analysis as a JSON object."""
+Return your analysis as a JSON object with blocking_gaps, important_gaps, nice_to_have_gaps arrays.
+Each gap should have: skill, priority, current_level (string), required_level (string), dependency_chain (array), estimated_hours (int).
+Also include total_gaps, estimated_total_hours, and recommendations array."""
 
     result = await run_agent_loop(
         system_prompt=SYSTEM_PROMPT,
         user_message=user_message,
-        tools=SKILL_GRAPH_TOOLS,
-        tool_executor=execute_tool,
+        tools=None,  # Pure analysis — no HelixDB tools (stubbed)
+        tool_executor=None,
         temperature=0.2,
-        max_tokens=2500,
+        max_tokens=3000,
         agent_name="Gap Finder",
     )
 

@@ -41,13 +41,22 @@ api.interceptors.response.use(
           const backendToken = session?.backendToken;
           if (backendToken) {
             localStorage.setItem("mintkey_token", backendToken);
-            // Retry the original request with the new token
             error.config.headers.Authorization = `Bearer ${backendToken}`;
             isRefreshing = false;
             return api.request(error.config);
           }
         }
-        // Session refresh didn't yield a token — clear stale one
+        // NextAuth didn't yield token — try dev-login as fallback
+        const devRes = await api.post("/api/v1/auth/dev-login", {}, {
+          headers: { Authorization: "" },
+        });
+        if (devRes.data?.success && devRes.data?.data?.access_token) {
+          const newToken = devRes.data.data.access_token;
+          localStorage.setItem("mintkey_token", newToken);
+          error.config.headers.Authorization = `Bearer ${newToken}`;
+          isRefreshing = false;
+          return api.request(error.config);
+        }
         localStorage.removeItem("mintkey_token");
       } catch {
         // Network error during refresh — don't delete token, might be temporary

@@ -39,18 +39,30 @@ class MintKeyOrchestrator:
 
         # =============================================
         # PHASE 1: Parallel — Agents 1, 2, 3, 4, 5
+        # Run in two batches to avoid Groq rate limits
         # =============================================
         if progress_callback:
             await progress_callback("phase1_start", "Starting Phase 1: Parallel agent analysis")
 
-        phase1_results = await asyncio.gather(
+        # Batch 1: Agents 1, 2, 3
+        batch1_results = await asyncio.gather(
             self._run_agent_1(request, progress_callback),
             self._run_agent_2(request, progress_callback),
             self._run_agent_3(request, progress_callback),
+            return_exceptions=True,
+        )
+
+        # Brief pause to respect rate limits
+        await asyncio.sleep(3)
+
+        # Batch 2: Agents 4, 5
+        batch2_results = await asyncio.gather(
             self._run_agent_4(request, progress_callback),
             self._run_agent_5(request, progress_callback),
             return_exceptions=True,
         )
+
+        phase1_results = list(batch1_results) + list(batch2_results)
 
         # Assign results (default to empty on failure)
         result.github_analysis = phase1_results[0] if not isinstance(phase1_results[0], Exception) else GitHubAnalysis()
@@ -85,12 +97,56 @@ class MintKeyOrchestrator:
 
         # =============================================
         # PHASE 2: Sequential — Agents 6, 7, 8
+        # Add delays between agents to respect rate limits
         # =============================================
         if progress_callback:
             await progress_callback("phase2_start", "Starting Phase 2: Sequential agent analysis")
 
         # Merge user skills from all sources
         user_skills = self._merge_user_skills(result)
+
+        # Enrich blueprints with required_skills from DB if agent returned empty
+        for company_slug, bp in result.company_blueprints.items():
+            if not bp.required_skills:
+                try:
+                    from app.core.database import async_session_factory
+                    from app.models.db import CompanyBlueprint
+                    from sqlalchemy import select
+
+                    async with async_session_factory() as session:
+                        r = await session.execute(
+                            select(CompanyBlueprint).where(CompanyBlueprint.slug == company_slug)
+                        )
+                        db_bp = r.scalar_one_or_none()
+                        if db_bp:
+                            # Extract required skills from tech_stack JSONB
+                            tech = db_bp.tech_stack or {}
+                            skills = set()
+                            if isinstance(tech, dict):
+                                for k, v in tech.items():
+                                    if isinstance(v, list):
+                                        skills.update(v)
+                                    elif isinstance(v, str):
+                                        skills.add(v)
+                            elif isinstance(tech, list):
+                                skills.update(tech)
+                            # Also add DSA topics from dsa_requirements
+                            dsa_req = db_bp.dsa_requirements or {}
+                            if isinstance(dsa_req, dict):
+                                for topic_list in dsa_req.values():
+                                    if isinstance(topic_list, list):
+                                        for item in topic_list:
+                                            if isinstance(item, str):
+                                                skills.add(item)
+                                            elif isinstance(item, dict):
+                                                skills.add(item.get("topic", item.get("name", "")))
+                            bp.required_skills = [s for s in skills if s][:25]
+                            logger.info(f"Enriched {company_slug} required_skills from DB: {len(bp.required_skills)} skills")
+                except Exception as e:
+                    logger.error(f"Failed to enrich blueprint for {company_slug}: {e}")
+
+        # Brief pause before Phase 2 LLM calls
+        await asyncio.sleep(5)
 
         # Agent 6: Gap Finder (needs Agents 1, 2, 5)
         try:
@@ -113,6 +169,9 @@ class MintKeyOrchestrator:
             logger.error(f"[Orchestrator] Agent 6 failed: {e}")
             result.gap_analysis = GapAnalysis(recommendations=[f"Gap analysis failed: {str(e)}"])
 
+        # Delay before Agent 7
+        await asyncio.sleep(3)
+
         # Agent 7: Roadmap Builder (needs Agents 2, 5, 6)
         try:
             if progress_callback:
@@ -133,6 +192,9 @@ class MintKeyOrchestrator:
         except Exception as e:
             logger.error(f"[Orchestrator] Agent 7 failed: {e}")
 
+        # Delay before Agent 8
+        await asyncio.sleep(3)
+
         # Agent 8: Career Coach (needs all agent outputs)
         try:
             if progress_callback:
@@ -140,14 +202,27 @@ class MintKeyOrchestrator:
 
             from agents.career_coach import run_career_coach
 
+            # Build a concise coaching input (avoid exceeding token limits)
+            gh_data = result.github_analysis.model_dump() if result.github_analysis else {}
+            dsa_data = result.dsa_analysis.model_dump() if result.dsa_analysis else {}
+            resume_data = result.resume_data.model_dump() if result.resume_data else {}
+            gap_data = result.gap_analysis.model_dump() if result.gap_analysis else {}
+
             coaching_input = {
-                "github": result.github_analysis.model_dump() if result.github_analysis else {},
-                "dsa": result.dsa_analysis.model_dump() if result.dsa_analysis else {},
-                "resume": result.resume_data.model_dump() if result.resume_data else {},
-                "trends": result.trend_data.model_dump() if result.trend_data else {},
-                "blueprints": {k: v.model_dump() for k, v in result.company_blueprints.items()},
-                "gaps": result.gap_analysis.model_dump() if result.gap_analysis else {},
-                "roadmaps": {k: v.model_dump() for k, v in result.roadmaps.items()},
+                "github_score": gh_data.get("project_depth_score", 0),
+                "engineering_maturity": gh_data.get("engineering_maturity_index", 0),
+                "top_languages": list(gh_data.get("language_distribution", {}).keys())[:5],
+                "key_weaknesses": gh_data.get("key_weaknesses", []),
+                "dsa_score": dsa_data.get("dsa_depth_score", 0),
+                "total_solved": dsa_data.get("total_solved", 0),
+                "difficulty_distribution": dsa_data.get("difficulty_distribution", {}),
+                "topic_weaknesses": list(dsa_data.get("topic_weakness_map", {}).keys())[:5],
+                "resume_score": resume_data.get("resume_strength_score", 0),
+                "extracted_skills": resume_data.get("extracted_skills", [])[:10],
+                "blocking_gaps": [g.get("skill") for g in gap_data.get("blocking_gaps", [])],
+                "important_gaps": [g.get("skill") for g in gap_data.get("important_gaps", [])],
+                "target_companies": list(result.roadmaps.keys()),
+                "overall_readiness": result.overall_readiness,
             }
 
             result.coaching = await run_career_coach(coaching_input)
