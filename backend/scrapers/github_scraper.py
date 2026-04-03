@@ -4,7 +4,6 @@ import asyncio
 import time
 from typing import Optional
 from datetime import datetime
-from functools import lru_cache
 import httpx
 from app.core.config import settings
 from app.core.redis import redis_client
