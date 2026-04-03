@@ -1,7 +1,10 @@
-# GitHub REST API scraper using httpx async with Redis caching
+# GitHub REST API scraper using httpx async with Redis caching + in-memory fallback
 import logging
+import asyncio
+import time
 from typing import Optional
 from datetime import datetime
+from functools import lru_cache
 import httpx
 from app.core.config import settings
 from app.core.redis import redis_client
@@ -12,9 +15,63 @@ logger = logging.getLogger(__name__)
 GITHUB_API_BASE = "https://api.github.com"
 CACHE_TTL_GITHUB = 86400  # 24 hours
 
+# ── In-memory cache fallback when Redis is unreachable ──
+_memory_cache: dict[str, tuple[float, str]] = {}  # key -> (expires_at, json_data)
+_MEMORY_CACHE_TTL = 600  # 10 min in-memory fallback
+_MEMORY_CACHE_MAX = 200  # max entries
+
+# ── Redis health tracking — skip Redis calls when known down ──
+_redis_healthy = True
+_redis_last_check = 0.0
+_REDIS_RETRY_INTERVAL = 60  # recheck Redis every 60s after failure
+
+# ── Concurrency limiter — max 5 parallel GitHub API calls ──
+_github_semaphore = asyncio.Semaphore(5)
+
+
+def _mem_cache_get(key: str) -> str | None:
+    """Read from in-memory cache, return raw JSON string or None."""
+    entry = _memory_cache.get(key)
+    if entry and entry[0] > time.time():
+        return entry[1]
+    # Expired — clean up
+    _memory_cache.pop(key, None)
+    return None
+
+
+def _mem_cache_set(key: str, value: str, ttl: int = _MEMORY_CACHE_TTL) -> None:
+    """Write to in-memory cache with TTL."""
+    # Evict oldest entries if cache is full
+    if len(_memory_cache) >= _MEMORY_CACHE_MAX:
+        oldest_key = min(_memory_cache, key=lambda k: _memory_cache[k][0])
+        _memory_cache.pop(oldest_key, None)
+    _memory_cache[key] = (time.time() + ttl, value)
+
+
+def _is_redis_available() -> bool:
+    """Check if Redis should be attempted (health tracking)."""
+    global _redis_healthy, _redis_last_check
+    if _redis_healthy:
+        return True
+    # After failure, retry every _REDIS_RETRY_INTERVAL seconds
+    if time.time() - _redis_last_check > _REDIS_RETRY_INTERVAL:
+        return True
+    return False
+
+
+def _mark_redis_down() -> None:
+    global _redis_healthy, _redis_last_check
+    _redis_healthy = False
+    _redis_last_check = time.time()
+
+
+def _mark_redis_up() -> None:
+    global _redis_healthy
+    _redis_healthy = True
+
 
 class GitHubScraper:
-    """Async GitHub REST API client with Redis caching."""
+    """Async GitHub REST API client with Redis caching + in-memory fallback."""
 
     def __init__(self) -> None:
         self.headers = {
@@ -25,42 +82,71 @@ class GitHubScraper:
             self.headers["Authorization"] = f"Bearer {settings.GITHUB_TOKEN}"
 
     async def _get(self, endpoint: str) -> dict | list | None:
-        """Make a GET request to GitHub API."""
+        """Make a GET request to GitHub API with concurrency limiting."""
         url = f"{GITHUB_API_BASE}{endpoint}"
-        try:
-            async with httpx.AsyncClient(timeout=15) as client:
-                response = await client.get(url, headers=self.headers)
-                if response.status_code == 200:
-                    return response.json()
-                elif response.status_code == 404:
-                    logger.warning(f"GitHub 404: {endpoint}")
-                    return None
-                else:
-                    logger.error(f"GitHub API error {response.status_code}: {endpoint}")
-                    return None
-        except httpx.TimeoutException:
-            logger.error(f"GitHub API timeout: {endpoint}")
-            return None
-        except Exception as e:
-            logger.error(f"GitHub API error: {e}")
-            return None
+        async with _github_semaphore:
+            try:
+                async with httpx.AsyncClient(timeout=15) as client:
+                    response = await client.get(url, headers=self.headers)
+                    if response.status_code == 200:
+                        return response.json()
+                    elif response.status_code == 404:
+                        logger.warning(f"GitHub 404: {endpoint}")
+                        return None
+                    elif response.status_code == 403:
+                        remaining = response.headers.get("X-RateLimit-Remaining", "?")
+                        reset = response.headers.get("X-RateLimit-Reset", "?")
+                        logger.error(f"GitHub API rate limited (403): {endpoint} | remaining={remaining} reset={reset}")
+                        return None
+                    else:
+                        logger.error(f"GitHub API error {response.status_code}: {endpoint}")
+                        return None
+            except httpx.TimeoutException:
+                logger.error(f"GitHub API timeout: {endpoint}")
+                return None
+            except httpx.RemoteProtocolError as e:
+                logger.error(f"GitHub API connection dropped ({type(e).__name__}): {endpoint} — {e}")
+                return None
+            except Exception as e:
+                logger.error(f"GitHub API error ({type(e).__name__}): {endpoint} — {e}")
+                return None
 
     async def _get_cached(self, cache_key: str, endpoint: str) -> dict | list | None:
-        """Fetch from Redis cache first, then GitHub API if not cached."""
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                logger.info(f"Cache hit: {cache_key}")
-                return json.loads(cached)
-        except Exception as e:
-            logger.warning(f"Redis cache read failed: {e}")
+        """Fetch from Redis → in-memory cache → GitHub API (with write-back to both)."""
+        # 1. Try Redis (if healthy)
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    logger.debug(f"Redis cache hit: {cache_key}")
+                    # Also warm in-memory cache
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception as e:
+                _mark_redis_down()
+                logger.warning(f"Redis unavailable, using in-memory fallback: {type(e).__name__}")
 
+        # 2. Try in-memory cache
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            logger.debug(f"Memory cache hit: {cache_key}")
+            return json.loads(mem_cached)
+
+        # 3. Fetch from GitHub API
         data = await self._get(endpoint)
         if data is not None:
-            try:
-                await redis_client.set(cache_key, json.dumps(data), ex=CACHE_TTL_GITHUB)
-            except Exception as e:
-                logger.warning(f"Redis cache write failed: {e}")
+            json_data = json.dumps(data)
+            # Write to in-memory cache (always works)
+            _mem_cache_set(cache_key, json_data)
+            # Try writing to Redis (non-blocking, best-effort)
+            if _is_redis_available():
+                try:
+                    await redis_client.set(cache_key, json_data, ex=CACHE_TTL_GITHUB)
+                    _mark_redis_up()
+                except Exception:
+                    _mark_redis_down()
 
         return data
 
@@ -95,23 +181,33 @@ class GitHubScraper:
     async def fetch_repo_readme(self, owner: str, repo: str) -> Optional[str]:
         """Fetch README content (decoded from base64)."""
         cache_key = f"github:readme:{owner}:{repo}"
-        cached = None
-        try:
-            cached = await redis_client.get(cache_key)
-        except Exception:
-            pass
-
-        if cached:
-            return cached
+        # Try Redis
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return cached
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        # Try memory cache
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return mem_cached
 
         data = await self._get(f"/repos/{owner}/{repo}/readme")
         if data and "content" in data:
             import base64
             content = base64.b64decode(data["content"]).decode("utf-8", errors="replace")
-            try:
-                await redis_client.set(cache_key, content, ex=CACHE_TTL_GITHUB)
-            except Exception:
-                pass
+            _mem_cache_set(cache_key, content)
+            if _is_redis_available():
+                try:
+                    await redis_client.set(cache_key, content, ex=CACHE_TTL_GITHUB)
+                    _mark_redis_up()
+                except Exception:
+                    _mark_redis_down()
             return content
         return None
 
@@ -206,12 +302,21 @@ class GitHubScraper:
     async def fetch_contribution_count(self, username: str) -> int:
         """Fetch total contributions from the user's GitHub profile page."""
         cache_key = f"github:contributions:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return int(cached)
-        except Exception:
-            pass
+        # Try Redis
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return int(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        # Try memory cache
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return int(mem_cached)
 
         try:
             url = f"https://github.com/users/{username}/contributions"
@@ -222,10 +327,13 @@ class GitHubScraper:
                     match = re.search(r'([\d,]+)\s+contributions?\s+in', response.text)
                     if match:
                         count = int(match.group(1).replace(",", ""))
-                        try:
-                            await redis_client.set(cache_key, str(count), ex=CACHE_TTL_GITHUB)
-                        except Exception:
-                            pass
+                        _mem_cache_set(cache_key, str(count))
+                        if _is_redis_available():
+                            try:
+                                await redis_client.set(cache_key, str(count), ex=CACHE_TTL_GITHUB)
+                                _mark_redis_up()
+                            except Exception:
+                                _mark_redis_down()
                         return count
         except Exception as e:
             logger.warning(f"Failed to fetch contribution count for {username}: {e}")
@@ -239,12 +347,21 @@ class GitHubScraper:
         Returns { "YYYY-MM-DD": level, ... } for all days with contributions > 0.
         """
         cache_key = f"github:calendar:{username}:{year or 'current'}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        # Try Redis
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        # Try memory cache
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         calendar: dict[str, int] = {}
         try:
@@ -294,11 +411,15 @@ class GitHubScraper:
                                 calendar[date_str] = int(level)
 
             if calendar:
+                json_cal = json.dumps(calendar)
+                _mem_cache_set(cache_key, json_cal)
                 ttl = CACHE_TTL_GITHUB if not year or year == datetime.now().year else 86400 * 30  # 30 days for old years
-                try:
-                    await redis_client.set(cache_key, json.dumps(calendar), ex=ttl)
-                except Exception:
-                    pass
+                if _is_redis_available():
+                    try:
+                        await redis_client.set(cache_key, json_cal, ex=ttl)
+                        _mark_redis_up()
+                    except Exception:
+                        _mark_redis_down()
 
         except Exception as e:
             logger.warning(f"Failed to fetch contribution calendar for {username} year={year}: {e}")
@@ -340,12 +461,21 @@ class GitHubScraper:
     async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""
         cache_key = f"github:events:v3:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        # Try Redis
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        # Try memory cache
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         data = await self._get(f"/users/{username}/events/public?per_page={per_page}")
         if not isinstance(data, list):
@@ -468,10 +598,14 @@ class GitHubScraper:
             ev.pop("commits", None)
             ev.pop("commit_msg", None)
 
-        try:
-            await redis_client.set(cache_key, json.dumps(events), ex=3600)  # 1hr cache
-        except Exception:
-            pass
+        json_events = json.dumps(events)
+        _mem_cache_set(cache_key, json_events)
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_events, ex=3600)  # 1hr cache
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return events
 

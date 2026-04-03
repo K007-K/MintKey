@@ -4,6 +4,10 @@ from typing import Optional
 from datetime import datetime, timezone
 import httpx
 from app.core.redis import redis_client
+from scrapers.github_scraper import (
+    _is_redis_available, _mark_redis_up, _mark_redis_down,
+    _mem_cache_get, _mem_cache_set,
+)
 import json
 
 logger = logging.getLogger(__name__)
@@ -50,12 +54,19 @@ class LeetCodeScraper:
     async def fetch_user_profile(self, username: str) -> Optional[dict]:
         """Fetch basic LeetCode profile info."""
         cache_key = f"leetcode:profile:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query getUserProfile($username: String!) {
@@ -81,22 +92,33 @@ class LeetCodeScraper:
         data = await self._query(query, {"username": username})
         if data and data.get("matchedUser"):
             result = data["matchedUser"]
-            try:
-                await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_LEETCODE)
-            except Exception:
-                pass
+            json_result = json.dumps(result)
+            _mem_cache_set(cache_key, json_result)
+            if _is_redis_available():
+                try:
+                    await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
+                    _mark_redis_up()
+                except Exception:
+                    _mark_redis_down()
             return result
         return None
 
     async def fetch_problem_stats(self, username: str) -> Optional[dict]:
         """Fetch solved problem counts by difficulty."""
         cache_key = f"leetcode:stats:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query userProblemsSolved($username: String!) {
@@ -141,22 +163,33 @@ class LeetCodeScraper:
                 "submissions": stat["submissions"],
             }
 
-        try:
-            await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_LEETCODE)
-        except Exception:
-            pass
+        json_result = json.dumps(result)
+        _mem_cache_set(cache_key, json_result)
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return result
 
     async def fetch_topic_stats(self, username: str) -> Optional[list]:
         """Fetch problem counts by topic/tag."""
         cache_key = f"leetcode:topics:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query skillStats($username: String!) {
@@ -201,10 +234,14 @@ class LeetCodeScraper:
         # Sort by solved count descending
         all_topics.sort(key=lambda x: -x["solved"])
 
-        try:
-            await redis_client.set(cache_key, json.dumps(all_topics), ex=CACHE_TTL_LEETCODE)
-        except Exception:
-            pass
+        json_topics = json.dumps(all_topics)
+        _mem_cache_set(cache_key, json_topics)
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_topics, ex=CACHE_TTL_LEETCODE)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return all_topics
 
@@ -212,12 +249,19 @@ class LeetCodeScraper:
         """Fetch the submission calendar (daily activity counts) for a specific year."""
         target_year = year or datetime.now().year
         cache_key = f"leetcode:calendar:{username}:{target_year}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query userProfileCalendar($username: String!, $year: Int) {
@@ -259,11 +303,15 @@ class LeetCodeScraper:
                 pass
 
         # Old years get longer cache, current year gets short cache
+        json_result = json.dumps(result)
+        _mem_cache_set(cache_key, json_result)
         ttl = 3600 if target_year == datetime.now().year else 86400 * 30
-        try:
-            await redis_client.set(cache_key, json.dumps(result), ex=ttl)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_result, ex=ttl)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return result
 
@@ -306,12 +354,19 @@ class LeetCodeScraper:
     async def fetch_contest_history(self, username: str) -> Optional[dict]:
         """Fetch contest participation and rating."""
         cache_key = f"leetcode:contests:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query userContestInfo($username: String!) {
@@ -341,22 +396,33 @@ class LeetCodeScraper:
             "history": (data.get("userContestRankingHistory") or [])[-10:],  # Last 10 contests
         }
 
-        try:
-            await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_LEETCODE)
-        except Exception:
-            pass
+        json_result = json.dumps(result)
+        _mem_cache_set(cache_key, json_result)
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return result
 
     async def fetch_recent_submissions(self, username: str, limit: int = 15) -> list[dict]:
         """Fetch recent accepted submissions using the public GraphQL endpoint."""
         cache_key = f"leetcode:recent:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if _is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    _mark_redis_up()
+                    _mem_cache_set(cache_key, cached)
+                    return json.loads(cached)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
+        mem_cached = _mem_cache_get(cache_key)
+        if mem_cached:
+            return json.loads(mem_cached)
 
         query = """
         query recentAcSubmissions($username: String!, $limit: Int!) {
@@ -385,10 +451,14 @@ class LeetCodeScraper:
                 "date": date_str,
             })
 
-        try:
-            await redis_client.set(cache_key, json.dumps(result), ex=3600)  # 1hr cache
-        except Exception:
-            pass
+        json_result = json.dumps(result)
+        _mem_cache_set(cache_key, json_result)
+        if _is_redis_available():
+            try:
+                await redis_client.set(cache_key, json_result, ex=3600)
+                _mark_redis_up()
+            except Exception:
+                _mark_redis_down()
 
         return result
 
