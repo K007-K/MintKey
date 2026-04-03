@@ -193,13 +193,10 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     return { name: label, solved, required, gap: solved - required };
   }).sort((a, b) => a.gap - b.gap).slice(0, 8);
 
-  // Difficulty breakdown
-  const easyPct = diffDist.easy_pct || 30;
-  const medPct = diffDist.medium_pct || 50;
-  const hardPct = diffDist.hard_pct || 20;
-  const easyReq = Math.round(totalRequired * easyPct / 100);
-  const medReq = Math.round(totalRequired * medPct / 100);
-  const hardReq = Math.round(totalRequired * hardPct / 100);
+  // Difficulty breakdown — use exact per-difficulty targets from DB if available, else fallback to percentages
+  const easyReq = minProblems.easy || Math.round(totalRequired * (diffDist.easy_pct || 30) / 100);
+  const medReq = minProblems.medium || Math.round(totalRequired * (diffDist.medium_pct || 50) / 100);
+  const hardReq = minProblems.hard || Math.round(totalRequired * (diffDist.hard_pct || 20) / 100);
 
   const dsaAnalysis = {
     total: { solved: userTotalSolved, required: totalRequired },
@@ -660,20 +657,30 @@ export default function MatchReportPage() {
             </div>
 
             {/* Easy */}
-            <div className="rounded-xl bg-green-50 border border-green-100 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-[#374151]">Easy</span>
-                <CheckCircle2 className="h-4 w-4 text-[#10B981]" />
-              </div>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-[#111827]">{data.dsaAnalysis.easy.solved}</span>
-                <span className="text-xl text-[#9CA3AF]">/ {data.dsaAnalysis.easy.required}</span>
-              </div>
-              <div className="h-2 rounded-full bg-green-100 mb-1.5">
-                <div className="h-full rounded-full bg-[#10B981]" style={{ width: "100%" }} />
-              </div>
-              <p className="text-xs text-[#10B981] font-medium">Target exceeded</p>
-            </div>
+            {(() => {
+              const easyPct = data.dsaAnalysis.easy.required > 0 ? Math.min(100, (data.dsaAnalysis.easy.solved / data.dsaAnalysis.easy.required) * 100) : 0;
+              const easyExceeded = data.dsaAnalysis.easy.solved >= data.dsaAnalysis.easy.required;
+              const easyRemaining = data.dsaAnalysis.easy.required - data.dsaAnalysis.easy.solved;
+              return (
+                <div className={`rounded-xl p-5 ${easyExceeded ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-[#374151]">Easy</span>
+                    {easyExceeded ? <CheckCircle2 className="h-4 w-4 text-[#10B981]" /> : <AlertCircle className="h-4 w-4 text-[#F59E0B]" />}
+                  </div>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-3xl font-bold text-[#111827]">{data.dsaAnalysis.easy.solved}</span>
+                    <span className="text-xl text-[#9CA3AF]">/ {data.dsaAnalysis.easy.required}</span>
+                  </div>
+                  <div className={`h-2 rounded-full ${easyExceeded ? 'bg-green-100' : 'bg-amber-100'} mb-1.5`}>
+                    <div className={`h-full rounded-full ${easyExceeded ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} style={{ width: `${easyPct}%` }} />
+                  </div>
+                  {easyExceeded
+                    ? <p className="text-xs text-[#10B981] font-medium">Target exceeded</p>
+                    : <p className="text-xs text-[#D97706] font-medium">{easyRemaining} more needed</p>
+                  }
+                </div>
+              );
+            })()}
 
             {/* Medium */}
             <div className="rounded-xl bg-amber-50 border border-amber-100 p-5">
@@ -733,42 +740,7 @@ export default function MatchReportPage() {
           </div>
         </div>
 
-        {/* ═══ SECTION 5 — TOP ACTIONS (with ROI) ═══ */}
-        <div>
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-base font-semibold text-[#111827]">Top Actions to Improve Score</h3>
-            <span className="text-sm text-[#9CA3AF]">Sorted by impact</span>
-          </div>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.topActions.map((a) => (
-              <div key={a.title} className="relative rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors">
-                <span className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{a.impact}%</span>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg[a.iconColor]}`}>
-                  <ActionIcon color={a.iconColor} />
-                </div>
-                <h4 className="text-sm font-semibold text-[#111827] mt-3">{a.title}</h4>
-                <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{a.desc}</p>
-
-                {/* ── FIX 3: ROI Details ── */}
-                <div className="mt-3 grid grid-cols-2 gap-1.5">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-[#9CA3AF]">Effort:</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${effortBadge(a.effort)}`}>{a.effort}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-[#9CA3AF]">ROI:</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${roiBadge(a.roi)}`}>{a.roi}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F3F4F6]">
-                  <span className="text-xs text-[#9CA3AF] flex items-center gap-1"><Clock className="h-3 w-3" /> {a.weeks}</span>
-                  <Link href={`/roadmap/${slug}`} className="text-sm font-medium text-[#10B981] hover:underline">Start →</Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Top Actions removed — displayed in roadmap page */}
 
         {/* ═══ SECTION 5.5 — SCORE SIMULATOR ═══ */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
