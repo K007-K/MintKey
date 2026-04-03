@@ -160,6 +160,7 @@ async def get_roadmap(
                     "week_start": p.week_start,
                     "week_end": p.week_end,
                     "status": p.status,
+                    "progress": p.progress,
                     "unlock_condition": p.unlock_condition,
                 }
                 for p in phases_result.scalars().all()

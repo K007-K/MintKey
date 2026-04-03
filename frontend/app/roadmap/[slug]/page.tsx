@@ -21,6 +21,21 @@ import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeet
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+/* ─── Skill label mapping — transform raw DB names to readable labels ─── */
+const SKILL_LABEL_MAP: Record<string, string> = {
+  oops_required: "OOP Concepts",
+  additional_valued: "Additional Skills",
+  languages_accepted: "Languages",
+  preferred_languages: "Preferred Languages",
+  core_cs: "Core CS Fundamentals",
+  soft_skills: "Soft Skills",
+};
+function cleanSkillLabel(raw: string): string {
+  if (SKILL_LABEL_MAP[raw]) return SKILL_LABEL_MAP[raw];
+  // Title-case already readable names
+  return raw.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /* ─── Icon helpers ─── */
 const iconBg: Record<string, string> = { red: "bg-red-50", amber: "bg-amber-50", blue: "bg-blue-50", purple: "bg-purple-50", green: "bg-green-50", orange: "bg-orange-50" };
 const iconColorMap: Record<string, string> = { red: "#EF4444", amber: "#F59E0B", blue: "#3B82F6", purple: "#8B5CF6", green: "#10B981", orange: "#F97316" };
@@ -182,7 +197,7 @@ export default function RoadmapPage() {
     if (rm?.skill_progress && Array.isArray(rm.skill_progress)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return rm.skill_progress.map((s: any) => ({
-        skill: s.topic, progress: s.required > 0 ? Math.round((s.solved / s.required) * 100) : 0,
+        skill: cleanSkillLabel(s.topic), progress: s.required > 0 ? Math.round((s.solved / s.required) * 100) : 0,
       }));
     }
     return [];
@@ -236,7 +251,6 @@ export default function RoadmapPage() {
 
   const [activeWeek, setActiveWeek] = useState(1);
   const [simSelected, setSimSelected] = useState<boolean[]>(scoreSimulator.map(() => false));
-  const [chartFilter, setChartFilter] = useState<"1M" | "3M" | "6M" | "1Y">("3M");
 
   // Safe access to current week data — fallback to first week or a placeholder
   const currentWeekData = weeks[activeWeek - 1] || weeks[0] || {
@@ -379,17 +393,31 @@ export default function RoadmapPage() {
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
           <h2 className="text-base font-semibold text-[#111827] mb-4">Weekly Plan</h2>
 
-          {/* Week pills */}
-          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
-            {Array.from({ length: weeksTotal }, (_, i) => i + 1).map((w) => {
-              const isCompleted = w <= (rm?.current_week || 1) - 1;
-              const isActive = w === activeWeek;
+          {/* Week pills — grouped by phase */}
+          <div className="flex gap-1 overflow-x-auto pb-3 scrollbar-hide items-end">
+            {phases.map((phase, pi) => {
+              const [start, end] = phase.weeks.split("-").map(Number);
+              const phaseWeeks = Array.from({ length: end - start + 1 }, (_, i) => start + i);
               return (
-                <button key={w} onClick={() => setActiveWeek(w)} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isCompleted && !isActive ? "bg-emerald-500 text-white" :
-                  isActive ? "border-2 border-emerald-500 text-emerald-600 bg-white font-semibold" :
-                  "border border-gray-200 text-gray-400"
-                }`}>W{w}</button>
+                <div key={phase.id} className="flex items-end gap-1">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#9CA3AF] whitespace-nowrap mb-0.5">P{phase.id}</span>
+                    <div className="flex gap-1">
+                      {phaseWeeks.map((w) => {
+                        const isCompleted = w <= (rm?.current_week || 1) - 1;
+                        const isActive = w === activeWeek;
+                        return (
+                          <button key={w} onClick={() => setActiveWeek(w)} className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                            isCompleted && !isActive ? "bg-emerald-500 text-white" :
+                            isActive ? "border-2 border-emerald-500 text-emerald-600 bg-white font-semibold" :
+                            "border border-gray-200 text-gray-400 hover:border-gray-300"
+                          }`}>W{w}</button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {pi < phases.length - 1 && <div className="w-px h-5 bg-gray-200 mx-1 mb-0.5" />}
+                </div>
               );
             })}
           </div>
@@ -572,30 +600,34 @@ export default function RoadmapPage() {
           </div>
         </div>
 
-        {/* ═══ SECTION 4 — TASK BOARD ═══ */}
+        {/* ═══ SECTION 4 — TASK BOARD (Compact) ═══ */}
         <div>
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[#111827]">Task Board</h2>
             <span className="text-sm text-[#9CA3AF]">Sorted by impact</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* TO DO */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">To Do</h3>
                 <span className="bg-gray-100 text-gray-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.todo.length}</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
                 {kanbanTasks.todo.map((t: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }) => (
-                  <div key={t.title} className="relative rounded-xl border border-[#E5E7EB] p-4 bg-white">
-                    <span className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{t.impact}%</span>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`text-xs font-bold rounded px-1.5 py-0.5 ${t.difficulty === "Hard" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{t.difficulty}</span>
-                      <span className="text-xs text-[#9CA3AF]">{t.duration}</span>
+                  <div key={t.title} className="rounded-lg border border-[#E5E7EB] p-3 bg-white hover:border-[#A7F3D0] transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${t.difficulty === "Hard" ? "bg-red-100 text-red-700" : t.difficulty === "Medium" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>{t.difficulty}</span>
+                        <span className="text-[11px] text-[#9CA3AF]">{t.duration}</span>
+                      </div>
+                      <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-1.5 py-0.5">+{t.impact}%</span>
                     </div>
-                    <p className="text-sm font-semibold text-[#111827]">{t.title}</p>
-                    <button onClick={() => t.id && handleTaskStatusChange(t.id, "in_progress")} className="text-sm font-medium text-[#10B981] mt-2 hover:underline">Start →</button>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-[#111827] truncate pr-2">{t.title}</p>
+                      <button onClick={() => t.id && handleTaskStatusChange(t.id, "in_progress")} className="text-xs font-semibold text-[#10B981] hover:underline shrink-0">Start →</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -607,19 +639,29 @@ export default function RoadmapPage() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">In Progress</h3>
                 <span className="bg-emerald-100 text-emerald-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.inProgress.length}</span>
               </div>
-              <div className="space-y-3">
-                {kanbanTasks.inProgress.map((t: { title: string; impact: number; progress: number }) => (
-                  <div key={t.title} className="relative rounded-xl border-2 border-emerald-400 p-4 bg-white">
-                    <span className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{t.impact}%</span>
-                    <p className="text-sm font-semibold text-[#111827] mb-2">{t.title}</p>
-                    <div className="flex items-center justify-between text-xs text-[#9CA3AF] mb-1">
-                      <span>Progress</span><span className="font-bold text-[#111827]">{t.progress}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#F3F4F6]">
-                      <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${t.progress}%` }} />
-                    </div>
+              <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+                {kanbanTasks.inProgress.length === 0 ? (
+                  <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center">
+                    <Clock className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-[#9CA3AF]">Click &quot;Start →&quot; on a todo task</p>
                   </div>
-                ))}
+                ) : (
+                  kanbanTasks.inProgress.map((t: { id?: string; title: string; impact: number; progress: number }) => (
+                    <div key={t.title} className="rounded-lg border-2 border-emerald-300 p-3 bg-white">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-sm font-medium text-[#111827] truncate pr-2">{t.title}</p>
+                        <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">+{t.impact}%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="flex-1 h-1.5 rounded-full bg-[#F3F4F6]">
+                          <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${t.progress}%` }} />
+                        </div>
+                        <span className="text-[10px] font-bold text-[#6B7280] w-8 text-right">{t.progress}%</span>
+                      </div>
+                      <button onClick={() => (t as { id?: string }).id && handleTaskStatusChange((t as { id?: string }).id!, "done")} className="text-xs font-semibold text-emerald-600 hover:underline">Mark Done ✓</button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -629,106 +671,119 @@ export default function RoadmapPage() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">Done</h3>
                 <span className="bg-emerald-100 text-emerald-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.done.length}</span>
               </div>
-              <div className="space-y-2">
-                {kanbanTasks.done.map((t: string) => (
-                  <div key={t} className="rounded-xl border border-[#E5E7EB] p-3.5 bg-emerald-50 flex items-center justify-between">
-                    <span className="text-sm text-[#6B7280]">{t}</span>
-                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
+              <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+                {kanbanTasks.done.length === 0 ? (
+                  <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center">
+                    <CheckCircle2 className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-[#9CA3AF]">Completed tasks appear here</p>
                   </div>
-                ))}
+                ) : (
+                  kanbanTasks.done.map((t: string) => (
+                    <div key={t} className="rounded-lg border border-emerald-200 p-3 bg-emerald-50 flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280] truncate pr-2">{t}</span>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ═══ SECTION 5 — PROGRESS CHARTS ═══ */}
+        {/* ═══ SECTION 5 — PROGRESS ANALYTICS (2-col layout) ═══ */}
         <div>
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[#111827]">Progress Analytics</h2>
-            <div className="flex gap-1.5">
-              {(["1M", "3M", "6M", "1Y"] as const).map((f) => (
-                <button key={f} onClick={() => setChartFilter(f)} className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  chartFilter === f ? "bg-[#10B981] text-white" : "border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB]"
-                }`}>{f}</button>
-              ))}
-            </div>
           </div>
 
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1fr_1fr_1fr]">
-            {/* Line chart */}
-            <div className="rounded-xl border border-[#E5E7EB] bg-white p-5 lg:col-span-1">
-              <h3 className="text-sm font-semibold text-[#111827] mb-3">Match Score Over Time</h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={chartScoreHistory} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                  <XAxis dataKey="month" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
-                  <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
-                  <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 12 }} />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                  <Line type="monotone" dataKey={() => targetScore} name={`Target (${targetScore}%)`} stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="score" name="Your Score" stroke="#10B981" strokeWidth={2} dot={{ r: 3, fill: "#10B981" }} connectNulls />
-                  <Line type="monotone" dataKey="projected" name="Projected" stroke="#9CA3AF" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 2, fill: "#9CA3AF" }} connectNulls />
-                </LineChart>
-              </ResponsiveContainer>
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-[2fr_1fr]">
+            {/* Left: Charts stacked vertically */}
+            <div className="space-y-4">
+              {/* Score Over Time */}
+              <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+                <h3 className="text-sm font-semibold text-[#111827] mb-3">Match Score Over Time</h3>
+                {chartScoreHistory.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={chartScoreHistory} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                      <XAxis dataKey="month" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
+                      <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
+                      <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 12 }} />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                      <Line type="monotone" dataKey={() => targetScore} name={`Target (${targetScore}%)`} stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                      <Line type="monotone" dataKey="score" name="Your Score" stroke="#10B981" strokeWidth={2} dot={{ r: 3, fill: "#10B981" }} connectNulls />
+                      <Line type="monotone" dataKey="projected" name="Projected" stroke="#9CA3AF" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 2, fill: "#9CA3AF" }} connectNulls />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[220px] text-center">
+                    <TrendingUp className="h-8 w-8 text-gray-200 mb-2" />
+                    <p className="text-sm font-medium text-[#9CA3AF]">No score data yet</p>
+                    <p className="text-xs text-[#D1D5DB] mt-1">Complete tasks and sync your profiles to track progress</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Problems Per Week */}
+              <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+                <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week</h3>
+                {(() => {
+                  const barData = weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsaProblems.reduce((sum: number, p: { countDone: number }) => sum + (p.countDone || 0), 0) }));
+                  const hasData = barData.some((d) => d.count > 0);
+                  return hasData ? (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={barData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                        <XAxis dataKey="week" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
+                        <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
+                        <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 12 }} />
+                        <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[220px] text-center">
+                      <BarChart3 className="h-8 w-8 text-gray-200 mb-2" />
+                      <p className="text-sm font-medium text-[#9CA3AF]">No problems solved yet</p>
+                      <p className="text-xs text-[#D1D5DB] mt-1">Start solving DSA problems to see weekly stats</p>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
 
-            {/* Bar chart */}
-            <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-              <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week</h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsaProblems.reduce((sum: number, p: { countDone: number }) => sum + (p.countDone || 0), 0) }))} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                  <XAxis dataKey="week" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
-                  <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
-                  <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 12 }} />
-                  <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Skill progress bars */}
+            {/* Right: Skill Progress (constrained scroll) */}
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
               <h3 className="text-sm font-semibold text-[#111827] mb-4">Skill Progress</h3>
-              <div className="space-y-4">
-                {skillProgress.map((s) => (
-                  <div key={s.skill}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-[#6B7280]">{s.skill}</span>
-                      <span className="text-xs font-bold" style={{ color: skillBarColor(s.progress) }}>{s.progress}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#F3F4F6]">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${s.progress}%`, backgroundColor: skillBarColor(s.progress) }} />
-                    </div>
+              {skillProgress.length > 0 ? (
+                <div className="relative">
+                  <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1 pb-2">
+                    {skillProgress.map((s) => (
+                      <div key={s.skill}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-[#6B7280]">{s.skill}</span>
+                          <span className="text-xs font-bold" style={{ color: skillBarColor(s.progress) }}>{s.progress}%</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-[#F3F4F6]">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${s.progress}%`, backgroundColor: skillBarColor(s.progress) }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                  {skillProgress.length > 10 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-b-xl" />
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[200px] text-center">
+                  <Target className="h-8 w-8 text-gray-200 mb-2" />
+                  <p className="text-sm font-medium text-[#9CA3AF]">No skills tracked yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* ═══ SECTION 6 — NEXT ACTIONS ═══ */}
-        <div>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-semibold text-[#111827]">Next Actions</h2>
-            <span className="text-sm text-[#9CA3AF]">Sorted by impact</span>
-          </div>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {kanbanTasks.todo.slice(0, 3).map((a: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }, i: number) => (
-              <div key={a.title} className="relative rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors">
-                <span className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{a.impact}%</span>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg[ACTION_COLORS[i % ACTION_COLORS.length]]}`}>
-                  <TaskIcon color={ACTION_COLORS[i % ACTION_COLORS.length]} />
-                </div>
-                <h4 className="text-sm font-semibold text-[#111827] mt-3">{a.title}</h4>
-                <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{a.difficulty} · {a.duration}</p>
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#F3F4F6]">
-                  <span className="text-xs text-[#9CA3AF] flex items-center gap-1"><Clock className="h-3 w-3" /> {a.duration}</span>
-                  <button onClick={() => a.id && handleTaskStatusChange(a.id, "in_progress")} className="text-sm font-medium text-[#10B981] hover:underline">Start →</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Next Actions section removed — redundant with Task Board */}
 
       </div>
 
