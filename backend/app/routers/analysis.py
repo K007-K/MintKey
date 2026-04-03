@@ -176,41 +176,9 @@ async def trigger_analysis(
                 import traceback
                 traceback.print_exc()
 
-            # Save roadmaps + phases + tasks + skills to DB (Sprint 2C)
-            try:
-                roadmaps_data = result_dict.get("roadmaps", {})
-                if roadmaps_data:
-                    from app.repositories.roadmaps import RoadmapRepository
-
-                    async with async_session_factory() as session:
-                        repo = RoadmapRepository(session)
-                        for company_slug, rm in roadmaps_data.items():
-                            weeks = rm.get("weeks", [])
-                            roadmap = await repo.upsert(
-                                user_id=current_user.id,
-                                company_slug=company_slug,
-                                total_weeks=rm.get("total_weeks", len(weeks)),
-                                hours_per_day=int(rm.get("hours_per_day", 4)),
-                                weeks_data=weeks,
-                                target_level=rm.get("target_level"),
-                            )
-
-                            # Persist phases, kanban tasks, skill progress, initial snapshot
-                            phases = rm.get("phases", [])
-                            kanban_tasks = rm.get("kanban_tasks", [])
-                            await repo.persist_roadmap_details(
-                                roadmap=roadmap,
-                                phases_data=phases,
-                                kanban_tasks_data=kanban_tasks,
-                                weeks_data=weeks,
-                            )
-
-                        await session.commit()
-                        logger.info(f"Saved {len(roadmaps_data)} roadmap(s) with phases/tasks/skills to DB")
-            except Exception as e:
-                logger.error(f"Failed to save roadmaps: {e}")
-                import traceback
-                traceback.print_exc()
+            # Roadmaps are now generated on-demand when user visits a company page
+            # See: /api/v1/roadmap/{company_slug} (auto-generates on first visit)
+            # See: /api/v1/roadmap/{company_slug}/regenerate (manual regeneration)
 
             # ────────────────────────────────────────────────
             # Save platform_scores (GitHub + LeetCode)

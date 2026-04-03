@@ -52,8 +52,8 @@ class MintKeyOrchestrator:
             return_exceptions=True,
         )
 
-        # Brief pause to respect rate limits
-        await asyncio.sleep(3)
+        # Pause between batches to respect Groq TPM limits (12K tokens/min for 70b)
+        await asyncio.sleep(8)
 
         # Batch 2: Agents 4, 5
         batch2_results = await asyncio.gather(
@@ -145,8 +145,8 @@ class MintKeyOrchestrator:
                 except Exception as e:
                     logger.error(f"Failed to enrich blueprint for {company_slug}: {e}")
 
-        # Brief pause before Phase 2 LLM calls
-        await asyncio.sleep(5)
+        # Longer pause before Phase 2 — let TPM window reset
+        await asyncio.sleep(15)
 
         # Agent 6: Gap Finder (needs Agents 1, 2, 5)
         try:
@@ -169,68 +169,12 @@ class MintKeyOrchestrator:
             logger.error(f"[Orchestrator] Agent 6 failed: {e}")
             result.gap_analysis = GapAnalysis(recommendations=[f"Gap analysis failed: {str(e)}"])
 
-        # Delay before Agent 7
-        await asyncio.sleep(3)
-
-        # Agent 7: Roadmap Builder (needs Agents 2, 5, 6)
-        try:
-            if progress_callback:
-                await progress_callback("agent7_start", "Agent 7: Building preparation roadmap")
-
-            from agents.roadmap_builder import run_roadmap_builder
-
-            for company_slug in request.target_companies[:3]:  # Max 3 companies
-                blueprint = result.company_blueprints.get(company_slug, CompanyBlueprintModel())
-                roadmap = await run_roadmap_builder(
-                    gap_analysis=result.gap_analysis.model_dump() if result.gap_analysis else {},
-                    dsa_analysis=result.dsa_analysis.model_dump() if result.dsa_analysis else {},
-                    company_blueprint=blueprint.model_dump(),
-                    months_available=request.months_available,
-                    hours_per_day=request.hours_per_day,
-                )
-                result.roadmaps[company_slug] = roadmap
-        except Exception as e:
-            logger.error(f"[Orchestrator] Agent 7 failed: {e}")
-
-        # Delay before Agent 8
-        await asyncio.sleep(3)
-
-        # Agent 8: Career Coach (needs all agent outputs)
-        try:
-            if progress_callback:
-                await progress_callback("agent8_start", "Agent 8: Generating coaching report")
-
-            from agents.career_coach import run_career_coach
-
-            # Build a concise coaching input (avoid exceeding token limits)
-            gh_data = result.github_analysis.model_dump() if result.github_analysis else {}
-            dsa_data = result.dsa_analysis.model_dump() if result.dsa_analysis else {}
-            resume_data = result.resume_data.model_dump() if result.resume_data else {}
-            gap_data = result.gap_analysis.model_dump() if result.gap_analysis else {}
-
-            coaching_input = {
-                "github_score": gh_data.get("project_depth_score", 0),
-                "engineering_maturity": gh_data.get("engineering_maturity_index", 0),
-                "top_languages": list(gh_data.get("language_distribution", {}).keys())[:5],
-                "key_weaknesses": gh_data.get("key_weaknesses", []),
-                "dsa_score": dsa_data.get("dsa_depth_score", 0),
-                "total_solved": dsa_data.get("total_solved", 0),
-                "difficulty_distribution": dsa_data.get("difficulty_distribution", {}),
-                "topic_weaknesses": list(dsa_data.get("topic_weakness_map", {}).keys())[:5],
-                "resume_score": resume_data.get("resume_strength_score", 0),
-                "extracted_skills": resume_data.get("extracted_skills", [])[:10],
-                "blocking_gaps": [g.get("skill") for g in gap_data.get("blocking_gaps", [])],
-                "important_gaps": [g.get("skill") for g in gap_data.get("important_gaps", [])],
-                "target_companies": list(result.roadmaps.keys()),
-                "overall_readiness": result.overall_readiness,
-            }
-
-            result.coaching = await run_career_coach(coaching_input)
-        except Exception as e:
-            logger.error(f"[Orchestrator] Agent 8 failed: {e}")
-            result.coaching = CoachingReport(
-                coaching_message=f"Coaching generation failed: {str(e)}",
-            )
+        # =============================================
+        # AGENTS 7 & 8 removed from main pipeline
+        # Roadmap Builder → triggered on-demand per company via /api/v1/roadmap/{slug}/generate
+        # Career Coach    → triggered on-demand via /api/v1/coach/generate
+        # This reduces LLM calls from ~10+ to ~6, avoiding TPM rate limits
+        # =============================================
 
         if progress_callback:
             await progress_callback("complete", "Analysis complete!")

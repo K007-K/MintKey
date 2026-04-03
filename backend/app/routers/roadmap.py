@@ -68,8 +68,74 @@ async def get_roadmap(
     company_slug: str,
     current_user: User = Depends(get_current_user),
 ):
-    """Get the full roadmap for a specific company — includes phases, weeks, tasks, skills."""
+    """Get the full roadmap for a specific company — auto-generates on first visit."""
     try:
+        # 1. Check if roadmap exists
+        has_roadmap = False
+        async with async_session_factory() as session:
+            repo = RoadmapRepository(session)
+            check = await repo.get_by_company(current_user.id, company_slug)
+            has_roadmap = check is not None
+
+        # 2. If no roadmap, auto-generate via Agent 7 (on-demand)
+        if not has_roadmap:
+            logger.info(f"[Roadmap] No roadmap for {company_slug}, auto-generating on first visit...")
+
+            # Fetch company blueprint
+            blueprint_data = None
+            async with async_session_factory() as session:
+                from app.models.db import CompanyBlueprint
+                bp_result = await session.execute(
+                    select(CompanyBlueprint).where(CompanyBlueprint.slug == company_slug)
+                )
+                bp_row = bp_result.scalar_one_or_none()
+                if bp_row:
+                    blueprint_data = {
+                        "company_name": bp_row.name,
+                        "company_slug": bp_row.slug,
+                        "dsa_topics": (bp_row.dsa_requirements or {}).get("focus_topics", []),
+                        "required_stack": bp_row.tech_stack or [],
+                        "required_skills": bp_row.tech_stack or [],
+                        "interview_format": bp_row.interview_format or {},
+                    }
+
+            if not blueprint_data:
+                return APIResponse(success=True, data=None)
+
+            # Call Agent 7
+            try:
+                from agents.roadmap_builder import run_roadmap_builder
+                roadmap_output = await run_roadmap_builder(
+                    gap_analysis={}, dsa_analysis={},
+                    company_blueprint=blueprint_data,
+                    months_available=6, hours_per_day=4.0,
+                )
+                rm_dict = roadmap_output.model_dump()
+                weeks = rm_dict.get("weeks", [])
+
+                async with async_session_factory() as session:
+                    repo = RoadmapRepository(session)
+                    rm = await repo.upsert(
+                        user_id=current_user.id,
+                        company_slug=company_slug,
+                        total_weeks=rm_dict.get("total_weeks", len(weeks)),
+                        hours_per_day=int(rm_dict.get("hours_per_day", 4)),
+                        weeks_data=weeks,
+                        target_level=rm_dict.get("target_level"),
+                    )
+                    await repo.persist_roadmap_details(
+                        roadmap=rm,
+                        phases_data=rm_dict.get("phases", []),
+                        kanban_tasks_data=rm_dict.get("kanban_tasks", []),
+                        weeks_data=weeks,
+                    )
+                    await session.commit()
+                    logger.info(f"[Roadmap] Auto-generated roadmap for {company_slug}")
+            except Exception as e:
+                logger.error(f"[Roadmap] Auto-generation failed for {company_slug}: {e}")
+                return APIResponse(success=True, data=None)
+
+        # 3. Fetch the full roadmap with all related data
         async with async_session_factory() as session:
             repo = RoadmapRepository(session)
             rm = await repo.get_by_company(current_user.id, company_slug)
