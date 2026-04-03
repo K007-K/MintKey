@@ -187,11 +187,24 @@ async def get_platform_stats(
         lc_breakdown = leetcode.breakdown if leetcode else {}
         gh_breakdown = github.breakdown if github else {}
 
+        # Fetch real per-topic solved counts from LeetCode scraper (cached)
+        topic_solved_counts: dict = {}
+        if current_user.leetcode_username:
+            try:
+                from scrapers.leetcode_scraper import LeetCodeScraper
+                scraper = LeetCodeScraper()
+                topics = await scraper.fetch_topic_stats(current_user.leetcode_username)
+                if topics:
+                    topic_solved_counts = {t["tag"]: t["solved"] for t in topics}
+            except Exception as topic_err:
+                logger.warning(f"Failed to fetch topic stats: {topic_err}")
+
         data = {
             "leetcode": {
                 "total_solved": lc_breakdown.get("total_solved", 0),
                 "difficulty_distribution": lc_breakdown.get("difficulty_distribution", {}),
                 "topic_weakness_map": lc_breakdown.get("topic_weakness_map", {}),
+                "topic_solved_counts": topic_solved_counts,
                 "dsa_depth_score": lc_breakdown.get("dsa_depth_score", 0),
                 "easy_reliance_flag": lc_breakdown.get("easy_reliance_flag", False),
             },

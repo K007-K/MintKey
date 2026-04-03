@@ -36,7 +36,7 @@ type MatchReportData = {
     topics: { name: string; solved: number; required: number; gap: number }[];
   };
   topActions: { title: string; desc: string; impact: number; weeks: string; iconColor: string; effort: "Low" | "Medium" | "High"; roi: "Low" | "Medium" | "High" | "Very High" }[];
-  scoreHistory: { month: string; score: number | null; projected: number | null }[];
+  scoreHistory: { month: string; score: number | null; projected: number | null; target: number }[];
   targetScoreLine: number;
   whyScore: { strong: string[]; weak: string[] };
   simulator: { scenarios: { label: string; action: string; currentScore: number; newScore: number }[] };
@@ -162,6 +162,8 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   const userMediumSolved = userDiffDist.Medium || userDiffDist.medium || 0;
   const userHardSolved = userDiffDist.Hard || userDiffDist.hard || 0;
   const topicWeakness: Record<string, string> = lc.topic_weakness_map || {};
+  // Real per-topic solved counts from LeetCode API (exact numbers)
+  const topicSolvedCounts: Record<string, number> = lc.topic_solved_counts || {};
 
   // DSA Analysis: build from dsa_requirements topic_targets
   const topicTargets = dsa.topic_targets || {};
@@ -170,9 +172,24 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     const t = val as any;
     const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
     const required = t.recommended || t.minimum || 30;
-    // Look up user's actual proficiency from topic weakness map
-    const strength = topicWeakness[label] || topicWeakness[key] || "";
-    const solved = strength === "strong" ? Math.round(required * 0.9) : strength === "medium" ? Math.round(required * 0.5) : strength === "weak" ? Math.round(required * 0.2) : 0;
+    // Look up user's actual solved count from LeetCode topic data
+    // Try multiple key formats: exact label, original key, various casings
+    const solved = topicSolvedCounts[label]
+      || topicSolvedCounts[key]
+      || topicSolvedCounts[label.replace(/ /g, "")]
+      || topicSolvedCounts[key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())]
+      || (() => {
+        // Fuzzy match: find a key in topicSolvedCounts that contains this topic name
+        const lowerLabel = label.toLowerCase();
+        for (const [k, v] of Object.entries(topicSolvedCounts)) {
+          if (k.toLowerCase() === lowerLabel || k.toLowerCase().includes(lowerLabel) || lowerLabel.includes(k.toLowerCase())) {
+            return v;
+          }
+        }
+        // Fallback to weakness map approximation if no exact count available
+        const strength = topicWeakness[label] || topicWeakness[key] || "";
+        return strength === "strong" ? Math.round(required * 0.9) : strength === "medium" ? Math.round(required * 0.5) : strength === "weak" ? Math.round(required * 0.2) : 0;
+      })();
     return { name: label, solved, required, gap: solved - required };
   }).sort((a, b) => a.gap - b.gap).slice(0, 8);
 
@@ -249,6 +266,25 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
   const gapToClose = Math.max(0, targetScore - matchScore);
   const problemsToSolve = totalRequired;
 
+  // Generate projected score history: show current + projected improvement
+  const generatedHistory: MatchReportData["scoreHistory"] = [];
+  if (hasRealScores) {
+    const now = new Date();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    // Current month as "Your Score", next months as projected growth
+    const monthlyGain = Math.max(0.5, (targetScore - matchScore) / (weeksAway || 8) * 4.3);
+    for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const label = monthNames[monthDate.getMonth()];
+      if (i === 0) {
+        generatedHistory.push({ month: label, score: matchScore, projected: matchScore, target: targetScore });
+      } else {
+        const projectedScore = Math.min(100, Math.round(matchScore + monthlyGain * i));
+        generatedHistory.push({ month: label, score: null, projected: projectedScore, target: targetScore });
+      }
+    }
+  }
+
   return {
     name: companyName,
     role,
@@ -263,7 +299,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     radarData,
     dsaAnalysis,
     topActions,
-    scoreHistory: [], // Populated separately from history API
+    scoreHistory: generatedHistory,
     targetScoreLine: targetScore,
     whyScore: {
       strong: strongAreas.length > 0 ? strongAreas : ["Run analysis to see your strengths"],
@@ -379,13 +415,14 @@ export default function MatchReportPage() {
       rawPlatformStats
     );
 
-    // Build score history from real data or leave empty
+    // Build score history from real data if available, otherwise keep generated projections
     if (rawHistory && Array.isArray(rawHistory) && rawHistory.length > 0) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       report.scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h: { overall_score: number; computed_at: string }, i: number) => ({
         month: months[new Date(h.computed_at).getMonth()] || `M${i}`,
         score: Math.round(h.overall_score),
         projected: null,
+        target: report.targetScoreLine,
       }));
     }
 
@@ -407,12 +444,10 @@ export default function MatchReportPage() {
     );
   }
 
-  /* Time filter slicing */
+  /* Time filter slicing — projected data starts at month 0 (current) */
   const filterMap = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12 };
   const months = filterMap[timeFilter];
-  const currentMonthIdx = 8;
-  const startIdx = Math.max(0, currentMonthIdx - months + 1);
-  const filteredHistory = data.scoreHistory.slice(startIdx, startIdx + months + 3).slice(0, 12);
+  const filteredHistory = data.scoreHistory.slice(0, months + 1);
 
   /* Status badge colors */
   const statusColors: Record<string, string> = {
@@ -813,7 +848,7 @@ export default function MatchReportPage() {
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
               <Line
-                type="monotone" dataKey={() => data.targetScoreLine} name={`Target (${data.targetScoreLine}%)`}
+                type="monotone" dataKey="target" name={`Target (${data.targetScoreLine}%)`}
                 stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls
               />
               <Line
