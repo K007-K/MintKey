@@ -155,7 +155,7 @@ async def sync_leetcode_for_roadmap(
     roadmap.streak_days = streak
     roadmap.last_solved_at = last_solved
     roadmap.problems_this_week = problems_this_week
-    roadmap.last_synced_at = datetime.now(timezone.utc)
+    roadmap.last_synced_at = datetime.utcnow()
 
     await session.commit()
 

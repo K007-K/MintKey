@@ -145,7 +145,7 @@ async def sync_github_for_roadmap(
     stats["commits_this_week"] = gh_commits_this_week
 
     # ─── 4. Update roadmap tracking ───
-    roadmap.last_synced_at = datetime.now(timezone.utc)
+    roadmap.last_synced_at = datetime.utcnow()
 
     await session.commit()
 
