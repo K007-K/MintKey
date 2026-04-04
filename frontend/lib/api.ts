@@ -188,6 +188,21 @@ export function useComputeScores() {
   });
 }
 
+// Recompute match scores from existing analysis data (no LLM needed)
+export function useRecomputeScores() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<APIResponse>("/api/v1/scores/recompute");
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["scores"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
 // --- Company Hooks ---
 
 // List all companies

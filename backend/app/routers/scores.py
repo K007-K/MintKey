@@ -225,3 +225,134 @@ async def get_platform_stats(
             error="Failed to fetch platform stats",
         )
 
+
+@router.post("/recompute", response_model=APIResponse)
+async def recompute_match_scores(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Recompute match scores from existing analysis data — NO LLM needed.
+    Use this after scoring logic fixes to update DB without re-analyzing.
+    """
+    from app.services.scoring import ScoringEngine
+    from app.models.db import AnalysisResult, CompanyMatchScore, UserTargetCompany
+    from agents.core.models import (
+        GitHubAnalysis, DSAAnalysis, ResumeData, CompanyBlueprintModel,
+    )
+    from sqlalchemy import desc, delete
+    from datetime import datetime, timezone
+
+    try:
+        # 1. Fetch latest completed analysis
+        result = await db.execute(
+            select(AnalysisResult)
+            .where(
+                AnalysisResult.user_id == current_user.id,
+                AnalysisResult.status == "completed",
+            )
+            .order_by(desc(AnalysisResult.completed_at))
+            .limit(1)
+        )
+        latest = result.scalar_one_or_none()
+
+        if not latest or not latest.merged_analysis:
+            return APIResponse(
+                success=False, data=None,
+                error="No completed analysis found. Run analysis first.",
+            )
+
+        # 2. Fetch target companies
+        tc_result = await db.execute(
+            select(UserTargetCompany)
+            .where(UserTargetCompany.user_id == current_user.id)
+        )
+        target_companies = tc_result.scalars().all()
+        if not target_companies:
+            return APIResponse(
+                success=False, data=None,
+                error="No target companies found.",
+            )
+
+        # 3. Build Pydantic models from stored analysis
+        analysis_data = latest.merged_analysis
+        github = None
+        dsa = None
+        resume = None
+
+        try:
+            if analysis_data.get("github_analysis"):
+                github = GitHubAnalysis(**analysis_data["github_analysis"])
+        except Exception as e:
+            logger.warning(f"Failed to parse GitHubAnalysis: {e}")
+
+        try:
+            if analysis_data.get("dsa_analysis"):
+                dsa = DSAAnalysis(**analysis_data["dsa_analysis"])
+        except Exception as e:
+            logger.warning(f"Failed to parse DSAAnalysis: {e}")
+
+        try:
+            if analysis_data.get("resume_data"):
+                resume = ResumeData(**analysis_data["resume_data"])
+        except Exception as e:
+            logger.warning(f"Failed to parse ResumeData: {e}")
+
+        blueprints = {}
+        for slug, bp_data in analysis_data.get("company_blueprints", {}).items():
+            try:
+                blueprints[slug] = CompanyBlueprintModel(**bp_data)
+            except Exception as e:
+                logger.warning(f"Failed to parse blueprint for {slug}: {e}")
+
+        # 4. Compute scores for each target company
+        engine = ScoringEngine()
+        recomputed = {}
+
+        for tc in target_companies:
+            company_slug = tc.company_slug
+            blueprint = blueprints.get(company_slug)
+
+            score_result = engine.compute_match_score(
+                github=github,
+                dsa=dsa,
+                resume=resume,
+                blueprint=blueprint,
+            )
+
+            # Delete old scores for this company
+            await db.execute(
+                delete(CompanyMatchScore).where(
+                    CompanyMatchScore.user_id == current_user.id,
+                    CompanyMatchScore.company_slug == company_slug,
+                )
+            )
+
+            # Insert new score
+            db.add(CompanyMatchScore(
+                user_id=current_user.id,
+                company_slug=company_slug,
+                overall_score=score_result["overall_score"],
+                breakdown=score_result["component_scores"],
+                status_label=score_result.get("grade", "Needs Work"),
+                weeks_away=max(2, round((85 - score_result["overall_score"]) / 3)),
+                computed_at=datetime.now(timezone.utc),
+            ))
+
+            recomputed[company_slug] = {
+                "overall_score": score_result["overall_score"],
+                "component_scores": score_result["component_scores"],
+                "grade": score_result.get("grade", "Needs Work"),
+            }
+
+        await db.commit()
+        score_summary = ", ".join(
+            f"{k}={v['overall_score']}" for k, v in recomputed.items()
+        )
+        logger.info(f"Recomputed scores for user {current_user.id}: {score_summary}")
+
+        return APIResponse(success=True, data=recomputed)
+
+    except Exception as e:
+        logger.error(f"Score recomputation failed: {e}", exc_info=True)
+        return APIResponse(success=False, data=None, error=str(e))
