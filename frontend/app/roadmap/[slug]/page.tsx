@@ -498,8 +498,27 @@ export default function RoadmapPage() {
                             <p className={`text-sm font-semibold ${d.isToday ? "text-amber-800" : "text-[#374151]"}`}>{d.day}</p>
                             {d.isToday && <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1">TODAY <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /></span>}
                           </div>
-                          <div className="px-4 py-3 flex-1">
-                            <p className={`text-sm ${d.isToday ? "text-amber-900 font-medium" : "text-[#6B7280]"}`}>{d.task}</p>
+                          <div className="px-4 py-3 flex-1 flex items-center gap-3">
+                            <p className={`text-sm flex-1 ${d.isToday ? "text-amber-900 font-medium" : "text-[#6B7280]"}`}>{d.task}</p>
+                            {/* Learning resource links (non-practice days / study days) */}
+                            {!isPracticeDay && currentWeekData.dsa.lcTag && (
+                              <div className="flex items-center gap-2 shrink-0">
+                                <a
+                                  href={`https://www.geeksforgeeks.org/${currentWeekData.dsa.lcTag.replace(/\s+/g, "-").toLowerCase()}/`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                                >
+                                  <BookOpen className="h-3 w-3" /> GFG ↗
+                                </a>
+                                <a
+                                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(currentWeekData.dsa.lcTag + " data structures algorithms tutorial")}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                                >
+                                  <Video className="h-3 w-3" /> YouTube ↗
+                                </a>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -833,7 +852,7 @@ export default function RoadmapPage() {
               <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
                 <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week <span className="text-xs font-normal text-[#9CA3AF]">· Target vs Solved</span></h3>
                 {(() => {
-                  const barData = weeks.slice(0, 8).map((w, i) => ({
+                  const barData = weeks.map((w, i) => ({
                     week: `W${i + 1}`,
                     target: w.dsa.count || 0,
                     solved: w.dsa.countDone || 0,
