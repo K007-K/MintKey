@@ -5,9 +5,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import DashboardLayout from "@/components/ui/DashboardLayout";
 import { useDashboardSummary, useMatchScores, useCurrentUser, useTriggerAnalysis, useAnalysisStatus, useComputeScores, queryClient } from "@/lib/api";
-import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
-} from "recharts";
+
 import { Plus, AlertTriangle, ArrowUpRight, Sparkles, ExternalLink, X, FileText, ChevronDown, ChevronUp, Zap, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
@@ -38,14 +36,13 @@ export default function DashboardPage() {
   const recentActivity = (d?.recent_activity as Array<Record<string, string>>) || [];
   const criticalGaps = (d?.critical_gaps as Array<Record<string, string>>) || [];
   const priorityActions = (d?.priority_actions as Array<Record<string, string>>) || [];
-  const trendData = (d?.trend_data as Array<Record<string, unknown>>) || null;
+
 
   // Match scores for company bars — single source of truth (deduplicated from useMatchScores)
   const scores = Array.isArray(matchScores) ? matchScores : [];
   const displayScores = scores;
 
-  // Chart: only show real trend data, no fake placeholder
-  const chartData = trendData && trendData.length > 0 ? trendData : null;
+
 
   // Heatmap modal state
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -286,54 +283,13 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* ─── Row 2: Readiness Trend + Company Match ─── */}
-        <div className="grid gap-5 lg:grid-cols-[1fr_320px] grid-cols-1">
-          {/* Readiness Trend Chart */}
-          <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">{(d?.trend_label as string) || "Readiness Trend"}</h2>
-                <p className="text-xs text-gray-400">
-                  {trendData ? "Your profile score across platforms" : "Run your first AI analysis to see trends"}
-                </p>
-              </div>
-            </div>
-            <div className="h-56">
-              {chartData ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.08} />
-                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }} labelStyle={{ fontWeight: 600 }} />
-                    <Area type="monotone" dataKey="score" stroke="#1e293b" strokeWidth={2} fill="url(#trendFill)" dot={{ r: 2.5, fill: '#1e293b', strokeWidth: 0 }} activeDot={{ r: 4, fill: '#1e293b' }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
-                    <svg className="h-6 w-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">No trend data yet</p>
-                  <p className="text-xs text-gray-400">Run your first AI analysis to start tracking progress</p>
-                </div>
-              )}
-            </div>
-          </div>
-
+        {/* ─── Row 2: Company Match ─── */}
+        <div className="grid gap-5 grid-cols-1">
           {/* Company Match */}
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
             <h2 className="mb-4 text-base font-bold text-gray-900">Company Match</h2>
             {scoresLoading || isLoading ? (
-              <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between"><div className="h-4 w-24 animate-pulse rounded bg-gray-100" /><div className="h-4 w-10 animate-pulse rounded bg-gray-100" /></div>
@@ -342,16 +298,16 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : displayScores.length > 0 ? (
-              <div className="space-y-4">
-                {displayScores.slice(0, 5).map((s: Record<string, unknown>, idx: number) => {
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {displayScores.slice(0, 6).map((s: Record<string, unknown>, idx: number) => {
                   const slug = (s.company_slug as string) || "";
                   const rawScore = s.overall_score;
                   const isPending = rawScore === null || rawScore === undefined;
                   const score = isPending ? 0 : Math.round(rawScore as number);
                   const color = score >= 80 ? "#16a34a" : score >= 60 ? "#2563eb" : "#1e293b";
                   return (
-                    <Link key={`${slug}-${idx}`} href={`/company/${slug}`} className="block group">
-                      <div className="flex items-center justify-between mb-1.5">
+                    <Link key={`${slug}-${idx}`} href={`/company/${slug}`} className="block group rounded-lg border border-gray-100 p-4 hover:border-gray-200 hover:shadow-sm transition-all">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2.5">
                           <CompanyLogo name={slug} />
                           <span className="text-sm font-medium text-gray-900 capitalize group-hover:text-teal-600 transition-colors">{slug.replace(/-/g, " ")}</span>

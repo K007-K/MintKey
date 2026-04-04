@@ -48,17 +48,19 @@ def compute_projected_score(
 # Company-specific weight distributions (must sum to 100)
 COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
     "google": {
-        "dsa": 40,
-        "projects": 20,
-        "academic": 10,
-        "stack": 15,
-        "internship": 10,
-        "aptitude": 0,
-        "consistency": 5,
-    },
-    "amazon": {
         "dsa": 35,
         "projects": 15,
+        "system_design": 10,
+        "academic": 10,
+        "stack": 10,
+        "internship": 10,
+        "aptitude": 0,
+        "consistency": 10,
+    },
+    "amazon": {
+        "dsa": 30,
+        "projects": 10,
+        "system_design": 10,
         "academic": 10,
         "stack": 15,
         "internship": 15,
@@ -66,8 +68,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 10,
     },
     "microsoft": {
-        "dsa": 35,
-        "projects": 20,
+        "dsa": 30,
+        "projects": 15,
+        "system_design": 10,
         "academic": 10,
         "stack": 15,
         "internship": 10,
@@ -75,8 +78,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 10,
     },
     "flipkart": {
-        "dsa": 35,
-        "projects": 20,
+        "dsa": 30,
+        "projects": 15,
+        "system_design": 10,
         "academic": 10,
         "stack": 15,
         "internship": 10,
@@ -85,9 +89,10 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
     },
     "razorpay": {
         "dsa": 20,
-        "projects": 30,
+        "projects": 25,
+        "system_design": 10,
         "academic": 10,
-        "stack": 25,
+        "stack": 20,
         "internship": 10,
         "aptitude": 0,
         "consistency": 5,
@@ -95,7 +100,8 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
     "tcs": {
         "dsa": 15,
         "projects": 10,
-        "academic": 25,
+        "system_design": 5,
+        "academic": 20,
         "stack": 10,
         "internship": 10,
         "aptitude": 25,
@@ -104,7 +110,8 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
     "infosys": {
         "dsa": 15,
         "projects": 10,
-        "academic": 25,
+        "system_design": 5,
+        "academic": 20,
         "stack": 10,
         "internship": 10,
         "aptitude": 25,
@@ -113,15 +120,17 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
     "wipro": {
         "dsa": 10,
         "projects": 10,
-        "academic": 25,
+        "system_design": 5,
+        "academic": 20,
         "stack": 10,
         "internship": 10,
         "aptitude": 30,
         "consistency": 5,
     },
     "startup": {
-        "dsa": 15,
-        "projects": 40,
+        "dsa": 10,
+        "projects": 35,
+        "system_design": 10,
         "academic": 5,
         "stack": 20,
         "internship": 15,
@@ -129,8 +138,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 5,
     },
     "zepto": {
-        "dsa": 25,
-        "projects": 30,
+        "dsa": 20,
+        "projects": 25,
+        "system_design": 10,
         "academic": 5,
         "stack": 20,
         "internship": 15,
@@ -138,8 +148,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 5,
     },
     "cred": {
-        "dsa": 25,
-        "projects": 30,
+        "dsa": 20,
+        "projects": 25,
+        "system_design": 10,
         "academic": 5,
         "stack": 25,
         "internship": 10,
@@ -147,8 +158,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 5,
     },
     "phonpe": {
-        "dsa": 30,
-        "projects": 20,
+        "dsa": 25,
+        "projects": 15,
+        "system_design": 10,
         "academic": 10,
         "stack": 20,
         "internship": 10,
@@ -156,8 +168,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 10,
     },
     "groww": {
-        "dsa": 25,
-        "projects": 25,
+        "dsa": 20,
+        "projects": 20,
+        "system_design": 10,
         "academic": 10,
         "stack": 20,
         "internship": 15,
@@ -165,8 +178,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 5,
     },
     "swiggy": {
-        "dsa": 30,
-        "projects": 20,
+        "dsa": 25,
+        "projects": 15,
+        "system_design": 10,
         "academic": 10,
         "stack": 20,
         "internship": 10,
@@ -174,8 +188,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 10,
     },
     "blinkit": {
-        "dsa": 25,
-        "projects": 25,
+        "dsa": 20,
+        "projects": 20,
+        "system_design": 10,
         "academic": 10,
         "stack": 20,
         "internship": 15,
@@ -183,8 +198,9 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
         "consistency": 5,
     },
     "meesho": {
-        "dsa": 25,
-        "projects": 25,
+        "dsa": 20,
+        "projects": 20,
+        "system_design": 10,
         "academic": 10,
         "stack": 20,
         "internship": 15,
@@ -196,9 +212,10 @@ COMPANY_WEIGHTS: dict[str, dict[str, int]] = {
 # Default weights for unknown companies
 DEFAULT_WEIGHTS = {
     "dsa": 25,
-    "projects": 25,
+    "projects": 20,
+    "system_design": 10,
     "academic": 10,
-    "stack": 20,
+    "stack": 15,
     "internship": 15,
     "aptitude": 0,
     "consistency": 5,
@@ -269,6 +286,7 @@ class ScoringEngine:
         scores = {
             "dsa": self._score_dsa(dsa, platform_dsa_progress),
             "projects": self._score_projects(github),
+            "system_design": self._score_system_design(github),
             "academic": self._score_academic(resume, blueprint),
             "stack": self._score_stack(github, resume, blueprint),
             "internship": self._score_internship(resume),
@@ -369,6 +387,23 @@ class ScoringEngine:
         if score > 0:
             return min(score, 100)
         return 20  # Default baseline
+
+    def _score_system_design(self, github: Optional[GitHubAnalysis]) -> float:
+        """Score system design readiness (0-100).
+
+        Uses engineering maturity + project depth.
+        """
+        if not github:
+            return 0
+
+        maturity = github.engineering_maturity_index
+        maturity = maturity if maturity > 0 else 0
+        depth = github.project_depth_score
+        depth = depth if depth > 0 else 0
+
+        # System design is a proxy: 60% engineering maturity + 40% project depth
+        score = maturity * 0.6 + depth * 0.4
+        return min(round(score), 100)
 
     def _score_academic(
         self, resume: Optional[ResumeData], blueprint: Optional[CompanyBlueprintModel]

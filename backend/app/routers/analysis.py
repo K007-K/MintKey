@@ -344,25 +344,40 @@ async def trigger_analysis(
                         # Compute individual component scores
                         dsa_score = min(dsa.get("dsa_depth_score", 0), 100)
                         project_score = min(gh.get("project_depth_score", 0), 100)
-                        stack_score = min(gh.get("engineering_maturity_index", 0), 100)
+
+                        # Tech Stack: compare user skills against company required skills
+                        user_skills = set()
+                        for s in gh.get("technology_stack", []):
+                            user_skills.add(s.lower())
+                        for s in resume.get("extracted_skills", []):
+                            user_skills.add(s.lower())
+
+                        # Get company required skills from blueprint in merged analysis
+                        company_bp = merged.get("company_blueprints", {}).get(company_slug, {})
+                        required_skills = set(s.lower() for s in company_bp.get("required_skills", []))
+                        if required_skills and user_skills:
+                            skill_overlap = user_skills & required_skills
+                            stack_score = min(len(skill_overlap) / len(required_skills) * 100, 100)
+                        else:
+                            stack_score = 50  # Neutral when no data
+
                         academic_score = min((resume.get("cgpa", 0) or 0) / 10 * 100, 100)
                         internship_score = min((resume.get("internship_count", 0) or 0) * 33, 100)
                         consistency_score = min(dsa.get("total_solved", 0) / 3, 100)
+
                         # System design: proxy from engineering maturity + project complexity
-                        sys_design_score = min(
-                            (gh.get("engineering_maturity_index", 0) * 0.6
-                             + gh.get("project_depth_score", 0) * 0.4),
-                            100,
-                        )
+                        maturity = gh.get("engineering_maturity_index", 0)
+                        depth = gh.get("project_depth_score", 0)
+                        sys_design_score = min(maturity * 0.6 + depth * 0.4, 100)
 
                         breakdown = {
                             "dsa": round(dsa_score, 1),
                             "projects": round(project_score, 1),
+                            "system_design": round(sys_design_score, 1),
                             "stack": round(stack_score, 1),
                             "academic": round(academic_score, 1),
                             "internship": round(internship_score, 1),
                             "consistency": round(consistency_score, 1),
-                            "system_design": round(sys_design_score, 1),
                         }
 
                         # Weighted overall score
