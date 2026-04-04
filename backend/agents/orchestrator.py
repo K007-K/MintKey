@@ -12,7 +12,6 @@ from agents.core.models import (
     TrendData,
     CompanyBlueprintModel,
     GapAnalysis,
-    CoachingReport,
 )
 
 logger = logging.getLogger(__name__)

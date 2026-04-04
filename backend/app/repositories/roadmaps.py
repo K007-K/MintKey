@@ -5,7 +5,7 @@ import json
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import select, update, func
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db import (

@@ -2,7 +2,7 @@
 import logging
 import json
 from typing import Optional
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from agents.core.agentic_loop import run_agent_loop
 from agents.core.tool_executor import execute_tool, RESOURCE_TOOLS

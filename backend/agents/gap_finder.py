@@ -2,7 +2,6 @@
 import logging
 import json
 from agents.core.agentic_loop import run_agent_loop
-from agents.core.tool_executor import execute_tool, SKILL_GRAPH_TOOLS
 from agents.core.models import GapAnalysis
 
 logger = logging.getLogger(__name__)

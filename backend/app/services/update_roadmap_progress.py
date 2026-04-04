@@ -2,8 +2,7 @@
 import logging
 import math
 from datetime import datetime
-from uuid import UUID
-from sqlalchemy import select, func, text, case
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db import (

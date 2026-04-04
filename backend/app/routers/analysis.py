@@ -504,7 +504,7 @@ async def fill_gaps_and_coaching(
 ):
     """Run Gap Finder + Career Coach agents individually and persist to DB."""
     from app.core.database import async_session_factory
-    from app.models.db import UserSkillGap, GapPriority as DBGapPriority, PlatformScore
+    from app.models.db import UserSkillGap, GapPriority as DBGapPriority
     from sqlalchemy import text, delete
 
     results = {"gaps_saved": 0, "coaching_saved": False, "errors": []}
