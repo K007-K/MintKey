@@ -353,7 +353,7 @@ async def trigger_analysis(
                             user_skills.add(s.lower())
 
                         # Get company required skills from blueprint in merged analysis
-                        company_bp = merged.get("company_blueprints", {}).get(company_slug, {})
+                        company_bp = result_dict.get("company_blueprints", {}).get(company_slug, {})
                         required_skills = set(s.lower() for s in company_bp.get("required_skills", []))
                         if required_skills and user_skills:
                             skill_overlap = user_skills & required_skills
