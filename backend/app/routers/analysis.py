@@ -322,10 +322,9 @@ async def trigger_analysis(
             try:
                 from app.models.db import CompanyMatchScore, UserTargetCompany
                 from sqlalchemy import delete
+                from app.services.scoring import ScoringEngine
 
-                gh = result_dict.get("github_analysis", {})
-                dsa = result_dict.get("dsa_analysis", {})
-                resume = result_dict.get("resume_data", {})
+                engine = ScoringEngine()
 
                 async with async_session_factory() as session:
                     for company_slug in payload.target_companies[:3]:
@@ -337,55 +336,20 @@ async def trigger_analysis(
                             )
                         )
 
-                        # Get company weights
-                        from app.services.scoring import COMPANY_WEIGHTS
-                        weights = COMPANY_WEIGHTS.get(company_slug, COMPANY_WEIGHTS.get("google", {}))
+                        # Get blueprint for this company (from the orchestrator result)
+                        blueprint = result.company_blueprints.get(company_slug)
 
-                        # Compute individual component scores
-                        dsa_score = min(dsa.get("dsa_depth_score", 0), 100)
-                        project_score = min(gh.get("project_depth_score", 0), 100)
+                        # Use the proper ScoringEngine with typed Pydantic models
+                        score_result = engine.compute_match_score(
+                            company_slug=company_slug,
+                            github=result.github_analysis,
+                            dsa=result.dsa_analysis,
+                            resume=result.resume_data,
+                            blueprint=blueprint,
+                        )
 
-                        # Tech Stack: compare user skills against company required skills
-                        user_skills = set()
-                        for s in gh.get("technology_stack", []):
-                            user_skills.add(s.lower())
-                        for s in resume.get("extracted_skills", []):
-                            user_skills.add(s.lower())
-
-                        # Get company required skills from blueprint in merged analysis
-                        company_bp = result_dict.get("company_blueprints", {}).get(company_slug, {})
-                        required_skills = set(s.lower() for s in company_bp.get("required_skills", []))
-                        if required_skills and user_skills:
-                            skill_overlap = user_skills & required_skills
-                            stack_score = min(len(skill_overlap) / len(required_skills) * 100, 100)
-                        else:
-                            stack_score = 50  # Neutral when no data
-
-                        academic_score = min((resume.get("cgpa", 0) or 0) / 10 * 100, 100)
-                        internship_score = min((resume.get("internship_count", 0) or 0) * 33, 100)
-                        consistency_score = min(dsa.get("total_solved", 0) / 3, 100)
-
-                        # System design: proxy from engineering maturity + project complexity
-                        maturity = gh.get("engineering_maturity_index", 0)
-                        depth = gh.get("project_depth_score", 0)
-                        sys_design_score = min(maturity * 0.6 + depth * 0.4, 100)
-
-                        breakdown = {
-                            "dsa": round(dsa_score, 1),
-                            "projects": round(project_score, 1),
-                            "system_design": round(sys_design_score, 1),
-                            "stack": round(stack_score, 1),
-                            "academic": round(academic_score, 1),
-                            "internship": round(internship_score, 1),
-                            "consistency": round(consistency_score, 1),
-                        }
-
-                        # Weighted overall score
-                        overall = 0
-                        for key, weight in weights.items():
-                            if key in breakdown:
-                                overall += breakdown[key] * (weight / 100)
-                        overall = round(min(overall, 100), 1)
+                        breakdown = score_result["component_scores"]
+                        overall = score_result["overall_score"]
 
                         # Status label
                         if overall >= 85:
