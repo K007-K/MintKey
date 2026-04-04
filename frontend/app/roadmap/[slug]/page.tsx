@@ -96,7 +96,7 @@ export default function RoadmapPage() {
   const streakDays = rm?.streak_days || 0;
   const scoreStatus = rm?.score_status || "Needs Work";
   const targetScore = 85;
-  const currentScore = progressPercent; // will be replaced by match score when available
+  const currentScore = rm?.match_score ?? 0;
 
   // Phases — directly from backend
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -336,7 +336,12 @@ export default function RoadmapPage() {
             <p className="text-xs text-[#9CA3AF] mb-1">Current Score</p>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-[#374151]">{currentScore}%</span>
-              <span className="bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full px-2 py-0.5">{scoreStatus}</span>
+              <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                scoreStatus === "Ready" ? "bg-green-100 text-green-700" :
+                scoreStatus === "Almost Ready" ? "bg-blue-100 text-blue-700" :
+                scoreStatus === "Getting There" ? "bg-amber-100 text-amber-700" :
+                "bg-red-100 text-red-700"
+              }`}>{scoreStatus}</span>
             </div>
           </div>
           <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">

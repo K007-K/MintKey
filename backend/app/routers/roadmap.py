@@ -226,6 +226,20 @@ async def get_roadmap(
                 for p in rpm_result.scalars().all()
             ]
 
+            # Fetch match score for this company
+            from app.models.db import CompanyMatchScore
+            ms_result = await session.execute(
+                select(CompanyMatchScore)
+                .where(
+                    CompanyMatchScore.user_id == current_user.id,
+                    CompanyMatchScore.company_slug == company_slug,
+                )
+                .order_by(CompanyMatchScore.computed_at.desc())
+                .limit(1)
+            )
+            match_row = ms_result.scalar_one_or_none()
+            match_score = round(match_row.overall_score) if match_row else 0
+
             return APIResponse(success=True, data={
                 "id": str(rm.id),
                 "company_slug": rm.company_slug,
@@ -234,18 +248,28 @@ async def get_roadmap(
                 "hours_per_day": rm.hours_per_day,
                 "current_week": rm.current_week,
                 "progress_pct": rm.progress_pct,
+                "match_score": match_score,
                 "target_level": rm.target_level,
                 "streak_days": rm.streak_days,
-                "last_synced_at": rm.last_synced_at.isoformat() if rm.last_synced_at else None,
+                "last_synced_at": (
+                    rm.last_synced_at.isoformat() + "Z"
+                    if rm.last_synced_at else None
+                ),
                 "generation_hash": rm.generation_hash,
-                "score_status": get_score_status(rm.progress_pct or 0),
+                "score_status": get_score_status(match_score),
                 "weeks_data": rm.weeks_data,
                 "phases": phases,
                 "kanban_tasks": kanban_tasks,
                 "skill_progress": skills,
                 "problem_map": problem_map,
-                "generated_at": rm.generated_at.isoformat() if rm.generated_at else None,
-                "updated_at": rm.updated_at.isoformat() if rm.updated_at else None,
+                "generated_at": (
+                    rm.generated_at.isoformat() + "Z"
+                    if rm.generated_at else None
+                ),
+                "updated_at": (
+                    rm.updated_at.isoformat() + "Z"
+                    if rm.updated_at else None
+                ),
             })
     except Exception as e:
         logger.error(f"Failed to get roadmap: {e}")
