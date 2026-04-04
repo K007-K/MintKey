@@ -157,6 +157,15 @@ async def sync_leetcode_for_roadmap(
     roadmap.problems_this_week = problems_this_week
     roadmap.last_synced_at = datetime.utcnow()
 
+    # ─── 6. Cascade progress to roadmap data structures ───
+    try:
+        from app.services.update_roadmap_progress import update_roadmap_progress
+        progress_result = await update_roadmap_progress(session, user, roadmap)
+        stats.update(progress_result)
+        logger.info(f"[LCSync] Progress cascade complete: {progress_result.get('problems_matched', 0)} problems matched")
+    except Exception as e:
+        logger.error(f"[LCSync] Progress cascade failed (sync still saved): {e}")
+
     await session.commit()
 
     logger.info(f"LeetCode sync complete for {lc_username}: {stats}")

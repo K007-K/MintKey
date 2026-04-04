@@ -197,6 +197,7 @@ class UserRoadmap(Base):
     tasks = relationship("RoadmapTask", back_populates="roadmap", cascade="all, delete-orphan")
     score_snapshots = relationship("ScoreSnapshot", back_populates="roadmap", cascade="all, delete-orphan")
     skill_progress = relationship("SkillProgress", back_populates="roadmap", cascade="all, delete-orphan")
+    problem_map = relationship("RoadmapProblemMap", back_populates="roadmap", cascade="all, delete-orphan")
 
 
 class RoadmapPhase(Base):
@@ -386,4 +387,31 @@ class UserProblemProgress(Base):
 
     user = relationship("User", back_populates="problem_progress")
     problem = relationship("ExternalProblem", back_populates="progress")
+
+
+class RoadmapProblemMap(Base):
+    """Maps specific problem slugs to roadmap weeks — source of truth for progress tracking."""
+    __tablename__ = "roadmap_problem_map"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    week_number = Column(Integer, nullable=False)
+    problem_order = Column(Integer, nullable=False, default=0)    # Order within the week (Day 1=Easy → Day 5=Hard)
+    problem_slug = Column(Text, nullable=False)                    # "two-sum" — matches lc_submissions.title_slug
+    topic = Column(Text, nullable=False)                           # "Arrays & Hashing"
+    difficulty = Column(Text, nullable=True)                       # Easy | Medium | Hard
+    status = Column(Text, default="pending")                       # pending | solved
+    assigned_at = Column(DateTime, default=datetime.utcnow)        # Anti-cheat: only count solves after this date
+    solved_at = Column(DateTime, nullable=True)                    # When user solved it (from lc_submissions)
+    submission_url = Column(Text, nullable=True)                   # Proof link
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    roadmap = relationship("UserRoadmap", back_populates="problem_map")
+
+    __table_args__ = (
+        UniqueConstraint('roadmap_id', 'week_number', 'problem_slug', name='uq_roadmap_week_slug'),
+        Index('idx_rpm_roadmap_week', 'roadmap_id', 'week_number'),
+    )
 

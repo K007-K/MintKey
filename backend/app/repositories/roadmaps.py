@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db import (
     UserRoadmap, RoadmapPhase, RoadmapTask,
-    ScoreSnapshot, SkillProgress,
+    ScoreSnapshot, SkillProgress, RoadmapProblemMap,
 )
 
 logger = logging.getLogger(__name__)
@@ -144,6 +144,30 @@ class RoadmapRepository:
             f"{len(phases_data)} phases, {len(kanban_tasks_data)} tasks, "
             f"{len(topic_map)} skill topics, 1 initial snapshot"
         )
+
+        # 5. Insert problem map from weeks' dsa_task.problems
+        problem_count = 0
+        for w in weeks_data:
+            wk_num = w.get("week_number", 1)
+            dsa = w.get("dsa_task")
+            if dsa and isinstance(dsa, dict):
+                for order_idx, slug in enumerate(dsa.get("problems") or []):
+                    rpm = RoadmapProblemMap(
+                        roadmap_id=roadmap_id,
+                        week_number=wk_num,
+                        problem_order=order_idx,
+                        problem_slug=slug,
+                        topic=w.get("focus_topic", dsa.get("lc_tag", "")),
+                        difficulty=dsa.get("difficulty", "medium"),
+                        status="pending",
+                        assigned_at=datetime.utcnow(),
+                    )
+                    self.session.add(rpm)
+                    problem_count += 1
+
+        if problem_count > 0:
+            await self.session.flush()
+            logger.info(f"Persisted {problem_count} problem assignments in roadmap_problem_map")
 
     async def get_by_company(
         self, user_id: UUID, company_slug: str

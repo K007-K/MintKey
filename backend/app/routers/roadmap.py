@@ -109,6 +109,7 @@ async def get_roadmap(
                     gap_analysis={}, dsa_analysis={},
                     company_blueprint=blueprint_data,
                     months_available=6, hours_per_day=4.0,
+                    session=session,
                 )
                 rm_dict = roadmap_output.model_dump()
                 weeks = rm_dict.get("weeks", [])
@@ -202,6 +203,27 @@ async def get_roadmap(
                 for s in skills_result.scalars().all()
             ]
 
+            # Fetch problem map — source of truth for progress
+            from app.models.db import RoadmapProblemMap
+            rpm_result = await session.execute(
+                select(RoadmapProblemMap)
+                .where(RoadmapProblemMap.roadmap_id == rm.id)
+                .order_by(RoadmapProblemMap.week_number, RoadmapProblemMap.problem_order)
+            )
+            problem_map = [
+                {
+                    "week": p.week_number,
+                    "order": p.problem_order,
+                    "slug": p.problem_slug,
+                    "topic": p.topic,
+                    "difficulty": p.difficulty,
+                    "status": p.status,
+                    "solved_at": p.solved_at.isoformat() if p.solved_at else None,
+                    "url": p.submission_url or f"https://leetcode.com/problems/{p.problem_slug}/",
+                }
+                for p in rpm_result.scalars().all()
+            ]
+
             return APIResponse(success=True, data={
                 "id": str(rm.id),
                 "company_slug": rm.company_slug,
@@ -218,6 +240,7 @@ async def get_roadmap(
                 "phases": phases,
                 "kanban_tasks": kanban_tasks,
                 "skill_progress": skills,
+                "problem_map": problem_map,
                 "generated_at": rm.generated_at.isoformat() if rm.generated_at else None,
                 "updated_at": rm.updated_at.isoformat() if rm.updated_at else None,
             })
@@ -663,6 +686,7 @@ async def regenerate_roadmap(
             company_blueprint=company_blueprint,
             months_available=6,
             hours_per_day=4.0,
+            session=session,
         )
 
         logger.info(f"[Regenerate] Agent 7 returned {len(roadmap_output.weeks)} weeks for {company_slug}")

@@ -170,9 +170,10 @@ class DsaTask(BaseModel):
     label: str = ""                    # "Solve 5 Two Pointers problems on LeetCode"
     lc_tag: str = ""                   # "two-pointers"
     count: int = 5                     # Number of problems
-    count_done: int = 0                # Progress
+    count_done: int = 0                # Progress (updated by sync)
     difficulty: str = "medium"         # easy | medium | hard
     status: str = "upcoming"           # upcoming | in_progress | done
+    problems: list[str] = Field(default_factory=list)  # Specific slugs: ["two-sum", "3sum", ...]
 
 
 class ProjectTask(BaseModel):

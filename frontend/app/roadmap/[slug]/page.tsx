@@ -1,7 +1,7 @@
 // Roadmap page — backend-driven preparation dashboard
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import DashboardLayout from "@/components/ui/DashboardLayout";
@@ -115,12 +115,22 @@ export default function RoadmapPage() {
     ];
   }, [rm?.phases, progressPercent]);
 
-  // Local state for per-week completion tracking (project done per week)
-  const [projectDoneMap, setProjectDoneMap] = useState<Record<number, boolean>>({});
-  const [dsaStatusOverrides, setDsaStatusOverrides] = useState<Record<string, string>>({});
-
-  // Weeks — from weeks_data JSONB
+  // Sync result banner state
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [syncResult, setSyncResult] = useState<{type: string; data: any} | null>(null);
+
+  // Problem map from API — source of truth for progress (grouped by week)
+  const problemMap = useMemo(() => {
+    const map: Record<number, Array<{
+      slug: string; topic: string; difficulty: string; order: number;
+      status: string; solved_at: string | null; url: string;
+    }>> = {};
+    for (const p of (rm?.problem_map || [])) {
+      (map[p.week] ||= []).push(p);
+    }
+    return map;
+  }, [rm?.problem_map]);
+
   const weeks = useMemo(() => {
     if (rm?.weeks_data && Array.isArray(rm.weeks_data) && rm.weeks_data.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,24 +140,29 @@ export default function RoadmapPage() {
         const projectTask = w.project_task || {};
         const resources = w.resources || [];
         const weekNum = w.week_number || i + 1;
-        const dsaKey = `w${weekNum}-dsa-1`;
-        const dsaStatus = dsaStatusOverrides[dsaKey] || dsaTask.status || "upcoming";
+        // Derive DSA status from server data (NOT local state)
+        const dsaStatus = dsaTask.status || "upcoming";
         const dsaCount = dsaTask.count || 5;
         const dsaCountDone = dsaTask.count_done || 0;
         const dsaProgress = dsaCount > 0 ? dsaCountDone / dsaCount : 0;
-        const projDone = projectDoneMap[weekNum] ?? false;
-        // R5: Week progress = dsaProgress * 0.7 + projectProgress * 0.3
-        const weekProgress = Math.round((dsaProgress * 0.7 + (projDone ? 1 : 0) * 0.3) * 100);
+        // Project done is tracked via server, not local state
+        const projDone = projectTask.done ?? false;
+        // Week progress derived from problem_map (server truth)
+        const weekProgress = w.progress != null ? Math.round(w.progress) : Math.round(dsaProgress * 100);
         return {
           number: weekNum,
           theme: w.theme || `Week ${i + 1}`,
           hoursPerDay: rm.hours_per_day || 4,
-          progressPercent: dsaStatus === "done" ? Math.max(weekProgress, 70) : weekProgress,
-          dsaProblems: dsaTask.label ? [{
-            id: 1, name: dsaTask.label, count: dsaCount,
-            difficulty: dsaTask.difficulty || "Medium", status: dsaStatus as "upcoming" | "in_progress" | "done" | "today",
-            countDone: dsaCountDone, lcTag: dsaTask.lc_tag || "",
-          }] : [],
+          progressPercent: weekProgress,
+          dsa: {
+            label: dsaTask.label || "",
+            lcTag: dsaTask.lc_tag || "",
+            count: dsaCount,
+            countDone: dsaCountDone,
+            difficulty: dsaTask.difficulty || "Medium",
+            status: dsaStatus,
+            problems: dsaTask.problems || [],
+          },
           dailyPlan: DAYS.map((day) => ({
             day, task: daily[day.toLowerCase()] || "Study", isToday: false,
           })),
@@ -157,16 +172,19 @@ export default function RoadmapPage() {
             name: r.title || "Resource", url: r.url || "#",
           })),
           projectTask: {
-            name: projectTask.title || "Project work", impact: projectTask.score_impact || 3,
-            effort: projectTask.effort || "Medium", hours: projectTask.hours || 4,
+            name: projectTask.title || projectTask.label || "Project work",
+            impact: projectTask.score_impact || 3,
+            effort: projectTask.effort || "Medium",
+            hours: projectTask.hours || 4,
             done: projDone,
           },
           milestone: w.milestone || `Complete Week ${i + 1}`,
+          weekNumber: weekNum,
         };
       });
     }
-    return [{ number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0, dsaProblems: [], dailyPlan: [], resources: [], projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0, done: false }, milestone: "Loading..." }];
-  }, [rm?.weeks_data, rm?.hours_per_day, projectDoneMap, dsaStatusOverrides]);
+    return [{ number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0, dsa: { label: "", lcTag: "", count: 0, countDone: 0, difficulty: "Medium", status: "upcoming", problems: [] }, dailyPlan: [], resources: [], projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0, done: false }, milestone: "Loading...", weekNumber: 1 }];
+  }, [rm?.weeks_data, rm?.hours_per_day]);
 
   // Kanban tasks — from backend
   const kanbanTasks = useMemo(() => {
@@ -234,20 +252,7 @@ export default function RoadmapPage() {
     updateTask.mutate({ companySlug: slug || "", taskId, status: newStatus });
   };
 
-  // R1: Toggle DSA task status: upcoming → in_progress → done → upcoming
-  const handleDsaToggle = useCallback((weekNum: number, dsaId: number) => {
-    const key = `w${weekNum}-dsa-${dsaId}`;
-    setDsaStatusOverrides(prev => {
-      const current = prev[key] || "upcoming";
-      const next = current === "upcoming" ? "in_progress" : current === "in_progress" ? "done" : "upcoming";
-      return { ...prev, [key]: next };
-    });
-  }, []);
-
-  // R3: Toggle project task done/undone per week
-  const handleProjectToggle = useCallback((weekNum: number) => {
-    setProjectDoneMap(prev => ({ ...prev, [weekNum]: !prev[weekNum] }));
-  }, []);
+  // Toggle handlers REMOVED — progress is verified by platform sync, not user clicks
 
   const [activeWeek, setActiveWeek] = useState(1);
   const [simSelected, setSimSelected] = useState<boolean[]>(scoreSimulator.map(() => false));
@@ -255,9 +260,10 @@ export default function RoadmapPage() {
   // Safe access to current week data — fallback to first week or a placeholder
   const currentWeekData = weeks[activeWeek - 1] || weeks[0] || {
     number: 1, theme: "Loading...", hoursPerDay: 4, progressPercent: 0,
-    dsaProblems: [], dailyPlan: [], resources: [], 
-    projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0 },
-    milestone: "Loading...",
+    dsa: { label: "", lcTag: "", count: 0, countDone: 0, difficulty: "Medium", status: "upcoming", problems: [] },
+    dailyPlan: [], resources: [], 
+    projectTask: { name: "Loading...", impact: 0, effort: "Low", hours: 0, done: false },
+    milestone: "Loading...", weekNumber: 1,
   };
 
   // Loading state
@@ -299,10 +305,20 @@ export default function RoadmapPage() {
             <p className="text-sm text-[#6B7280]">{companyRole} · {weeksTotal} week plan{rm?.last_synced_at ? ` · Last synced: ${new Date(rm.last_synced_at).toLocaleString()}` : ""}</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => syncLC.mutate(slug || "")} disabled={syncLC.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
+            <button onClick={() => syncLC.mutate(slug || "", {
+              onSuccess: (result) => {
+                setSyncResult({ type: "leetcode", data: result || {} });
+                setTimeout(() => setSyncResult(null), 6000);
+              },
+            })} disabled={syncLC.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
               <RefreshCw className={`h-4 w-4 ${syncLC.isPending ? "animate-spin" : ""}`} /> {syncLC.isPending ? "Syncing..." : "Sync LeetCode"}
             </button>
-            <button onClick={() => syncGH.mutate(slug || "")} disabled={syncGH.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
+            <button onClick={() => syncGH.mutate(slug || "", {
+              onSuccess: (result) => {
+                setSyncResult({ type: "github", data: result || {} });
+                setTimeout(() => setSyncResult(null), 6000);
+              },
+            })} disabled={syncGH.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
               <RefreshCw className={`h-4 w-4 ${syncGH.isPending ? "animate-spin" : ""}`} /> {syncGH.isPending ? "Syncing..." : "Sync GitHub"}
             </button>
             <button onClick={() => regenerate.mutate(slug || "")} disabled={regenerate.isPending} className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50">
@@ -345,6 +361,25 @@ export default function RoadmapPage() {
           <span className="text-[#D1D5DB]">·</span>
           <span>Problems this week: <span className="font-medium text-[#111827]">{rm?.problems_this_week || 0}</span></span>
         </div>
+
+        {/* Sync Result Banner */}
+        {syncResult && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-emerald-800">
+                {syncResult.type === "leetcode" ? "LeetCode" : "GitHub"} Sync Complete
+              </p>
+              <p className="text-xs text-emerald-700 mt-1">
+                {syncResult.data?.new_submissions != null && `${syncResult.data.new_submissions} new submissions found · `}
+                {syncResult.data?.problems_matched != null && `${syncResult.data.problems_matched} roadmap problems matched · `}
+                {syncResult.data?.progress_pct != null && `Progress: ${syncResult.data.progress_pct}%`}
+                {syncResult.data?.message && syncResult.data.message}
+              </p>
+            </div>
+            <button onClick={() => setSyncResult(null)} className="text-emerald-400 hover:text-emerald-600 text-lg leading-none">&times;</button>
+          </div>
+        )}
 
         {/* Overall progress bar */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
@@ -434,33 +469,55 @@ export default function RoadmapPage() {
               <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${currentWeekData.progressPercent}%` }} />
             </div>
 
-            {/* DSA PROBLEMS */}
-            <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">DSA Problems</p>
+            {/* DSA PROBLEMS — Verified Status from problem_map */}
+            <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">DSA Problems <span className="text-gray-300 font-normal normal-case">· {currentWeekData.dsa.countDone}/{currentWeekData.dsa.count} solved</span></p>
             <div className="space-y-2 mb-6">
-              {currentWeekData.dsaProblems.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => handleDsaToggle(currentWeekData.number, p.id)}
-                  className={`w-full text-left rounded-lg p-4 flex items-center gap-3 transition-all duration-200 cursor-pointer hover:shadow-sm ${
-                  p.status === "done" ? "bg-emerald-50 border border-emerald-200" :
-                  p.status === "in_progress" ? "bg-amber-50 border border-amber-300" :
-                  "bg-white border border-[#E5E7EB] hover:border-emerald-300"
-                }`}>
-                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
-                    p.status === "done" ? "bg-emerald-500" : p.status === "in_progress" ? "bg-amber-400" : "border-2 border-gray-300 hover:border-emerald-400"
+              {(problemMap[currentWeekData.number] || []).length > 0 ? (
+                (problemMap[currentWeekData.number] || []).map((problem) => (
+                  <div key={problem.slug} className={`w-full rounded-lg p-3 flex items-center gap-3 transition-all duration-200 ${
+                    problem.status === "solved"
+                      ? "bg-emerald-50 border border-emerald-200"
+                      : "bg-white border border-[#E5E7EB]"
                   }`}>
-                    {p.status === "done" && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
-                    {p.status === "in_progress" && <Clock className="h-3 w-3 text-white" />}
+                    {/* Status dot — green=solved, gray=pending */}
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
+                      problem.status === "solved" ? "bg-emerald-500" : "border-2 border-gray-300"
+                    }`}>
+                      {problem.status === "solved" && <CheckCircle2 className="h-3 w-3 text-white" />}
+                    </div>
+
+                    {/* Problem name */}
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium capitalize ${problem.status === "solved" ? "line-through text-gray-400" : "text-[#111827]"}`}>
+                        {problem.slug.replace(/-/g, " ")}
+                      </p>
+                      <p className="text-xs text-[#9CA3AF]">{problem.difficulty}</p>
+                    </div>
+
+                    {/* Proof link + timestamp */}
+                    {problem.status === "solved" ? (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-emerald-600">
+                          {new Date(problem.solved_at!).toLocaleDateString()}
+                        </span>
+                        <a href={problem.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
+                          View ↗
+                        </a>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Verified ✓</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[#9CA3AF] shrink-0">Not solved</span>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${p.status === "done" ? "line-through text-gray-400" : "text-[#111827]"}`}>{p.name}</p>
-                    <p className="text-xs text-[#9CA3AF]">{p.countDone}/{p.count} {p.difficulty} problems</p>
-                  </div>
-                  {p.status === "done" && <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">Done ✓</span>}
-                  {p.status === "in_progress" && <span className="bg-amber-500 text-white text-xs font-bold rounded-full px-2 py-0.5 animate-pulse">In Progress</span>}
-                  {p.status === "upcoming" && <span className="text-xs text-[#9CA3AF]">Click to start</span>}
-                </button>
-              ))}
+                ))
+              ) : (
+                /* Fallback for old roadmaps without problem map */
+                <div className="bg-white border border-dashed border-[#D1D5DB] rounded-lg p-4">
+                  <p className="text-sm text-[#6B7280]">{currentWeekData.dsa.label || "DSA problems"}</p>
+                  <p className="text-xs text-[#9CA3AF] mt-1">Tag: {currentWeekData.dsa.lcTag} · {currentWeekData.dsa.count} problems</p>
+                  <p className="text-xs text-amber-500 mt-2">⚠ Regenerate roadmap to get specific problem assignments with verified tracking</p>
+                </div>
+              )}
             </div>
 
             {/* DAILY PLAN */}
@@ -493,21 +550,18 @@ export default function RoadmapPage() {
               ))}
             </div>
 
-            {/* PROJECT TASK */}
+            {/* PROJECT TASK — Read-only server status */}
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Project Task</p>
-            <button
-              onClick={() => handleProjectToggle(currentWeekData.number)}
-              className={`w-full text-left border rounded-lg p-4 mb-6 transition-all duration-200 cursor-pointer hover:shadow-sm ${
-                currentWeekData.projectTask.done
-                  ? "bg-emerald-50 border-emerald-200"
-                  : "border-[#E5E7EB] hover:border-emerald-300"
-              }`}
-            >
+            <div className={`w-full text-left border rounded-lg p-4 mb-6 ${
+              currentWeekData.projectTask.done
+                ? "bg-emerald-50 border-emerald-200"
+                : "border-[#E5E7EB]"
+            }`}>
               <div className="flex items-start gap-3">
-                <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 ${
                   currentWeekData.projectTask.done
                     ? "bg-emerald-500"
-                    : "border-2 border-gray-300 hover:border-emerald-400"
+                    : "border-2 border-gray-300"
                 }`}>
                   {currentWeekData.projectTask.done && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
                 </div>
@@ -518,11 +572,12 @@ export default function RoadmapPage() {
                   <div className="flex items-center gap-2 mt-1">
                     <span className="bg-amber-100 text-amber-700 text-xs rounded-full px-2 py-0.5">{currentWeekData.projectTask.effort}</span>
                     <span className="text-xs text-[#9CA3AF]">· {currentWeekData.projectTask.hours} hrs</span>
-                    {currentWeekData.projectTask.done && <span className="text-xs font-bold text-emerald-600">✓ Complete</span>}
+                    {currentWeekData.projectTask.done && <span className="text-xs font-bold text-emerald-600">✓ Verified by GitHub</span>}
+                    {!currentWeekData.projectTask.done && <span className="text-xs text-gray-400">Detected via GitHub sync</span>}
                   </div>
                 </div>
               </div>
-            </button>
+            </div>
 
             {/* MILESTONE */}
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
@@ -728,7 +783,7 @@ export default function RoadmapPage() {
               <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
                 <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week</h3>
                 {(() => {
-                  const barData = weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsaProblems.reduce((sum: number, p: { countDone: number }) => sum + (p.countDone || 0), 0) }));
+                  const barData = weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsa.countDone || 0 }));
                   const hasData = barData.some((d) => d.count > 0);
                   return hasData ? (
                     <ResponsiveContainer width="100%" height={220}>

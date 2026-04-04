@@ -1,6 +1,9 @@
 # Agent 7: Roadmap Generator — enriched output with daily_plan, DSA tags, phases, kanban tasks
 import logging
 import json
+from typing import Optional
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
 from agents.core.agentic_loop import run_agent_loop
 from agents.core.tool_executor import execute_tool, RESOURCE_TOOLS
 from agents.core.models import (
@@ -9,6 +12,9 @@ from agents.core.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Difficulty sort order for problem assignments (easy first in a week)
+_DIFF_ORDER = {"easy": 0, "Easy": 0, "medium": 1, "Medium": 1, "hard": 2, "Hard": 2}
 
 SYSTEM_PROMPT = """You are the Roadmap Generator for MintKey, an AI career targeting platform.
 
@@ -50,7 +56,8 @@ You MUST produce a JSON response with these exact top-level fields:
         "label": "Solve 5 Array & Hashing problems on LeetCode",
         "lc_tag": "array",
         "count": 5,
-        "difficulty": "medium"
+        "difficulty": "medium",
+        "problems": ["two-sum", "contains-duplicate", "valid-anagram", "group-anagrams", "top-k-frequent-elements"]
       },
       "project_task": {
         "label": "Project work",
@@ -86,6 +93,7 @@ Roadmap design guidelines:
 - First phase: Fill BLOCKING skill gaps (prerequisites first)
 - Each week needs a UNIQUE daily_plan with 7 different daily tasks
 - Map each week's DSA topic to a LeetCode tag in dsa_task.lc_tag
+- Include specific LeetCode problem slugs in dsa_task.problems (e.g. ["two-sum", "3sum"])
 - Create 8-12 kanban_tasks covering DSA, projects, system design, stack, consistency
 - Balance DSA practice with project/skill building
 - Include rest days on Sunday
@@ -100,6 +108,7 @@ async def run_roadmap_builder(
     company_blueprint: dict,
     months_available: int = 3,
     hours_per_day: float = 4.0,
+    session: Optional[AsyncSession] = None,
 ) -> RoadmapOutput:
     """Run the Roadmap Generator agent."""
     company = company_blueprint.get("company_name", "") or company_blueprint.get("company_slug", "Unknown")
@@ -147,7 +156,7 @@ Return your roadmap as a JSON object."""
         logger.error(f"[Roadmap Builder] Failed to parse output: {e}")
 
     # Deterministic template fallback when LLM fails or returns empty
-    return _build_template_roadmap(company, company_blueprint, gap_analysis, dsa_analysis, months_available, hours_per_day)
+    return await _build_template_roadmap(company, company_blueprint, gap_analysis, dsa_analysis, months_available, hours_per_day, session)
 
 
 def _extract_json(text: str) -> dict:
@@ -219,16 +228,46 @@ def _get_lc_tag(topic: str) -> str:
     return TOPIC_TO_LC_TAG.get(topic, topic.lower().replace(" ", "-").replace("&", ""))
 
 
-def _build_template_roadmap(
+async def _build_template_roadmap(
     company: str,
     blueprint: dict,
     gap_analysis: dict,
     dsa_analysis: dict,
     months: int,
     hours_per_day: float,
+    session: Optional[AsyncSession] = None,
 ) -> RoadmapOutput:
     """Build a deterministic enriched roadmap from company blueprint data when LLM fails."""
     total_weeks = months * 4
+
+    # --- Build problem pool from external_problems (grouped by tag) ---
+    problem_pool: dict[str, list[dict]] = {}  # lc_tag → [{slug, difficulty}, ...]
+    if session:
+        try:
+            from app.models.db import ExternalProblem
+            result = await session.execute(
+                select(
+                    ExternalProblem.slug,
+                    ExternalProblem.tags,
+                    ExternalProblem.difficulty,
+                ).where(ExternalProblem.slug.isnot(None))
+            )
+            for row in result:
+                for tag in (row.tags or []):
+                    tag_lower = tag.lower().strip()
+                    problem_pool.setdefault(tag_lower, []).append({
+                        "slug": row.slug,
+                        "difficulty": row.difficulty or "Medium",
+                    })
+            # Sort each tag's problems: easy first, then medium, then hard
+            for tag in problem_pool:
+                problem_pool[tag].sort(key=lambda p: _DIFF_ORDER.get(p["difficulty"], 1))
+            logger.info(f"[Roadmap Builder] Loaded problem pool: {len(problem_pool)} tags, {sum(len(v) for v in problem_pool.values())} total problems")
+        except Exception as e:
+            logger.warning(f"[Roadmap Builder] Could not load problem pool: {e}")
+
+    # Track used slugs to avoid assigning the same problem to multiple weeks
+    used_slugs: set[str] = set()
 
     # Extract DSA topics from blueprint
     dsa_topics = blueprint.get("dsa_topics", [])
@@ -316,14 +355,31 @@ def _build_template_roadmap(
             # Build daily plan from templates
             daily_plan = _build_daily_plan(topic, pdef["focus"])
 
-            # Build DSA task
+            # --- Pick specific problem slugs from the pool ---
+            selected_slugs: list[str] = []
+            pool_key = lc_tag.lower().replace("_", "-")
+            available = [p for p in problem_pool.get(pool_key, []) if p["slug"] not in used_slugs]
+            # Also try topic name as fallback key
+            if not available:
+                alt_key = topic.lower().replace(" & ", "-").replace(" ", "-")
+                available = [p for p in problem_pool.get(alt_key, []) if p["slug"] not in used_slugs]
+
+            # Select up to dsa_count, sorted by difficulty
+            for p in available[:dsa_count]:
+                selected_slugs.append(p["slug"])
+                used_slugs.add(p["slug"])
+
+            actual_count = len(selected_slugs) if selected_slugs else dsa_count
+
+            # Build DSA task with specific problem slugs
             dsa_task = DsaTask(
-                label=f"Solve {dsa_count} {topic} problems on LeetCode",
+                label=f"Solve {actual_count} {topic} problems on LeetCode",
                 lc_tag=lc_tag,
-                count=dsa_count,
+                count=actual_count,
                 count_done=0,
                 difficulty=difficulty,
                 status="upcoming",
+                problems=selected_slugs,
             )
 
             # Build project task
