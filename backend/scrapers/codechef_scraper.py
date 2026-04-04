@@ -4,7 +4,7 @@ import json
 import re
 from typing import Optional
 import httpx
-from app.core.redis import redis_client
+from app.core.redis import redis_client, is_redis_available, mark_redis_down, mark_redis_up
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +24,15 @@ class CodeChefScraper:
     async def fetch_profile(self, username: str) -> Optional[dict]:
         """Fetch CodeChef profile data by scraping the user profile page."""
         cache_key = f"codechef:profile:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    mark_redis_up()
+                    return json.loads(cached)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         try:
             async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
@@ -116,10 +119,12 @@ class CodeChefScraper:
                     "contestsParticipated": len(contest_history),
                 }
 
-                try:
-                    await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_CODECHEF)
-                except Exception:
-                    pass
+                if is_redis_available():
+                    try:
+                        await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_CODECHEF)
+                        mark_redis_up()
+                    except Exception:
+                        mark_redis_down()
 
                 return result
 
@@ -133,12 +138,15 @@ class CodeChefScraper:
     async def fetch_recent_activity(self, username: str) -> list[dict]:
         """Fetch recent contest participation from CodeChef profile page."""
         cache_key = f"codechef:activity:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    mark_redis_up()
+                    return json.loads(cached)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         try:
             async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
@@ -187,10 +195,12 @@ class CodeChefScraper:
                     logger.warning(f"Failed to parse contest data: {e}")
                     return []
 
-                try:
-                    await redis_client.set(cache_key, json.dumps(activities), ex=CACHE_TTL_CODECHEF)
-                except Exception:
-                    pass
+                if is_redis_available():
+                    try:
+                        await redis_client.set(cache_key, json.dumps(activities), ex=CACHE_TTL_CODECHEF)
+                        mark_redis_up()
+                    except Exception:
+                        mark_redis_down()
 
                 return activities
 

@@ -3,9 +3,10 @@ import logging
 from typing import Optional
 from datetime import datetime, timezone
 import httpx
-from app.core.redis import redis_client
+from app.core.redis import (
+    redis_client, is_redis_available, mark_redis_up, mark_redis_down,
+)
 from scrapers.github_scraper import (
-    _is_redis_available, _mark_redis_up, _mark_redis_down,
     _mem_cache_get, _mem_cache_set,
 )
 import json
@@ -54,16 +55,16 @@ class LeetCodeScraper:
     async def fetch_user_profile(self, username: str) -> Optional[dict]:
         """Fetch basic LeetCode profile info."""
         cache_key = f"leetcode:profile:{username}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -94,28 +95,28 @@ class LeetCodeScraper:
             result = data["matchedUser"]
             json_result = json.dumps(result)
             _mem_cache_set(cache_key, json_result)
-            if _is_redis_available():
+            if is_redis_available():
                 try:
                     await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
-                    _mark_redis_up()
+                    mark_redis_up()
                 except Exception:
-                    _mark_redis_down()
+                    mark_redis_down()
             return result
         return None
 
     async def fetch_problem_stats(self, username: str) -> Optional[dict]:
         """Fetch solved problem counts by difficulty."""
         cache_key = f"leetcode:stats:{username}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -165,28 +166,28 @@ class LeetCodeScraper:
 
         json_result = json.dumps(result)
         _mem_cache_set(cache_key, json_result)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return result
 
     async def fetch_topic_stats(self, username: str) -> Optional[list]:
         """Fetch problem counts by topic/tag."""
         cache_key = f"leetcode:topics:{username}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -236,12 +237,12 @@ class LeetCodeScraper:
 
         json_topics = json.dumps(all_topics)
         _mem_cache_set(cache_key, json_topics)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_topics, ex=CACHE_TTL_LEETCODE)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return all_topics
 
@@ -249,16 +250,16 @@ class LeetCodeScraper:
         """Fetch the submission calendar (daily activity counts) for a specific year."""
         target_year = year or datetime.now().year
         cache_key = f"leetcode:calendar:{username}:{target_year}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -306,12 +307,12 @@ class LeetCodeScraper:
         json_result = json.dumps(result)
         _mem_cache_set(cache_key, json_result)
         ttl = 3600 if target_year == datetime.now().year else 86400 * 30
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_result, ex=ttl)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return result
 
@@ -354,16 +355,16 @@ class LeetCodeScraper:
     async def fetch_contest_history(self, username: str) -> Optional[dict]:
         """Fetch contest participation and rating."""
         cache_key = f"leetcode:contests:{username}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -398,28 +399,28 @@ class LeetCodeScraper:
 
         json_result = json.dumps(result)
         _mem_cache_set(cache_key, json_result)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_result, ex=CACHE_TTL_LEETCODE)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return result
 
     async def fetch_recent_submissions(self, username: str, limit: int = 15) -> list[dict]:
         """Fetch recent accepted submissions using the public GraphQL endpoint."""
         cache_key = f"leetcode:recent:{username}"
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
             return json.loads(mem_cached)
@@ -453,12 +454,12 @@ class LeetCodeScraper:
 
         json_result = json.dumps(result)
         _mem_cache_set(cache_key, json_result)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_result, ex=3600)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return result
 

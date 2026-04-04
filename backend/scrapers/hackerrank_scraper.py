@@ -2,7 +2,7 @@
 import logging
 from typing import Optional
 import httpx
-from app.core.redis import redis_client
+from app.core.redis import redis_client, is_redis_available, mark_redis_down, mark_redis_up
 import json
 
 logger = logging.getLogger(__name__)
@@ -43,12 +43,15 @@ class HackerRankScraper:
     async def fetch_profile(self, username: str) -> Optional[dict]:
         """Fetch HackerRank profile badges and scores."""
         cache_key = f"hackerrank:profile:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    mark_redis_up()
+                    return json.loads(cached)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         # Fetch badges/scores
         data = await self._get(f"{HACKERRANK_API_BASE}/hackers/{username}/scores")
@@ -84,22 +87,27 @@ class HackerRankScraper:
         else:
             result["badges"] = []
 
-        try:
-            await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_HACKERRANK)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                await redis_client.set(cache_key, json.dumps(result), ex=CACHE_TTL_HACKERRANK)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         return result
 
     async def fetch_recent_activity(self, username: str) -> list[dict]:
         """Fetch recent challenge submissions from HackerRank."""
         cache_key = f"hackerrank:activity:{username}"
-        try:
-            cached = await redis_client.get(cache_key)
-            if cached:
-                return json.loads(cached)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                cached = await redis_client.get(cache_key)
+                if cached:
+                    mark_redis_up()
+                    return json.loads(cached)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         data = await self._get(
             f"{HACKERRANK_API_BASE}/hackers/{username}/recent_challenges?limit=10&cursor=&response_version=v1"
@@ -138,10 +146,12 @@ class HackerRankScraper:
                     "date": "",
                 })
 
-        try:
-            await redis_client.set(cache_key, json.dumps(activities), ex=CACHE_TTL_HACKERRANK)
-        except Exception:
-            pass
+        if is_redis_available():
+            try:
+                await redis_client.set(cache_key, json.dumps(activities), ex=CACHE_TTL_HACKERRANK)
+                mark_redis_up()
+            except Exception:
+                mark_redis_down()
 
         return activities
 

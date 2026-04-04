@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import datetime
 import httpx
 from app.core.config import settings
-from app.core.redis import redis_client
+from app.core.redis import redis_client, is_redis_available, mark_redis_down, mark_redis_up
 import json
 
 logger = logging.getLogger(__name__)
@@ -18,11 +18,6 @@ CACHE_TTL_GITHUB = 86400  # 24 hours
 _memory_cache: dict[str, tuple[float, str]] = {}  # key -> (expires_at, json_data)
 _MEMORY_CACHE_TTL = 600  # 10 min in-memory fallback
 _MEMORY_CACHE_MAX = 200  # max entries
-
-# ── Redis health tracking — skip Redis calls when known down ──
-_redis_healthy = True
-_redis_last_check = 0.0
-_REDIS_RETRY_INTERVAL = 60  # recheck Redis every 60s after failure
 
 # ── Concurrency limiter — max 5 parallel GitHub API calls ──
 _github_semaphore = asyncio.Semaphore(5)
@@ -45,28 +40,6 @@ def _mem_cache_set(key: str, value: str, ttl: int = _MEMORY_CACHE_TTL) -> None:
         oldest_key = min(_memory_cache, key=lambda k: _memory_cache[k][0])
         _memory_cache.pop(oldest_key, None)
     _memory_cache[key] = (time.time() + ttl, value)
-
-
-def _is_redis_available() -> bool:
-    """Check if Redis should be attempted (health tracking)."""
-    global _redis_healthy, _redis_last_check
-    if _redis_healthy:
-        return True
-    # After failure, retry every _REDIS_RETRY_INTERVAL seconds
-    if time.time() - _redis_last_check > _REDIS_RETRY_INTERVAL:
-        return True
-    return False
-
-
-def _mark_redis_down() -> None:
-    global _redis_healthy, _redis_last_check
-    _redis_healthy = False
-    _redis_last_check = time.time()
-
-
-def _mark_redis_up() -> None:
-    global _redis_healthy
-    _redis_healthy = True
 
 
 class GitHubScraper:
@@ -113,18 +86,18 @@ class GitHubScraper:
     async def _get_cached(self, cache_key: str, endpoint: str) -> dict | list | None:
         """Fetch from Redis → in-memory cache → GitHub API (with write-back to both)."""
         # 1. Try Redis (if healthy)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     logger.debug(f"Redis cache hit: {cache_key}")
                     # Also warm in-memory cache
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception as e:
-                _mark_redis_down()
+                mark_redis_down()
                 logger.warning(f"Redis unavailable, using in-memory fallback: {type(e).__name__}")
 
         # 2. Try in-memory cache
@@ -140,12 +113,12 @@ class GitHubScraper:
             # Write to in-memory cache (always works)
             _mem_cache_set(cache_key, json_data)
             # Try writing to Redis (non-blocking, best-effort)
-            if _is_redis_available():
+            if is_redis_available():
                 try:
                     await redis_client.set(cache_key, json_data, ex=CACHE_TTL_GITHUB)
-                    _mark_redis_up()
+                    mark_redis_up()
                 except Exception:
-                    _mark_redis_down()
+                    mark_redis_down()
 
         return data
 
@@ -181,16 +154,16 @@ class GitHubScraper:
         """Fetch README content (decoded from base64)."""
         cache_key = f"github:readme:{owner}:{repo}"
         # Try Redis
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return cached
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         # Try memory cache
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
@@ -201,12 +174,12 @@ class GitHubScraper:
             import base64
             content = base64.b64decode(data["content"]).decode("utf-8", errors="replace")
             _mem_cache_set(cache_key, content)
-            if _is_redis_available():
+            if is_redis_available():
                 try:
                     await redis_client.set(cache_key, content, ex=CACHE_TTL_GITHUB)
-                    _mark_redis_up()
+                    mark_redis_up()
                 except Exception:
-                    _mark_redis_down()
+                    mark_redis_down()
             return content
         return None
 
@@ -297,21 +270,90 @@ class GitHubScraper:
             "contribution_calendar": contribution_calendar,
             "recent_events": recent_events,
         }
+    async def fetch_dashboard_summary(self, username: str) -> dict:
+        """
+        Lightweight GitHub data for dashboard — skips per-repo commits/languages.
+        ~5 API calls vs ~45 for fetch_full_profile.
+        """
+        profile = await self.fetch_user_profile(username)
+        if not profile:
+            return {"error": f"User '{username}' not found", "username": username}
+
+        repos = await self.fetch_repos(username)
+
+        # Use primary language from repo metadata (no extra API calls)
+        language_totals: dict[str, int] = {}
+        for repo in repos:
+            lang = repo.get("language")
+            if lang:
+                # Use approximate size from repo metadata
+                language_totals[lang] = language_totals.get(lang, 0) + repo.get("size", 1)
+
+        total_bytes = sum(language_totals.values()) or 1
+        language_distribution = {
+            lang: round(bytes_count / total_bytes * 100, 1)
+            for lang, bytes_count in sorted(language_totals.items(), key=lambda x: -x[1])
+        }
+
+        import asyncio as _asyncio
+        contributions, recent_events = await _asyncio.gather(
+            self.fetch_contribution_count(username),
+            self.fetch_recent_events(username, per_page=10, fetch_commit_details=False),
+            return_exceptions=True,
+        )
+        if isinstance(contributions, Exception):
+            contributions = 0
+        if isinstance(recent_events, Exception):
+            recent_events = []
+
+        return {
+            "username": username,
+            "profile": {
+                "name": profile.get("name"),
+                "bio": profile.get("bio"),
+                "company": profile.get("company"),
+                "location": profile.get("location"),
+                "public_repos": profile.get("public_repos", 0),
+                "followers": profile.get("followers", 0),
+                "following": profile.get("following", 0),
+                "created_at": profile.get("created_at"),
+                "avatar_url": profile.get("avatar_url"),
+            },
+            "total_repos": len(repos),
+            "original_repos": len([r for r in repos if not r.get("fork")]),
+            "forked_repos": len([r for r in repos if r.get("fork")]),
+            "language_distribution": language_distribution,
+            "top_repos": [
+                {
+                    "name": r.get("name", ""),
+                    "description": r.get("description", ""),
+                    "stars": r.get("stargazers_count", 0),
+                    "forks": r.get("forks_count", 0),
+                    "language": r.get("language"),
+                    "topics": r.get("topics", []),
+                    "updated_at": r.get("updated_at"),
+                    "is_fork": r.get("fork", False),
+                }
+                for r in repos[:10]
+            ],
+            "total_contributions": contributions,
+            "recent_events": recent_events,
+        }
 
     async def fetch_contribution_count(self, username: str) -> int:
         """Fetch total contributions from the user's GitHub profile page."""
         cache_key = f"github:contributions:{username}"
         # Try Redis
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return int(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         # Try memory cache
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
@@ -327,12 +369,12 @@ class GitHubScraper:
                     if match:
                         count = int(match.group(1).replace(",", ""))
                         _mem_cache_set(cache_key, str(count))
-                        if _is_redis_available():
+                        if is_redis_available():
                             try:
                                 await redis_client.set(cache_key, str(count), ex=CACHE_TTL_GITHUB)
-                                _mark_redis_up()
+                                mark_redis_up()
                             except Exception:
-                                _mark_redis_down()
+                                mark_redis_down()
                         return count
         except Exception as e:
             logger.warning(f"Failed to fetch contribution count for {username}: {e}")
@@ -347,16 +389,16 @@ class GitHubScraper:
         """
         cache_key = f"github:calendar:{username}:{year or 'current'}"
         # Try Redis
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         # Try memory cache
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
@@ -413,12 +455,12 @@ class GitHubScraper:
                 json_cal = json.dumps(calendar)
                 _mem_cache_set(cache_key, json_cal)
                 ttl = CACHE_TTL_GITHUB if not year or year == datetime.now().year else 86400 * 30  # 30 days for old years
-                if _is_redis_available():
+                if is_redis_available():
                     try:
                         await redis_client.set(cache_key, json_cal, ex=ttl)
-                        _mark_redis_up()
+                        mark_redis_up()
                     except Exception:
-                        _mark_redis_down()
+                        mark_redis_down()
 
         except Exception as e:
             logger.warning(f"Failed to fetch contribution calendar for {username} year={year}: {e}")
@@ -457,20 +499,20 @@ class GitHubScraper:
                      f"{sum(len(v) for v in result.values())} active days")
         return result
 
-    async def fetch_recent_events(self, username: str, per_page: int = 30) -> list[dict]:
+    async def fetch_recent_events(self, username: str, per_page: int = 30, fetch_commit_details: bool = True) -> list[dict]:
         """Fetch recent public events from the GitHub Events API."""
         cache_key = f"github:events:v3:{username}"
         # Try Redis
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 cached = await redis_client.get(cache_key)
                 if cached:
-                    _mark_redis_up()
+                    mark_redis_up()
                     _mem_cache_set(cache_key, cached)
                     return json.loads(cached)
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
         # Try memory cache
         mem_cached = _mem_cache_get(cache_key)
         if mem_cached:
@@ -481,7 +523,7 @@ class GitHubScraper:
             return []
 
         raw_events = []
-        for event in data[:30]:
+        for event in data[:per_page]:
             event_type = event.get("type", "")
             repo_full = event.get("repo", {}).get("name", "")
             repo_name = repo_full.split("/")[-1]
@@ -489,7 +531,6 @@ class GitHubScraper:
             payload = event.get("payload", {})
 
             if event_type == "PushEvent":
-                # Public Events API strips commits/size; use head SHA fallback
                 commit_count = payload.get("size", 0)
                 commits_list = payload.get("commits", [])
                 commit_msg = ""
@@ -497,33 +538,33 @@ class GitHubScraper:
                 before_sha = payload.get("before", "")
 
                 if commits_list:
-                    # If commits array is present, use it directly
                     commit_msg = commits_list[-1].get("message", "").split("\n")[0][:60]
-                elif head_sha and repo_full:
-                    # Fallback: fetch commit message from head SHA
+                elif fetch_commit_details and head_sha and repo_full:
+                    # Only fetch commit details when explicitly requested (analysis mode)
                     try:
                         commit_data = await self._get(f"/repos/{repo_full}/commits/{head_sha}")
                         if isinstance(commit_data, dict) and "commit" in commit_data:
                             commit_msg = commit_data["commit"].get("message", "").split("\n")[0][:60]
-                        # Estimate commit count from compare if both SHAs exist
                         if not commit_count and before_sha and before_sha != "0000000000000000000000000000000000000000":
                             try:
                                 compare = await self._get(f"/repos/{repo_full}/compare/{before_sha[:7]}...{head_sha[:7]}")
                                 if isinstance(compare, dict):
                                     commit_count = compare.get("total_commits", 1)
                             except Exception:
-                                commit_count = 1  # At least 1 commit if we have a head SHA
+                                commit_count = 1
                         elif not commit_count:
                             commit_count = 1
                     except Exception:
                         pass
+                elif not commit_count:
+                    commit_count = 1  # Assume at least 1 commit
 
                 raw_events.append({
                     "type": "push",
                     "repo": repo_name,
                     "commits": commit_count,
                     "commit_msg": commit_msg,
-                    "detail": "",  # Will be set after consolidation
+                    "detail": "",
                     "date": created_at,
                     "url": f"https://github.com/{repo_full}",
                 })
@@ -599,12 +640,12 @@ class GitHubScraper:
 
         json_events = json.dumps(events)
         _mem_cache_set(cache_key, json_events)
-        if _is_redis_available():
+        if is_redis_available():
             try:
                 await redis_client.set(cache_key, json_events, ex=3600)  # 1hr cache
-                _mark_redis_up()
+                mark_redis_up()
             except Exception:
-                _mark_redis_down()
+                mark_redis_down()
 
         return events
 

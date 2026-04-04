@@ -362,6 +362,15 @@ async def get_dashboard_summary(
     codechef_data: dict = {}
     hackerrank_data: dict = {}
 
+    # Quick Redis health probe — check once before parallel scrapers
+    from app.core.redis import redis_client as _rc, is_redis_available, mark_redis_down, mark_redis_up
+    if is_redis_available():
+        try:
+            await asyncio.wait_for(_rc.ping(), timeout=0.5)
+            mark_redis_up()
+        except Exception:
+            mark_redis_down()
+
     # Scrape ALL platforms in parallel (cached — 1hr/24hr TTL)
     tasks = []
 
@@ -370,7 +379,7 @@ async def get_dashboard_summary(
 
         async def fetch_github():
             scraper = GitHubScraper()
-            return await scraper.fetch_full_profile(_extract_username(current_user.github_username))
+            return await scraper.fetch_dashboard_summary(_extract_username(current_user.github_username))
         tasks.append(("github", fetch_github()))
 
     if current_user.leetcode_username:
