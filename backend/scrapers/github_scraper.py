@@ -296,15 +296,18 @@ class GitHubScraper:
         }
 
         import asyncio as _asyncio
-        contributions, recent_events = await _asyncio.gather(
+        contributions, recent_events, contribution_calendar = await _asyncio.gather(
             self.fetch_contribution_count(username),
             self.fetch_recent_events(username, per_page=10, fetch_commit_details=False),
+            self.fetch_contribution_calendar(username),
             return_exceptions=True,
         )
         if isinstance(contributions, Exception):
             contributions = 0
         if isinstance(recent_events, Exception):
             recent_events = []
+        if isinstance(contribution_calendar, Exception):
+            contribution_calendar = {}
 
         return {
             "username": username,
@@ -338,6 +341,7 @@ class GitHubScraper:
             ],
             "total_contributions": contributions,
             "recent_events": recent_events,
+            "contribution_calendar": contribution_calendar,
         }
 
     async def fetch_contribution_count(self, username: str) -> int:
