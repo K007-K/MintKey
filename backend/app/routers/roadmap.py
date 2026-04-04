@@ -102,20 +102,21 @@ async def get_roadmap(
             if not blueprint_data:
                 return APIResponse(success=True, data=None)
 
-            # Call Agent 7
+            # Call Agent 7 — fresh session for problem lookup
             try:
                 from agents.roadmap_builder import run_roadmap_builder
-                roadmap_output = await run_roadmap_builder(
-                    gap_analysis={}, dsa_analysis={},
-                    company_blueprint=blueprint_data,
-                    months_available=6, hours_per_day=4.0,
-                    session=session,
-                )
+                async with async_session_factory() as builder_session:
+                    roadmap_output = await run_roadmap_builder(
+                        gap_analysis={}, dsa_analysis={},
+                        company_blueprint=blueprint_data,
+                        months_available=6, hours_per_day=4.0,
+                        session=builder_session,
+                    )
                 rm_dict = roadmap_output.model_dump()
                 weeks = rm_dict.get("weeks", [])
 
-                async with async_session_factory() as session:
-                    repo = RoadmapRepository(session)
+                async with async_session_factory() as save_session:
+                    repo = RoadmapRepository(save_session)
                     rm = await repo.upsert(
                         user_id=current_user.id,
                         company_slug=company_slug,
@@ -130,7 +131,7 @@ async def get_roadmap(
                         kanban_tasks_data=rm_dict.get("kanban_tasks", []),
                         weeks_data=weeks,
                     )
-                    await session.commit()
+                    await save_session.commit()
                     logger.info(f"[Roadmap] Auto-generated roadmap for {company_slug}")
             except Exception as e:
                 logger.error(f"[Roadmap] Auto-generation failed for {company_slug}: {e}")
@@ -624,9 +625,9 @@ async def regenerate_roadmap(
     current_user: User = Depends(get_current_user),
 ):
     """Regenerate roadmap via Agent 7 (Roadmap Builder) — calls Groq LLM."""
+    # 1. Fetch blueprint + gap data (session closes after extraction)
+    from app.models.db import CompanyBlueprint, SkillProgress
     async with async_session_factory() as session:
-        # 1. Fetch the company blueprint
-        from app.models.db import CompanyBlueprint
         bp_result = await session.execute(
             select(CompanyBlueprint).where(CompanyBlueprint.slug == company_slug)
         )
@@ -645,8 +646,6 @@ async def regenerate_roadmap(
             "resources": {},
         }
 
-        # 2. Build gap analysis from current skill progress
-        from app.models.db import SkillProgress
         existing_rm = await session.execute(
             select(UserRoadmap).where(
                 UserRoadmap.user_id == current_user.id,
@@ -675,19 +674,20 @@ async def regenerate_roadmap(
                     "solved": sk.solved, "required": sk.required, "progress": sk.progress,
                 }
 
-    # 3. Call Agent 7 (roadmap_builder) — this actually hits Groq LLM
+    # 2. Call Agent 7 — fresh session for problem lookup inside builder
     try:
         from agents.roadmap_builder import run_roadmap_builder
         logger.info(f"[Regenerate] Calling Agent 7 for {company_slug}...")
 
-        roadmap_output = await run_roadmap_builder(
-            gap_analysis=gap_analysis,
-            dsa_analysis=dsa_analysis,
-            company_blueprint=company_blueprint,
-            months_available=6,
-            hours_per_day=4.0,
-            session=session,
-        )
+        async with async_session_factory() as builder_session:
+            roadmap_output = await run_roadmap_builder(
+                gap_analysis=gap_analysis,
+                dsa_analysis=dsa_analysis,
+                company_blueprint=company_blueprint,
+                months_available=6,
+                hours_per_day=4.0,
+                session=builder_session,
+            )
 
         logger.info(f"[Regenerate] Agent 7 returned {len(roadmap_output.weeks)} weeks for {company_slug}")
     except Exception as e:
@@ -696,15 +696,15 @@ async def regenerate_roadmap(
         traceback.print_exc()
         return APIResponse(success=False, data=None, error=f"Roadmap generation failed: {str(e)}")
 
-    # 4. Save the new roadmap to DB
+    # 3. Save the new roadmap to DB
     try:
         from app.repositories.roadmaps import RoadmapRepository
 
         rm_dict = roadmap_output.model_dump()
         weeks = rm_dict.get("weeks", [])
 
-        async with async_session_factory() as session:
-            repo = RoadmapRepository(session)
+        async with async_session_factory() as save_session:
+            repo = RoadmapRepository(save_session)
             roadmap = await repo.upsert(
                 user_id=current_user.id,
                 company_slug=company_slug,
@@ -721,7 +721,7 @@ async def regenerate_roadmap(
                 weeks_data=weeks,
             )
 
-            await session.commit()
+            await save_session.commit()
             logger.info(f"[Regenerate] Saved new roadmap for {company_slug}")
 
         return APIResponse(
