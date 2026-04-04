@@ -254,7 +254,7 @@ async def _build_template_roadmap(
             )
             for row in result:
                 for tag in (row.tags or []):
-                    tag_lower = tag.lower().strip()
+                    tag_lower = tag.lower().strip().replace(" & ", "-").replace("&", "").replace(" ", "-")
                     problem_pool.setdefault(tag_lower, []).append({
                         "slug": row.slug,
                         "difficulty": row.difficulty or "Medium",
@@ -357,12 +357,16 @@ async def _build_template_roadmap(
 
             # --- Pick specific problem slugs from the pool ---
             selected_slugs: list[str] = []
-            pool_key = lc_tag.lower().replace("_", "-")
+            pool_key = lc_tag.lower().replace("_", "-").replace(" ", "-")
             available = [p for p in problem_pool.get(pool_key, []) if p["slug"] not in used_slugs]
             # Also try topic name as fallback key
             if not available:
-                alt_key = topic.lower().replace(" & ", "-").replace(" ", "-")
+                alt_key = topic.lower().replace(" & ", "-").replace("&", "").replace(" ", "-")
                 available = [p for p in problem_pool.get(alt_key, []) if p["slug"] not in used_slugs]
+            # Also try with spaces (in case pool was keyed with spaces)
+            if not available:
+                space_key = lc_tag.lower().replace("-", " ")
+                available = [p for p in problem_pool.get(space_key, []) if p["slug"] not in used_slugs]
 
             # Select up to dsa_count, sorted by difficulty
             for p in available[:dsa_count]:

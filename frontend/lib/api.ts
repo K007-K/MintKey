@@ -721,7 +721,7 @@ export function useRegenerateRoadmap() {
     },
     onSuccess: (_data, companySlug) => {
       // Invalidate roadmap data to force refetch with new AI-generated content
-      queryClient.invalidateQueries({ queryKey: ["roadmap", companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["roadmaps", companySlug] });
       queryClient.invalidateQueries({ queryKey: ["score-history", companySlug] });
     },
   });
