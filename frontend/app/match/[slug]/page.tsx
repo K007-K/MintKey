@@ -110,7 +110,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
     const match = userScores.find((s: any) => s.company_slug === slug);
     if (match) {
       hasRealScores = true;
-      matchScore = Math.round(match.overall_score || 0);
+      matchScore = Math.round(Number(match.overall_score) || 0);
       statusLabel = match.status_label || (matchScore >= 85 ? "Strong" : matchScore >= 70 ? "Good" : matchScore >= 50 ? "Needs Work" : "Critical");
       weeksAway = match.weeks_away ?? Math.max(2, Math.round((85 - matchScore) / 3));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -243,7 +243,7 @@ function buildMatchReport(company: Record<string, any> | null, userScores: any[]
 
   // Score Simulator: based on actual scoring weights
   const simScenarios = sortedWeights.slice(0, 3).map((sw) => {
-    const boost = Math.round(sw.weight * 15);
+    const boost = Math.round((sw.weight || 0) * 15);
     return {
       label: `Improve ${sw.label} by 15%`,
       action: `+15% ${sw.label}`,
@@ -411,9 +411,9 @@ export default function MatchReportPage() {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       report.scoreHistory = (rawHistory as { overall_score: number; computed_at: string }[]).map((h: { overall_score: number; computed_at: string }, i: number) => ({
         month: months[new Date(h.computed_at).getMonth()] || `M${i}`,
-        score: Math.round(h.overall_score),
+        score: Math.round(Number(h.overall_score) || 0),
         projected: null,
-        target: report.targetScoreLine,
+        target: report.targetScoreLine ?? 85,
       }));
     }
 
@@ -814,7 +814,7 @@ export default function MatchReportPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="month" tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
                 <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: "#9CA3AF", fontSize: 12 }} axisLine={{ stroke: "#E5E7EB" }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 13 }} formatter={(value) => (value == null || Number.isNaN(Number(value))) ? "—" : `${value}%`} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
                 <Line
                   type="monotone" dataKey="target" name={`Target (${data.targetScoreLine}%)`}
