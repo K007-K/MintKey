@@ -20,6 +20,10 @@ import { useCompany, useRoadmapData, useUpdateTask, useScoreHistory, useSyncLeet
 
 const ACTION_COLORS = ["red", "amber", "blue", "purple", "green", "orange"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const TODAY_NAME = new Date().toLocaleDateString("en-US", { weekday: "long" }); // e.g. "Friday"
+
+/* Practice days where problems are assigned (not study/review days) */
+const PRACTICE_DAYS = ["Tuesday", "Thursday", "Friday"];
 
 /* ─── Skill label mapping — transform raw DB names to readable labels ─── */
 const SKILL_LABEL_MAP: Record<string, string> = {
@@ -164,7 +168,7 @@ export default function RoadmapPage() {
             problems: dsaTask.problems || [],
           },
           dailyPlan: DAYS.map((day) => ({
-            day, task: daily[day.toLowerCase()] || "Study", isToday: false,
+            day, task: daily[day.toLowerCase()] || "Study", isToday: day === TODAY_NAME,
           })),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           resources: resources.map((r: any) => ({
@@ -248,11 +252,7 @@ export default function RoadmapPage() {
   }, [company?.scoring_weights]);
 
   // Handle task status change (Task Board)
-  const handleTaskStatusChange = (taskId: string, newStatus: string) => {
-    updateTask.mutate({ companySlug: slug || "", taskId, status: newStatus });
-  };
-
-  // Toggle handlers REMOVED — progress is verified by platform sync, not user clicks
+  // Manual task status change REMOVED — progress is verified by platform sync, not user clicks
 
   const [activeWeek, setActiveWeek] = useState(1);
   const [simSelected, setSimSelected] = useState<boolean[]>(scoreSimulator.map(() => false));
@@ -469,72 +469,98 @@ export default function RoadmapPage() {
               <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${currentWeekData.progressPercent}%` }} />
             </div>
 
-            {/* DSA PROBLEMS — Verified Status from problem_map */}
-            <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">DSA Problems <span className="text-gray-300 font-normal normal-case">· {currentWeekData.dsa.countDone}/{currentWeekData.dsa.count} solved</span></p>
-            <div className="space-y-2 mb-6">
-              {(problemMap[currentWeekData.number] || []).length > 0 ? (
-                (problemMap[currentWeekData.number] || []).map((problem) => (
-                  <div key={problem.slug} className={`w-full rounded-lg p-3 flex items-center gap-3 transition-all duration-200 ${
-                    problem.status === "solved"
-                      ? "bg-emerald-50 border border-emerald-200"
-                      : "bg-white border border-[#E5E7EB]"
-                  }`}>
-                    {/* Status dot — green=solved, gray=pending */}
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
-                      problem.status === "solved" ? "bg-emerald-500" : "border-2 border-gray-300"
-                    }`}>
-                      {problem.status === "solved" && <CheckCircle2 className="h-3 w-3 text-white" />}
-                    </div>
+            {/* ═══ DAILY PLAN + DSA PROBLEMS — Unified View ═══ */}
+            <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">
+              Daily Plan <span className="text-gray-300 font-normal normal-case">· {currentWeekData.dsa.countDone}/{currentWeekData.dsa.count} problems solved</span>
+            </p>
 
-                    {/* Problem name */}
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium capitalize ${problem.status === "solved" ? "line-through text-gray-400" : "text-[#111827]"}`}>
-                        {problem.slug.replace(/-/g, " ")}
-                      </p>
-                      <p className="text-xs text-[#9CA3AF]">{problem.difficulty}</p>
-                    </div>
+            {(() => {
+              /* Distribute problems into practice days (Tue/Thu/Fri) using problem_order */
+              const weekProblems = [...(problemMap[currentWeekData.number] || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+              const dailyProblems: Record<string, typeof weekProblems> = {};
+              if (weekProblems.length > 0) {
+                const perDay = Math.ceil(weekProblems.length / PRACTICE_DAYS.length);
+                PRACTICE_DAYS.forEach((day, di) => {
+                  dailyProblems[day] = weekProblems.slice(di * perDay, (di + 1) * perDay);
+                });
+              }
 
-                    {/* Proof link + timestamp */}
-                    {problem.status === "solved" ? (
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-emerald-600">
-                          {new Date(problem.solved_at!).toLocaleDateString()}
-                        </span>
-                        <a href={problem.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
-                          View ↗
-                        </a>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Verified ✓</span>
+              return (
+                <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
+                  {currentWeekData.dailyPlan.map((d) => {
+                    const dayProblems = dailyProblems[d.day] || [];
+                    const isPracticeDay = PRACTICE_DAYS.includes(d.day);
+                    return (
+                      <div key={d.day} className={`border-b border-[#E5E7EB] last:border-0 ${d.isToday ? "bg-amber-50/60" : ""}`}>
+                        {/* Day header row */}
+                        <div className="flex">
+                          <div className={`w-32 shrink-0 px-4 py-3 border-r border-[#E5E7EB] ${d.isToday ? "bg-amber-100/60" : "bg-gray-50"}`}>
+                            <p className={`text-sm font-semibold ${d.isToday ? "text-amber-800" : "text-[#374151]"}`}>{d.day}</p>
+                            {d.isToday && <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1">TODAY <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /></span>}
+                          </div>
+                          <div className="px-4 py-3 flex-1">
+                            <p className={`text-sm ${d.isToday ? "text-amber-900 font-medium" : "text-[#6B7280]"}`}>{d.task}</p>
+                          </div>
+                        </div>
+
+                        {/* Problems assigned to this day */}
+                        {isPracticeDay && dayProblems.length > 0 && (
+                          <div className="pl-32 border-t border-[#F3F4F6]">
+                            {dayProblems.map((problem) => (
+                              <div key={problem.slug} className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#F3F4F6] last:border-0 ${
+                                problem.status === "solved" ? "bg-emerald-50/50" : ""
+                              }`}>
+                                {/* Status indicator */}
+                                <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
+                                  problem.status === "solved" ? "bg-emerald-500" : "border-2 border-gray-300"
+                                }`}>
+                                  {problem.status === "solved" && <CheckCircle2 className="h-2.5 w-2.5 text-white" />}
+                                </div>
+
+                                {/* Problem name + difficulty */}
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm font-medium capitalize ${problem.status === "solved" ? "line-through text-gray-400" : "text-[#111827]"}`}>
+                                    {problem.slug.replace(/-/g, " ")}
+                                  </p>
+                                </div>
+                                <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                                  problem.difficulty?.toLowerCase() === "hard" ? "bg-red-100 text-red-700" :
+                                  problem.difficulty?.toLowerCase() === "medium" ? "bg-amber-100 text-amber-700" :
+                                  "bg-green-100 text-green-700"
+                                }`}>{problem.difficulty}</span>
+
+                                {/* Action: solved=proof link, unsolved=LeetCode link */}
+                                {problem.status === "solved" ? (
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="text-xs text-emerald-600">{new Date(problem.solved_at!).toLocaleDateString()}</span>
+                                    <a href={problem.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">View ↗</a>
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Verified ✓</span>
+                                  </div>
+                                ) : (
+                                  <a href={`https://leetcode.com/problems/${problem.slug}/`} target="_blank" rel="noopener noreferrer"
+                                     className="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 shrink-0">
+                                    Solve on LeetCode <span className="text-[10px]">↗</span>
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <span className="text-xs text-[#9CA3AF] shrink-0">Not solved</span>
-                    )}
-                  </div>
-                ))
-              ) : (
-                /* Fallback for old roadmaps without problem map */
-                <div className="bg-white border border-dashed border-[#D1D5DB] rounded-lg p-4">
-                  <p className="text-sm text-[#6B7280]">{currentWeekData.dsa.label || "DSA problems"}</p>
-                  <p className="text-xs text-[#9CA3AF] mt-1">Tag: {currentWeekData.dsa.lcTag} · {currentWeekData.dsa.count} problems</p>
-                  <p className="text-xs text-amber-500 mt-2">⚠ Regenerate roadmap to get specific problem assignments with verified tracking</p>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
-            {/* DAILY PLAN */}
-            <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">This Week — Daily Plan</p>
-            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
-              {currentWeekData.dailyPlan.map((d, i) => (
-                <div key={d.day} className={`flex border-b border-[#E5E7EB] last:border-0 ${d.isToday ? "bg-amber-50" : ""}`}>
-                  <div className={`w-32 shrink-0 px-4 py-3 bg-gray-50 border-r border-[#E5E7EB] ${d.isToday ? "bg-amber-50" : ""}`}>
-                    <p className="text-sm font-medium text-[#374151]">{d.day}</p>
-                    {d.isToday && <span className="text-[10px] font-bold text-amber-600">TODAY ●</span>}
-                  </div>
-                  <div className="px-4 py-3 flex-1">
-                    <p className="text-sm text-[#6B7280]">{d.task}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Fallback for old roadmaps without problem map */}
+            {!(problemMap[currentWeekData.number]?.length) && (
+              <div className="bg-white border border-dashed border-[#D1D5DB] rounded-lg p-4 mb-6">
+                <p className="text-sm text-[#6B7280]">{currentWeekData.dsa.label || "DSA problems"}</p>
+                <p className="text-xs text-[#9CA3AF] mt-1">Tag: {currentWeekData.dsa.lcTag} · {currentWeekData.dsa.count} problems</p>
+                <p className="text-xs text-amber-500 mt-2">⚠ Regenerate roadmap to get specific problem assignments with verified tracking</p>
+              </div>
+            )}
 
             {/* RESOURCES */}
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Resources</p>
@@ -550,31 +576,47 @@ export default function RoadmapPage() {
               ))}
             </div>
 
-            {/* PROJECT TASK — Read-only server status */}
+            {/* PROJECT TASK — Read-only status card (no checkbox) */}
             <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Project Task</p>
-            <div className={`w-full text-left border rounded-lg p-4 mb-6 ${
+            <div className={`w-full border rounded-lg p-4 mb-6 ${
               currentWeekData.projectTask.done
                 ? "bg-emerald-50 border-emerald-200"
-                : "border-[#E5E7EB]"
+                : "bg-white border-[#E5E7EB]"
             }`}>
               <div className="flex items-start gap-3">
-                <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 ${
-                  currentWeekData.projectTask.done
-                    ? "bg-emerald-500"
-                    : "border-2 border-gray-300"
+                {/* Icon — not a checkbox */}
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  currentWeekData.projectTask.done ? "bg-emerald-100" : "bg-gray-100"
                 }`}>
-                  {currentWeekData.projectTask.done && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                  <GitBranch className={`h-4 w-4 ${currentWeekData.projectTask.done ? "text-emerald-600" : "text-gray-400"}`} />
                 </div>
-                <div>
-                  <p className={`text-sm font-medium ${
-                    currentWeekData.projectTask.done ? "line-through text-gray-400" : "text-[#111827]"
-                  }`}>{currentWeekData.projectTask.name} <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5 ml-1">+{currentWeekData.projectTask.impact}%</span></p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="bg-amber-100 text-amber-700 text-xs rounded-full px-2 py-0.5">{currentWeekData.projectTask.effort}</span>
-                    <span className="text-xs text-[#9CA3AF]">· {currentWeekData.projectTask.hours} hrs</span>
-                    {currentWeekData.projectTask.done && <span className="text-xs font-bold text-emerald-600">✓ Verified by GitHub</span>}
-                    {!currentWeekData.projectTask.done && <span className="text-xs text-gray-400">Detected via GitHub sync</span>}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className={`text-sm font-semibold ${
+                      currentWeekData.projectTask.done ? "text-gray-400 line-through" : "text-[#111827]"
+                    }`}>{currentWeekData.projectTask.name}</p>
+                    <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-2 py-0.5">+{currentWeekData.projectTask.impact}%</span>
+                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                      currentWeekData.projectTask.done 
+                        ? "bg-emerald-500 text-white" 
+                        : "bg-gray-100 text-gray-500"
+                    }`}>
+                      {currentWeekData.projectTask.done ? "✓ Verified" : "Pending"}
+                    </span>
                   </div>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-[#9CA3AF]">
+                    <span className="bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 font-medium">{currentWeekData.projectTask.effort}</span>
+                    <span>~{currentWeekData.projectTask.hours} hrs</span>
+                  </div>
+                  {currentWeekData.projectTask.done ? (
+                    <p className="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Verified via GitHub sync
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-400 mt-2">
+                      Build this project and push to GitHub → Sync GitHub to verify automatically
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -594,27 +636,32 @@ export default function RoadmapPage() {
           </div>
         </div>
 
-        {/* ═══ SECTION 3 — SCORE IMPACT SIMULATOR ═══ */}
+        {/* ═══ SECTION 3 — WHAT-IF SCORE SIMULATOR ═══ */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h2 className="text-base font-semibold text-[#111827] mb-1">Score Impact Simulator</h2>
-          <p className="text-sm text-[#9CA3AF] mb-5">See how completing tasks improves your match score</p>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-base font-semibold text-[#111827]">What-If Score Simulator</h2>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 rounded-full px-2.5 py-0.5">Simulation Only</span>
+          </div>
+          <p className="text-sm text-[#9CA3AF] mb-5">Toggle areas to see how completing them would impact your match score. <span className="text-[#D1D5DB]">This does not affect your actual score.</span></p>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Left — checkboxes */}
+            {/* Left — toggle switches */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Select tasks to simulate</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mb-3">Toggle areas to simulate</p>
               <div className="space-y-2">
                 {scoreSimulator.map((s, i) => (
                   <button key={s.task} onClick={() => toggleSim(i)} className={`w-full text-left rounded-lg p-3 flex items-center justify-between transition-colors ${
-                    simSelected[i] ? "bg-emerald-50 border border-emerald-200" : "bg-white border border-[#E5E7EB] hover:border-[#A7F3D0]"
+                    simSelected[i] ? "bg-blue-50 border border-blue-200" : "bg-white border border-[#E5E7EB] hover:border-blue-200"
                   }`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${simSelected[i] ? "bg-emerald-500" : "border-2 border-gray-300"}`}>
-                        {simSelected[i] && <CheckCircle2 className="h-3 w-3 text-white" />}
+                      {/* Toggle switch — NOT a checkbox */}
+                      <div className={`w-9 h-5 rounded-full relative transition-colors duration-200 ${simSelected[i] ? "bg-blue-500" : "bg-gray-300"}`}>
+                        <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all duration-200 shadow-sm ${simSelected[i] ? "left-4.5" : "left-0.5"}`}
+                             style={{ left: simSelected[i] ? "18px" : "2px" }} />
                       </div>
-                      <span className="text-sm text-[#374151]">{s.task}</span>
+                      <span className={`text-sm ${simSelected[i] ? "text-blue-700 font-medium" : "text-[#374151]"}`}>{s.task}</span>
                     </div>
-                    <span className="bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full px-2 py-0.5">+{s.impact}%</span>
+                    <span className={`text-xs font-bold rounded-full px-2 py-0.5 ${simSelected[i] ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-700"}`}>+{s.impact}%</span>
                   </button>
                 ))}
               </div>
@@ -655,11 +702,11 @@ export default function RoadmapPage() {
           </div>
         </div>
 
-        {/* ═══ SECTION 4 — TASK BOARD (Compact) ═══ */}
+        {/* ═══ SECTION 4 — TASK BOARD (Read-Only — Status Driven) ═══ */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[#111827]">Task Board</h2>
-            <span className="text-sm text-[#9CA3AF]">Sorted by impact</span>
+            <span className="text-xs text-[#9CA3AF]">Auto-updated via platform sync</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -670,21 +717,25 @@ export default function RoadmapPage() {
                 <span className="bg-gray-100 text-gray-600 rounded-full px-2 text-xs font-bold">{kanbanTasks.todo.length}</span>
               </div>
               <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-                {kanbanTasks.todo.map((t: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }) => (
-                  <div key={t.title} className="rounded-lg border border-[#E5E7EB] p-3 bg-white hover:border-[#A7F3D0] transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${t.difficulty === "Hard" ? "bg-red-100 text-red-700" : t.difficulty === "Medium" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>{t.difficulty}</span>
-                        <span className="text-[11px] text-[#9CA3AF]">{t.duration}</span>
-                      </div>
-                      <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-1.5 py-0.5">+{t.impact}%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-[#111827] truncate pr-2">{t.title}</p>
-                      <button onClick={() => t.id && handleTaskStatusChange(t.id, "in_progress")} className="text-xs font-semibold text-[#10B981] hover:underline shrink-0">Start →</button>
-                    </div>
+                {kanbanTasks.todo.length === 0 ? (
+                  <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center">
+                    <Target className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-[#9CA3AF]">All tasks in progress or completed</p>
                   </div>
-                ))}
+                ) : (
+                  kanbanTasks.todo.map((t: { id?: string; title: string; impact: number; difficulty: string; duration: string; description: string }) => (
+                    <div key={t.title} className="rounded-lg border border-[#E5E7EB] p-3 bg-white">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${t.difficulty === "Hard" ? "bg-red-100 text-red-700" : t.difficulty === "Medium" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>{t.difficulty}</span>
+                          <span className="text-[11px] text-[#9CA3AF]">{t.duration}</span>
+                        </div>
+                        <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-1.5 py-0.5">+{t.impact}%</span>
+                      </div>
+                      <p className="text-sm font-medium text-[#111827] truncate">{t.title}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -698,7 +749,7 @@ export default function RoadmapPage() {
                 {kanbanTasks.inProgress.length === 0 ? (
                   <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center">
                     <Clock className="h-6 w-6 text-gray-300 mx-auto mb-2" />
-                    <p className="text-xs text-[#9CA3AF]">Click &quot;Start →&quot; on a todo task</p>
+                    <p className="text-xs text-[#9CA3AF]">Tasks move here when partial progress is detected</p>
                   </div>
                 ) : (
                   kanbanTasks.inProgress.map((t: { id?: string; title: string; impact: number; progress: number }) => (
@@ -707,13 +758,12 @@ export default function RoadmapPage() {
                         <p className="text-sm font-medium text-[#111827] truncate pr-2">{t.title}</p>
                         <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">+{t.impact}%</span>
                       </div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2">
                         <div className="flex-1 h-1.5 rounded-full bg-[#F3F4F6]">
                           <div className="h-full rounded-full bg-[#10B981] transition-all" style={{ width: `${t.progress}%` }} />
                         </div>
                         <span className="text-[10px] font-bold text-[#6B7280] w-8 text-right">{t.progress}%</span>
                       </div>
-                      <button onClick={() => (t as { id?: string }).id && handleTaskStatusChange((t as { id?: string }).id!, "done")} className="text-xs font-semibold text-emerald-600 hover:underline">Mark Done ✓</button>
                     </div>
                   ))
                 )}
@@ -730,7 +780,7 @@ export default function RoadmapPage() {
                 {kanbanTasks.done.length === 0 ? (
                   <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center">
                     <CheckCircle2 className="h-6 w-6 text-gray-300 mx-auto mb-2" />
-                    <p className="text-xs text-[#9CA3AF]">Completed tasks appear here</p>
+                    <p className="text-xs text-[#9CA3AF]">Verified completions appear here</p>
                   </div>
                 ) : (
                   kanbanTasks.done.map((t: string) => (
@@ -779,27 +829,32 @@ export default function RoadmapPage() {
                 )}
               </div>
 
-              {/* Problems Per Week */}
+              {/* Problems Per Week — Always shows target + solved */}
               <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-                <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week</h3>
+                <h3 className="text-sm font-semibold text-[#111827] mb-3">Problems Per Week <span className="text-xs font-normal text-[#9CA3AF]">· Target vs Solved</span></h3>
                 {(() => {
-                  const barData = weeks.slice(0, 8).map((w, i) => ({ week: `W${i + 1}`, count: w.dsa.countDone || 0 }));
-                  const hasData = barData.some((d) => d.count > 0);
-                  return hasData ? (
+                  const barData = weeks.slice(0, 8).map((w, i) => ({
+                    week: `W${i + 1}`,
+                    target: w.dsa.count || 0,
+                    solved: w.dsa.countDone || 0,
+                  }));
+                  const hasWeeks = barData.some((d) => d.target > 0);
+                  return hasWeeks ? (
                     <ResponsiveContainer width="100%" height={220}>
                       <BarChart data={barData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                         <XAxis dataKey="week" tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
                         <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={{ stroke: "#E5E7EB" }} />
                         <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 12 }} />
-                        <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
+                        <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                        <Bar dataKey="target" name="Target" fill="#E5E7EB" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="solved" name="Solved" fill="#10B981" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-[220px] text-center">
                       <BarChart3 className="h-8 w-8 text-gray-200 mb-2" />
-                      <p className="text-sm font-medium text-[#9CA3AF]">No problems solved yet</p>
-                      <p className="text-xs text-[#D1D5DB] mt-1">Start solving DSA problems to see weekly stats</p>
+                      <p className="text-sm font-medium text-[#9CA3AF]">Generate a roadmap to see weekly targets</p>
                     </div>
                   );
                 })()}
