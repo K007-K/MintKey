@@ -175,6 +175,10 @@ class UserRoadmap(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     company_slug = Column(String(100), nullable=False)
 
+    # Versioning — "Plans can change. Progress should not."
+    version = Column(Integer, default=1)
+    is_active = Column(Boolean, default=True)
+
     total_weeks = Column(Integer, nullable=False)
     hours_per_day = Column(Integer, default=5)
     weeks_data = Column(JSONB, nullable=False)  # Array of week objects
@@ -252,6 +256,10 @@ class ScoreSnapshot(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     roadmap_id = Column(UUID(as_uuid=True), ForeignKey("user_roadmaps.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # User-centric columns — score history survives roadmap regeneration
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
+    company_slug = Column(String(100), nullable=True)
 
     week_number = Column(Integer, nullable=False)
     score = Column(Float, nullable=False)
@@ -402,6 +410,7 @@ class RoadmapProblemMap(Base):
     topic = Column(Text, nullable=False)                           # "Arrays & Hashing"
     difficulty = Column(Text, nullable=True)                       # Easy | Medium | Hard
     status = Column(Text, default="pending")                       # pending | solved
+    source = Column(Text, default="roadmap")                        # roadmap | carry_over
     assigned_at = Column(DateTime, default=datetime.utcnow)        # Anti-cheat: only count solves after this date
     solved_at = Column(DateTime, nullable=True)                    # When user solved it (from lc_submissions)
     submission_url = Column(Text, nullable=True)                   # Proof link

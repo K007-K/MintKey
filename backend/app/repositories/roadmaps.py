@@ -1,11 +1,11 @@
-# Repository for user_roadmaps DB operations — enriched with phase/task/skill persistence
+# Repository for user_roadmaps DB operations — versioned + progress-preserving
 import logging
 import hashlib
 import json
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import select, delete
+from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db import (
@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class RoadmapRepository:
-    """CRUD for the user_roadmaps and related tables."""
+    """CRUD for user_roadmaps — versioned architecture.
+
+    Core principle: "Plans can change. Progress should not."
+    Old roadmaps are archived (is_active=false), never deleted.
+    """
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -30,27 +34,79 @@ class RoadmapRepository:
         hours_per_day: int,
         weeks_data: list[dict],
         target_level: str = None,
-    ) -> UserRoadmap:
-        """Insert or replace the roadmap for a user + company pair."""
-        # Delete existing roadmap (cascade will remove phases/tasks/skills/snapshots)
-        await self.session.execute(
-            delete(UserRoadmap).where(
+    ) -> tuple[UserRoadmap, dict]:
+        """Create a new roadmap version, archiving any existing active one.
+
+        Returns:
+            (new_roadmap, old_context) where old_context contains:
+            - original_generated_at: datetime of the first ever roadmap
+            - last_score: last recorded score for carry-forward
+            - previous_version: version number of the old roadmap
+        """
+        old_context = {
+            "original_generated_at": None,
+            "last_score": 0.0,
+            "previous_version": 0,
+        }
+
+        # 1. Find the currently active roadmap (if any)
+        old_result = await self.session.execute(
+            select(UserRoadmap).where(
+                UserRoadmap.user_id == user_id,
+                UserRoadmap.company_slug == company_slug,
+                UserRoadmap.is_active == True,  # noqa: E712
+            )
+        )
+        old_roadmap = old_result.scalar_one_or_none()
+
+        if old_roadmap:
+            # Capture context before archiving
+            old_context["original_generated_at"] = old_roadmap.generated_at
+            old_context["previous_version"] = old_roadmap.version or 1
+
+            # Fetch last score snapshot for carry-forward
+            last_snap = await self.session.execute(
+                select(ScoreSnapshot.score)
+                .where(ScoreSnapshot.roadmap_id == old_roadmap.id)
+                .order_by(ScoreSnapshot.recorded_at.desc())
+                .limit(1)
+            )
+            last_score = last_snap.scalar_one_or_none()
+            if last_score is not None:
+                old_context["last_score"] = last_score
+
+            # Archive the old roadmap — do NOT delete
+            old_roadmap.is_active = False
+            logger.info(
+                f"Archived roadmap v{old_roadmap.version} for "
+                f"user={user_id} company={company_slug}"
+            )
+
+        # 2. Compute next version
+        max_version_result = await self.session.execute(
+            select(func.coalesce(func.max(UserRoadmap.version), 0))
+            .where(
                 UserRoadmap.user_id == user_id,
                 UserRoadmap.company_slug == company_slug,
             )
         )
+        next_version = (max_version_result.scalar() or 0) + 1
 
-        # Compute generation hash from inputs
+        # 3. Compute generation hash
         hash_input = json.dumps({
             "company": company_slug,
             "weeks": total_weeks,
             "hours": hours_per_day,
+            "version": next_version,
         }, sort_keys=True)
         gen_hash = hashlib.sha256(hash_input.encode()).hexdigest()[:16]
 
+        # 4. Create new active roadmap
         roadmap = UserRoadmap(
             user_id=user_id,
             company_slug=company_slug,
+            version=next_version,
+            is_active=True,
             total_weeks=total_weeks,
             hours_per_day=hours_per_day,
             weeks_data=weeks_data,
@@ -60,8 +116,13 @@ class RoadmapRepository:
         )
         self.session.add(roadmap)
         await self.session.flush()
-        logger.info(f"Upserted roadmap for user={user_id} company={company_slug}")
-        return roadmap
+
+        logger.info(
+            f"Created roadmap v{next_version} for "
+            f"user={user_id} company={company_slug} "
+            f"(archived v{old_context['previous_version']})"
+        )
+        return roadmap, old_context
 
     async def persist_roadmap_details(
         self,
@@ -69,9 +130,16 @@ class RoadmapRepository:
         phases_data: list[dict],
         kanban_tasks_data: list[dict],
         weeks_data: list[dict],
+        original_assigned_at: datetime | None = None,
     ) -> None:
-        """Persist phases, kanban tasks, skill progress, and initial score snapshot."""
+        """Persist phases, kanban tasks, skill progress, and problem map.
+
+        Args:
+            original_assigned_at: If regenerating, use the original roadmap's
+                generated_at so anti-cheat doesn't reject previously-solved problems.
+        """
         roadmap_id = roadmap.id
+        assigned_at = original_assigned_at or datetime.utcnow()
 
         # 1. Insert phases
         for p in phases_data:
@@ -114,7 +182,6 @@ class RoadmapRepository:
                         "required": dsa.get("count", 5),
                     }
                 elif lc_tag in topic_map:
-                    # Accumulate required count across weeks with the same tag
                     topic_map[lc_tag]["required"] += dsa.get("count", 5)
 
         for lc_tag, info in topic_map.items():
@@ -128,9 +195,11 @@ class RoadmapRepository:
             )
             self.session.add(sp)
 
-        # 4. Insert initial score snapshot
+        # 4. Insert initial score snapshot (user-centric)
         snapshot = ScoreSnapshot(
             roadmap_id=roadmap_id,
+            user_id=roadmap.user_id,
+            company_slug=roadmap.company_slug,
             week_number=1,
             score=0.0,
             projected_score=0.0,
@@ -160,7 +229,8 @@ class RoadmapRepository:
                         topic=w.get("focus_topic", dsa.get("lc_tag", "")),
                         difficulty=dsa.get("difficulty", "medium"),
                         status="pending",
-                        assigned_at=datetime.utcnow(),
+                        source="roadmap",
+                        assigned_at=assigned_at,  # Uses original date for regen
                     )
                     self.session.add(rpm)
                     problem_count += 1
@@ -172,23 +242,26 @@ class RoadmapRepository:
     async def get_by_company(
         self, user_id: UUID, company_slug: str
     ) -> Optional[UserRoadmap]:
-        """Get the roadmap for a specific company."""
+        """Get the ACTIVE roadmap for a specific company."""
         result = await self.session.execute(
             select(UserRoadmap)
             .where(
                 UserRoadmap.user_id == user_id,
                 UserRoadmap.company_slug == company_slug,
+                UserRoadmap.is_active == True,  # noqa: E712
             )
-            .order_by(UserRoadmap.generated_at.desc())
             .limit(1)
         )
         return result.scalar_one_or_none()
 
     async def list_for_user(self, user_id: UUID) -> list[UserRoadmap]:
-        """List all roadmaps for a user."""
+        """List all ACTIVE roadmaps for a user."""
         result = await self.session.execute(
             select(UserRoadmap)
-            .where(UserRoadmap.user_id == user_id)
+            .where(
+                UserRoadmap.user_id == user_id,
+                UserRoadmap.is_active == True,  # noqa: E712
+            )
             .order_by(UserRoadmap.generated_at.desc())
         )
         return list(result.scalars().all())

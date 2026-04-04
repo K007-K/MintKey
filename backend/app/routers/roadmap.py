@@ -117,7 +117,7 @@ async def get_roadmap(
 
                 async with async_session_factory() as save_session:
                     repo = RoadmapRepository(save_session)
-                    rm = await repo.upsert(
+                    rm, _old_context = await repo.upsert(
                         user_id=current_user.id,
                         company_slug=company_slug,
                         total_weeks=rm_dict.get("total_weeks", len(weeks)),
@@ -132,7 +132,7 @@ async def get_roadmap(
                         weeks_data=weeks,
                     )
                     await save_session.commit()
-                    logger.info(f"[Roadmap] Auto-generated roadmap for {company_slug}")
+                    logger.info(f"[Roadmap] Auto-generated roadmap v{rm.version} for {company_slug}")
             except Exception as e:
                 logger.error(f"[Roadmap] Auto-generation failed for {company_slug}: {e}")
                 return APIResponse(success=True, data=None)
@@ -219,6 +219,7 @@ async def get_roadmap(
                     "topic": p.topic,
                     "difficulty": p.difficulty,
                     "status": p.status,
+                    "source": p.source or "roadmap",
                     "solved_at": p.solved_at.isoformat() if p.solved_at else None,
                     "url": p.submission_url or f"https://leetcode.com/problems/{p.problem_slug}/",
                 }
@@ -228,6 +229,7 @@ async def get_roadmap(
             return APIResponse(success=True, data={
                 "id": str(rm.id),
                 "company_slug": rm.company_slug,
+                "version": rm.version,
                 "total_weeks": rm.total_weeks,
                 "hours_per_day": rm.hours_per_day,
                 "current_week": rm.current_week,
@@ -434,17 +436,17 @@ async def get_score_history(
     company_slug: str,
     current_user: User = Depends(get_current_user),
 ):
-    """Get score snapshot history for the trend chart."""
+    """Get score snapshot history for the trend chart — user-centric, survives regeneration."""
     try:
         async with async_session_factory() as session:
-            repo = RoadmapRepository(session)
-            rm = await repo.get_by_company(current_user.id, company_slug)
-            if not rm:
-                return APIResponse(success=False, data=None, error="Roadmap not found")
-
+            # Query by user_id + company_slug — not roadmap_id
+            # This ensures score history persists across roadmap versions
             result = await session.execute(
                 select(ScoreSnapshot)
-                .where(ScoreSnapshot.roadmap_id == rm.id)
+                .where(
+                    ScoreSnapshot.user_id == current_user.id,
+                    ScoreSnapshot.company_slug == company_slug,
+                )
                 .order_by(ScoreSnapshot.recorded_at)
             )
             history = [
@@ -503,6 +505,7 @@ async def sync_leetcode(
                 select(UserRoadmap).where(
                     UserRoadmap.user_id == current_user.id,
                     UserRoadmap.company_slug == company_slug,
+                    UserRoadmap.is_active == True,  # noqa: E712
                 )
             )
             rm = result.scalar_one_or_none()
@@ -528,6 +531,7 @@ async def sync_github(
                 select(UserRoadmap).where(
                     UserRoadmap.user_id == current_user.id,
                     UserRoadmap.company_slug == company_slug,
+                    UserRoadmap.is_active == True,  # noqa: E712
                 )
             )
             rm = result.scalar_one_or_none()
@@ -624,8 +628,8 @@ async def regenerate_roadmap(
     company_slug: str,
     current_user: User = Depends(get_current_user),
 ):
-    """Regenerate roadmap via Agent 7 (Roadmap Builder) — calls Groq LLM."""
-    # 1. Fetch blueprint + gap data (session closes after extraction)
+    """Regenerate roadmap via Agent 7 (Roadmap Builder) — versioned, progress-preserving."""
+    # 1. Fetch blueprint + gap data from the ACTIVE roadmap (session closes after extraction)
     from app.models.db import CompanyBlueprint, SkillProgress
     async with async_session_factory() as session:
         bp_result = await session.execute(
@@ -646,10 +650,12 @@ async def regenerate_roadmap(
             "resources": {},
         }
 
+        # Query the currently active roadmap for gap analysis
         existing_rm = await session.execute(
             select(UserRoadmap).where(
                 UserRoadmap.user_id == current_user.id,
                 UserRoadmap.company_slug == company_slug,
+                UserRoadmap.is_active == True,  # noqa: E712
             )
         )
         old_roadmap = existing_rm.scalar_one_or_none()
@@ -696,16 +702,19 @@ async def regenerate_roadmap(
         traceback.print_exc()
         return APIResponse(success=False, data=None, error=f"Roadmap generation failed: {str(e)}")
 
-    # 3. Save the new roadmap to DB
+    # 3. Save the new roadmap to DB (archive old, create versioned new)
     try:
         from app.repositories.roadmaps import RoadmapRepository
+        from app.services.update_roadmap_progress import update_roadmap_progress
 
         rm_dict = roadmap_output.model_dump()
         weeks = rm_dict.get("weeks", [])
 
         async with async_session_factory() as save_session:
             repo = RoadmapRepository(save_session)
-            roadmap = await repo.upsert(
+
+            # Archive old roadmap + create new version
+            roadmap, old_context = await repo.upsert(
                 user_id=current_user.id,
                 company_slug=company_slug,
                 total_weeks=rm_dict.get("total_weeks", len(weeks)),
@@ -714,23 +723,42 @@ async def regenerate_roadmap(
                 target_level=rm_dict.get("target_level"),
             )
 
+            # Persist details with original assigned_at for anti-cheat
             await repo.persist_roadmap_details(
                 roadmap=roadmap,
                 phases_data=rm_dict.get("phases", []),
                 kanban_tasks_data=rm_dict.get("kanban_tasks", []),
                 weeks_data=weeks,
+                original_assigned_at=old_context["original_generated_at"],
+            )
+
+            # Re-match existing lc_submissions against new problem map
+            progress_result = await update_roadmap_progress(
+                save_session, current_user, roadmap
+            )
+            logger.info(
+                f"[Regenerate] Re-matched progress: "
+                f"{progress_result.get('problems_matched', 0)} problems, "
+                f"{progress_result.get('overall_progress', 0)}% overall"
             )
 
             await save_session.commit()
-            logger.info(f"[Regenerate] Saved new roadmap for {company_slug}")
+            logger.info(f"[Regenerate] Saved roadmap v{roadmap.version} for {company_slug}")
 
         return APIResponse(
             success=True,
-            data={"message": f"Roadmap regenerated for {company_slug}", "total_weeks": len(weeks)},
+            data={
+                "message": f"Roadmap regenerated for {company_slug}",
+                "version": roadmap.version,
+                "total_weeks": len(weeks),
+                "progress_carried": progress_result.get("overall_progress", 0),
+                "problems_matched": progress_result.get("problems_matched", 0),
+            },
         )
     except Exception as e:
         logger.error(f"[Regenerate] Failed to save roadmap: {e}")
         import traceback
         traceback.print_exc()
         return APIResponse(success=False, data=None, error=f"Failed to save roadmap: {str(e)}")
+
 

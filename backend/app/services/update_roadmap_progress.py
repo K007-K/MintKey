@@ -69,9 +69,17 @@ async def update_roadmap_progress(
             solved_at = solved_map[rpm.problem_slug]
             # Anti-cheat: only count if solved AFTER problem was assigned
             if rpm.assigned_at and solved_at < rpm.assigned_at:
-                continue  # Solved before roadmap — doesn't count
+                # Mark as carry_over — solved before this roadmap version
+                if rpm.source != "carry_over":
+                    rpm.source = "carry_over"
+                    rpm.status = "solved"
+                    rpm.solved_at = solved_at
+                    rpm.submission_url = f"https://leetcode.com/problems/{rpm.problem_slug}/"
+                    problems_matched += 1
+                continue
             if rpm.status != "solved":
                 rpm.status = "solved"
+                rpm.source = "roadmap"
                 rpm.solved_at = solved_at
                 rpm.submission_url = f"https://leetcode.com/problems/{rpm.problem_slug}/"
                 problems_matched += 1
@@ -178,6 +186,8 @@ async def update_roadmap_progress(
     # ─── 10. Record score snapshot ───
     snapshot = ScoreSnapshot(
         roadmap_id=roadmap_id,
+        user_id=user.id,
+        company_slug=roadmap.company_slug,
         week_number=roadmap.current_week or 1,
         score=overall_progress,
         projected_score=min(overall_progress * 1.2, 100),
