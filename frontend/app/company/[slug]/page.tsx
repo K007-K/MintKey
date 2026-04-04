@@ -162,8 +162,8 @@ function buildCompanyPageData(raw: Record<string, unknown>): CompanyPageData {
   };
 }
 
-/* Tab set — all 9 tabs */
-const TABS = ["Overview", "DSA Requirements", "System Design", "Projects", "Interview Format", "Resources", "Reviews", "Skill Gap Analysis", "Preparation Strategy"] as const;
+/* Tab set — consolidated 4 tabs */
+const TABS = ["Overview", "Technical Requirements", "Projects & Stack", "Interview Guide"] as const;
 type Tab = typeof TABS[number];
 
 /* ─── Stat Card Icon ─── */
@@ -364,7 +364,7 @@ export default function CompanyDetailPage() {
                 }`}
               >
                 {tab}
-                {tab === "DSA Requirements" && (
+                {tab === "Technical Requirements" && (
                   <span className="ml-2 text-[11px] text-[#6B7280] font-normal">High</span>
                 )}
               </button>
@@ -374,14 +374,9 @@ export default function CompanyDetailPage() {
 
         {/* ─── TAB CONTENT ─── */}
         {activeTab === "Overview" && <OverviewContent data={data} slug={slug} setTab={setActiveTab} />}
-        {activeTab === "DSA Requirements" && <DSARequirementsTab data={data} raw={rawCompany as Record<string, unknown>} />}
-        {activeTab === "System Design" && <SystemDesignTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Projects" && <ProjectsTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Interview Format" && <InterviewFormatTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Resources" && <ResourcesTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Reviews" && <ReviewsTab raw={rawCompany as Record<string, unknown>} name={name} />}
-        {activeTab === "Skill Gap Analysis" && <SkillGapTab raw={rawCompany as Record<string, unknown>} name={name} slug={slug} />}
-        {activeTab === "Preparation Strategy" && <PreparationStrategyTab raw={rawCompany as Record<string, unknown>} name={name} slug={slug} />}
+        {activeTab === "Technical Requirements" && <TechnicalRequirementsTab data={data} raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Projects & Stack" && <ProjectsTab raw={rawCompany as Record<string, unknown>} name={name} />}
+        {activeTab === "Interview Guide" && <InterviewGuideTab raw={rawCompany as Record<string, unknown>} name={name} />}
       </div>
     </DashboardLayout>
   );
@@ -415,7 +410,7 @@ function OverviewContent({ data, slug, setTab }: { data: CompanyPageData; slug: 
           <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-[#111827]">DSA Topic Frequency</h3>
-              <button onClick={() => setTab("DSA Requirements")} className="text-sm font-medium text-[#10B981] hover:underline">View All Data</button>
+              <button onClick={() => setTab("Technical Requirements")} className="text-sm font-medium text-[#10B981] hover:underline">View All Data</button>
             </div>
             <BarChart data={data.dsaTopicFreq} />
           </div>
@@ -573,267 +568,170 @@ function OverviewContent({ data, slug, setTab }: { data: CompanyPageData; slug: 
 }
 
 /* ════════════════════════════════════════════════════════
-   TAB 2 — DSA REQUIREMENTS
+   TAB 2 — TECHNICAL REQUIREMENTS (merged DSA + System Design)
    ════════════════════════════════════════════════════════ */
-function DSARequirementsTab({ data, raw }: { data: CompanyPageData; raw: Record<string, unknown> }) {
+function TechnicalRequirementsTab({ data, raw, name }: { data: CompanyPageData; raw: Record<string, unknown>; name: string }) {
+  // === DSA Data ===
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dsa = (raw.dsa_requirements || {}) as any;
   const minProblems = dsa.minimum_problems || {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const weights = (raw.scoring_weights || {}) as any;
   const dsaWeight = parseFloat(weights.dsa_score || "0.25");
-
-  const difficulty = [
-    { label: "Easy", required: minProblems.easy || 50, user: 0, color: "#10B981", borderColor: "#A7F3D0" },
-    { label: "Medium", required: minProblems.medium || 100, user: 0, color: "#F59E0B", borderColor: "#FDE68A" },
-    { label: "Hard", required: minProblems.hard || 30, user: 0, color: "#EF4444", borderColor: "#FECACA" },
-    { label: "Total", required: minProblems.total || 200, user: 0, color: "#10B981", borderColor: "#6EE7B7" },
-  ];
-
-  // Build topics from API topic_targets
   const topicTargets = dsa.topic_targets || {};
-  const topics = Object.entries(topicTargets)
+  const difficultyMix = dsa.difficulty_mix || {};
+  const barSummary = dsa.bar || "Strong algorithmic problem-solving required.";
+
+  const sortedTopics = Object.entries(topicTargets)
     .map(([key, val]: [string, unknown]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const t = val as any;
-      const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
-      return { name: label, required: t.recommended || 20, user: 0 };
+      return { name: key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()), count: t.recommended || 20, difficulty: t.difficulty || "Medium" };
     })
-    .sort((a, b) => b.required - a.required)
-    .slice(0, 8);
+    .sort((a, b) => b.count - a.count);
 
-  // Contest expectations from API
-  const recRating = dsa.recommended_rating || "1800+";
-  const contestImportance = dsa.contest_importance || (dsaWeight >= 0.35 ? "Important" : "Helpful");
-  const cpRequired = dsa.cp_required ? "Required" : "Optional";
-
-  // Readiness: 0% when no user data
-  const totalRequired = minProblems.total || 200;
-  const totalSolved = 0;
-  const readinessPct = totalRequired > 0 ? Math.round((totalSolved / totalRequired) * 100) : 0;
-
-  // Generate tips from company data
-  const topTopic = topics[0]?.name || "DSA";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const behavioral = (raw.behavioral || {}) as any;
-  const companyName = (raw.name as string) || "this company";
-  const tips = [
-    `Focus on ${topTopic} — ${companyName} emphasizes this in ${Math.round(dsaWeight * 100)}% of scoring.`,
-    `Target ${minProblems.medium || 100}+ medium problems — this is the most tested difficulty level.`,
-    behavioral.type === "Leadership Principles" ? `Prepare STAR stories for ${companyName}'s Leadership Principles.` : "Practice explaining your approach clearly — communication is always graded.",
-  ];
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
-      {/* LEFT — Main content */}
-      <div className="space-y-6">
-        {/* Section 1: Problem Difficulty Targets */}
-        <div className="grid gap-4 grid-cols-2">
-          {difficulty.map((d) => {
-            const pct = d.required > 0 ? Math.round((d.user / d.required) * 100) : 0;
-            return (
-              <div key={d.label} className="rounded-xl border bg-white p-5" style={{ borderColor: "#e5e7eb", borderLeftWidth: 4, borderLeftColor: d.borderColor }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
-                  <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wide">{d.label}</span>
-                </div>
-                <div className="text-2xl font-bold text-[#111827] mb-0.5">{d.required}+</div>
-                <p className="text-xs text-[#9CA3AF] mb-3">problems required</p>
-                <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden mb-2">
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: d.color }} />
-                </div>
-                <p className="text-xs text-[#6B7280]">You: <span className="font-semibold" style={{ color: pct >= 80 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#EF4444" }}>{d.user}</span> / {d.required}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Section 2: Topic Distribution */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="text-base font-semibold text-[#111827] mb-5">DSA Topic Breakdown</h3>
-          {topics.length > 0 ? (
-            <div className="space-y-4">
-              {topics.map((t) => {
-                const pct = t.required > 0 ? Math.round((t.user / t.required) * 100) : 0;
-                const met = t.user >= t.required;
-                return (
-                  <div key={t.name} className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-[#374151] w-[180px] shrink-0">{t.name}</span>
-                    <div className="flex-1 h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: met ? "#10B981" : "#F59E0B" }} />
-                    </div>
-                    <span className="text-xs text-[#9CA3AF] w-[130px] shrink-0 text-right">{t.required} problems required</span>
-                    <span className={`text-xs font-medium w-[60px] shrink-0 text-right ${met ? "text-[#10B981]" : pct >= 60 ? "text-[#F59E0B]" : "text-[#EF4444]"}`}>You: {t.user}</span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-[#9CA3AF]">Topic targets not available for this company yet.</p>
-          )}
-          <div className="mt-4 text-right">
-            <button className="text-sm font-medium text-[#10B981] hover:underline">View All Topics →</button>
-          </div>
-        </div>
-
-        {/* Section 3: Contest Expectations */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-xs text-[#9CA3AF] mb-1">Recommended Rating</p>
-              <p className="text-lg font-bold text-[#111827]">{recRating}</p>
-            </div>
-            <div className="text-center border-x border-[#F3F4F6]">
-              <p className="text-xs text-[#9CA3AF] mb-1">Weekly Contest</p>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">{contestImportance}</span>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-[#9CA3AF] mb-1">CP Experience</p>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#F3F4F6] text-[#6B7280]">{cpRequired}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT — Sidebar */}
-      <div className="space-y-5">
-        {/* DSA Readiness */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 text-center">
-          <h3 className="text-base font-semibold text-[#111827] mb-4">Your DSA Readiness</h3>
-          <div className="text-5xl font-bold text-[#9CA3AF] mb-1">{readinessPct}%</div>
-          <p className="text-xs text-[#9CA3AF] mb-5">{totalSolved} of {totalRequired} target problems solved</p>
-          <div className="space-y-3 text-left">
-            {[
-              { label: "Easy", user: 0, req: minProblems.easy || 50, color: "#10B981" },
-              { label: "Medium", user: 0, req: minProblems.medium || 100, color: "#F59E0B" },
-              { label: "Hard", user: 0, req: minProblems.hard || 30, color: "#EF4444" },
-            ].map((d) => (
-              <div key={d.label}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#6B7280]">{d.label}</span>
-                  <span className="text-[#9CA3AF]">{d.user}/{d.req}</span>
-                </div>
-                <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${d.req > 0 ? (d.user / d.req) * 100 : 0}%`, backgroundColor: d.color }} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-xs text-[#9CA3AF] italic">Run analysis to see your progress</p>
-          <button className="mt-3 w-full rounded-lg border border-[#10B981] text-[#10B981] py-2.5 text-sm font-medium hover:bg-[#ECFDF5] transition-colors">
-            Practice Problems →
-          </button>
-        </div>
-
-        {/* Quick Tips — company-specific */}
-        <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
-          <h3 className="text-sm font-semibold text-[#111827] mb-3">Quick Tips</h3>
-          <ul className="space-y-2.5 text-sm text-[#374151]">
-            {tips.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════
-   TAB 3 — SYSTEM DESIGN
-   ════════════════════════════════════════════════════════ */
-function SystemDesignTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+  // === System Design Data ===
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sysDesign = (raw.system_design || {}) as any;
-  const mustKnow: string[] = sysDesign.must_know_designs || [];
-  const sdDepth = sysDesign.depth || "Medium";
-  const sdRequired = sysDesign.required_at_sde1 ? "Required" : "Optional";
+  const coreTopics: string[] = sysDesign.core_topics || ["Distributed Systems", "Database Design", "Caching", "Load Balancing", "API Design"];
+  const mustKnowDesigns: string[] = sysDesign.must_know_designs || ["URL Shortener", "Chat System", "News Feed", "Rate Limiter"];
 
-  const iconMap = [Layers, Database, MessageSquare, Server, Hash, Shield, GitBranch, Globe];
-  const defaultTopics = [
-    { name: "Load Balancing", desc: "Distribute traffic across servers", importance: "High" },
-    { name: "Caching", desc: "Reduce latency using in-memory stores", importance: "High" },
-    { name: "Message Queues", desc: "Async communication between services", importance: "Medium" },
-    { name: "Database Sharding", desc: "Horizontal partitioning for scale", importance: "High" },
-    { name: "Consistent Hashing", desc: "Distribute data with minimal remapping", importance: "Medium" },
-    { name: "Rate Limiting", desc: "Control traffic to protect services", importance: "Medium" },
-    { name: "Microservices", desc: "Decompose systems into independent services", importance: "High" },
-    { name: "Distributed Systems", desc: "Coordinate across multiple nodes", importance: "High" },
-  ];
-  const coreTopics = defaultTopics.map((t, i) => ({ ...t, icon: (() => { const Icon = iconMap[i]; return <Icon className="h-5 w-5 text-[#10B981]" />; })() }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const interviewProblems = (sysDesign.interview_problems || []).map((p: any) => ({
+    name: typeof p === "string" ? p : p.name || p.title || "Untitled",
+    difficulty: typeof p === "string" ? "Medium" : p.difficulty || "Medium",
+    tags: typeof p === "string" ? ["System Design"] : p.tags || ["System Design"],
+  }));
 
-  const problems = mustKnow.length > 0
-    ? mustKnow.map((q, i) => ({ name: `Design: ${q}`, difficulty: (i % 2 === 0 ? "Hard" : "Medium") as "Hard" | "Medium", tags: ["System Design"] }))
-    : [
-        { name: "Design URL Shortener", difficulty: "Medium" as const, tags: ["Hashing", "Caching", "DB Design"] },
-        { name: "Design YouTube", difficulty: "Hard" as const, tags: ["CDN", "Storage", "Streaming"] },
-        { name: "Design Chat System", difficulty: "Hard" as const, tags: ["WebSockets", "Queues", "Presence"] },
-      ];
+  const diffBadge = (d: string) => {
+    if (d === "Hard") return "bg-[#FEF2F2] text-[#DC2626]";
+    if (d === "Medium") return "bg-[#FFFBEB] text-[#D97706]";
+    return "bg-[#ECFDF5] text-[#10B981]";
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Section 1: Core Topics Grid */}
-      <div>
-        <div className="flex items-center gap-3 mb-5">
-          <h3 className="text-base font-semibold text-[#111827]">Core System Design Topics</h3>
-          <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[#FFFBEB] text-[#D97706]">{sdRequired} · {sdDepth}</span>
+    <div className="space-y-10">
+      {/* ═══ SECTION A: DSA REQUIREMENTS ═══ */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-1">
+          <Code2 className="h-5 w-5 text-[#10B981]" />
+          <h2 className="text-lg font-bold text-[#111827]">DSA Requirements</h2>
+          <span className="ml-auto rounded-full bg-[#ECFDF5] px-3 py-0.5 text-xs font-semibold text-[#10B981]">Weight: {Math.round(dsaWeight * 100)}%</span>
         </div>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          {coreTopics.map((t) => (
-            <div key={t.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="rounded-lg bg-[#ECFDF5] p-2 w-fit mb-3">{t.icon}</div>
-              <h4 className="text-sm font-bold text-[#111827] mb-1">{t.name}</h4>
-              <p className="text-xs text-[#9CA3AF] leading-relaxed mb-3">{t.desc}</p>
-              <div className="flex items-center justify-between">
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${t.importance === "High" ? "bg-[#FEF2F2] text-[#DC2626]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{t.importance}</span>
-                <ArrowRight className="h-3.5 w-3.5 text-[#D1D5DB] group-hover:text-[#10B981] transition-colors" />
-              </div>
+
+        {/* Bar Level */}
+        <div className="rounded-xl bg-[#FEF2F2] border-l-4 border-[#EF4444] p-4">
+          <p className="text-sm font-medium text-[#DC2626] flex items-center gap-2"><AlertCircle className="h-4 w-4" /> {barSummary}</p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          {[
+            { label: "Total Target", value: minProblems.total || "—", badge: "Problems" },
+            { label: "Easy", value: minProblems.easy || "—", badge: `${difficultyMix.easy || "—"}` },
+            { label: "Medium", value: minProblems.medium || "—", badge: `${difficultyMix.medium || "—"}` },
+            { label: "Hard", value: minProblems.hard || "—", badge: `${difficultyMix.hard || "—"}` },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
+              <p className="text-xs text-[#9CA3AF] mb-1">{s.label}</p>
+              <p className="text-xl font-bold text-[#111827]">{s.value}</p>
+              <p className="text-[10px] text-[#6B7280]">{s.badge}</p>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Section 2: Example Interview Problems */}
-      <div>
-        <h3 className="text-base font-semibold text-[#111827] mb-5">Common Interview Questions</h3>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-          {problems.map((p) => (
-            <div key={p.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-[#9CA3AF]" />
-                  <span className="text-sm font-bold text-[#111827]">{p.name}</span>
+        {/* Topic-wise Breakdown */}
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
+          <h3 className="text-base font-semibold text-[#111827] mb-5">Topic-wise Problem Targets</h3>
+          <div className="space-y-3">
+            {sortedTopics.map((t) => (
+              <div key={t.name} className="flex items-center gap-4">
+                <span className="text-sm font-medium text-[#374151] w-[150px] shrink-0">{t.name}</span>
+                <div className="flex-1 h-2.5 rounded-full bg-[#E5E7EB] overflow-hidden">
+                  <div className="h-full rounded-full bg-[#10B981] transition-all duration-700" style={{ width: `${(t.count / (sortedTopics[0]?.count || 30)) * 100}%` }} />
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${p.difficulty === "Hard" ? "bg-[#FEF2F2] text-[#DC2626]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{p.difficulty}</span>
+                <span className="text-sm font-bold text-[#111827] w-8 text-right">{t.count}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diffBadge(t.difficulty)}`}>{t.difficulty}</span>
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {p.tags.map((tag) => (
-                  <span key={tag} className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-medium text-[#6B7280]">{tag}</span>
-                ))}
-              </div>
-              <button className="text-sm font-medium text-[#10B981] group-hover:underline">Study →</button>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* DSA Topic Frequency Chart */}
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
+          <h3 className="text-base font-semibold text-[#111827] mb-5">DSA Topic Frequency in Interviews</h3>
+          <BarChart data={data.dsaTopicFreq} />
         </div>
       </div>
 
-      {/* Section 3: Preparation Resources Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#10B981] to-[#0D9488] p-8 flex items-center justify-between">
+      {/* ═══ Divider ═══ */}
+      <div className="border-t border-[#E5E7EB]" />
+
+      {/* ═══ SECTION B: SYSTEM DESIGN ═══ */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-1">
+          <Layers className="h-5 w-5 text-[#10B981]" />
+          <h2 className="text-lg font-bold text-[#111827]">System Design Requirements</h2>
+        </div>
+
+        {/* Core Topics Grid */}
         <div>
-          <h3 className="text-lg font-bold text-white mb-1">Ready to practice System Design?</h3>
-          <p className="text-sm text-white/80">Access curated system design problems and mock interview sessions</p>
+          <h3 className="text-base font-semibold text-[#111827] mb-4">Core Concepts to Master</h3>
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {coreTopics.map((topic) => (
+              <div key={topic} className="rounded-xl border border-[#E5E7EB] bg-white p-4 hover:border-[#A7F3D0] transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-colors">
+                    <Layers className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium text-[#374151]">{topic}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Practice Now</button>
-          <button className="rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors">Mock Interview</button>
+
+        {/* Must-Know System Designs */}
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
+          <h3 className="text-base font-semibold text-[#111827] mb-4">Must-Know System Designs for {name}</h3>
+          <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+            {mustKnowDesigns.map((design, idx) => (
+              <div key={design} className="flex items-center gap-3 rounded-lg border border-[#F3F4F6] bg-[#F9FAFB] px-4 py-3 hover:border-[#A7F3D0] transition-colors">
+                <span className="w-6 h-6 rounded-full bg-[#10B981] text-white flex items-center justify-center text-xs font-bold shrink-0">{idx + 1}</span>
+                <span className="text-sm font-medium text-[#374151]">{design}</span>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Interview Problems */}
+        {interviewProblems.length > 0 && (
+          <div>
+            <h3 className="text-base font-semibold text-[#111827] mb-4">Common System Design Interview Problems</h3>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {interviewProblems.map((p: {name: string; difficulty: string; tags: string[]}) => (
+                <div key={p.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-[#111827]">{p.name}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diffBadge(p.difficulty)}`}>{p.difficulty}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.tags.map((tag) => (
+                      <span key={tag} className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-medium text-[#6B7280]">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 /* ════════════════════════════════════════════════════════
-   TAB 4 — PROJECTS
+   TAB 3 — PROJECTS & STACK
    ════════════════════════════════════════════════════════ */
 function ProjectsTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -944,9 +842,9 @@ function ProjectsTab({ raw, name }: { raw: Record<string, unknown>; name: string
 }
 
 /* ════════════════════════════════════════════════════════
-   TAB 5 — INTERVIEW FORMAT
+   TAB 4 — INTERVIEW GUIDE (merged Interview Format + Do/Don't + Tips)
    ════════════════════════════════════════════════════════ */
-function InterviewFormatTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
+function InterviewGuideTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const interviewFmt = (raw.interview_format || {}) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -978,6 +876,22 @@ function InterviewFormatTab({ raw, name }: { raw: Record<string, unknown>; name:
     if (d === "Medium") return "bg-[#FFFBEB] text-[#D97706]";
     return "bg-[#ECFDF5] text-[#10B981]";
   };
+
+  // Reviews data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const apiReviews: any[] = hiringData.interview_reviews || [];
+  const reviews = apiReviews.length > 0
+    ? apiReviews.map((r: {round: string; question: string; difficulty: string; outcome: string; quote: string; rating: number; date: string; role: string}) => ({
+        round: r.round,
+        question: r.question,
+        difficulty: r.difficulty as "Hard" | "Medium" | "Easy",
+        outcome: r.outcome as "Offer" | "Rejected",
+        quote: r.quote,
+        rating: r.rating || 3,
+        date: r.date || "Recent",
+        role: r.role || "SDE",
+      }))
+    : [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
@@ -1042,6 +956,40 @@ function InterviewFormatTab({ raw, name }: { raw: Record<string, unknown>; name:
             </ul>
           </div>
         </div>
+
+        {/* Interview Reviews (inline if any exist) */}
+        {reviews.length > 0 && (
+          <div>
+            <h3 className="text-base font-semibold text-[#111827] mb-4">Interview Experiences</h3>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              {reviews.slice(0, 4).map((r, i) => (
+                <div key={i} className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-[#111827]">{r.round}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diffBadge(r.difficulty)}`}>{r.difficulty}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${r.outcome === "Offer" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>
+                        {r.outcome === "Offer" ? "✅" : "❌"} {r.outcome}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="border-t border-[#F3F4F6] pt-3">
+                    <p className="text-sm font-medium text-[#374151] mb-1">Q: {r.question}</p>
+                    <p className="text-sm text-[#6B7280] italic leading-relaxed">&quot;{r.quote}&quot;</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star key={j} className="h-3 w-3" fill={j < r.rating ? "#F59E0B" : "#E5E7EB"} stroke="none" />
+                      ))}
+                    </div>
+                    <span className="text-xs text-[#9CA3AF]">{r.date} · {r.role}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* RIGHT — Sidebar */}
@@ -1065,417 +1013,11 @@ function InterviewFormatTab({ raw, name }: { raw: Record<string, unknown>; name:
         </div>
 
         {/* Insider Tips */}
-        {insiderTips.length > 0 && (
-          <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
-            <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
-            <ul className="space-y-2.5 text-sm text-[#374151]">
-              {insiderTips.slice(0, 5).map((tip, i) => (
-                <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {insiderTips.length === 0 && (
-          <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
-            <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
-            <ul className="space-y-2.5 text-sm text-[#374151]">
-              <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Always start with brute force, then optimize</li>
-              <li className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> Practice explaining your solution in plain English</li>
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════
-   TAB 6 — RESOURCES
-   ════════════════════════════════════════════════════════ */
-function ResourcesTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const resourcesData = (raw.resources || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dsaResources: any[] = resourcesData.dsa || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sdResources: any[] = resourcesData.system_design || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const behavioralResources: any[] = resourcesData.behavioral || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const platforms: any[] = resourcesData.platforms || [];
-
-  const stars = (n: number) => Array.from({ length: 5 }).map((_, i) => (
-    <Star key={i} className="h-3 w-3" fill={i < n ? "#F59E0B" : "#E5E7EB"} stroke="none" />
-  ));
-
-  return (
-    <div className="space-y-8">
-      {/* DSA Resources */}
-      <div>
-        <h3 className="text-base font-semibold text-[#111827] mb-4 flex items-center gap-2"><Code2 className="h-4 w-4 text-[#10B981]" /> DSA Preparation</h3>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {dsaResources.map((r) => (
-            <div key={r.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-4 w-4 text-[#9CA3AF]" />
-                <h4 className="text-sm font-bold text-[#111827]">{r.name}</h4>
-              </div>
-              <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">{r.desc}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex gap-0.5">{stars(r.rating)}</div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
-              </div>
-              {r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a> : <span className="mt-3 text-sm font-medium text-[#9CA3AF] block">Coming soon</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Behavioral Resources */}
-      {behavioralResources.length > 0 && (
-        <div>
-          <h3 className="text-base font-semibold text-[#111827] mb-4 flex items-center gap-2"><Users className="h-4 w-4 text-[#10B981]" /> Behavioral Resources</h3>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-            {behavioralResources.map((r: {name: string; desc: string; url?: string; cost: string; rating: number}) => (
-              <div key={r.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-                <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="h-4 w-4 text-[#9CA3AF]" />
-                  <h4 className="text-sm font-bold text-[#111827]">{r.name}</h4>
-                </div>
-                <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">{r.desc}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-0.5">{stars(r.rating || 3)}</div>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
-                </div>
-                {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* System Design Resources */}
-      <div>
-        <h3 className="text-base font-semibold text-[#111827] mb-4 flex items-center gap-2"><Layers className="h-4 w-4 text-[#10B981]" /> System Design Resources</h3>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {sdResources.map((r: {name: string; desc: string; url?: string; cost: string; rating: number}) => (
-            <div key={r.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-4 w-4 text-[#9CA3AF]" />
-                <h4 className="text-sm font-bold text-[#111827]">{r.name}</h4>
-              </div>
-              <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">{r.desc}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex gap-0.5">{stars(r.rating || 3)}</div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.cost === "Free" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FFFBEB] text-[#D97706]"}`}>{r.cost}</span>
-              </div>
-              {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm font-medium text-[#10B981] group-hover:underline block">Open Resource →</a>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Practice Platforms */}
-      {platforms.length > 0 && (<div>
-        <h3 className="text-base font-semibold text-[#111827] mb-4">Practice Platforms</h3>
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-          {platforms.map((p: {name: string; desc: string; url?: string; cost: string; color?: string}) => (
-            <div key={p.name} className="rounded-xl border border-[#E5E7EB] bg-white p-5 text-center hover:border-[#A7F3D0] transition-colors group cursor-pointer">
-              <div className="w-8 h-8 rounded-lg mx-auto mb-3 flex items-center justify-center" style={{ backgroundColor: (p.color || "#10B981") + "20" }}>
-                <Globe className="h-4 w-4" style={{ color: p.color || "#10B981" }} />
-              </div>
-              <h4 className="text-sm font-bold text-[#111827] mb-0.5">{p.name}</h4>
-              <p className="text-xs text-[#9CA3AF] mb-2">{p.desc}</p>
-              <span className="text-[10px] font-medium text-[#6B7280]">{p.cost}</span>
-              {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" className="block mx-auto mt-2 text-sm font-medium text-[#10B981] group-hover:underline">Visit →</a> : <button className="block mx-auto mt-2 text-sm font-medium text-[#10B981] group-hover:underline">Visit →</button>}
-            </div>
-          ))}
-        </div>
-      </div>)}
-
-      {/* Curated Prep Course Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#10B981] to-[#0D9488] p-8 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-white mb-1">{name} Interview Prep Course</h3>
-          <p className="text-sm text-white/80">Curated by ex-{name} interviewers. Covers all rounds.</p>
-        </div>
-        <button className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Start Learning</button>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════
-   TAB 7 — REVIEWS
-   ════════════════════════════════════════════════════════ */
-function ReviewsTab({ raw, name }: { raw: Record<string, unknown>; name: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hiringData = (raw.hiring_data || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const apiReviews: any[] = hiringData.interview_reviews || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stats = hiringData.interview_stats || {} as any;
-
-  const reviews = apiReviews.length > 0
-    ? apiReviews.map((r: {round: string; question: string; difficulty: string; outcome: string; quote: string; rating: number; date: string; role: string}) => ({
-        round: r.round,
-        question: r.question,
-        difficulty: r.difficulty as "Hard" | "Medium" | "Easy",
-        outcome: r.outcome as "Offer" | "Rejected",
-        quote: r.quote,
-        rating: r.rating || 3,
-        date: r.date || "Recent",
-        role: r.role || "SDE",
-      }))
-    : [
-        { round: "Technical DSA", question: "LeetCode Medium-Hard", difficulty: "Hard" as const, outcome: "Offer" as const, quote: "Standard DSA round.", rating: 4, date: "Recent", role: "SDE I" },
-      ];
-
-  const totalReviews = stats.total_reviews || reviews.length;
-  const offerCount = reviews.filter(r => r.outcome === "Offer").length;
-  const offerPct = reviews.length > 0 ? Math.round((offerCount / reviews.length) * 100) : 0;
-  const avgRating = reviews.length > 0 ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1) : "—";
-
-  const diffBadge = (d: string) => {
-    if (d === "Hard") return "bg-[#FEF2F2] text-[#DC2626]";
-    if (d === "Medium") return "bg-[#FFFBEB] text-[#D97706]";
-    return "bg-[#ECFDF5] text-[#10B981]";
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Filter Bar */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {["All", "By Round", "By Outcome", "By Difficulty"].map((f) => (
-          <button key={f} className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-sm text-[#6B7280] hover:border-[#A7F3D0] transition-colors flex items-center gap-1">
-            {f} <ChevronDown className="h-3 w-3" />
-          </button>
-        ))}
-        <div className="ml-auto">
-          <button className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-sm text-[#6B7280] flex items-center gap-1">
-            Sort: Most Recent <ChevronDown className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-
-      {/* Review Cards */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        {reviews.map((r, i) => (
-          <div key={i} className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold text-[#111827]">{r.round}</span>
-              <div className="flex items-center gap-2">
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diffBadge(r.difficulty)}`}>{r.difficulty}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${r.outcome === "Offer" ? "bg-[#ECFDF5] text-[#10B981]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>
-                  {r.outcome === "Offer" ? "✅" : "❌"} {r.outcome}
-                </span>
-              </div>
-            </div>
-            <div className="border-t border-[#F3F4F6] pt-3 mb-3">
-              <p className="text-sm font-medium text-[#374151] mb-1">Q: {r.question}</p>
-              <p className="text-sm text-[#6B7280] italic leading-relaxed">&quot;{r.quote}&quot;</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className="h-3 w-3" fill={j < r.rating ? "#F59E0B" : "#E5E7EB"} stroke="none" />
-                ))}
-                <span className="text-xs text-[#9CA3AF] ml-1">Difficulty: {r.difficulty}</span>
-              </div>
-              <span className="text-xs text-[#9CA3AF]">{r.date} · {r.role} position</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Summary Stats Row */}
-      <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <p className="text-xl font-bold text-[#111827]">{totalReviews}</p>
-            <p className="text-xs text-[#9CA3AF]">Total Reviews</p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-[#10B981]">{offerPct}%</p>
-            <p className="text-xs text-[#9CA3AF]">Offer Rate</p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-[#111827]">{avgRating}/5</p>
-            <p className="text-xs text-[#9CA3AF]">Avg Difficulty</p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-[#111827]">{reviews[0]?.role || "SDE"}</p>
-            <p className="text-xs text-[#9CA3AF]">Most Common</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════
-   TAB 8 — SKILL GAP ANALYSIS
-   ════════════════════════════════════════════════════════ */
-function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dsa = (raw.dsa_requirements || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sysDesign = (raw.system_design || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectsData = (raw.projects || {}) as any;
-  const minProblems = dsa.minimum_problems || {};
-  const mustKnowDesigns = sysDesign.must_know_designs || [];
-  const impressiveProjects = projectsData.impressive_projects || [];
-
-  // Readiness: 0% until user runs analysis
-  const readiness = [
-    { area: "DSA", pct: 0, status: "Not Analyzed" },
-    { area: "System Design", pct: 0, status: "Not Analyzed" },
-    { area: "Projects", pct: 0, status: "Not Analyzed" },
-    { area: "Interview Prep", pct: 0, status: "Not Analyzed" },
-  ];
-
-  // Build gap table dynamically from company requirements
-  const topicTargets = dsa.topic_targets || {};
-  const gapTable: { skill: string; required: string; yours: string; gap: string; severity: "critical" | "warning" | "ok" }[] = [];
-  Object.entries(topicTargets)
-    .sort(([, a]: [string, unknown], [, b]: [string, unknown]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return ((b as any).recommended || 0) - ((a as any).recommended || 0);
-    })
-    .slice(0, 5)
-    .forEach(([key, val]: [string, unknown]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const t = val as any;
-      const label = key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
-      const req = t.recommended || 20;
-      gapTable.push({ skill: label, required: `${req} problems`, yours: "0 problems", gap: `-${req}`, severity: "critical" });
-    });
-  if (mustKnowDesigns.length > 0) {
-    gapTable.push({ skill: "System Design", required: `${mustKnowDesigns.length} topics`, yours: "0 topics", gap: `-${mustKnowDesigns.length}`, severity: "critical" });
-  }
-  if (impressiveProjects.length > 0) {
-    gapTable.push({ skill: "Projects", required: `${impressiveProjects.length} projects`, yours: "0 projects", gap: `-${impressiveProjects.length}`, severity: "critical" });
-  }
-
-  // Weak areas from top gaps
-  const weakAreas = gapTable.slice(0, 3).map((g) => ({
-    name: g.skill,
-    gap: g.required,
-    priority: "Critical" as const,
-    cta: g.skill === "System Design" ? "Start System Design →" : g.skill === "Projects" ? "Browse Templates →" : `Practice ${g.skill} →`,
-    border: "border-[#EF4444]",
-  }));
-
-  // Blockers from company requirements
-  const blockers = [
-    minProblems.total ? `DSA: 0 of ${minProblems.total} target problems solved` : null,
-    mustKnowDesigns.length > 0 ? `System Design: 0 of ${mustKnowDesigns.length} topics covered` : null,
-    impressiveProjects.length > 0 ? `Projects: 0 of ${impressiveProjects.length} required` : null,
-  ].filter(Boolean) as string[];
-
-  const statusColor = (s: string) => {
-    if (s === "Good Progress" || s === "On Track") return "text-[#10B981]";
-    if (s === "Needs Work") return "text-[#F59E0B]";
-    return "text-[#9CA3AF]";
-  };
-
-  const barColor = (pct: number) => pct > 70 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#EF4444";
-
-  const severityBadge = (s: string) => {
-    if (s === "critical") return "bg-[#FEF2F2] text-[#DC2626]";
-    if (s === "warning") return "bg-[#FFFBEB] text-[#D97706]";
-    return "bg-[#ECFDF5] text-[#10B981]";
-  };
-
-  const severityIcon = (s: string) => s === "critical" ? "🔴" : s === "warning" ? "⚠️" : "✅";
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
-      {/* LEFT */}
-      <div className="space-y-6">
-        {/* Readiness Banner */}
-        <div className="rounded-xl bg-gradient-to-r from-[#F9FAFB] to-[#ECFDF5] border border-[#A7F3D0] p-6">
-          <h3 className="text-base font-semibold text-[#111827] mb-5">Your Overall Readiness for {name}</h3>
-          <div className="space-y-3">
-            {readiness.map((r) => (
-              <div key={r.area} className="flex items-center gap-4">
-                <span className="text-sm font-medium text-[#374151] w-[120px] shrink-0">{r.area}</span>
-                <div className="flex-1 h-2.5 rounded-full bg-[#E5E7EB] overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(r.pct, 2)}%`, backgroundColor: barColor(r.pct) }} />
-                </div>
-                <span className="text-sm font-bold text-[#111827] w-10">{r.pct}%</span>
-                <span className={`text-xs font-medium w-[100px] text-right ${statusColor(r.status)}`}>{r.status}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-4 mt-5">
-            <span className="text-sm text-[#6B7280]">Composite Score:</span>
-            <span className="text-lg font-bold text-[#9CA3AF]">—</span>
-            <Link href={`/roadmap/${slug}`} className="ml-auto rounded-lg bg-[#10B981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669] transition-colors">Generate Roadmap →</Link>
-          </div>
-          <p className="text-xs text-[#9CA3AF] italic mt-3">Run analysis to see your personalized readiness scores</p>
-        </div>
-
-        {/* Gap Table */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white overflow-hidden">
-          <div className="p-5 pb-0">
-            <h3 className="text-base font-semibold text-[#111827] mb-4">Detailed Skill Gap Analysis</h3>
-          </div>
-          <table className="w-full">
-            <thead>
-              <tr className="bg-[#F9FAFB] text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
-                <th className="text-left px-5 py-3">Skill</th>
-                <th className="text-left px-5 py-3">Required</th>
-                <th className="text-left px-5 py-3">Your Level</th>
-                <th className="text-left px-5 py-3">Gap</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gapTable.map((r) => (
-                <tr key={r.skill} className="border-t border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
-                  <td className="px-5 py-3 text-sm font-medium text-[#111827]">{r.skill}</td>
-                  <td className="px-5 py-3 text-sm text-[#6B7280]">{r.required}</td>
-                  <td className="px-5 py-3 text-sm text-[#6B7280]">{r.yours}</td>
-                  <td className="px-5 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${severityBadge(r.severity)}`}>{severityIcon(r.severity)} {r.gap}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Weak Areas */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {weakAreas.map((w) => (
-            <div key={w.name} className={`rounded-xl border-l-4 ${w.border} border border-[#E5E7EB] bg-white p-5`}>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-bold text-[#111827]">{w.name}</span>
-              </div>
-              <p className="text-xs text-[#9CA3AF] mb-1">Need: {w.gap}</p>
-              <p className="text-xs text-[#9CA3AF] mb-3">Priority: <span className="text-[#EF4444] font-semibold">{w.priority}</span></p>
-              <button className="text-sm font-medium text-[#10B981] hover:underline">{w.cta}</button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* RIGHT — Sidebar */}
-      <div className="space-y-5">
-        {/* Readiness Score */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 text-center">
-          <div className="text-5xl font-bold text-[#9CA3AF] mb-1">—</div>
-          <p className="text-sm text-[#6B7280] mb-1">Match Score</p>
-          <p className="text-xs text-[#9CA3AF]">Run analysis to calculate your score</p>
-        </div>
-
-        {/* What's Holding You Back — from API */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="text-sm font-semibold text-[#111827] mb-4">Requirements for {name}</h3>
-          <ul className="space-y-3 text-sm text-[#6B7280]">
-            {blockers.map((b, i) => (
-              <li key={i} className="flex items-start gap-2"><AlertCircle className="h-4 w-4 text-[#EF4444] shrink-0 mt-0.5" /> {b}</li>
+        <div className="rounded-xl bg-[#ECFDF5] border-l-4 border-[#10B981] p-5">
+          <h3 className="text-sm font-semibold text-[#111827] mb-3 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[#10B981]" /> Insider Tips</h3>
+          <ul className="space-y-2.5 text-sm text-[#374151]">
+            {(insiderTips.length > 0 ? insiderTips : ["Always start with brute force, then optimize", "Practice explaining your solution in plain English"]).slice(0, 5).map((tip, i) => (
+              <li key={i} className="flex items-start gap-2"><span className="text-[#10B981] mt-0.5">•</span> {tip}</li>
             ))}
           </ul>
         </div>
@@ -1484,144 +1026,3 @@ function SkillGapTab({ raw, name, slug }: { raw: Record<string, unknown>; name: 
   );
 }
 
-/* ════════════════════════════════════════════════════════
-   TAB 9 — PREPARATION STRATEGY
-   ════════════════════════════════════════════════════════ */
-function PreparationStrategyTab({ raw, name, slug }: { raw: Record<string, unknown>; name: string; slug: string }) {
-  const [activeStep, setActiveStep] = useState(1);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dsa = (raw.dsa_requirements || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sysDesign = (raw.system_design || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const behavioral = (raw.behavioral || {}) as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectsData = (raw.projects || {}) as any;
-  const minProblems = dsa.minimum_problems || {};
-  const topicTargets = dsa.topic_targets || {};
-  const mustKnowDesigns = sysDesign.must_know_designs || [];
-  const impressiveProjects = projectsData.impressive_projects || [];
-
-  // Generate steps from company data
-  const sortedTopics = Object.entries(topicTargets)
-    .map(([key, val]: [string, unknown]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const t = val as any;
-      return { name: key.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()), count: t.recommended || 20 };
-    })
-    .sort((a, b) => b.count - a.count);
-
-  const steps: { num: number; title: string; desc: string; est: string; cta: string }[] = [];
-  let stepNum = 1;
-  // Step 1-2: Top 2 DSA topics
-  if (sortedTopics[0]) {
-    steps.push({ num: stepNum++, title: `Master ${sortedTopics[0].name}`, desc: `Solve ${sortedTopics[0].count}+ problems. This is ${name}'s most tested topic.`, est: "2-3 weeks", cta: "Start →" });
-  }
-  if (sortedTopics[1]) {
-    steps.push({ num: stepNum++, title: `Strengthen ${sortedTopics[1].name}`, desc: `Target ${sortedTopics[1].count}+ problems in this area.`, est: "1-2 weeks", cta: "Start →" });
-  }
-  // Step 3: Projects
-  if (impressiveProjects.length > 0) {
-    const projTitle = typeof impressiveProjects[0] === "object" ? impressiveProjects[0].title : impressiveProjects[0];
-    steps.push({ num: stepNum++, title: "Build a Standout Project", desc: `${name} values: ${projTitle}. Build ${impressiveProjects.length} production-quality project(s).`, est: "3-4 weeks", cta: "View Templates →" });
-  }
-  // Step 4: System Design
-  if (mustKnowDesigns.length > 0) {
-    steps.push({ num: stepNum++, title: "System Design Preparation", desc: `Cover: ${mustKnowDesigns.slice(0, 3).join(", ")}${mustKnowDesigns.length > 3 ? ` + ${mustKnowDesigns.length - 3} more` : ""}.`, est: "2 weeks", cta: "Resources →" });
-  }
-  // Step 5: Mock interviews & behavioral
-  steps.push({ num: stepNum++, title: "Mock Interviews & Behavioral", desc: behavioral.type === "Leadership Principles" ? `Prepare STAR stories for ${name}'s Leadership Principles.` : `Practice ${behavioral.type || "behavioral"} questions. 2-3 mocks/week.`, est: "2 weeks", cta: "Schedule →" });
-
-  // Weekly plan from topics
-  const totalProblems = minProblems.total || 200;
-  const weeklyPlan = [
-    { week: "Week 1-2", task: sortedTopics[0] ? `Solve ${sortedTopics[0].count} ${sortedTopics[0].name} problems` : `Solve ${Math.round(totalProblems * 0.3)} Easy + Medium problems`, current: true },
-    { week: "Week 3-4", task: sortedTopics[1] ? `Practice ${sortedTopics[1].name} (${sortedTopics[1].count} problems)` : `Practice Medium + Hard problems`, current: false },
-    { week: "Week 5-6", task: impressiveProjects.length > 0 ? `Build project + polish README/docs` : `Solve remaining ${Math.round(totalProblems * 0.3)} problems + build 1 project`, current: false },
-    { week: "Week 7", task: mustKnowDesigns.length > 0 ? `System Design: ${mustKnowDesigns.slice(0, 2).join(", ")}` : "Review weak topics + practice Hard problems", current: false },
-    { week: "Week 8", task: `Mock interviews (2-3/week), ${behavioral.type || "behavioral"} prep, full review`, current: false },
-  ];
-
-  const projections = [
-    { label: "Current Score", pct: 0, delta: null },
-    { label: "After DSA (Week 4)", pct: 40, delta: "+40%" },
-    { label: "After Projects (Week 6)", pct: 65, delta: "+25%" },
-    { label: "After Mocks (Week 8)", pct: 85, delta: "+20%" },
-  ];
-
-  return (
-    <div className="space-y-8">
-      {/* Section 1: Preparation Roadmap */}
-      <div>
-        <h3 className="text-base font-semibold text-[#111827] mb-5">Your Personalized Preparation Roadmap</h3>
-        <div className="space-y-0">
-          {steps.map((s, i) => (
-            <div key={s.num} className="flex gap-4" onClick={() => setActiveStep(s.num)}>
-              <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 cursor-pointer ${s.num === activeStep ? "bg-[#10B981] text-white" : s.num < activeStep ? "bg-[#A7F3D0] text-[#065F46]" : "bg-[#F3F4F6] text-[#6B7280]"}`}>
-                  {s.num}
-                </div>
-                {i < steps.length - 1 && <div className="w-px flex-1 min-h-[20px] border-l-2 border-dashed border-[#E5E7EB] ml-0" />}
-              </div>
-              <div className="flex-1 pb-4">
-                <div className={`rounded-xl border bg-white p-5 transition-colors cursor-pointer ${s.num === activeStep ? "border-[#10B981] shadow-sm" : "border-[#E5E7EB] hover:border-[#A7F3D0]"}`}>
-                  <h4 className="text-sm font-bold text-[#111827] mb-1">{s.title}</h4>
-                  <p className="text-xs text-[#9CA3AF] mb-2 leading-relaxed">{s.desc}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#6B7280]">Estimated: {s.est}</span>
-                    <button className="text-sm font-medium text-[#10B981] hover:underline">{s.cta}</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Section 2: Weekly Plan */}
-      <div className="rounded-xl border border-[#E5E7EB] overflow-hidden">
-        <div className="p-5 pb-0">
-          <h3 className="text-base font-semibold text-[#111827] mb-4">8-Week Sprint Plan</h3>
-        </div>
-        <table className="w-full">
-          <tbody>
-            {weeklyPlan.map((w) => (
-              <tr key={w.week} className={`border-t border-[#E5E7EB] ${w.current ? "bg-[#ECFDF5] border-l-4 border-l-[#10B981]" : ""}`}>
-                <td className="bg-[#F9FAFB] font-medium text-sm w-32 px-4 py-3 text-[#374151]">{w.week}</td>
-                <td className="text-sm text-[#6B7280] px-4 py-3">{w.task}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Section 3: Score Projection */}
-      <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-        <h3 className="text-base font-semibold text-[#111827] mb-5">Projected Match Score Growth</h3>
-        <div className="space-y-4">
-          {projections.map((p) => (
-            <div key={p.label} className="flex items-center gap-4">
-              <span className="text-sm text-[#374151] w-[200px] shrink-0">{p.label}</span>
-              <div className="flex-1 h-3 rounded-full bg-[#F3F4F6] overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${p.pct}%`, backgroundColor: "#10B981" }} />
-              </div>
-              <span className="text-sm font-bold text-[#111827] w-10">{p.pct}%</span>
-              {p.delta && <span className="text-xs font-medium text-[#10B981] bg-[#ECFDF5] rounded px-1.5 py-0.5">{p.delta}</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CTA Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#10B981] to-[#0D9488] p-8 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Rocket className="h-5 w-5 text-white" />
-          <h3 className="text-lg font-bold text-white">Ready to start your {name} preparation?</h3>
-        </div>
-        <p className="text-sm text-white/80 mb-5">Get a personalized day-by-day roadmap based on your profile</p>
-        <Link href={`/roadmap/${slug}`} className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-[#10B981] hover:bg-[#F0FDF4] transition-colors">Generate Full Roadmap →</Link>
-      </div>
-    </div>
-  );
-}
