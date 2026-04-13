@@ -33,7 +33,7 @@ def _build_provider_pool() -> list[dict]:
     if settings.CEREBRAS_API_KEY:
         os.environ["CEREBRAS_API_KEY"] = settings.CEREBRAS_API_KEY
         pool.append({
-            "model": "cerebras/llama-3.3-70b",
+            "model": "cerebras/llama3.3-70b",
             "api_key": settings.CEREBRAS_API_KEY,
             "label": "Cerebras-70B",
         })
@@ -41,9 +41,9 @@ def _build_provider_pool() -> list[dict]:
     # OpenRouter — community-funded free models
     if settings.OPENROUTER_API_KEY:
         pool.append({
-            "model": "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+            "model": "openrouter/meta-llama/llama-3.1-8b-instruct:free",
             "api_key": settings.OPENROUTER_API_KEY,
-            "label": "OpenRouter-70B",
+            "label": "OpenRouter-8B",
         })
 
     # Fallback: if no keys configured, use Groq default
@@ -113,7 +113,7 @@ async def call_llm(
     messages: list[dict],
     tools: list[dict] | None = None,
     temperature: float = 0.2,
-    max_tokens: int = 1000,
+    max_tokens: int = 700,
     model: str | None = None,
 ) -> dict:
     """
