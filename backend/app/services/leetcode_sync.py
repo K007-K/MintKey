@@ -1,6 +1,6 @@
 # LeetCode sync service — pulls recent submissions and updates skill_progress + streak
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import select
@@ -75,7 +75,7 @@ async def sync_leetcode_for_roadmap(
         for sub in recent:
             if not sub.get("slug") or not sub.get("date"):
                 continue
-            solved_dt = datetime.strptime(sub["date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            solved_dt = datetime.strptime(sub["date"], "%Y-%m-%d")
             stmt = pg_insert(LcSubmission).values(
                 user_id=user.id,
                 lc_problem_id=sub["slug"],  # use slug as ID
@@ -136,10 +136,10 @@ async def sync_leetcode_for_roadmap(
         if cal_data:
             sorted_dates = sorted(cal_data.keys(), reverse=True)
             if sorted_dates:
-                last_solved = datetime.strptime(sorted_dates[0], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                last_solved = datetime.strptime(sorted_dates[0], "%Y-%m-%d")
 
             # Count problems this week (Monday-based)
-            today = datetime.now(timezone.utc).date()
+            today = datetime.utcnow().date()
             monday = today - timedelta(days=today.weekday())
             for date_str, count in cal_data.items():
                 try:
