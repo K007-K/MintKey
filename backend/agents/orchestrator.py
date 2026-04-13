@@ -61,7 +61,7 @@ class MintKeyOrchestrator:
                 logger.error(f"[Orchestrator] Agent {i+1} failed: {e}")
                 agent_results.append(e)
             if i < len(agent_runners) - 1:
-                await asyncio.sleep(8)  # 8s between agents — allows Groq 12K TPM to reset
+                await asyncio.sleep(3)  # 3s between agents — daily-limit-skip makes long delays unnecessary
 
         phase1_results = agent_results
 
