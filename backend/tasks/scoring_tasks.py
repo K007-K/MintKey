@@ -2,7 +2,6 @@
 import logging
 import asyncio
 from uuid import UUID
-from datetime import datetime, timezone
 
 from tasks.celery_app import celery_app
 
