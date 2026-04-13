@@ -29,21 +29,23 @@ def _build_provider_pool() -> list[dict]:
             "label": "Groq-70B",
         })
 
-    # Cerebras — 1M tokens/day free tier
+    # Cerebras — 1M tokens/day free tier (gpt-oss-120b is their current model)
     if settings.CEREBRAS_API_KEY:
         os.environ["CEREBRAS_API_KEY"] = settings.CEREBRAS_API_KEY
         pool.append({
-            "model": "cerebras/llama3.3-70b",
+            "model": "cerebras/gpt-oss-120b",
             "api_key": settings.CEREBRAS_API_KEY,
-            "label": "Cerebras-70B",
+            "api_base": "https://api.cerebras.ai/v1",
+            "label": "Cerebras-120B",
         })
 
-    # OpenRouter — community-funded free models
+    # OpenRouter — auto-selects from available free models
     if settings.OPENROUTER_API_KEY:
+        os.environ["OPENROUTER_API_KEY"] = settings.OPENROUTER_API_KEY
         pool.append({
-            "model": "openrouter/meta-llama/llama-3.1-8b-instruct:free",
+            "model": "openrouter/openrouter/free",
             "api_key": settings.OPENROUTER_API_KEY,
-            "label": "OpenRouter-8B",
+            "label": "OpenRouter-Free",
         })
 
     # Fallback: if no keys configured, use Groq default
@@ -80,6 +82,8 @@ async def _call_single_provider(
     call_kwargs = {**kwargs, "model": provider["model"]}
     if provider.get("api_key"):
         call_kwargs["api_key"] = provider["api_key"]
+    if provider.get("api_base"):
+        call_kwargs["api_base"] = provider["api_base"]
 
     last_error = None
     for attempt in range(retries):
