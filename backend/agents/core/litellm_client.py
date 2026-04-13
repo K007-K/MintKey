@@ -96,8 +96,13 @@ async def _call_single_provider(
             last_error = e
             error_str = str(e).lower()
             is_rate_limit = "429" in error_str or "rate" in error_str or "too many" in error_str
+            # Daily limits won't reset soon — fail immediately, try next provider
+            is_daily_limit = "per day" in error_str or "tpd" in error_str
 
-            if is_rate_limit and attempt < retries - 1:
+            if is_daily_limit:
+                logger.warning(f"[{provider['label']}] Daily limit hit — skipping to next provider")
+                break
+            elif is_rate_limit and attempt < retries - 1:
                 suggested = _parse_retry_after(str(e))
                 delay = suggested if suggested else RETRY_BASE_DELAY * (2 ** attempt)
                 delay = min(delay, 45)  # Cap at 45s
