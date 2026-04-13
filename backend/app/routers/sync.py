@@ -1,16 +1,43 @@
 # Sync trigger endpoints — kick off platform data sync
 import logging
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from typing import Optional
 
 from app.core.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.db import User
+from app.models.db import User, PlatformScore
 from app.models.schemas import APIResponse
 
 logger = logging.getLogger(__name__)
+
+
+async def _upsert_platform_score(
+    db: AsyncSession, user_id, platform: str, raw_data: dict
+) -> None:
+    """Insert or update the platform_scores row for a given platform."""
+    result = await db.execute(
+        select(PlatformScore).where(
+            PlatformScore.user_id == user_id,
+            PlatformScore.platform == platform,
+        )
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        existing.raw_data = raw_data
+        existing.synced_at = datetime.utcnow()
+    else:
+        db.add(PlatformScore(
+            user_id=user_id,
+            platform=platform,
+            raw_data=raw_data,
+            synced_at=datetime.utcnow(),
+        ))
+    await db.commit()
+    logger.info(f"[Sync] Saved {platform} data for user {user_id}")
 
 router = APIRouter(prefix="/api/v1/sync", tags=["sync"])
 
@@ -66,8 +93,9 @@ async def trigger_sync(
 async def sync_github_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Synchronous GitHub sync — clears cache first, then runs scraper."""
+    """Synchronous GitHub sync — clears cache first, then runs scraper, saves to DB."""
     if not payload.github_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -98,6 +126,9 @@ async def sync_github_direct(
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
 
+    # Persist to platform_scores
+    await _upsert_platform_score(db, current_user.id, "github", data)
+
     return APIResponse(success=True, data=data)
 
 
@@ -105,8 +136,9 @@ async def sync_github_direct(
 async def sync_leetcode_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Synchronous LeetCode sync — clears cache first, then runs scraper."""
+    """Synchronous LeetCode sync — clears cache first, then runs scraper, saves to DB."""
     if not payload.leetcode_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -138,6 +170,9 @@ async def sync_leetcode_direct(
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
 
+    # Persist to platform_scores
+    await _upsert_platform_score(db, current_user.id, "leetcode", data)
+
     return APIResponse(success=True, data=data)
 
 
@@ -145,8 +180,9 @@ async def sync_leetcode_direct(
 async def sync_codechef_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Synchronous CodeChef sync — clears cache first, then runs scraper."""
+    """Synchronous CodeChef sync — clears cache first, then runs scraper, saves to DB."""
     if not payload.codechef_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -173,6 +209,9 @@ async def sync_codechef_direct(
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
 
+    # Persist to platform_scores
+    await _upsert_platform_score(db, current_user.id, "codechef", data)
+
     return APIResponse(success=True, data=data)
 
 
@@ -180,8 +219,9 @@ async def sync_codechef_direct(
 async def sync_hackerrank_direct(
     payload: SyncRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Synchronous HackerRank sync — runs scraper directly."""
+    """Synchronous HackerRank sync — runs scraper directly, saves to DB."""
     if not payload.hackerrank_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -194,6 +234,9 @@ async def sync_hackerrank_direct(
 
     if "error" in data:
         return APIResponse(success=False, data=None, error=data["error"])
+
+    # Persist to platform_scores
+    await _upsert_platform_score(db, current_user.id, "hackerrank", data)
 
     return APIResponse(success=True, data=data)
 
