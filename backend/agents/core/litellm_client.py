@@ -21,7 +21,7 @@ def _build_provider_pool() -> list[dict]:
     """Build the provider pool from available API keys."""
     pool = []
 
-    # Groq — 12K TPM free tier, fastest inference
+    # Groq 70B — 12K TPM, 100K TPD free tier
     if settings.GROQ_API_KEY:
         pool.append({
             "model": "groq/llama-3.3-70b-versatile",
@@ -29,17 +29,25 @@ def _build_provider_pool() -> list[dict]:
             "label": "Groq-70B",
         })
 
-    # Cerebras — 1M tokens/day free tier (gpt-oss-120b is their current model)
+    # Cerebras — llama3.1-8b (confirmed available: 60K TPM, 1M TPD)
     if settings.CEREBRAS_API_KEY:
         os.environ["CEREBRAS_API_KEY"] = settings.CEREBRAS_API_KEY
         pool.append({
-            "model": "cerebras/gpt-oss-120b",
+            "model": "cerebras/llama3.1-8b",
             "api_key": settings.CEREBRAS_API_KEY,
             "api_base": "https://api.cerebras.ai/v1",
-            "label": "Cerebras-120B",
+            "label": "Cerebras-8B",
         })
 
-    # OpenRouter — auto-selects from available free models
+    # Groq 8B — separate rate limit bucket from 70B (20K TPM, higher daily)
+    if settings.GROQ_API_KEY:
+        pool.append({
+            "model": "groq/llama-3.1-8b-instant",
+            "api_key": settings.GROQ_API_KEY,
+            "label": "Groq-8B",
+        })
+
+    # OpenRouter — auto-selects from available free models (last resort)
     if settings.OPENROUTER_API_KEY:
         os.environ["OPENROUTER_API_KEY"] = settings.OPENROUTER_API_KEY
         pool.append({
