@@ -1,7 +1,8 @@
-# Shared LiteLLM client singleton — replaces anthropic_client.py
+# Shared LiteLLM client singleton — multi-provider rotation for free tier rate limits
 import logging
 import asyncio
 import re
+import os
 import litellm
 from app.core.config import settings
 
@@ -10,25 +11,82 @@ logger = logging.getLogger(__name__)
 # Configure LiteLLM
 litellm.drop_params = True  # Drop unsupported params instead of erroring
 
-# Rate limit retry settings — tuned for Groq free tier (12K TPM / 6K TPM)
-MAX_RETRIES = 4
-RETRY_BASE_DELAY = 5  # seconds — Groq rate limits typically need 10-30s wait
+# ─── Provider Pool ───
+# All serve Llama 3.3 70B — same quality, distributed across 3 free APIs
+# Each provider has its own rate limit, so spreading calls avoids hitting any single limit
+PROVIDER_POOL: list[dict] = []
+
+
+def _build_provider_pool() -> list[dict]:
+    """Build the provider pool from available API keys."""
+    pool = []
+
+    # Groq — 12K TPM free tier, fastest inference
+    if settings.GROQ_API_KEY:
+        pool.append({
+            "model": "groq/llama-3.3-70b-versatile",
+            "api_key": settings.GROQ_API_KEY,
+            "label": "Groq-70B",
+        })
+
+    # Cerebras — 1M tokens/day free tier
+    if settings.CEREBRAS_API_KEY:
+        os.environ["CEREBRAS_API_KEY"] = settings.CEREBRAS_API_KEY
+        pool.append({
+            "model": "cerebras/llama-3.3-70b",
+            "api_key": settings.CEREBRAS_API_KEY,
+            "label": "Cerebras-70B",
+        })
+
+    # OpenRouter — community-funded free models
+    if settings.OPENROUTER_API_KEY:
+        pool.append({
+            "model": "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+            "api_key": settings.OPENROUTER_API_KEY,
+            "label": "OpenRouter-70B",
+        })
+
+    # Fallback: if no keys configured, use Groq default
+    if not pool:
+        pool.append({
+            "model": settings.LLM_MODEL,
+            "api_key": settings.GROQ_API_KEY,
+            "label": "Default",
+        })
+
+    return pool
+
+
+# Rate limit retry settings
+MAX_RETRIES = 3
+RETRY_BASE_DELAY = 5  # seconds
+
+# Round-robin counter
+_call_counter = 0
 
 
 def _parse_retry_after(error_str: str) -> float | None:
-    """Extract the suggested wait time from a Groq rate limit error message."""
+    """Extract the suggested wait time from a rate limit error message."""
     match = re.search(r"try again in (\d+\.?\d*)s", error_str.lower())
     if match:
         return float(match.group(1))
     return None
 
 
-async def _call_with_retry(kwargs: dict, model_label: str, retries: int = MAX_RETRIES) -> dict:
-    """Call LiteLLM with exponential backoff retry for rate limits."""
+async def _call_single_provider(
+    provider: dict, kwargs: dict, retries: int = MAX_RETRIES
+) -> dict:
+    """Try a single provider with exponential backoff retry for rate limits."""
+    call_kwargs = {**kwargs, "model": provider["model"]}
+    if provider.get("api_key"):
+        call_kwargs["api_key"] = provider["api_key"]
+
     last_error = None
     for attempt in range(retries):
         try:
-            response = await litellm.acompletion(**kwargs)
+            response = await litellm.acompletion(**call_kwargs)
+            if attempt > 0:
+                logger.info(f"[{provider['label']}] Succeeded on retry {attempt + 1}")
             return response
         except Exception as e:
             last_error = e
@@ -36,18 +94,17 @@ async def _call_with_retry(kwargs: dict, model_label: str, retries: int = MAX_RE
             is_rate_limit = "429" in error_str or "rate" in error_str or "too many" in error_str
 
             if is_rate_limit and attempt < retries - 1:
-                # Use Groq's suggested wait time if available, else exponential backoff
                 suggested = _parse_retry_after(str(e))
                 delay = suggested if suggested else RETRY_BASE_DELAY * (2 ** attempt)
-                delay = min(delay, 60)  # Cap at 60s
+                delay = min(delay, 45)  # Cap at 45s
                 logger.warning(
-                    f"[{model_label}] Rate limited (attempt {attempt + 1}/{retries}). "
+                    f"[{provider['label']}] Rate limited (attempt {attempt + 1}/{retries}). "
                     f"Waiting {delay:.1f}s..."
                 )
                 await asyncio.sleep(delay)
                 continue
             elif not is_rate_limit:
-                break  # Non-rate-limit error — don't retry
+                break  # Non-rate-limit error — don't retry, try next provider
 
     raise last_error
 
@@ -60,18 +117,25 @@ async def call_llm(
     model: str | None = None,
 ) -> dict:
     """
-    Call the LLM via LiteLLM. Uses Groq by default with automatic retry
-    for rate limits (429). Falls back to smaller model on persistent failure.
+    Call the LLM via LiteLLM with multi-provider rotation.
 
-    Response format (OpenAI-compatible):
-        response.choices[0].message.content      -> text output
-        response.choices[0].finish_reason         -> "stop" or "tool_calls"
-        response.choices[0].message.tool_calls    -> list of tool call objects
+    Distributes calls across Groq, Cerebras, and OpenRouter in round-robin
+    to avoid hitting any single provider's free tier rate limits.
+    All providers serve the same Llama 3.3 70B model — identical output quality.
+
+    If a specific model is requested (e.g., for agents needing a particular model),
+    it will be used directly without rotation.
     """
-    target_model = model or settings.LLM_MODEL
+    global _call_counter, PROVIDER_POOL
+
+    # Build pool on first call (lazy init after settings are loaded)
+    if not PROVIDER_POOL:
+        PROVIDER_POOL = _build_provider_pool()
+        logger.info(
+            f"[LLM] Provider pool initialized: {[p['label'] for p in PROVIDER_POOL]}"
+        )
 
     kwargs = {
-        "model": target_model,
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,
@@ -80,28 +144,44 @@ async def call_llm(
         kwargs["tools"] = tools
         kwargs["tool_choice"] = "auto"
 
-    # Try primary model with retry
-    primary_err = None
-    try:
-        return await _call_with_retry(kwargs, model_label=target_model)
-    except Exception as e:
-        primary_err = e
+    # If a specific model is requested, use it directly (bypass rotation)
+    if model:
+        kwargs["model"] = model
+        try:
+            return await litellm.acompletion(**kwargs)
+        except Exception:
+            pass  # Fall through to rotation
 
-    # All retries exhausted — wait then try fallback model
-    fallback_model = "groq/llama-3.1-8b-instant"
-    logger.warning(
-        f"Primary LLM ({target_model}) failed after {MAX_RETRIES} attempts: {primary_err}. "
-        f"Waiting 10s before fallback ({fallback_model})..."
+    # Round-robin: try each provider starting from the next in rotation
+    pool_size = len(PROVIDER_POOL)
+    start_idx = _call_counter % pool_size
+    _call_counter += 1
+
+    errors = []
+    for offset in range(pool_size):
+        idx = (start_idx + offset) % pool_size
+        provider = PROVIDER_POOL[idx]
+
+        try:
+            logger.debug(f"[LLM] Using {provider['label']} (slot {idx})")
+            response = await _call_single_provider(provider, kwargs, retries=2)
+            return response
+        except Exception as e:
+            errors.append((provider["label"], e))
+            logger.warning(f"[LLM] {provider['label']} failed: {e}")
+            # Small delay before trying next provider
+            if offset < pool_size - 1:
+                await asyncio.sleep(3)
+
+    # All providers failed — do one final retry on the first provider with longer waits
+    logger.error(
+        f"[LLM] All {pool_size} providers failed. Final retry on {PROVIDER_POOL[0]['label']}..."
     )
-    await asyncio.sleep(10)  # Let rate limit window pass before hitting fallback
+    await asyncio.sleep(15)  # Let rate limits Cool down
 
     try:
-        kwargs["model"] = fallback_model
-        response = await _call_with_retry(kwargs, model_label=fallback_model, retries=3)
-        logger.info(f"Fallback LLM ({fallback_model}) succeeded")
-        return response
-    except Exception as fallback_err:
-        logger.error(f"Fallback LLM ({fallback_model}) also failed: {fallback_err}")
-        raise primary_err  # Raise original error
-
-
+        return await _call_single_provider(PROVIDER_POOL[0], kwargs, retries=3)
+    except Exception as final_err:
+        logger.error(f"[LLM] All providers exhausted. Last error: {final_err}")
+        # Raise the first error for better debugging
+        raise errors[0][1] if errors else final_err

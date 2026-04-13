@@ -12,8 +12,10 @@ class Settings(BaseSettings):
     # Redis — Upstash
     REDIS_URL: str = "redis://localhost:6379"
 
-    # LLM — LiteLLM with Groq
+    # LLM — Multi-provider (Groq + Cerebras + OpenRouter, all free tier)
     GROQ_API_KEY: str = ""
+    CEREBRAS_API_KEY: str = ""
+    OPENROUTER_API_KEY: str = ""
     LLM_MODEL: str = "groq/llama-3.3-70b-versatile"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
