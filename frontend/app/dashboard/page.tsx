@@ -192,7 +192,16 @@ export default function DashboardPage() {
       },
       {
         onSuccess: (data) => {
-          const taskId = (data as Record<string, unknown>)?.task_id as string;
+          const result = data as Record<string, unknown>;
+          // Smart cache: if backend detected no data changes, skip analysis entirely
+          if (result?.cached) {
+            setAnalysisStep("complete");
+            isTriggering.current = false;
+            queryClient.refetchQueries({ queryKey: ["dashboard"] });
+            queryClient.refetchQueries({ queryKey: ["scores"] });
+            return;
+          }
+          const taskId = result?.task_id as string;
           setAnalysisTaskId(taskId);
           setAnalysisStep("running");
         },

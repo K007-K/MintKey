@@ -47,7 +47,89 @@ async def trigger_analysis(
     """
     Trigger a full 8-agent analysis.
     Returns a task_id to track progress via WebSocket.
+
+    Smart caching: if GitHub contributions, LeetCode solved count, and resume
+    haven't changed since the last analysis, returns the cached result instantly.
     """
+    import hashlib
+    from app.core.database import async_session_factory
+    from app.models.db import AnalysisResult, User as UserModel, PlatformScore
+    from sqlalchemy import select
+
+    # ─── Build data fingerprint ───
+    # Hash of: github_username + leetcode_username + resume_text + target_companies
+    # Plus live stats: GitHub contribution count + LeetCode solved count
+    fp_parts = [
+        payload.github_username or "",
+        payload.leetcode_username or "",
+        str(sorted(payload.target_companies)),
+    ]
+
+    # Fetch live platform stats to detect actual data changes
+    try:
+        async with async_session_factory() as session:
+            scores = (await session.execute(
+                select(PlatformScore).where(PlatformScore.user_id == current_user.id)
+            )).scalars().all()
+
+            for ps in scores:
+                raw = ps.raw_data or {}
+                if ps.platform == "github":
+                    fp_parts.append(f"gh:{raw.get('total_contributions', 0)}:{raw.get('repo_count', 0)}")
+                elif ps.platform == "leetcode":
+                    summary = raw.get("summary", {})
+                    fp_parts.append(f"lc:{summary.get('total_solved', 0)}")
+
+            # Include resume hash if user has one
+            db_user = (await session.execute(
+                select(UserModel).where(UserModel.id == current_user.id)
+            )).scalar_one_or_none()
+            if db_user and db_user.resume_parsed_data:
+                resume_str = json.dumps(db_user.resume_parsed_data, sort_keys=True)
+                fp_parts.append(f"resume:{hashlib.md5(resume_str.encode()).hexdigest()[:12]}")
+
+    except Exception as e:
+        logger.warning(f"[Analysis] Fingerprint fetch failed, skipping cache: {e}")
+        fp_parts.append(f"nocache:{uuid.uuid4()}")  # Force re-analysis
+
+    fingerprint = hashlib.sha256("|".join(fp_parts).encode()).hexdigest()[:32]
+    logger.info(f"[Analysis] Data fingerprint: {fingerprint}")
+
+    # ─── Check for cached analysis with same fingerprint ───
+    try:
+        async with async_session_factory() as session:
+            latest = (await session.execute(
+                select(AnalysisResult)
+                .where(AnalysisResult.user_id == current_user.id)
+                .where(AnalysisResult.status == "completed")
+                .order_by(AnalysisResult.completed_at.desc())
+                .limit(1)
+            )).scalar_one_or_none()
+
+            if latest and latest.merged_analysis:
+                cached_fp = latest.merged_analysis.get("_data_fingerprint")
+                if cached_fp == fingerprint:
+                    logger.info(
+                        f"[Analysis] Cache HIT — fingerprint unchanged ({fingerprint}). "
+                        f"Returning cached result from {latest.completed_at}"
+                    )
+                    return APIResponse(
+                        success=True,
+                        data={
+                            "task_id": f"cached:{latest.id}",
+                            "status": "complete",
+                            "cached": True,
+                            "message": "No changes detected since last analysis. Using cached results.",
+                        },
+                    )
+                else:
+                    logger.info(
+                        f"[Analysis] Cache MISS — fingerprint changed: "
+                        f"{cached_fp} → {fingerprint}"
+                    )
+    except Exception as e:
+        logger.warning(f"[Analysis] Cache check failed: {e}")
+
     task_id = str(uuid.uuid4())
 
     # Store task status in Redis
@@ -147,6 +229,9 @@ async def trigger_analysis(
                 from datetime import datetime
 
                 result_dict = result.model_dump()
+
+                # Store fingerprint for smart caching on next run
+                result_dict["_data_fingerprint"] = fingerprint
 
                 async with async_session_factory() as session:
                     analysis = AnalysisResult(
