@@ -76,6 +76,11 @@ async def _sync_github(user_id: str, github_username: str) -> dict:
     except Exception:
         pass
 
+    # Trigger score recomputation after successful sync
+    from tasks.scoring_tasks import recompute_match_scores
+    recompute_match_scores.delay(user_id)
+    logger.info(f"Dispatched score recomputation after GitHub sync for {user_id}")
+
     return {
         "success": True,
         "repos_analyzed": github_data.get("total_repos", 0),
@@ -130,6 +135,11 @@ async def _sync_leetcode(user_id: str, leetcode_username: str) -> dict:
         await redis_client.delete(f"scores:{user_id}")
     except Exception:
         pass
+
+    # Trigger score recomputation after successful sync
+    from tasks.scoring_tasks import recompute_match_scores
+    recompute_match_scores.delay(user_id)
+    logger.info(f"Dispatched score recomputation after LeetCode sync for {user_id}")
 
     return {
         "success": True,

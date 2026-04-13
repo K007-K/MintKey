@@ -1,14 +1,24 @@
 # Celery application configuration with Upstash Redis broker
 import logging
+import ssl
 from celery import Celery
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Upstash uses rediss:// (TLS) — Celery requires explicit ssl_cert_reqs
+_broker_url = settings.REDIS_URL
+_backend_url = settings.REDIS_URL
+
+if _broker_url.startswith("rediss://"):
+    _separator = "&" if "?" in _broker_url else "?"
+    _broker_url = f"{_broker_url}{_separator}ssl_cert_reqs=CERT_NONE"
+    _backend_url = f"{_backend_url}{_separator}ssl_cert_reqs=CERT_NONE"
+
 celery_app = Celery(
     "mintkey",
-    broker=settings.REDIS_URL,
-    backend=settings.REDIS_URL,
+    broker=_broker_url,
+    backend=_backend_url,
     include=[
         "tasks.sync_tasks",
         "tasks.scoring_tasks",
@@ -28,4 +38,6 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     worker_concurrency=2,  # Conservative for free tier
     result_expires=3600,  # Results expire after 1 hour
+    broker_use_ssl={"ssl_cert_reqs": ssl.CERT_NONE} if settings.REDIS_URL.startswith("rediss://") else None,
+    redis_backend_use_ssl={"ssl_cert_reqs": ssl.CERT_NONE} if settings.REDIS_URL.startswith("rediss://") else None,
 )

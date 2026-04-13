@@ -241,7 +241,7 @@ async def recompute_match_scores(
         GitHubAnalysis, DSAAnalysis, ResumeData, CompanyBlueprintModel,
     )
     from sqlalchemy import desc, delete
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     try:
         # 1. Fetch latest completed analysis
@@ -314,6 +314,7 @@ async def recompute_match_scores(
             blueprint = blueprints.get(company_slug)
 
             score_result = engine.compute_match_score(
+                company_slug=company_slug,
                 github=github,
                 dsa=dsa,
                 resume=resume,
@@ -336,7 +337,7 @@ async def recompute_match_scores(
                 breakdown=score_result["component_scores"],
                 status_label=score_result.get("grade", "Needs Work"),
                 weeks_away=max(2, round((85 - score_result["overall_score"]) / 3)),
-                computed_at=datetime.now(timezone.utc),
+                computed_at=datetime.utcnow(),
             ))
 
             recomputed[company_slug] = {
