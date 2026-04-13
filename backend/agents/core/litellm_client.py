@@ -39,14 +39,6 @@ def _build_provider_pool() -> list[dict]:
             "label": "Cerebras-8B",
         })
 
-    # Groq 8B — separate rate limit bucket from 70B (20K TPM, higher daily)
-    if settings.GROQ_API_KEY:
-        pool.append({
-            "model": "groq/llama-3.1-8b-instant",
-            "api_key": settings.GROQ_API_KEY,
-            "label": "Groq-8B",
-        })
-
     # OpenRouter — auto-selects from available free models (last resort)
     if settings.OPENROUTER_API_KEY:
         os.environ["OPENROUTER_API_KEY"] = settings.OPENROUTER_API_KEY
