@@ -21,6 +21,35 @@ def _build_provider_pool() -> list[dict]:
     """Build the provider pool from available API keys."""
     pool = []
 
+    # Ollama — LOCAL, unlimited, no rate limits (M3 Pro GPU)
+    # Primary provider when available — falls through to cloud if offline
+    ollama_base = settings.OLLAMA_BASE_URL or "http://localhost:11434"
+    try:
+        import httpx
+        r = httpx.get(f"{ollama_base}/api/tags", timeout=2.0)
+        if r.status_code == 200:
+            models = [m["name"] for m in r.json().get("models", [])]
+            # Prefer larger models first
+            for preferred in ["qwen2.5:14b", "qwen2.5:7b", "llama3.1:8b"]:
+                if preferred in models:
+                    pool.append({
+                        "model": f"ollama/{preferred}",
+                        "api_base": ollama_base,
+                        "label": f"Ollama-{preferred}",
+                    })
+                    logger.info(f"[LLM] Ollama local model found: {preferred}")
+                    break
+            else:
+                if models:
+                    pool.append({
+                        "model": f"ollama/{models[0]}",
+                        "api_base": ollama_base,
+                        "label": f"Ollama-{models[0]}",
+                    })
+                    logger.info(f"[LLM] Ollama using first available: {models[0]}")
+    except Exception:
+        logger.info("[LLM] Ollama not running — using cloud providers only")
+
     # Groq 70B — 12K TPM, 100K TPD free tier
     if settings.GROQ_API_KEY:
         pool.append({
