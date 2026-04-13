@@ -190,36 +190,51 @@ async def call_llm(
         except Exception:
             pass  # Fall through to rotation
 
-    # Round-robin: try each provider starting from the next in rotation
-    pool_size = len(PROVIDER_POOL)
-    start_idx = _call_counter % pool_size
-    _call_counter += 1
+    # Strategy: Always try local (Ollama) first, then round-robin cloud fallbacks
+    local_providers = [p for p in PROVIDER_POOL if p["label"].startswith("Ollama")]
+    cloud_providers = [p for p in PROVIDER_POOL if not p["label"].startswith("Ollama")]
 
     errors = []
-    for offset in range(pool_size):
-        idx = (start_idx + offset) % pool_size
-        provider = PROVIDER_POOL[idx]
 
+    # Step 1: Try local Ollama first (unlimited, zero cost, no rate limits)
+    for provider in local_providers:
         try:
-            logger.debug(f"[LLM] Using {provider['label']} (slot {idx})")
-            response = await _call_single_provider(provider, kwargs, retries=2)
+            logger.debug(f"[LLM] Trying local: {provider['label']}")
+            response = await _call_single_provider(provider, kwargs, retries=1)
             return response
         except Exception as e:
             errors.append((provider["label"], e))
-            logger.warning(f"[LLM] {provider['label']} failed: {e}")
-            # Small delay before trying next provider
-            if offset < pool_size - 1:
-                await asyncio.sleep(3)
+            logger.warning(f"[LLM] Local {provider['label']} failed: {e}")
 
-    # All providers failed — do one final retry on the first provider with longer waits
+    # Step 2: Round-robin across cloud providers as fallback
+    if cloud_providers:
+        cloud_size = len(cloud_providers)
+        start_idx = _call_counter % cloud_size
+        _call_counter += 1
+
+        for offset in range(cloud_size):
+            idx = (start_idx + offset) % cloud_size
+            provider = cloud_providers[idx]
+
+            try:
+                logger.debug(f"[LLM] Falling back to cloud: {provider['label']}")
+                response = await _call_single_provider(provider, kwargs, retries=2)
+                return response
+            except Exception as e:
+                errors.append((provider["label"], e))
+                logger.warning(f"[LLM] {provider['label']} failed: {e}")
+                if offset < cloud_size - 1:
+                    await asyncio.sleep(3)
+
+    # All providers failed — final retry on first available
+    fallback = local_providers[0] if local_providers else PROVIDER_POOL[0]
     logger.error(
-        f"[LLM] All {pool_size} providers failed. Final retry on {PROVIDER_POOL[0]['label']}..."
+        f"[LLM] All providers failed. Final retry on {fallback['label']}..."
     )
-    await asyncio.sleep(15)  # Let rate limits Cool down
+    await asyncio.sleep(10)
 
     try:
-        return await _call_single_provider(PROVIDER_POOL[0], kwargs, retries=3)
+        return await _call_single_provider(fallback, kwargs, retries=3)
     except Exception as final_err:
         logger.error(f"[LLM] All providers exhausted. Last error: {final_err}")
-        # Raise the first error for better debugging
         raise errors[0][1] if errors else final_err
